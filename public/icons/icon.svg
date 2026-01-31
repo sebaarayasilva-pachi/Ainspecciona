@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Ainspecciona">
+  <rect width="512" height="512" rx="96" fill="#667eea"/>
+  <rect x="64" y="64" width="384" height="384" rx="72" fill="#764ba2" opacity="0.9"/>
+  <text x="256" y="310" font-size="220" text-anchor="middle" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-weight="700">A</text>
+</svg>

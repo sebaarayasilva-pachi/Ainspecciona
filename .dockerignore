@@ -1,0 +1,11 @@
+node_modules
+npm-debug.log
+uploads
+.git
+.github
+.vscode
+.cursor
+.env
+README.md
+AppData
+OneDrive

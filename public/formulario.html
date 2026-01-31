@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ainspecciona – Formulario</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f6f7fb;
+      color: #111827;
+    }
+    .container {
+      max-width: 920px;
+      margin: 24px auto;
+      padding: 0 16px 40px;
+    }
+    h1 { margin: 0 0 8px; }
+    .subtitle { color: #6b7280; margin-bottom: 16px; }
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 6px 16px rgba(17, 24, 39, 0.06);
+      margin-bottom: 16px;
+      border: 1px solid #e5e7eb;
+    }
+    label { display: block; font-size: 12px; font-weight: 700; margin: 12px 0 6px; color: #374151; }
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      font-size: 14px;
+      background: #fff;
+    }
+    .row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .row-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .checks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 10px; }
+    .checks label { font-weight: 600; }
+    .btn {
+      margin-top: 16px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: none;
+      font-weight: 800;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      cursor: pointer;
+    }
+    .btn.secondary { background: #16a34a; }
+    .hidden { display: none; }
+    .slot {
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 10px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      background: #f9fafb;
+      white-space: pre-line;
+    }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+    .linkBtn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 800;
+      border: 1px solid #e5e7eb;
+      background: #f3f6ff;
+      color: #4050d6;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Ainspecciona</h1>
+    <div class="subtitle">Completa los datos para generar el photo plan.</div>
+
+    <div class="card">
+      <h3>Propietario</h3>
+      <div class="row-2">
+        <div>
+          <label>Nombre</label>
+          <input id="ownerName" placeholder="Nombre completo" />
+        </div>
+        <div>
+          <label>RUT</label>
+          <input id="ownerRut" placeholder="RUT" />
+        </div>
+      </div>
+
+      <h3 style="margin-top:16px;">Propiedad</h3>
+      <div class="row-2">
+        <div>
+          <label>ROL</label>
+          <input id="propertyRol" placeholder="ROL" />
+        </div>
+        <div>
+          <label>Dirección</label>
+          <input id="propertyAddress" placeholder="Dirección" />
+        </div>
+      </div>
+      <div class="row-2">
+        <div>
+          <label>Tipo operación</label>
+          <input id="propertyOperationType" placeholder="Venta / Arriendo" />
+        </div>
+        <div>
+          <label>Superficie (m2)</label>
+          <input id="propertySurface" placeholder="Ej: 45" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Tipo de propiedad</label>
+          <select id="propertyType">
+            <option value="DEPARTMENT">Departamento</option>
+            <option value="HOUSE">Casa</option>
+          </select>
+        </div>
+        <div>
+          <label>Baños</label>
+          <input type="number" id="bathroomsCount" min="1" value="1" />
+        </div>
+        <div>
+          <label>Dormitorios</label>
+          <input type="number" id="bedroomsCount" min="0" value="1" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Antigüedad</label>
+          <select id="propertyAgeRange">
+            <option value="">—</option>
+            <option value="LESS_THAN_10_YEARS">Menos de 10 años</option>
+            <option value="BETWEEN_10_AND_30_YEARS">Entre 10 y 30 años</option>
+            <option value="MORE_THAN_30_YEARS">Más de 30 años</option>
+          </select>
+        </div>
+        <div>
+          <label>Tipo de piso</label>
+          <select id="floorType">
+            <option value="CONCRETE">Hormigón</option>
+            <option value="WOOD">Madera</option>
+            <option value="MIXED">Mixto</option>
+          </select>
+        </div>
+        <div>
+          <label>Año construcción (opcional)</label>
+          <input type="number" id="yearBuilt" min="1900" max="2100" placeholder="Ej: 2015" />
+        </div>
+      </div>
+
+      <div class="checks">
+        <label><input type="checkbox" id="hasPatio" /> Tiene patio</label>
+        <label><input type="checkbox" id="hasAttic" /> Tiene entretecho</label>
+        <label><input type="checkbox" id="hasLaundry" /> Tiene loggia</label>
+      </div>
+
+      <label>WhatsApp (opcional)</label>
+      <input id="phoneNumber" placeholder="Ej: 56912345678" />
+
+      <button id="generateBtn" class="btn">Generar photo plan</button>
+    </div>
+
+    <div id="resultCard" class="card hidden">
+      <h3>Resultado</h3>
+      <div id="resultMsg" class="subtitle"></div>
+      <div class="actions">
+        <a id="captureLink" class="linkBtn" target="_blank" rel="noreferrer" style="display:none;">Abrir captura (celular)</a>
+        <a id="reportLink" class="linkBtn" target="_blank" rel="noreferrer" style="display:none;">Ver informe</a>
+        <a id="whatsappLink" class="linkBtn secondary" target="_blank" rel="noreferrer" style="display:none;">Enviar WhatsApp</a>
+      </div>
+    </div>
+
+    <div id="planCard" class="card hidden">
+      <h3>Guía de fotos</h3>
+      <div id="planList"></div>
+    </div>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const generateBtn = $('generateBtn');
+    const resultCard = $('resultCard');
+    const planCard = $('planCard');
+    const planList = $('planList');
+    const resultMsg = $('resultMsg');
+    const captureLink = $('captureLink');
+    const reportLink = $('reportLink');
+    const whatsappLink = $('whatsappLink');
+
+    function buildWhatsApp(phone, url) {
+      if (!phone) return null;
+      const msg = `Hola, aquí está tu link de captura:\n${url.startsWith('http') ? url : (location.origin + url)}`;
+      return `https://wa.me/${encodeURIComponent(phone)}?text=${encodeURIComponent(msg)}`;
+    }
+
+    function renderPlan(slots) {
+      planList.innerHTML = '';
+      slots.forEach((s) => {
+        const div = document.createElement('div');
+        div.className = 'slot';
+        div.textContent = `${s.title}\n${s.instructions}`;
+        planList.appendChild(div);
+      });
+    }
+
+    generateBtn.addEventListener('click', async () => {
+      const payload = {
+        ownerName: $('ownerName').value,
+        ownerRut: $('ownerRut').value,
+        propertyRol: $('propertyRol').value,
+        propertyAddress: $('propertyAddress').value,
+        propertyOperationType: $('propertyOperationType').value,
+        propertySurface: $('propertySurface').value,
+        propertyType: $('propertyType').value,
+        bathroomsCount: Number($('bathroomsCount').value || 1),
+        bedroomsCount: Number($('bedroomsCount').value || 0),
+        propertyAgeRange: $('propertyAgeRange').value || null,
+        floorType: $('floorType').value,
+        yearBuilt: $('yearBuilt').value ? Number($('yearBuilt').value) : null,
+        hasPatio: $('hasPatio').checked,
+        hasAttic: $('hasAttic').checked,
+        hasLaundry: $('hasLaundry').checked
+      };
+
+      const res = await fetch('/api/cases', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || !json.ok) {
+        resultMsg.textContent = json.error || json.message || 'No se pudo crear el caso.';
+        resultCard.classList.remove('hidden');
+        return;
+      }
+
+      resultMsg.textContent = `Caso creado: ${json.caseId}`;
+      resultCard.classList.remove('hidden');
+
+      if (json.captureUrl) {
+        captureLink.href = json.captureUrl;
+        captureLink.style.display = 'inline-flex';
+      }
+      if (json.reportUrl) {
+        reportLink.href = json.reportUrl;
+        reportLink.style.display = 'inline-flex';
+      }
+
+      const phone = $('phoneNumber').value;
+      const wa = buildWhatsApp(phone, json.captureUrl || '');
+      if (wa) {
+        whatsappLink.href = wa;
+        whatsappLink.style.display = 'inline-flex';
+      }
+
+      if (Array.isArray(json.slots)) {
+        planCard.classList.remove('hidden');
+        renderPlan(json.slots);
+      }
+    });
+  </script>
+</body>
+</html>

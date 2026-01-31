@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ainspecciona – Informe</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #F6F7F9;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+      color: #111827;
+    }
+    .canvas {
+      width: 100%;
+      overflow-x: auto;
+      padding: 24px 0 40px;
+    }
+    svg {
+      display: block;
+      margin: 0 auto;
+      background: #F6F7F9;
+    }
+  </style>
+</head>
+<body>
+  <div class="canvas">
+    <svg id="reportSvg" width="1143" height="2720" viewBox="0 0 1143 2720" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#0F172A" flood-opacity="0.10"/>
+        </filter>
+        <filter id="shadowSmall" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="5" stdDeviation="10" flood-color="#0F172A" flood-opacity="0.10"/>
+        </filter>
+      </defs>
+
+      <rect id="bgRect" width="1143" height="2720" fill="#F6F7F9"/>
+
+      <rect x="0" y="0" width="1143" height="92" fill="#7A7471"/>
+      <rect x="32" y="22" width="46" height="46" rx="10" fill="#E5E7EB" opacity="0.35"/>
+      <text x="90" y="40" font-size="28" fill="#FFFFFF" font-weight="700">Ainspecciona</text>
+      <text x="571" y="38" font-size="22" fill="#FFFFFF" font-weight="700" text-anchor="middle">Informe Técnico del Inmueble</text>
+      <text x="571" y="62" font-size="13" fill="#E5E7EB" text-anchor="middle">Evaluación automatizada basada en evidencia fotográfica</text>
+      <text x="1080" y="34" font-size="12" fill="#E5E7EB" text-anchor="end">STI · v1.0</text>
+      <text id="headerDate" x="1080" y="58" font-size="12" fill="#E5E7EB" text-anchor="end">—</text>
+
+      <rect id="pageCard" x="28" y="112" width="1087" height="2580" rx="18" fill="#FFFFFF" filter="url(#shadow)"/>
+
+      <rect x="52" y="136" width="1040" height="260" rx="14" fill="#FFFFFF" filter="url(#shadowSmall)"/>
+
+      <text x="80" y="185" font-size="13" fill="#111827">Nombre Propietario</text>
+      <text id="ownerName" x="230" y="185" font-size="13" fill="#111827" font-weight="700">—</text>
+
+      <text x="80" y="210" font-size="13" fill="#111827">RUT:</text>
+      <text id="ownerRut" x="230" y="210" font-size="13" fill="#111827" font-weight="700">—</text>
+
+      <text x="80" y="235" font-size="13" fill="#111827">ROL:</text>
+      <text id="propertyRol" x="230" y="235" font-size="13" fill="#111827" font-weight="700">—</text>
+
+      <text x="80" y="260" font-size="13" fill="#111827">Dirección:</text>
+      <text id="propertyAddress" x="230" y="260" font-size="13" fill="#111827" font-weight="700">—</text>
+
+      <text x="80" y="285" font-size="13" fill="#111827">Tipo Operación</text>
+      <text id="propertyOperation" x="230" y="285" font-size="13" fill="#111827">—</text>
+
+      <text x="80" y="310" font-size="13" fill="#111827">Superficie</text>
+      <text id="propertySurface" x="230" y="310" font-size="13" fill="#111827">—</text>
+
+      <text x="80" y="350" font-size="12" fill="#6B7280">Basado exclusivamente en evidencia fotográfica disponible.</text>
+
+      <text x="490" y="185" font-size="13" fill="#111827">N° de caso</text>
+      <text id="caseNumber" x="610" y="185" font-size="13" fill="#111827" font-weight="700">—</text>
+
+      <text x="490" y="210" font-size="13" fill="#111827">Fecha de análisis</text>
+      <text id="analysisDate" x="610" y="210" font-size="13" fill="#111827">—</text>
+
+      <line x1="740" y1="156" x2="740" y2="372" stroke="#E5E7EB"/>
+
+      <text x="920" y="185" font-size="16" fill="#111827" font-weight="700" text-anchor="middle">Score Técnico del Inmueble</text>
+      <text x="920" y="205" font-size="12" fill="#111827" text-anchor="middle">STI</text>
+
+      <path id="stiBaseArc" d="M850 315 A70 70 0 0 1 990 315" stroke="#E5E7EB" stroke-width="14" fill="none" stroke-linecap="round"/>
+      <path id="stiArc" d="M850 315 A70 70 0 0 1 850 315" stroke="#E0B300" stroke-width="14" fill="none" stroke-linecap="round"/>
+      <text id="stiScore" x="920" y="304" font-size="16" fill="#111827" font-weight="700" text-anchor="middle">—</text>
+
+      <rect x="855" y="340" width="130" height="30" rx="6" fill="#F3F4F6" stroke="#E5E7EB"/>
+      <text id="stiLabel" x="920" y="360" font-size="12" fill="#111827" font-weight="600" text-anchor="middle">—</text>
+
+      <text x="80" y="440" font-size="14" fill="#111827" font-weight="700">KPIs técnicos clave (resumen)</text>
+
+      <rect x="52" y="462" width="1040" height="150" rx="14" fill="#FFFFFF" filter="url(#shadowSmall)"/>
+      <g id="kpiSummary"></g>
+
+      <text x="80" y="660" font-size="14" fill="#111827" font-weight="700">Detalle por KPI (slots)</text>
+      <g id="kpiSections"></g>
+
+      <g id="techDoc">
+        <text id="techDocTitle" x="80" y="2625" font-size="14" fill="#111827" font-weight="700">Documentación técnica del análisis automatizado</text>
+        <text id="techDocLine1" x="80" y="2655" font-size="12" fill="#111827">
+          Análisis ejecutado por un worker en Google Cloud, utilizando modelos de análisis de imágenes provistos por OpenAI (versión vigente al momento del análisis).
+        </text>
+        <text id="techDocLine2" x="80" y="2678" font-size="12" fill="#111827">
+          El proceso considera análisis de píxel, histogramas, detección de bordes/formas y relaciones espaciales para identificar indicios compatibles con condiciones técnicas relevantes.
+        </text>
+      </g>
+    </svg>
+  </div>
+
+  <script>
+    const svgNS = "http://www.w3.org/2000/svg";
+    const GROUP_ORDER = [
+      "BATH_MAIN",
+      "BATH_SECONDARY",
+      "KITCHEN",
+      "LAUNDRY",
+      "ELECTRICAL",
+      "STRUCTURE",
+      "EXTERIOR",
+      "ATTIC",
+      "OTHER",
+    ];
+
+    function sortGroups(groups) {
+      const idx = new Map(GROUP_ORDER.map((k, i) => [k, i]));
+      return [...groups].sort((a, b) => {
+        const ia = idx.get((a.groupKey || "OTHER").toUpperCase()) ?? 999;
+        const ib = idx.get((b.groupKey || "OTHER").toUpperCase()) ?? 999;
+        return ia - ib;
+      });
+    }
+
+    function setText(id, value) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = value || "—";
+    }
+
+    function formatDate(value) {
+      if (!value) return "—";
+      const d = new Date(value);
+      if (Number.isNaN(d.getTime())) return "—";
+      const parts = new Intl.DateTimeFormat("es-CL", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      }).formatToParts(d);
+      const day = parts.find(p => p.type === "day")?.value || "";
+      const month = parts.find(p => p.type === "month")?.value || "";
+      const year = parts.find(p => p.type === "year")?.value || "";
+      return `${day} · ${month} · ${year}`;
+    }
+
+    function badgeColor(badge) {
+      const b = String(badge || "").toUpperCase();
+      if (b === "GREEN") return "#10B981";
+      if (b === "YELLOW") return "#F59E0B";
+      if (b === "RED") return "#F97316";
+      if (b === "GRAY") return "#94A3B8";
+      return "#94A3B8";
+    }
+
+    function badgeLabel(badge) {
+      const b = String(badge || "").toUpperCase();
+      if (b === "GREEN") return "Favorable";
+      if (b === "YELLOW") return "Intermedio";
+      if (b === "RED") return "Revisión sugerida";
+      if (b === "GRAY") return "Sin datos";
+      return "—";
+    }
+
+    function severityLabel(sev) {
+      const s = String(sev || "").toLowerCase();
+      if (s === "high") return { text: "HIGH", fill: "#9A3412", bg: "#FFF7ED" };
+      if (s === "medium") return { text: "MEDIUM", fill: "#9A3412", bg: "#FFF7ED" };
+      return { text: "LOW", fill: "#166534", bg: "#ECFDF5" };
+    }
+
+    function arcPath(cx, cy, r, startAngle, endAngle) {
+      const toRad = (deg) => (deg * Math.PI) / 180;
+      const start = {
+        x: cx + r * Math.cos(toRad(startAngle)),
+        y: cy + r * Math.sin(toRad(startAngle)),
+      };
+      const end = {
+        x: cx + r * Math.cos(toRad(endAngle)),
+        y: cy + r * Math.sin(toRad(endAngle)),
+      };
+      const largeArc = endAngle - startAngle <= 180 ? 0 : 1;
+      return `M${start.x} ${start.y} A${r} ${r} 0 ${largeArc} 1 ${end.x} ${end.y}`;
+    }
+
+    function clampScore(value) {
+      const num = Number(value);
+      if (Number.isNaN(num)) return 0;
+      return Math.max(0, Math.min(100, num));
+    }
+
+    function applyArcProgress(pathEl, percent) {
+      if (!pathEl) return;
+      const pct = clampScore(percent) / 100;
+      const length = pathEl.getTotalLength();
+      pathEl.setAttribute("stroke-dasharray", `${length * pct} ${length}`);
+      pathEl.setAttribute("stroke-dashoffset", "0");
+    }
+
+    function slugifyId(value) {
+      return String(value || "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+    }
+
+    function getCaseIdFromPath() {
+      const parts = window.location.pathname.split('/').filter(Boolean);
+      const idx = parts.indexOf('cases');
+      if (idx >= 0 && parts[idx + 1]) return parts[idx + 1];
+      return null;
+    }
+
+    function createSvg(tag, attrs = {}) {
+      const el = document.createElementNS(svgNS, tag);
+      Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+      return el;
+    }
+
+    function renderKpiSummary(kpis) {
+      const group = document.getElementById("kpiSummary");
+      group.innerHTML = "";
+      const xs = [110, 280, 450, 620, 790, 960];
+      const y = 520;
+      kpis.slice(0, 6).forEach((kpi, idx) => {
+        const color = badgeColor(kpi.badge);
+        const label = badgeLabel(kpi.badge);
+        const score = (kpi.score == null) ? "—" : Math.round(Number(kpi.score ?? 0));
+        const x = xs[idx] ?? xs[xs.length - 1];
+
+        const ringGroup = createSvg("g", {});
+        const radius = 24;
+        const circumference = 2 * Math.PI * radius;
+        const pct = kpi.score == null ? 0 : clampScore(kpi.score) / 100;
+        ringGroup.appendChild(createSvg("circle", { cx: x, cy: y, r: radius, stroke: "#E5E7EB", "stroke-width": 8, fill: "none" }));
+        const progress = createSvg("circle", {
+          cx: x, cy: y, r: radius, stroke: color, "stroke-width": 8, fill: "none",
+          "stroke-linecap": "round",
+          "stroke-dasharray": `${circumference * pct} ${circumference}`,
+          transform: `rotate(-90 ${x} ${y})`
+        });
+        ringGroup.appendChild(progress);
+        group.appendChild(ringGroup);
+        group.appendChild(createSvg("text", { x, y: y + 4, "font-size": 12, fill: "#111827", "font-weight": 700, "text-anchor": "middle" })).textContent = score;
+        group.appendChild(createSvg("text", { x, y: y + 38, "font-size": 12, fill: "#111827", "font-weight": 700, "text-anchor": "middle" })).textContent = kpi.title;
+        group.appendChild(createSvg("text", { x, y: y + 56, "font-size": 11, fill: color, "font-weight": 700, "text-anchor": "middle" })).textContent = label;
+      });
+    }
+
+    function renderKpiSections(kpiGroups) {
+      const container = document.getElementById("kpiSections");
+      const defs = document.querySelector("#reportSvg defs");
+      container.innerHTML = "";
+      let currentY = 690;
+      const cardX = 52;
+      const cardW = 1040;
+      const headerOffset = 55;
+      const slotStartOffset = 110;
+      const slotH = 78;
+      const slotGap = 8;
+
+      kpiGroups.forEach((g) => {
+        const list = g.items || [];
+        const hasSlots = list.length > 0;
+        const slotsHeight = hasSlots ? (list.length * slotH + (list.length - 1) * slotGap) : 46;
+        const sectionHeight = slotStartOffset + slotsHeight;
+        const color = badgeColor(g.badge);
+        const label = badgeLabel(g.badge);
+        const score = Math.round(Number(g.scoreIfOnlyGroup ?? 0));
+
+        container.appendChild(createSvg("rect", {
+          x: cardX, y: currentY, width: cardW, height: sectionHeight, rx: 14, fill: "#FFFFFF", filter: "url(#shadowSmall)"
+        }));
+
+        const headerCx = 105;
+        const headerCy = currentY + headerOffset;
+        const headerRadius = 22;
+        const headerCirc = 2 * Math.PI * headerRadius;
+        const headerPct = g.scoreIfOnlyGroup == null ? 0 : clampScore(g.scoreIfOnlyGroup) / 100;
+        container.appendChild(createSvg("circle", { cx: headerCx, cy: headerCy, r: headerRadius, stroke: "#E5E7EB", "stroke-width": 8, fill: "none" }));
+        container.appendChild(createSvg("circle", {
+          cx: headerCx, cy: headerCy, r: headerRadius, stroke: color, "stroke-width": 8, fill: "none",
+          "stroke-linecap": "round",
+          "stroke-dasharray": `${headerCirc * headerPct} ${headerCirc}`,
+          transform: `rotate(-90 ${headerCx} ${headerCy})`
+        }));
+        container.appendChild(createSvg("text", { x: 105, y: currentY + headerOffset + 4, "font-size": 11, fill: "#111827", "font-weight": 700, "text-anchor": "middle" })).textContent = score;
+        container.appendChild(createSvg("text", { x: 150, y: currentY + headerOffset - 5, "font-size": 13, fill: "#111827", "font-weight": 700 })).textContent = g.title || g.key;
+        container.appendChild(createSvg("text", { x: 150, y: currentY + headerOffset + 17, "font-size": 12, fill: color, "font-weight": 700 })).textContent = label;
+        container.appendChild(createSvg("text", { x: 250, y: currentY + headerOffset + 5, "font-size": 12, fill: "#111827" })).textContent = `· ${list.length} slots`;
+
+        if (!hasSlots) {
+          container.appendChild(createSvg("text", { x: 150, y: currentY + slotStartOffset + 22, "font-size": 12, fill: "#6B7280" }))
+            .textContent = "Sin evidencia disponible en este KPI.";
+        }
+
+        list.forEach((s, idx) => {
+          const slotY = currentY + slotStartOffset + idx * (slotH + slotGap);
+          const conf = s.confidence != null ? Number(s.confidence).toFixed(2) : "—";
+          const sev = severityLabel(s.severity);
+          const scoreSlot = s.confidence != null ? Math.round(Number(s.confidence) * 100) : 0;
+          const sourceLabel = String(s.source || "").toUpperCase() === "OPENAI" ? "OpenAI" : "V1";
+          const analyzedAt = s.analyzedAt ? formatDate(s.analyzedAt) : "—";
+          const code = s.findingCode || s.slotCode || "";
+          const evidenceUrl = s.photoUrl || null;
+
+          container.appendChild(createSvg("rect", { x: 72, y: slotY, width: 1000, height: slotH, rx: 12, fill: "#FFFFFF", stroke: "#E5E7EB" }));
+          container.appendChild(createSvg("rect", { x: 88, y: slotY + 12, width: 64, height: 54, rx: 10, fill: "#E5E7EB" }));
+          if (evidenceUrl) {
+            const clipId = `thumbClip-${slugifyId(g.key || "kpi")}-${idx}`;
+            const clip = createSvg("clipPath", { id: clipId });
+            clip.appendChild(createSvg("rect", { x: 88, y: slotY + 12, width: 64, height: 54, rx: 10 }));
+            if (defs) defs.appendChild(clip);
+            const img = createSvg("image", {
+              href: evidenceUrl,
+              x: 88,
+              y: slotY + 12,
+              width: 64,
+              height: 54,
+              preserveAspectRatio: "xMidYMid slice",
+              "clip-path": `url(#${clipId})`
+            });
+            container.appendChild(img);
+          }
+
+          container.appendChild(createSvg("rect", { x: 170, y: slotY + 12, width: 90, height: 22, rx: 11, fill: "#F3F4F6", stroke: "#E5E7EB" }));
+          container.appendChild(createSvg("text", { x: 215, y: slotY + 28, "font-size": 11, fill: "#111827", "font-weight": 700, "text-anchor": "middle" })).textContent = `${scoreSlot}/100`;
+
+          container.appendChild(createSvg("rect", { x: 270, y: slotY + 12, width: 72, height: 22, rx: 11, fill: sev.bg, stroke: "#E5E7EB" }));
+          container.appendChild(createSvg("text", { x: 306, y: slotY + 28, "font-size": 11, fill: sev.fill, "font-weight": 700, "text-anchor": "middle" })).textContent = sev.text;
+
+          container.appendChild(createSvg("text", { x: 360, y: slotY + 28, "font-size": 12, fill: "#111827", "font-weight": 700 })).textContent = code;
+
+          container.appendChild(createSvg("rect", { x: 520, y: slotY + 14, width: 26, height: 18, rx: 9, fill: "#EEF2FF", stroke: "#E5E7EB" }));
+          container.appendChild(createSvg("text", { x: 533, y: slotY + 27, "font-size": 10, fill: "#111827", "font-weight": 700, "text-anchor": "middle" })).textContent = sourceLabel;
+
+          container.appendChild(createSvg("text", { x: 170, y: slotY + 52, "font-size": 12, fill: "#111827", "font-weight": 700 })).textContent =
+            `Ambiente: ${s.groupTitle || ""} · Slot: ${s.title || ""} · Confianza: ${conf} · Fuente: ${sourceLabel} · Fecha: ${analyzedAt}`;
+          container.appendChild(createSvg("text", { x: 170, y: slotY + 72, "font-size": 11, fill: "#6B7280" })).textContent =
+            s.message || "Sin observaciones.";
+
+          if (evidenceUrl) {
+            const link = createSvg("a", { href: evidenceUrl, target: "_blank" });
+            const txt = createSvg("text", { x: 965, y: slotY + 62, "font-size": 12, fill: "#2563EB", "text-anchor": "end" });
+            txt.textContent = "Ver evidencia";
+            link.appendChild(txt);
+            container.appendChild(link);
+            container.appendChild(createSvg("line", { x1: 890, y1: slotY + 66, x2: 965, y2: slotY + 66, stroke: "#2563EB", "stroke-width": 1 }));
+          }
+        });
+
+        currentY += sectionHeight + 30;
+      });
+
+      const techTitle = document.getElementById("techDocTitle");
+      const techLine1 = document.getElementById("techDocLine1");
+      const techLine2 = document.getElementById("techDocLine2");
+      if (techTitle && techLine1 && techLine2) {
+        techTitle.setAttribute("y", String(currentY + 20));
+        techLine1.setAttribute("y", String(currentY + 50));
+        techLine2.setAttribute("y", String(currentY + 73));
+      }
+
+      const newHeight = currentY + 110;
+      const svg = document.getElementById("reportSvg");
+      svg.setAttribute("height", String(newHeight));
+      svg.setAttribute("viewBox", `0 0 1143 ${newHeight}`);
+      document.getElementById("bgRect").setAttribute("height", String(newHeight));
+      document.getElementById("pageCard").setAttribute("height", String(newHeight - 140));
+    }
+
+    function classifyKpi(slot) {
+      const code = String(slot.findingCode || slot.slotCode || "").toLowerCase();
+      const title = String(slot.title || "").toLowerCase();
+      const msg = String(slot.message || "").toLowerCase();
+
+      const has = (txt) => title.includes(txt) || code.includes(txt) || msg.includes(txt);
+      const hasAny = (arr) => arr.some(has);
+
+      if (hasAny(["electrical", "tablero", "enchufe", "interruptor"])) return "ELECTRICIDAD";
+      if (hasAny(["ventana", "vidrio", "marco"])) return "VENTANAS";
+      if (hasAny(["humedad", "moho", "filtr", "water", "mold"])) return "HUMEDAD";
+      if (hasAny(["piso", "pisos", "floor"])) return "PISOS";
+      if (hasAny(["pintura", "muros", "cielos", "paint"])) return "PINTURA";
+      if (hasAny(["wc", "lavamanos", "lavaplatos", "grifer", "ducha", "tina", "sanitario", "sifon", "cañer", "baño", "baño"])) return "SANITARIOS";
+      return null;
+    }
+
+    function kpiBadgeFromScore(score) {
+      if (score == null) return "GRAY";
+      if (score >= 80) return "GREEN";
+      if (score >= 60) return "YELLOW";
+      return "RED";
+    }
+
+    function buildKpis(slots) {
+      const order = ["HUMEDAD", "PINTURA", "PISOS", "SANITARIOS", "ELECTRICIDAD", "VENTANAS"];
+      const buckets = new Map(order.map((k) => [k, []]));
+
+      slots.forEach((s) => {
+        const key = classifyKpi(s);
+        if (key && buckets.has(key)) buckets.get(key).push(s);
+      });
+
+      return order.map((key) => {
+        const items = buckets.get(key) || [];
+        if (!items.length) {
+          return { title: key[0] + key.slice(1).toLowerCase(), score: null, badge: "GRAY" };
+        }
+        const penalties = items.map((s) => {
+          const sev = String(s.severity || "").toLowerCase();
+          if (sev === "high") return 30;
+          if (sev === "medium") return 15;
+          if (sev === "low") return 5;
+          return 0;
+        });
+        const totalPenalty = penalties.reduce((a, b) => a + b, 0);
+        const score = Math.max(0, Math.min(100, 100 - totalPenalty));
+        return { title: key[0] + key.slice(1).toLowerCase(), score, badge: kpiBadgeFromScore(score) };
+      });
+    }
+
+    async function load() {
+      const caseId = getCaseIdFromPath();
+      if (!caseId) return;
+
+      const summaryRes = await fetch(`/api/cases/${encodeURIComponent(caseId)}/summary`);
+      const summary = await summaryRes.json().catch(() => ({}));
+      if (!summaryRes.ok || !summary.ok) return;
+
+      const c = summary.case || {};
+      const property = c.property || {};
+      const owner = property.owner || {};
+
+      setText("ownerName", owner.fullName);
+      setText("ownerRut", owner.rut);
+      setText("propertyRol", property.rol);
+      setText("propertyAddress", property.address);
+      setText("propertyOperation", property.operationType);
+      setText("propertySurface", property.surface);
+      setText("caseNumber", caseId);
+      setText("analysisDate", formatDate(c.createdAt));
+      setText("headerDate", formatDate(c.createdAt));
+
+      const score = clampScore(summary.score);
+      setText("stiScore", `${Math.round(score)} / 100`);
+      setText("stiLabel", badgeLabel(summary.badge));
+      document.getElementById("stiArc").setAttribute("stroke", badgeColor(summary.badge));
+      const fullArc = arcPath(920, 315, 70, 180, 0);
+      const stiArc = document.getElementById("stiArc");
+      stiArc.setAttribute("d", fullArc);
+      applyArcProgress(stiArc, score);
+
+      const slots = summary.slots || [];
+      const kpis = buildKpis(slots);
+      renderKpiSummary(kpis);
+
+      const kpiOrder = ["HUMEDAD", "PINTURA", "PISOS", "SANITARIOS", "ELECTRICIDAD", "VENTANAS"];
+      const kpiGroups = kpiOrder.map((key) => {
+        const items = slots.filter((s) => classifyKpi(s) === key);
+        const scoreValue = kpis.find((k) => k.title.toUpperCase() === key)?.score ?? null;
+        const badge = kpiBadgeFromScore(scoreValue);
+        return {
+          key,
+          title: key[0] + key.slice(1).toLowerCase(),
+          scoreIfOnlyGroup: scoreValue ?? 0,
+          badge,
+          items
+        };
+      });
+
+      renderKpiSections(kpiGroups);
+    }
+
+    load().catch(() => {});
+  </script>
+</body>
+</html>

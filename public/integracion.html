@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Integración · Ainspecciona</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #F6F7F9;
+      color: #0f172a;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: #ffffff;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .nav {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: inherit;
+      font-weight: 800;
+    }
+    .brand img { height: 32px; }
+    .links {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .links a {
+      text-decoration: none;
+      color: #1f2937;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .cta {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      text-decoration: none;
+      font-weight: 800;
+      font-size: 14px;
+    }
+    .heroWrap {
+      background: radial-gradient(circle at 20% 20%, #1f2b3a 0%, #0b121b 65%, #070b12 100%);
+      color: #e5eef7;
+    }
+    .hero {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 72px 20px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 40px;
+      align-items: center;
+    }
+    .hero h1 { margin: 0 0 16px; font-size: 36px; line-height: 1.2; }
+    .hero p { color: #cbd5e1; margin: 0 0 18px; }
+    .hero img {
+      width: 100%;
+      border-radius: 16px;
+      box-shadow: 0 18px 40px rgba(3, 7, 18, 0.45);
+    }
+    .pill {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 12px;
+      background: #eef2ff;
+      color: #4c51bf;
+    }
+    .section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 48px 20px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+    .card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+    }
+    .muted { color: #64748b; }
+    .ctaRow {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+    .outline {
+      border: 1px solid #e5e7eb;
+      padding: 10px 14px;
+      border-radius: 999px;
+      text-decoration: none;
+      color: #1f2937;
+      font-weight: 700;
+      background: #fff;
+    }
+    footer {
+      background: linear-gradient(135deg, #0b1220 0%, #0f172a 60%, #0b1220 100%);
+      color: #e5e7eb;
+      padding: 60px 20px 40px;
+      border-top: 1px solid rgba(148, 163, 184, 0.2);
+    }
+    footer .footerWrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr 1fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    .footerBrand {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .footerBrand img { height: 36px; width: auto; }
+    .footerTitle { font-weight: 800; font-size: 16px; }
+    .footerDesc { color: #94a3b8; font-size: 14px; line-height: 1.5; }
+    .footerCol h4 { margin: 0 0 10px; font-size: 14px; }
+    .footerCol a { color: #cbd5e1; text-decoration: none; font-size: 14px; display: block; margin-bottom: 8px; }
+    .footerCol a:hover { color: #ffffff; }
+    .footerCta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #39c6ff 0%, #2c7bff 100%);
+      color: #07101a;
+      font-weight: 800;
+      text-decoration: none;
+      font-size: 14px;
+      margin-top: 8px;
+    }
+    .footerBottom {
+      max-width: 1200px;
+      margin: 28px auto 0;
+      padding-top: 18px;
+      border-top: 1px solid rgba(148, 163, 184, 0.2);
+      color: #94a3b8;
+      font-size: 12px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; }
+      .grid, footer .footerWrap { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav">
+      <a class="brand" href="/">
+        <img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" />
+      </a>
+      <div class="links">
+        <a href="/como-funciona.html">Cómo funciona</a>
+        <a href="/modelo.html">Modelo</a>
+        <a href="/integracion.html">Integración</a>
+        <a href="/faq.html">FAQ</a>
+        <a href="/contacto.html">Contacto</a>
+        <a class="cta" href="/formulario">Generar inspección</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="heroWrap">
+      <div class="hero">
+        <div>
+          <span class="pill">Integración</span>
+          <h1>Outputs auditables listos para portales y CRMs</h1>
+          <p>Integra Ainspecciona vía API o white-label. Entregamos evidencia por slot, severidad, confianza y badge final listo para publicación.</p>
+          <div class="ctaRow">
+            <a class="cta" href="/agendar.html">Agendar reunión</a>
+            <a class="outline" href="/contacto.html">Hablar con soporte</a>
+          </div>
+        </div>
+        <img src="/assets/IT.png" alt="Integraciones" />
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Qué puedes integrar</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>API de casos</h3>
+          <p class="muted">Crear casos, generar slots técnicos y consultar reportes con trazabilidad.</p>
+        </div>
+        <div class="card">
+          <h3>Webhooks</h3>
+          <p class="muted">Notificaciones en tiempo real cuando el análisis finaliza o cambia el badge.</p>
+        </div>
+        <div class="card">
+          <h3>White-label</h3>
+          <p class="muted">Inserta el reporte en tu marca, con evidencias y score por KPI.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Salida técnica estándar</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>Por slot</h3>
+          <p class="muted">analysis_code · severity · confidence · message · photo_id.</p>
+        </div>
+        <div class="card">
+          <h3>Por KPI</h3>
+          <p class="muted">Humedad, Pintura, Pisos, Sanitarios, Electricidad, Ventanas.</p>
+        </div>
+        <div class="card">
+          <h3>Badge final</h3>
+          <p class="muted">Verde, Amarillo o Rojo con explicación y trazabilidad.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footerWrap">
+      <div class="footerBrand">
+        <img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" />
+        <div class="footerTitle">Ainspecciona</div>
+        <div class="footerDesc">Inspección técnica automatizada con evidencia por slot y trazabilidad completa.</div>
+        <a class="footerCta" href="/formulario">Generar inspección</a>
+      </div>
+      <div class="footerCol">
+        <h4>Producto</h4>
+        <a href="/como-funciona.html">Cómo funciona</a>
+        <a href="/modelo.html">Modelo</a>
+        <a href="/integracion.html">Integración</a>
+        <a href="/faq.html">FAQ</a>
+      </div>
+      <div class="footerCol">
+        <h4>Empresa</h4>
+        <a href="/contacto.html">Contacto</a>
+        <a href="/agendar.html">Agendar reunión</a>
+        <a href="/dashboard">Dashboard</a>
+      </div>
+      <div class="footerCol">
+        <h4>Recursos</h4>
+        <a href="/formulario">Crear caso</a>
+        <a href="/cases">Casos</a>
+      </div>
+    </div>
+    <div class="footerBottom">
+      <div>© 2026 Ainspecciona. Todos los derechos reservados.</div>
+      <div>Audit-ready · Evidencia por slot · White-label</div>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ainspecciona</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #F6F7F9;
+      color: #0f172a;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: #ffffff;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .nav {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: inherit;
+      font-weight: 800;
+    }
+    .brand img { height: 32px; }
+    .links {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .links a {
+      text-decoration: none;
+      color: #1f2937;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .cta {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      text-decoration: none;
+      font-weight: 800;
+      font-size: 14px;
+    }
+    .section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 48px 20px;
+    }
+    .hero {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 48px;
+      align-items: center;
+      padding: 80px 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .heroWrap {
+      background: radial-gradient(circle at 20% 20%, #1f2b3a 0%, #0b121b 65%, #070b12 100%);
+      color: #e5eef7;
+    }
+    .hero h1 {
+      font-size: 40px;
+      margin: 0 0 18px;
+      line-height: 1.2;
+      font-weight: 800;
+    }
+    .hero p { font-size: 16px; color: #cbd5e1; margin: 0 0 18px; }
+    .hero ul { margin: 0 0 22px; padding-left: 18px; color: #e2e8f0; }
+    .hero li { margin-bottom: 8px; }
+    .hero img {
+      width: 100%;
+      border-radius: 16px;
+      box-shadow: 0 18px 40px rgba(3, 7, 18, 0.45);
+    }
+    .heroCta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 22px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #4f46e5 0%, #2563eb 100%);
+      color: #fff;
+      text-decoration: none;
+      font-weight: 800;
+    }
+    .pill {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 12px;
+      background: #eef2ff;
+      color: #4c51bf;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+    .card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+    }
+    .card h3 { margin: 0 0 10px; }
+    .muted { color: #64748b; }
+    .sectionTitle {
+      font-size: 22px;
+      margin: 0 0 18px;
+    }
+    .ctaRow {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+    .outline {
+      border: 1px solid #e5e7eb;
+      padding: 10px 14px;
+      border-radius: 999px;
+      text-decoration: none;
+      color: #1f2937;
+      font-weight: 700;
+      background: #fff;
+    }
+    footer {
+      background: linear-gradient(135deg, #0b1220 0%, #0f172a 60%, #0b1220 100%);
+      color: #e5e7eb;
+      padding: 60px 20px 40px;
+      border-top: 1px solid rgba(148, 163, 184, 0.2);
+    }
+    footer .footerWrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr 1fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    .footerBrand {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .footerBrand img { height: 36px; width: auto; }
+    .footerTitle { font-weight: 800; font-size: 16px; }
+    .footerDesc { color: #94a3b8; font-size: 14px; line-height: 1.5; }
+    .footerCol h4 { margin: 0 0 10px; font-size: 14px; }
+    .footerCol a { color: #cbd5e1; text-decoration: none; font-size: 14px; display: block; margin-bottom: 8px; }
+    .footerCol a:hover { color: #ffffff; }
+    .footerCta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #39c6ff 0%, #2c7bff 100%);
+      color: #07101a;
+      font-weight: 800;
+      text-decoration: none;
+      font-size: 14px;
+      margin-top: 8px;
+    }
+    .footerBottom {
+      max-width: 1200px;
+      margin: 28px auto 0;
+      padding-top: 18px;
+      border-top: 1px solid rgba(148, 163, 184, 0.2);
+      color: #94a3b8;
+      font-size: 12px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; }
+      .cards, footer .footerWrap { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav">
+      <a class="brand" href="/">
+        <img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" />
+      </a>
+      <div class="links">
+        <a href="/como-funciona.html">Cómo funciona</a>
+        <a href="/modelo.html">Modelo</a>
+        <a href="/integracion.html">Integración</a>
+        <a href="/faq.html">FAQ</a>
+        <a href="/contacto.html">Contacto</a>
+        <a class="cta" href="/formulario">Generar inspección</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="heroWrap">
+    <div class="hero">
+      <div>
+        <h1>
+          Tus avisos inmobiliarios<br />
+          pueden mostrar una evaluación<br />
+          técnica visible
+        </h1>
+        <p>
+          Ainspecciona genera automáticamente una evaluación técnica y un informe
+          de respaldo, visibles directamente en el aviso y en el motor de búsqueda.
+        </p>
+        <ul>
+          <li>Evaluación técnica visible mediante estrellas</li>
+          <li>Informe técnico automático como respaldo</li>
+          <li>Integrable en portales inmobiliarios y sitios propios</li>
+        </ul>
+        <a class="heroCta" href="/agendar.html">Agendar reunión</a>
+      </div>
+      <img src="/assets/Aviso-simulado.png" alt="Aviso inmobiliario" />
+    </div>
+  </section>
+
+  <section id="product">
+    <div style="width:100%; overflow:hidden;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="1440" height="720" viewBox="0 0 1440 720" style="display:block; width:100%; height:auto;">
+        <defs>
+          <radialGradient id="bgGlow" cx="72%" cy="32%" r="70%">
+            <stop offset="0%" stop-color="#11314A" stop-opacity="0.65"/>
+            <stop offset="45%" stop-color="#0B1622" stop-opacity="0.75"/>
+            <stop offset="100%" stop-color="#070D14" stop-opacity="1"/>
+          </radialGradient>
+          <linearGradient id="ctaGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#39C6FF"/>
+            <stop offset="100%" stop-color="#2C7BFF"/>
+          </linearGradient>
+          <linearGradient id="cardGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0F1C28"/>
+            <stop offset="100%" stop-color="#0B1520"/>
+          </linearGradient>
+          <style>
+            .h1 { font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; font-size: 46px; font-weight: 650; fill: #EAF2FF; }
+            .h2 { font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; font-size: 18px; font-weight: 450; fill: #A9B8CC; }
+            .b  { font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; font-size: 15px; font-weight: 500; fill: #CFE0F6; }
+            .muted { font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; font-size: 13px; font-weight: 500; fill: #8EA2BA; }
+            .btn { font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; font-size: 14px; font-weight: 600; fill: #07101A; }
+            .btn2 { font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; font-size: 14px; font-weight: 600; fill: #CFE0F6; }
+            .label { font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; font-size: 12px; font-weight: 650; letter-spacing: 0.2px; }
+            .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 11px; fill: #8EA2BA; }
+            .stroke { stroke: #203142; stroke-opacity: 0.9; }
+          </style>
+          <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
+            <feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#000000" flood-opacity="0.55"/>
+          </filter>
+          <filter id="cardShadow" x="-30%" y="-30%" width="160%" height="160%">
+            <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#000000" flood-opacity="0.45"/>
+          </filter>
+          <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse">
+            <path d="M36 0H0V36" fill="none" stroke="#142333" stroke-opacity="0.55" stroke-width="1"/>
+          </pattern>
+          <linearGradient id="gGreen" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#27E38B"/>
+            <stop offset="100%" stop-color="#1AAE69"/>
+          </linearGradient>
+          <linearGradient id="gYellow" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#FFD36A"/>
+            <stop offset="100%" stop-color="#E8A93A"/>
+          </linearGradient>
+          <linearGradient id="gRed" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#FF6B6B"/>
+            <stop offset="100%" stop-color="#E54242"/>
+          </linearGradient>
+        </defs>
+
+        <rect x="0" y="0" width="1440" height="720" fill="url(#bgGlow)"/>
+        <rect x="0" y="0" width="1440" height="720" fill="url(#grid)" opacity="0.45"/>
+
+        <g transform="translate(92,150)">
+          <text class="h1" x="0" y="0">
+            <tspan x="0" dy="0">Inspección inmobiliaria</tspan>
+            <tspan x="0" dy="54">automatizada con IA</tspan>
+          </text>
+
+          <text class="h2" x="0" y="124">
+            <tspan x="0" dy="0">Analizamos propiedades a partir de fotografías guiadas,</tspan>
+            <tspan x="0" dy="28">generando diagnósticos técnicos inmediatos, objetivos y escalables.</tspan>
+          </text>
+
+          <g transform="translate(0,190)">
+            <circle cx="6" cy="6" r="4" fill="#39C6FF"/>
+            <text class="b" x="22" y="11">Sin visitas presenciales iniciales</text>
+
+            <circle cx="6" cy="44" r="4" fill="#39C6FF"/>
+            <text class="b" x="22" y="49">Análisis por componente (slots técnicos)</text>
+
+            <circle cx="6" cy="82" r="4" fill="#39C6FF"/>
+            <text class="b" x="22" y="87">Resultado accionable: Verde · Amarillo · Rojo</text>
+          </g>
+
+          <g transform="translate(0,310)">
+            <rect x="0" y="0" width="190" height="46" rx="12" fill="url(#ctaGrad)"/>
+            <text x="22" y="29" class="btn">Ver cómo funciona</text>
+            <text x="156" y="29" class="btn" style="fill:#07101A; opacity:0.85;">→</text>
+
+            <rect x="206" y="0" width="220" height="46" rx="12" fill="#0B1520" class="stroke" stroke-width="1"/>
+            <text x="228" y="29" class="btn2">Integraciones y arquitectura</text>
+          </g>
+
+          <g transform="translate(0,392)" opacity="0.9">
+            <text class="mono" x="0" y="0">Output por slot:</text>
+            <text class="mono" x="114" y="0">analysis_code</text>
+            <text class="mono" x="220" y="0">· severity</text>
+            <text class="mono" x="292" y="0">· confidence</text>
+            <text class="mono" x="396" y="0">· message</text>
+          </g>
+        </g>
+
+        <g transform="translate(790,132)" filter="url(#softShadow)">
+          <rect x="0" y="0" width="558" height="456" rx="18" fill="url(#cardGrad)" class="stroke" stroke-width="1"/>
+          <g transform="translate(22,20)">
+            <text class="b" x="0" y="18" style="font-size:14px; font-weight:650; fill:#EAF2FF;">Informe — Caso #A-10492</text>
+            <text class="muted" x="0" y="40">Estado del inmueble basado en evidencia fotográfica</text>
+            <g transform="translate(360,6)">
+              <rect x="0" y="0" width="150" height="34" rx="12" fill="#0B1520" class="stroke" stroke-width="1"/>
+              <circle cx="18" cy="17" r="6" fill="url(#gYellow)"/>
+              <text class="label" x="32" y="21" fill="#EAF2FF">AMARILLO</text>
+              <text class="muted" x="106" y="21" style="font-size:12px;">/ 72</text>
+            </g>
+          </g>
+          <line x1="0" y1="78" x2="558" y2="78" stroke="#203142" stroke-opacity="0.75"/>
+
+          <g transform="translate(18,96)" filter="url(#cardShadow)">
+            <rect x="0" y="0" width="255" height="338" rx="14" fill="#0B1520" class="stroke" stroke-width="1"/>
+            <text class="muted" x="14" y="26">Slots técnicos</text>
+            <g transform="translate(12,42)">
+              <rect x="0" y="0" width="231" height="56" rx="12" fill="#0F1C28" class="stroke" stroke-width="1"/>
+              <text class="b" x="14" y="23" style="font-size:14px;">Baño</text>
+              <text class="muted" x="14" y="42">Humedad / sello ducha</text>
+              <rect x="168" y="14" width="52" height="26" rx="10" fill="url(#gYellow)"/>
+              <text class="label" x="182" y="32" fill="#07101A">MED</text>
+
+              <g transform="translate(0,68)">
+                <rect x="0" y="0" width="231" height="56" rx="12" fill="#0F1C28" class="stroke" stroke-width="1"/>
+                <text class="b" x="14" y="23" style="font-size:14px;">Cocina</text>
+                <text class="muted" x="14" y="42">Fugas / sifón</text>
+                <rect x="168" y="14" width="52" height="26" rx="10" fill="url(#gGreen)"/>
+                <text class="label" x="182" y="32" fill="#07101A">OK</text>
+              </g>
+
+              <g transform="translate(0,136)">
+                <rect x="0" y="0" width="231" height="56" rx="12" fill="#0F1C28" class="stroke" stroke-width="1"/>
+                <text class="b" x="14" y="23" style="font-size:14px;">Muros</text>
+                <text class="muted" x="14" y="42">Fisuras / pintura</text>
+                <rect x="168" y="14" width="52" height="26" rx="10" fill="url(#gYellow)"/>
+                <text class="label" x="182" y="32" fill="#07101A">MED</text>
+              </g>
+
+              <g transform="translate(0,204)">
+                <rect x="0" y="0" width="231" height="56" rx="12" fill="#0F1C28" class="stroke" stroke-width="1"/>
+                <text class="b" x="14" y="23" style="font-size:14px;">Instalaciones</text>
+                <text class="muted" x="14" y="42">Eléctrico / térmico</text>
+                <rect x="168" y="14" width="52" height="26" rx="10" fill="url(#gRed)"/>
+                <text class="label" x="182" y="32" fill="#07101A">ALTO</text>
+              </g>
+            </g>
+          </g>
+
+          <g transform="translate(288,96)" filter="url(#cardShadow)">
+            <rect x="0" y="0" width="252" height="338" rx="14" fill="#0B1520" class="stroke" stroke-width="1"/>
+            <text class="muted" x="14" y="26">Detalle de hallazgo</text>
+            <g transform="translate(14,44)">
+              <rect x="0" y="0" width="224" height="120" rx="14" fill="#0F1C28" class="stroke" stroke-width="1"/>
+              <text class="b" x="14" y="26" style="font-size:14px;">Instalaciones — Riesgo alto</text>
+              <text class="mono" x="14" y="48">analysis_code: ELEC_RISK_01</text>
+              <text class="mono" x="14" y="66">severity: 1.5</text>
+              <text class="mono" x="14" y="84">confidence: 0.82</text>
+              <rect x="14" y="92" width="86" height="24" rx="10" fill="url(#gRed)"/>
+              <text class="label" x="28" y="109" fill="#07101A">ROJO</text>
+            </g>
+            <g transform="translate(14,180)">
+              <rect x="0" y="0" width="224" height="120" rx="14" fill="#0F1C28" class="stroke" stroke-width="1"/>
+              <text class="muted" x="14" y="26">Mensaje</text>
+              <text class="b" x="14" y="52" style="font-size:14px; font-weight:520; fill:#D7E6FA;">
+                <tspan x="14" dy="0">Se observan señales compatibles</tspan>
+                <tspan x="14" dy="22">con instalación expuesta /</tspan>
+                <tspan x="14" dy="22">terminación deficiente.</tspan>
+              </text>
+            </g>
+          </g>
+
+          <g transform="translate(22,444)" opacity="0.85">
+            <text class="mono" x="0" y="0">Audit-ready · Evidencia por slot · Integración API / White-label</text>
+          </g>
+        </g>
+
+        <rect x="0" y="620" width="1440" height="100" fill="#070D14" opacity="0.85"/>
+      </svg>
+    </div>
+  </section>
+
+  <section id="report">
+    <div style="width:100%; overflow:hidden;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="1400" height="600" viewBox="0 0 1400 600" style="display:block; width:100%; height:auto;">
+        <defs>
+          <linearGradient id="bgLight" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0B111A"/>
+            <stop offset="100%" stop-color="#070B12"/>
+          </linearGradient>
+
+          <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#000" flood-opacity="0.12"/>
+          </filter>
+
+          <style>
+            .wrap { fill:url(#bgLight); }
+            .h2 { font-family:Inter, system-ui; font-size:44px; font-weight:800; fill:#EAF2FF; letter-spacing:-0.4px; }
+            .p  { font-family:Inter, system-ui; font-size:18px; fill:#A9B8CC; }
+            .li { font-family:Inter, system-ui; font-size:18px; fill:#EAF2FF; }
+            .dot { fill:#39C6FF; }
+            .caption { font-family:Inter, system-ui; font-size:12px; fill:#8EA2BA; }
+            .imgFrame { fill:#0B1520; stroke:#203142; stroke-width:1.2; rx:18; }
+          </style>
+        </defs>
+
+        <rect class="wrap" x="0" y="0" width="1400" height="600"/>
+
+        <g transform="translate(92,140)">
+          <text class="h2" x="0" y="0">Informe técnico automatizado</text>
+
+          <text class="p" x="0" y="92">
+            <tspan x="0" dy="0">Cada evaluación visible en un aviso está respaldada por un informe</tspan>
+            <tspan x="0" dy="26">técnico automático, generado a partir de evidencia fotográfica y</tspan>
+            <tspan x="0" dy="26">análisis por componente.</tspan>
+          </text>
+
+          <g transform="translate(0,180)">
+            <circle class="dot" cx="8" cy="8" r="5"/>
+            <text class="li" x="26" y="14">Diagnóstico por área y componente (slots técnicos)</text>
+
+            <circle class="dot" cx="8" cy="52" r="5"/>
+            <text class="li" x="26" y="58">Evidencia fotográfica asociada a cada hallazgo</text>
+
+            <circle class="dot" cx="8" cy="96" r="5"/>
+            <text class="li" x="26" y="102">Evaluación clara: Favorable · Intermedio · Revisión sugerida</text>
+
+            <circle class="dot" cx="8" cy="140" r="5"/>
+            <text class="li" x="26" y="146">Trazabilidad del análisis y del resultado</text>
+          </g>
+        </g>
+
+        <g transform="translate(760,110)" filter="url(#softShadow)">
+          <rect class="imgFrame" x="0" y="0" width="548" height="380" rx="18"/>
+
+          <image
+            href="/assets/IT.png"
+            x="18" y="18"
+            width="512" height="344"
+            preserveAspectRatio="xMidYMid meet"
+            opacity="0.98"
+          />
+
+          <text class="caption" x="18" y="418">
+            Vista del informe técnico generado automáticamente
+          </text>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <section id="como-funciona">
+    <div style="width:100%; overflow:hidden;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="1440" height="560" viewBox="0 0 1440 560" style="display:block; width:100%; height:auto;">
+        <defs>
+          <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#060B12"/>
+            <stop offset="60%" stop-color="#07101A"/>
+            <stop offset="100%" stop-color="#05090F"/>
+          </linearGradient>
+          <radialGradient id="glow" cx="70%" cy="30%" r="85%">
+            <stop offset="0%" stop-color="#0F2C45" stop-opacity="0.45"/>
+            <stop offset="55%" stop-color="#07101A" stop-opacity="0.55"/>
+            <stop offset="100%" stop-color="#05090F" stop-opacity="1"/>
+          </radialGradient>
+          <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0F1C28"/>
+            <stop offset="100%" stop-color="#0B1520"/>
+          </linearGradient>
+          <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#39C6FF"/>
+            <stop offset="100%" stop-color="#2C7BFF"/>
+          </linearGradient>
+          <linearGradient id="gGreen" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#27E38B"/>
+            <stop offset="100%" stop-color="#1AAE69"/>
+          </linearGradient>
+          <linearGradient id="gYellow" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#FFD36A"/>
+            <stop offset="100%" stop-color="#E8A93A"/>
+          </linearGradient>
+          <linearGradient id="gRed" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#FF6B6B"/>
+            <stop offset="100%" stop-color="#E54242"/>
+          </linearGradient>
+          <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse">
+            <path d="M36 0H0V36" fill="none" stroke="#142333" stroke-opacity="0.5" stroke-width="1"/>
+          </pattern>
+          <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+            <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000" flood-opacity="0.45"/>
+          </filter>
+          <style>
+            .kicker { font-family: Inter, ui-sans-serif, system-ui; font-size:12px; font-weight:700; letter-spacing:.6px; fill:#8EA2BA; text-transform:uppercase; }
+            .h2 { font-family: Inter, ui-sans-serif, system-ui; font-size:30px; font-weight:650; fill:#EAF2FF; }
+            .p { font-family: Inter, ui-sans-serif, system-ui; font-size:16px; font-weight:450; fill:#A9B8CC; }
+            .b { font-family: Inter, ui-sans-serif, system-ui; font-size:15px; font-weight:560; fill:#D7E6FA; }
+            .muted { font-family: Inter, ui-sans-serif, system-ui; font-size:13px; font-weight:500; fill:#8EA2BA; }
+            .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas; font-size:11px; fill:#8EA2BA; }
+            .label { font-family: Inter, ui-sans-serif, system-ui; font-size:12px; font-weight:700; }
+            .stroke { stroke:#203142; stroke-opacity:.9; }
+          </style>
+        </defs>
+
+        <rect x="0" y="0" width="1440" height="560" fill="url(#bg)"/>
+        <rect x="0" y="0" width="1440" height="560" fill="url(#glow)"/>
+        <rect x="0" y="0" width="1440" height="560" fill="url(#grid)" opacity="0.35"/>
+
+        <g transform="translate(92,90)">
+          <text class="kicker">Cómo funciona</text>
+          <text class="h2" x="0" y="44">Un flujo simple, técnico y auditable</text>
+          <text class="p" x="0" y="78">
+            <tspan x="0" dy="0">Ainspecciona convierte fotografías guiadas en un diagnóstico estructurado.</tspan>
+            <tspan x="0" dy="26">Cada paso genera datos trazables, listos para decisión o integración.</tspan>
+          </text>
+        </g>
+
+        <g transform="translate(92,210)">
+          <g filter="url(#shadow)">
+            <rect x="0" y="0" width="300" height="260" rx="18" fill="url(#card)" class="stroke"/>
+            <g transform="translate(22,22)">
+              <text class="label" x="0" y="0" fill="#39C6FF">01</text>
+              <text class="b" x="0" y="26" style="font-size:16px;">Captura guiada</text>
+              <text class="muted" x="0" y="50">
+                <tspan x="0" dy="0">El usuario toma fotografías</tspan>
+                <tspan x="0" dy="22">siguiendo instrucciones</tspan>
+                <tspan x="0" dy="22">por slot técnico.</tspan>
+              </text>
+              <g transform="translate(0,120)">
+                <rect x="0" y="0" width="256" height="90" rx="14" fill="#0B1520" class="stroke"/>
+                <text class="mono" x="14" y="28">slot: baño</text>
+                <text class="mono" x="14" y="48">foto: ducha / sellos</text>
+                <text class="mono" x="14" y="68">validación: OK</text>
+              </g>
+            </g>
+          </g>
+
+          <g transform="translate(320,120)">
+            <line x1="0" y1="0" x2="60" y2="0" stroke="url(#accent)" stroke-width="2"/>
+            <polygon points="60,-6 72,0 60,6" fill="#2C7BFF"/>
+          </g>
+
+          <g transform="translate(400,0)" filter="url(#shadow)">
+            <rect x="0" y="0" width="300" height="260" rx="18" fill="url(#card)" class="stroke"/>
+            <g transform="translate(22,22)">
+              <text class="label" x="0" y="0" fill="#39C6FF">02</text>
+              <text class="b" x="0" y="26" style="font-size:16px;">Análisis por IA</text>
+              <text class="muted" x="0" y="50">
+                <tspan x="0" dy="0">Modelos especializados</tspan>
+                <tspan x="0" dy="22">analizan cada imagen</tspan>
+                <tspan x="0" dy="22">según tipo de slot.</tspan>
+              </text>
+              <g transform="translate(0,120)">
+                <rect x="0" y="0" width="256" height="90" rx="14" fill="#0B1520" class="stroke"/>
+                <text class="mono" x="14" y="28">analysis_code</text>
+                <text class="mono" x="14" y="48">severity: 1.3</text>
+                <text class="mono" x="14" y="68">confidence: 0.86</text>
+              </g>
+            </g>
+          </g>
+
+          <g transform="translate(720,120)">
+            <line x1="0" y1="0" x2="60" y2="0" stroke="url(#accent)" stroke-width="2"/>
+            <polygon points="60,-6 72,0 60,6" fill="#2C7BFF"/>
+          </g>
+
+          <g transform="translate(800,0)" filter="url(#shadow)">
+            <rect x="0" y="0" width="300" height="260" rx="18" fill="url(#card)" class="stroke"/>
+            <g transform="translate(22,22)">
+              <text class="label" x="0" y="0" fill="#39C6FF">03</text>
+              <text class="b" x="0" y="26" style="font-size:16px;">Resultado accionable</text>
+              <text class="muted" x="0" y="50">
+                <tspan x="0" dy="0">Se consolida el estado</tspan>
+                <tspan x="0" dy="22">del inmueble en un</tspan>
+                <tspan x="0" dy="22">badge claro y trazable.</tspan>
+              </text>
+              <g transform="translate(0,120)">
+                <rect x="0" y="0" width="256" height="90" rx="14" fill="#0B1520" class="stroke"/>
+                <rect x="14" y="18" width="86" height="26" rx="10" fill="url(#gGreen)"/>
+                <text class="label" x="28" y="36" fill="#07101A">VERDE</text>
+                <rect x="108" y="18" width="102" height="26" rx="10" fill="url(#gYellow)"/>
+                <text class="label" x="124" y="36" fill="#07101A">AMARILLO</text>
+                <rect x="14" y="52" width="86" height="26" rx="10" fill="url(#gRed)"/>
+                <text class="label" x="30" y="70" fill="#07101A">ROJO</text>
+              </g>
+            </g>
+          </g>
+        </g>
+
+        <g transform="translate(92,500)" opacity="0.9">
+          <text class="mono">Pipeline determinístico · Evidencia por slot · Listo para integración API</text>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <section id="modelo-analisis">
+    <div style="width:100%; overflow:hidden;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="1440" height="560" viewBox="0 0 1440 560" style="display:block; width:100%; height:auto;">
+        <defs>
+          <linearGradient id="bg2" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#05090F"/>
+            <stop offset="55%" stop-color="#07101A"/>
+            <stop offset="100%" stop-color="#05080D"/>
+          </linearGradient>
+          <radialGradient id="glow2" cx="28%" cy="28%" r="85%">
+            <stop offset="0%" stop-color="#0E2B44" stop-opacity="0.42"/>
+            <stop offset="55%" stop-color="#07101A" stop-opacity="0.55"/>
+            <stop offset="100%" stop-color="#05080D" stop-opacity="1"/>
+          </radialGradient>
+          <pattern id="grid2" width="36" height="36" patternUnits="userSpaceOnUse">
+            <path d="M36 0H0V36" fill="none" stroke="#142333" stroke-opacity="0.5" stroke-width="1"/>
+          </pattern>
+          <linearGradient id="card2" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0F1C28"/>
+            <stop offset="100%" stop-color="#0B1520"/>
+          </linearGradient>
+          <linearGradient id="accent2" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#39C6FF"/>
+            <stop offset="100%" stop-color="#2C7BFF"/>
+          </linearGradient>
+          <linearGradient id="gGreen2" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#27E38B"/>
+            <stop offset="100%" stop-color="#1AAE69"/>
+          </linearGradient>
+          <linearGradient id="gYellow2" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#FFD36A"/>
+            <stop offset="100%" stop-color="#E8A93A"/>
+          </linearGradient>
+          <linearGradient id="gRed2" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#FF6B6B"/>
+            <stop offset="100%" stop-color="#E54242"/>
+          </linearGradient>
+          <filter id="shadow2" x="-30%" y="-30%" width="160%" height="160%">
+            <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000" flood-opacity="0.45"/>
+          </filter>
+          <filter id="shadowLite2" x="-30%" y="-30%" width="160%" height="160%">
+            <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#000" flood-opacity="0.35"/>
+          </filter>
+          <style>
+            .kicker2 { font-family: Inter, ui-sans-serif, system-ui; font-size:12px; font-weight:700; letter-spacing:.6px; fill:#8EA2BA; text-transform:uppercase; }
+            .h2_2 { font-family: Inter, ui-sans-serif, system-ui; font-size:30px; font-weight:650; fill:#EAF2FF; }
+            .p2 { font-family: Inter, ui-sans-serif, system-ui; font-size:16px; font-weight:450; fill:#A9B8CC; }
+            .b2 { font-family: Inter, ui-sans-serif, system-ui; font-size:15px; font-weight:560; fill:#D7E6FA; }
+            .muted2 { font-family: Inter, ui-sans-serif, system-ui; font-size:13px; font-weight:500; fill:#8EA2BA; }
+            .mono2 { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas; font-size:11px; fill:#8EA2BA; }
+            .label2 { font-family: Inter, ui-sans-serif, system-ui; font-size:12px; font-weight:700; letter-spacing:.2px; }
+            .stroke2 { stroke:#203142; stroke-opacity:.9; }
+          </style>
+        </defs>
+
+        <rect x="0" y="0" width="1440" height="560" fill="url(#bg2)"/>
+        <rect x="0" y="0" width="1440" height="560" fill="url(#glow2)"/>
+        <rect x="0" y="0" width="1440" height="560" fill="url(#grid2)" opacity="0.33"/>
+
+        <g transform="translate(92,90)">
+          <text class="kicker2">Modelo de análisis</text>
+          <text class="h2_2" x="0" y="44">Análisis por slot, no por propiedad genérica</text>
+          <text class="p2" x="0" y="78">
+            <tspan x="0" dy="0">Cada inmueble se descompone en componentes técnicos (slots). Cada slot genera hallazgos con</tspan>
+            <tspan x="0" dy="26">severidad, confianza y evidencia visual. Esto habilita trazabilidad, auditoría y mejora continua.</tspan>
+          </text>
+        </g>
+
+        <g transform="translate(92,210)">
+          <g filter="url(#shadow2)">
+            <rect x="0" y="0" width="708" height="300" rx="18" fill="url(#card2)" class="stroke2"/>
+            <g transform="translate(22,22)">
+              <text class="b2" x="0" y="18" style="font-size:16px; font-weight:700;">Slots técnicos (ejemplo)</text>
+              <text class="muted2" x="0" y="42">Selecciona un slot para ver su diagnóstico</text>
+
+              <g transform="translate(0,66)">
+                <g>
+                  <rect x="0" y="0" width="214" height="74" rx="14" fill="#0B1520" class="stroke2"/>
+                  <text class="b2" x="16" y="30">Baño</text>
+                  <text class="muted2" x="16" y="54">ducha / sellos</text>
+                  <rect x="146" y="18" width="52" height="26" rx="10" fill="url(#gYellow2)"/>
+                  <text class="label2" x="160" y="36" fill="#07101A">MED</text>
+                </g>
+
+                <g transform="translate(232,0)">
+                  <rect x="0" y="0" width="214" height="74" rx="14" fill="#0B1520" class="stroke2"/>
+                  <text class="b2" x="16" y="30">Cocina</text>
+                  <text class="muted2" x="16" y="54">fugas / sifón</text>
+                  <rect x="146" y="18" width="52" height="26" rx="10" fill="url(#gGreen2)"/>
+                  <text class="label2" x="162" y="36" fill="#07101A">OK</text>
+                </g>
+
+                <g transform="translate(464,0)">
+                  <rect x="0" y="0" width="214" height="74" rx="14" fill="#0B1520" class="stroke2"/>
+                  <text class="b2" x="16" y="30">Muros</text>
+                  <text class="muted2" x="16" y="54">fisuras / pintura</text>
+                  <rect x="146" y="18" width="52" height="26" rx="10" fill="url(#gYellow2)"/>
+                  <text class="label2" x="160" y="36" fill="#07101A">MED</text>
+                </g>
+
+                <g transform="translate(0,92)">
+                  <rect x="0" y="0" width="214" height="74" rx="14" fill="#0B1520" class="stroke2"/>
+                  <text class="b2" x="16" y="30">Instalaciones</text>
+                  <text class="muted2" x="16" y="54">eléctrico / gas</text>
+                  <rect x="146" y="18" width="52" height="26" rx="10" fill="url(#gRed2)"/>
+                  <text class="label2" x="158" y="36" fill="#07101A">ALTO</text>
+                </g>
+
+                <g transform="translate(232,92)">
+                  <rect x="0" y="0" width="214" height="74" rx="14" fill="#0B1520" class="stroke2"/>
+                  <text class="b2" x="16" y="30">Cielos</text>
+                  <text class="muted2" x="16" y="54">manchas / nivel</text>
+                  <rect x="146" y="18" width="52" height="26" rx="10" fill="url(#gYellow2)"/>
+                  <text class="label2" x="160" y="36" fill="#07101A">MED</text>
+                </g>
+
+                <g transform="translate(464,92)">
+                  <rect x="0" y="0" width="214" height="74" rx="14" fill="#0B1520" class="stroke2"/>
+                  <text class="b2" x="16" y="30">Exterior</text>
+                  <text class="muted2" x="16" y="54">fachada / agua</text>
+                  <rect x="146" y="18" width="52" height="26" rx="10" fill="url(#gGreen2)"/>
+                  <text class="label2" x="162" y="36" fill="#07101A">OK</text>
+                </g>
+              </g>
+
+              <g transform="translate(0,262)" opacity="0.9">
+                <text class="mono2">Cada slot mantiene su evidencia (photo_id) y su último análisis (analysis_code, severity, confidence, message).</text>
+              </g>
+            </g>
+          </g>
+
+          <g transform="translate(732,0)" filter="url(#shadow2)">
+            <rect x="0" y="0" width="524" height="300" rx="18" fill="url(#card2)" class="stroke2"/>
+            <g transform="translate(22,22)">
+              <text class="b2" x="0" y="18" style="font-size:16px; font-weight:700;">Diagnóstico del slot</text>
+              <text class="muted2" x="0" y="42">Detalle estructurado y auditable</text>
+
+              <g transform="translate(0,66)" filter="url(#shadowLite2)">
+                <rect x="0" y="0" width="480" height="110" rx="16" fill="#0B1520" class="stroke2"/>
+                <text class="b2" x="16" y="30">Instalaciones</text>
+                <rect x="380" y="18" width="84" height="26" rx="10" fill="url(#gRed2)"/>
+                <text class="label2" x="404" y="36" fill="#07101A">ROJO</text>
+                <text class="mono2" x="16" y="56">analysis_code: ELEC_RISK_01</text>
+                <text class="mono2" x="16" y="74">severity: 1.5   ·   confidence: 0.82</text>
+                <text class="mono2" x="16" y="92">analyzed_at: 2026-01-25T11:14:32-03:00</text>
+              </g>
+
+              <g transform="translate(0,190)" filter="url(#shadowLite2)">
+                <rect x="0" y="0" width="480" height="88" rx="16" fill="#0B1520" class="stroke2"/>
+                <text class="muted2" x="16" y="26">Mensaje</text>
+                <text class="b2" x="16" y="52" style="font-size:14px; font-weight:520; fill:#D7E6FA;">
+                  <tspan x="16" dy="0">Se observan señales compatibles con</tspan>
+                  <tspan x="16" dy="20">instalación expuesta / terminación deficiente.</tspan>
+                </text>
+              </g>
+            </g>
+          </g>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <section id="score-output">
+    <div style="width:100%; overflow:hidden;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="1400" height="640" viewBox="0 0 1400 640" style="display:block; width:100%; height:auto;">
+        <defs>
+          <linearGradient id="bgLight5" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#F8FAFC"/>
+            <stop offset="100%" stop-color="#EEF2F7"/>
+          </linearGradient>
+
+          <filter id="softShadow5" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="10" stdDeviation="18" flood-color="#000" flood-opacity="0.12"/>
+          </filter>
+
+          <style>
+            .wrap { fill:url(#bgLight5); }
+            .h2 { font-family:Inter, system-ui; font-size:42px; font-weight:800; fill:#0F172A; letter-spacing:-0.4px; }
+            .p  { font-family:Inter, system-ui; font-size:16px; fill:#334155; }
+            .muted { font-family:Inter, system-ui; font-size:12px; fill:#64748B; }
+            .card { fill:#FFFFFF; stroke:#E5E7EB; stroke-width:1.2; rx:18; }
+            .title { font-family:Inter, system-ui; font-size:14px; font-weight:800; fill:#0F172A; }
+            .pill { stroke:#E5E7EB; stroke-width:1; rx:999; }
+            .pillTxt { font-family:Inter, system-ui; font-size:11px; font-weight:800; letter-spacing:.2px; }
+            .okBG { fill:#ECFDF5; } .okTxt { fill:#065F46; }
+            .obsBG { fill:#FFFBEB; } .obsTxt { fill:#92400E; }
+            .revBG { fill:#FFF7ED; } .revTxt { fill:#9A3412; }
+
+            .midBox { fill:#F9FAFB; stroke:#E5E7EB; stroke-width:1; rx:18; }
+            .midH { font-family:Inter, system-ui; font-size:14px; font-weight:800; fill:#0F172A; }
+            .midP { font-family:Inter, system-ui; font-size:12px; fill:#475569; }
+
+            .arrow { stroke:#94A3B8; stroke-width:2.5; fill:none; }
+            .arrowHead { fill:#94A3B8; }
+
+            .star { fill:#94A3B8; }
+            .starsLabel { font-family:Inter, system-ui; font-size:12px; fill:#0F172A; font-weight:700; }
+            .caption { font-family:Inter, system-ui; font-size:12px; fill:#64748B; }
+            .imgFrame { fill:#FFFFFF; stroke:#E5E7EB; stroke-width:1.2; rx:16; }
+          </style>
+        </defs>
+
+        <rect class="wrap" x="0" y="0" width="1400" height="640"/>
+
+        <g transform="translate(92,92)">
+          <text class="h2" x="0" y="0">De diagnóstico técnico a señal visible</text>
+          <text class="p" x="0" y="44">
+            Un mismo análisis genera dos salidas: un <tspan font-weight="800">Tech-Report</tspan> detallado y una señal visual simple (estrellas) para la publicación.
+          </text>
+        </g>
+
+        <g transform="translate(92,170)">
+          <g filter="url(#softShadow5)">
+            <rect class="card" x="0" y="0" width="410" height="390" rx="18"/>
+            <text class="title" x="22" y="34">Tech-Report</text>
+            <text class="caption" x="22" y="56">Diagnóstico técnico por componente, con evidencia y trazabilidad.</text>
+
+            <rect class="imgFrame" x="22" y="80" width="366" height="200" rx="14"/>
+            <text class="muted" x="36" y="112">Caso AI-CASE-10492</text>
+            <text class="muted" x="36" y="134">Slots (ejemplo)</text>
+
+            <g transform="translate(36,150)">
+              <rect x="0" y="0" width="330" height="44" rx="12" fill="#F9FAFB" stroke="#E5E7EB"/>
+              <text class="muted" x="14" y="28">Humedad · Baño</text>
+              <rect class="pill obsBG" x="220" y="10" width="96" height="24"/>
+              <text class="pillTxt obsTxt" x="268" y="27" text-anchor="middle">OBS</text>
+
+              <rect x="0" y="56" width="330" height="44" rx="12" fill="#F9FAFB" stroke="#E5E7EB"/>
+              <text class="muted" x="14" y="84">Electricidad · Tablero</text>
+              <rect class="pill revBG" x="220" y="66" width="96" height="24"/>
+              <text class="pillTxt revTxt" x="268" y="83" text-anchor="middle">REV</text>
+
+              <rect x="0" y="112" width="330" height="44" rx="12" fill="#F9FAFB" stroke="#E5E7EB"/>
+              <text class="muted" x="14" y="140">Pisos · Living</text>
+              <rect class="pill okBG" x="220" y="122" width="96" height="24"/>
+              <text class="pillTxt okTxt" x="268" y="139" text-anchor="middle">OK</text>
+            </g>
+
+            <text class="caption" x="22" y="344">Rol: respaldo técnico, compliance y detalle.</text>
+          </g>
+
+          <g transform="translate(468,0)" filter="url(#softShadow5)">
+            <rect class="midBox" x="0" y="0" width="340" height="390" rx="18"/>
+            <text class="midH" x="26" y="48">Traducción automática</text>
+            <text class="midP" x="26" y="74">Del diagnóstico detallado a una señal visual estandarizada.</text>
+
+            <g transform="translate(26,110)">
+              <rect x="0" y="0" width="288" height="62" rx="14" fill="#FFFFFF" stroke="#E5E7EB"/>
+              <text class="title" x="16" y="26">1) Normalización</text>
+              <text class="muted" x="16" y="46">Unifica criterios por componente (slot).</text>
+
+              <rect x="0" y="78" width="288" height="62" rx="14" fill="#FFFFFF" stroke="#E5E7EB"/>
+              <text class="title" x="16" y="104">2) Agregación</text>
+              <text class="muted" x="16" y="124">Pondera severidad y ajusta por confianza.</text>
+
+              <rect x="0" y="156" width="288" height="62" rx="14" fill="#FFFFFF" stroke="#E5E7EB"/>
+              <text class="title" x="16" y="182">3) Síntesis</text>
+              <text class="muted" x="16" y="202">Genera STI y rangos interpretativos.</text>
+            </g>
+
+            <g transform="translate(170,322)">
+              <path class="arrow" d="M-140 0 C-60 0, -60 0, 0 0"/>
+              <path class="arrowHead" d="M0 0 L-10 -6 L-10 6 Z"/>
+              <path class="arrow" d="M0 0 C60 0, 60 0, 140 0"/>
+              <path class="arrowHead" d="M140 0 L130 -6 L130 6 Z"/>
+            </g>
+
+            <text class="caption" x="26" y="362">Un análisis, dos niveles de visibilidad.</text>
+          </g>
+
+          <g transform="translate(840,0)" filter="url(#softShadow5)">
+            <rect class="card" x="0" y="0" width="410" height="390" rx="18"/>
+            <text class="title" x="22" y="34">Señal visible en el aviso</text>
+            <text class="caption" x="22" y="56">Una señal simple para priorizar, filtrar y comparar inmuebles.</text>
+
+            <rect class="imgFrame" x="22" y="80" width="366" height="200" rx="14"/>
+
+            <g transform="translate(40,104)">
+              <text class="starsLabel" x="0" y="0">Evaluación técnica</text>
+              <g transform="translate(0,12)">
+                <path class="star" d="M10,0 L12.8,6.2 L19.6,6.7 L14.3,11.1 L15.9,18 L10,14.6 L4.1,18 L5.7,11.1 L0.4,6.7 L7.2,6.2 Z" opacity="0.95"/>
+                <g transform="translate(24,0)">
+                  <path class="star" d="M10,0 L12.8,6.2 L19.6,6.7 L14.3,11.1 L15.9,18 L10,14.6 L4.1,18 L5.7,11.1 L0.4,6.7 L7.2,6.2 Z" opacity="0.95"/>
+                </g>
+                <g transform="translate(48,0)">
+                  <path class="star" d="M10,0 L12.8,6.2 L19.6,6.7 L14.3,11.1 L15.9,18 L10,14.6 L4.1,18 L5.7,11.1 L0.4,6.7 L7.2,6.2 Z" opacity="0.95"/>
+                </g>
+                <g transform="translate(72,0)">
+                  <path class="star" d="M10,0 L12.8,6.2 L19.6,6.7 L14.3,11.1 L15.9,18 L10,14.6 L4.1,18 L5.7,11.1 L0.4,6.7 L7.2,6.2 Z" opacity="0.65"/>
+                </g>
+                <g transform="translate(96,0)">
+                  <path class="star" d="M10,0 L12.8,6.2 L19.6,6.7 L14.3,11.1 L15.9,18 L10,14.6 L4.1,18 L5.7,11.1 L0.4,6.7 L7.2,6.2 Z" opacity="0.35"/>
+                </g>
+              </g>
+            </g>
+
+            <g transform="translate(40,160)">
+              <text class="muted" x="0" y="0">Depto 2D/2B · 70 m²</text>
+              <text class="title" x="0" y="28">Providencia · Metro cercano</text>
+              <text class="muted" x="0" y="56">$ 590.000 · gastos comunes incl.</text>
+              <text class="muted" x="0" y="82">Corredora: Andes Propiedades</text>
+            </g>
+
+            <text class="caption" x="22" y="344">Rol: confianza, conversión y decisión rápida.</text>
+          </g>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <section id="cierre">
+    <div style="width:100%; overflow:hidden;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="1400" height="620" viewBox="0 0 1400 620" style="display:block; width:100%; height:auto;">
+        <defs>
+          <radialGradient id="bgGlow6" cx="35%" cy="18%" r="90%">
+            <stop offset="0%" stop-color="#0B2236"/>
+            <stop offset="45%" stop-color="#071A2A"/>
+            <stop offset="100%" stop-color="#04121E"/>
+          </radialGradient>
+
+          <linearGradient id="cardStroke6" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#244257" stop-opacity="0.70"/>
+            <stop offset="100%" stop-color="#0B2236" stop-opacity="0.35"/>
+          </linearGradient>
+
+          <linearGradient id="btnGrad6" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#3B82F6"/>
+            <stop offset="100%" stop-color="#2563EB"/>
+          </linearGradient>
+
+          <filter id="softShadow6" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="10" stdDeviation="18" flood-color="#000000" flood-opacity="0.35"/>
+          </filter>
+
+          <style>
+            .wrap { fill:url(#bgGlow6); }
+            .kicker { font-family:Inter, system-ui; font-size:12px; font-weight:800; fill:#93C5FD; letter-spacing:1.2px; }
+            .h2 { font-family:Inter, system-ui; font-size:40px; font-weight:850; fill:#F8FAFC; letter-spacing:-0.4px; }
+            .p  { font-family:Inter, system-ui; font-size:16px; fill:#C7D2FE; opacity:0.95; }
+            .muted { font-family:Inter, system-ui; font-size:12px; fill:#94A3B8; }
+
+            .card { fill:#071A2A; stroke:url(#cardStroke6); stroke-width:1.2; rx:18; }
+            .cardTitle { font-family:Inter, system-ui; font-size:13px; font-weight:800; fill:#E5E7EB; }
+            .cardSub { font-family:Inter, system-ui; font-size:12px; fill:#94A3B8; }
+
+            .row { fill:#0A1F32; stroke:#1F3447; stroke-width:1; rx:14; }
+            .rowNum { font-family:Inter, system-ui; font-size:12px; font-weight:850; fill:#E5E7EB; }
+            .rowText { font-family:Inter, system-ui; font-size:13px; font-weight:750; fill:#E5E7EB; }
+            .rowMeta { font-family:ui-monospace, SFMono-Regular, Menlo, Monaco; font-size:11px; fill:#94A3B8; }
+
+            .btn { fill:url(#btnGrad6); rx:14; }
+            .btnTxt { font-family:Inter, system-ui; font-size:13px; font-weight:850; fill:#04121E; }
+            .btnTxt2 { font-family:Inter, system-ui; font-size:13px; font-weight:850; fill:#E5E7EB; }
+            .btnGhost { fill:#0A1F32; stroke:#1F3447; stroke-width:1.2; rx:14; }
+
+            .field { fill:#071A2A; stroke:#1F3447; stroke-width:1; rx:12; }
+            .fieldLbl { font-family:Inter, system-ui; font-size:10px; fill:#94A3B8; }
+            .fieldVal { font-family:Inter, system-ui; font-size:12px; fill:#E5E7EB; }
+
+            .star { fill:#F59E0B; }
+            .starOff { fill:#334155; }
+          </style>
+        </defs>
+
+        <rect class="wrap" x="0" y="0" width="1400" height="620"/>
+
+        <g transform="translate(110,120)">
+          <text class="kicker" x="0" y="0">CIERRE</text>
+          <text class="h2" x="0" y="48">Listo para evaluación técnica visible e informe de respaldo</text>
+          <text class="p" x="0" y="82">
+            <tspan x="0" dy="0">Un mismo análisis genera dos salidas: estrellas visibles en el aviso y un Tech-Report auditable</tspan>
+            <tspan x="0" dy="22">por componente, listo para integración en portales y sitios propios.</tspan>
+          </text>
+        </g>
+
+        <g transform="translate(110,220)" filter="url(#softShadow6)">
+          <rect class="card" x="0" y="0" width="660" height="300" rx="18"/>
+          <text class="cardTitle" x="24" y="40">Resumen en 4 puntos</text>
+          <text class="cardSub" x="24" y="62">Lo esencial del producto</text>
+
+          <g transform="translate(24,86)">
+            <rect class="row" x="0" y="0" width="612" height="52" rx="14"/>
+            <text class="rowNum" x="18" y="32">1)</text>
+            <text class="rowText" x="48" y="32">Captura guiada por slot</text>
+            <text class="rowMeta" x="420" y="32">evidencia consistente</text>
+          </g>
+
+          <g transform="translate(24,148)">
+            <rect class="row" x="0" y="0" width="612" height="52" rx="14"/>
+            <text class="rowNum" x="18" y="32">2)</text>
+            <text class="rowText" x="48" y="32">Tech-Report automático (badges + evidencia)</text>
+            <text class="rowMeta" x="420" y="32">slot · hallazgo · foto</text>
+          </g>
+
+          <g transform="translate(24,210)">
+            <rect class="row" x="0" y="0" width="612" height="52" rx="14"/>
+            <text class="rowNum" x="18" y="32">3)</text>
+            <text class="rowText" x="48" y="32">Señal visible en el aviso (estrellas)</text>
+
+            <g transform="translate(430,18)">
+              <g transform="scale(0.7)">
+                <path class="star" d="M10,0 L12.8,6.2 L19.6,6.7 L14.3,11.1 L15.9,18 L10,14.6 L4.1,18 L5.7,11.1 L0.4,6.7 L7.2,6.2 Z"/>
+                <g transform="translate(22,0)"><path class="star" d="M10,0 L12.8,6.2 L19.6,6.7 L14.3,11.1 L15.9,18 L10,14.6 L4.1,18 L5.7,11.1 L0.4,6.7 L7.2,6.2 Z"/></g>
+                <g transform="translate(44,0)"><path class="star" d="M10,0 L12.8,6.2 L19.6,6.7 L14.3,11.1 L15.9,18 L10,14.6 L4.1,18 L5.7,11.1 L0.4,6.7 L7.2,6.2 Z"/></g>
+                <g transform="translate(66,0)"><path class="star" d="M10,0 L12.8,6.2 L19.6,6.7 L14.3,11.1 L15.9,18 L10,14.6 L4.1,18 L5.7,11.1 L0.4,6.7 L7.2,6.2 Z"/></g>
+                <g transform="translate(88,0)"><path class="starOff" d="M10,0 L12.8,6.2 L19.6,6.7 L14.3,11.1 L15.9,18 L10,14.6 L4.1,18 L5.7,11.1 L0.4,6.7 L7.2,6.2 Z"/></g>
+              </g>
+            </g>
+          </g>
+
+          <g transform="translate(24,272)">
+            <rect class="row" x="0" y="0" width="612" height="52" rx="14"/>
+            <text class="rowNum" x="18" y="32">4)</text>
+            <text class="rowText" x="48" y="32">Integración enterprise</text>
+            <text class="rowMeta" x="420" y="32">API-first · white-label</text>
+          </g>
+        </g>
+
+        <g transform="translate(810,220)" filter="url(#softShadow6)">
+          <rect class="card" x="0" y="0" width="480" height="300" rx="18"/>
+          <text class="cardTitle" x="24" y="40">Solicita una demo</text>
+          <text class="cardSub" x="24" y="62">Te mostramos flujo completo y opciones de integración.</text>
+
+          <rect class="btn" x="24" y="92" width="250" height="46" rx="14"/>
+          <text class="btnTxt" x="44" y="121">Agendar reunión técnica</text>
+          <text class="btnTxt" x="256" y="121">→</text>
+
+          <rect class="btnGhost" x="286" y="92" width="170" height="46" rx="14"/>
+          <text class="btnTxt2" x="310" y="121">Ver Tech-Report</text>
+
+          <g transform="translate(24,154)">
+            <rect class="field" x="0" y="0" width="432" height="44" rx="12"/>
+            <text class="fieldLbl" x="14" y="16">Nombre</text>
+            <text class="fieldVal" x="14" y="33">—</text>
+
+            <rect class="field" x="0" y="56" width="432" height="44" rx="12"/>
+            <text class="fieldLbl" x="14" y="72">Empresa</text>
+            <text class="fieldVal" x="14" y="89">—</text>
+
+            <rect class="field" x="0" y="112" width="432" height="44" rx="12"/>
+            <text class="fieldLbl" x="14" y="128">Caso de uso</text>
+            <text class="fieldVal" x="14" y="145">Portal / Corredora / Inmobiliaria</text>
+          </g>
+
+          <text class="muted" x="24" y="286">* La demo usa un caso ilustrativo y muestra la señal visible (estrellas) + Tech-Report.</text>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <section id="demo">
+    <div style="width:100%; overflow:hidden;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="1440" height="460" viewBox="0 0 1440 460" style="display:block; width:100%; height:auto;">
+        <defs>
+          <linearGradient id="bg3" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#04070B"/>
+            <stop offset="55%" stop-color="#07101A"/>
+            <stop offset="100%" stop-color="#03060A"/>
+          </linearGradient>
+          <radialGradient id="glow3" cx="50%" cy="35%" r="95%">
+            <stop offset="0%" stop-color="#0F2C45" stop-opacity="0.42"/>
+            <stop offset="55%" stop-color="#07101A" stop-opacity="0.55"/>
+            <stop offset="100%" stop-color="#03060A" stop-opacity="1"/>
+          </radialGradient>
+          <pattern id="grid3" width="36" height="36" patternUnits="userSpaceOnUse">
+            <path d="M36 0H0V36" fill="none" stroke="#142333" stroke-opacity="0.42" stroke-width="1"/>
+          </pattern>
+          <linearGradient id="card3" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0F1C28"/>
+            <stop offset="100%" stop-color="#0B1520"/>
+          </linearGradient>
+          <linearGradient id="ctaGrad3" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#39C6FF"/>
+            <stop offset="100%" stop-color="#2C7BFF"/>
+          </linearGradient>
+          <filter id="shadow3" x="-30%" y="-30%" width="160%" height="160%">
+            <feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#000" flood-opacity="0.50"/>
+          </filter>
+          <style>
+            .kicker3 { font-family: Inter, ui-sans-serif, system-ui; font-size:12px; font-weight:700; letter-spacing:.6px; fill:#8EA2BA; text-transform:uppercase; }
+            .h2_3 { font-family: Inter, ui-sans-serif, system-ui; font-size:30px; font-weight:650; fill:#EAF2FF; }
+            .p3 { font-family: Inter, ui-sans-serif, system-ui; font-size:16px; font-weight:450; fill:#A9B8CC; }
+            .b3 { font-family: Inter, ui-sans-serif, system-ui; font-size:15px; font-weight:560; fill:#D7E6FA; }
+            .mono3 { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas; font-size:11px; fill:#8EA2BA; }
+            .btn3 { font-family: Inter, ui-sans-serif, system-ui; font-size:14px; font-weight:650; fill:#07101A; }
+            .btn3b { font-family: Inter, ui-sans-serif, system-ui; font-size:14px; font-weight:650; fill:#CFE0F6; }
+            .stroke3 { stroke:#203142; stroke-opacity:.9; }
+          </style>
+        </defs>
+
+        <rect x="0" y="0" width="1440" height="460" fill="url(#bg3)"/>
+        <rect x="0" y="0" width="1440" height="460" fill="url(#glow3)"/>
+        <rect x="0" y="0" width="1440" height="460" fill="url(#grid3)" opacity="0.33"/>
+
+        <g transform="translate(92,110)" filter="url(#shadow3)">
+          <rect x="0" y="0" width="1256" height="240" rx="22" fill="url(#card3)" class="stroke3"/>
+
+          <g transform="translate(48,48)">
+            <text class="kicker3">Demo</text>
+            <text class="h2_3" x="0" y="44">¿Quieres ver Ainspecciona funcionando sobre un caso real?</text>
+            <text class="p3" x="0" y="82">
+              <tspan x="0" dy="0">Te mostramos el flujo completo: captura guiada, análisis por slot, y reporte con badge final.</tspan>
+              <tspan x="0" dy="26">Enfocado en integración y criterios de auditoría.</tspan>
+            </text>
+
+            <g transform="translate(0,130)">
+              <circle cx="6" cy="6" r="4" fill="#39C6FF"/>
+              <text class="b3" x="22" y="11">Sin promesas: evidencia + severidad + confianza</text>
+
+              <g transform="translate(0,34)">
+                <circle cx="6" cy="6" r="4" fill="#39C6FF"/>
+                <text class="b3" x="22" y="11">Lista para integrarse vía API / webhooks</text>
+              </g>
+            </g>
+          </g>
+
+          <g transform="translate(980,70)">
+            <rect x="0" y="0" width="228" height="46" rx="12" fill="url(#ctaGrad3)"/>
+            <text class="btn3" x="22" y="29">Solicitar demo técnica</text>
+            <text class="btn3" x="196" y="29" style="opacity:0.85;">→</text>
+
+            <rect x="0" y="60" width="228" height="46" rx="12" fill="#0B1520" class="stroke3"/>
+            <text class="btn3b" x="22" y="89">Ver arquitectura</text>
+
+            <text class="mono3" x="0" y="140">Respuesta en &lt; 24h hábiles</text>
+            <text class="mono3" x="0" y="158">Formato: llamada + demo</text>
+          </g>
+
+          <line x1="48" y1="210" x2="1208" y2="210" stroke="#203142" stroke-opacity="0.6"/>
+          <g transform="translate(48,228)" opacity="0.9">
+            <text class="mono3">Ainspecciona · Audit-ready outputs · White-label disponible</text>
+          </g>
+        </g>
+
+        <rect x="0" y="400" width="1440" height="60" fill="#03060A" opacity="0.9"/>
+      </svg>
+    </div>
+  </section>
+
+  <section id="interpretacion">
+    <div style="width:100%; overflow:hidden;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="1440" height="520" viewBox="0 0 1440 520" style="display:block; width:100%; height:auto;">
+        <defs>
+          <linearGradient id="bg4" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#020306"/>
+            <stop offset="55%" stop-color="#060B12"/>
+            <stop offset="100%" stop-color="#010204"/>
+          </linearGradient>
+          <radialGradient id="glow4" cx="30%" cy="40%" r="100%">
+            <stop offset="0%" stop-color="#0B2740" stop-opacity="0.34"/>
+            <stop offset="55%" stop-color="#060B12" stop-opacity="0.55"/>
+            <stop offset="100%" stop-color="#010204" stop-opacity="1"/>
+          </radialGradient>
+          <pattern id="grid4" width="36" height="36" patternUnits="userSpaceOnUse">
+            <path d="M36 0H0V36" fill="none" stroke="#142333" stroke-opacity="0.36" stroke-width="1"/>
+          </pattern>
+          <linearGradient id="card4" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0E1A26"/>
+            <stop offset="100%" stop-color="#0A131D"/>
+          </linearGradient>
+          <linearGradient id="accent4" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#39C6FF"/>
+            <stop offset="100%" stop-color="#2C7BFF"/>
+          </linearGradient>
+          <linearGradient id="gGreen4" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#27E38B"/>
+            <stop offset="100%" stop-color="#1AAE69"/>
+          </linearGradient>
+          <linearGradient id="gYellow4" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#FFD36A"/>
+            <stop offset="100%" stop-color="#E8A93A"/>
+          </linearGradient>
+          <linearGradient id="gRed4" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#FF6B6B"/>
+            <stop offset="100%" stop-color="#E54242"/>
+          </linearGradient>
+          <filter id="shadow4" x="-30%" y="-30%" width="160%" height="160%">
+            <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000" flood-opacity="0.45"/>
+          </filter>
+          <style>
+            .kicker4 { font-family: Inter, ui-sans-serif, system-ui; font-size:12px; font-weight:700; letter-spacing:.6px; fill:#8EA2BA; text-transform:uppercase; }
+            .h2_4 { font-family: Inter, ui-sans-serif, system-ui; font-size:28px; font-weight:650; fill:#EAF2FF; }
+            .p4 { font-family: Inter, ui-sans-serif, system-ui; font-size:15px; font-weight:450; fill:#A9B8CC; }
+            .b4 { font-family: Inter, ui-sans-serif, system-ui; font-size:15px; font-weight:600; fill:#D7E6FA; }
+            .muted4 { font-family: Inter, ui-sans-serif, system-ui; font-size:13px; font-weight:500; fill:#8EA2BA; }
+            .mono4 { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas; font-size:11px; fill:#8EA2BA; }
+            .label4 { font-family: Inter, ui-sans-serif, system-ui; font-size:12px; font-weight:700; letter-spacing:.2px; }
+            .stroke4 { stroke:#203142; stroke-opacity:.9; }
+          </style>
+        </defs>
+
+        <rect x="0" y="0" width="1440" height="520" fill="url(#bg4)"/>
+        <rect x="0" y="0" width="1440" height="520" fill="url(#glow4)"/>
+        <rect x="0" y="0" width="1440" height="520" fill="url(#grid4)" opacity="0.30"/>
+
+        <g transform="translate(92,86)">
+          <text class="kicker4">Interpretación</text>
+          <text class="h2_4" x="0" y="44">Badges que permiten decisiones inmediatas</text>
+          <text class="p4" x="0" y="76">
+            <tspan x="0" dy="0">Los resultados técnicos se traducen en un lenguaje simple. El badge es estable, explicable</tspan>
+            <tspan x="0" dy="24">y trazable: se puede auditar desde los slots hacia el estado final.</tspan>
+          </text>
+        </g>
+
+        <g transform="translate(92,178)">
+          <g filter="url(#shadow4)">
+            <rect x="0" y="0" width="560" height="290" rx="18" fill="url(#card4)" class="stroke4"/>
+            <g transform="translate(22,22)">
+              <text class="b4" x="0" y="18" style="font-size:16px; font-weight:700;">Regla de consolidación (ejemplo)</text>
+              <text class="muted4" x="0" y="42">De hallazgos por slot → badge del inmueble</text>
+
+              <g transform="translate(0,70)">
+                <rect x="0" y="0" width="516" height="64" rx="16" fill="#0B1520" class="stroke4"/>
+                <rect x="14" y="18" width="92" height="28" rx="12" fill="url(#gGreen4)"/>
+                <text class="label4" x="36" y="38" fill="#07101A">VERDE</text>
+                <text class="b4" x="120" y="30">Publicable</text>
+                <text class="muted4" x="120" y="52">Sin hallazgos críticos / severidad controlada</text>
+
+                <g transform="translate(0,82)">
+                  <rect x="0" y="0" width="516" height="64" rx="16" fill="#0B1520" class="stroke4"/>
+                  <rect x="14" y="18" width="116" height="28" rx="12" fill="url(#gYellow4)"/>
+                  <text class="label4" x="30" y="38" fill="#07101A">AMARILLO</text>
+                  <text class="b4" x="140" y="30">Publicable con observaciones</text>
+                  <text class="muted4" x="140" y="52">Hallazgos medios con explicación y evidencia</text>
+                </g>
+
+                <g transform="translate(0,164)">
+                  <rect x="0" y="0" width="516" height="64" rx="16" fill="#0B1520" class="stroke4"/>
+                  <rect x="14" y="18" width="92" height="28" rx="12" fill="url(#gRed4)"/>
+                  <text class="label4" x="44" y="38" fill="#07101A">ROJO</text>
+                  <text class="b4" x="120" y="30">Revisión humana recomendada</text>
+                  <text class="muted4" x="120" y="52">Hallazgos críticos o baja certeza en puntos clave</text>
+                </g>
+              </g>
+
+              <g transform="translate(0,260)" opacity="0.9">
+                <text class="mono4">Las reglas (thresholds) pueden ajustarse por partner, manteniendo trazabilidad.</text>
+              </g>
+            </g>
+          </g>
+
+          <g transform="translate(588,0)" filter="url(#shadow4)">
+            <rect x="0" y="0" width="668" height="290" rx="18" fill="url(#card4)" class="stroke4"/>
+            <g transform="translate(22,22)">
+              <text class="b4" x="0" y="18" style="font-size:16px; font-weight:700;">Trazabilidad</text>
+              <text class="muted4" x="0" y="42">Explicación desde el badge hacia los slots</text>
+
+              <g transform="translate(0,70)">
+                <rect x="0" y="0" width="624" height="64" rx="16" fill="#0B1520" class="stroke4"/>
+                <text class="muted4" x="16" y="26">Badge final</text>
+                <rect x="16" y="30" width="124" height="26" rx="12" fill="url(#gYellow4)"/>
+                <text class="label4" x="34" y="48" fill="#07101A">AMARILLO</text>
+                <text class="b4" x="156" y="44">Se detectaron 3 hallazgos medios y 0 críticos</text>
+              </g>
+
+              <g transform="translate(0,150)">
+                <rect x="0" y="0" width="624" height="104" rx="16" fill="#0B1520" class="stroke4"/>
+                <text class="b4" x="16" y="34">Baño</text>
+                <text class="mono4" x="210" y="34">analysis_code: HUM_SEAL_02</text>
+                <rect x="520" y="18" width="88" height="26" rx="10" fill="url(#gYellow4)"/>
+                <text class="label4" x="548" y="36" fill="#07101A">MED</text>
+                <line x1="16" y1="52" x2="608" y2="52" stroke="#203142" stroke-opacity="0.6"/>
+                <text class="b4" x="16" y="82">Muros</text>
+                <text class="mono4" x="210" y="82">analysis_code: CRACK_PAINT_01</text>
+                <rect x="520" y="66" width="88" height="26" rx="10" fill="url(#gYellow4)"/>
+                <text class="label4" x="548" y="84" fill="#07101A">MED</text>
+              </g>
+            </g>
+          </g>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footerWrap">
+      <div class="footerBrand">
+        <img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" />
+        <div class="footerTitle">Ainspecciona</div>
+        <div class="footerDesc">Inspección técnica automatizada con evidencia por slot y trazabilidad completa.</div>
+        <a class="footerCta" href="/formulario">Generar inspección</a>
+      </div>
+      <div class="footerCol">
+        <h4>Producto</h4>
+        <a href="/como-funciona.html">Cómo funciona</a>
+        <a href="/modelo.html">Modelo</a>
+        <a href="/integracion.html">Integración</a>
+        <a href="/faq.html">FAQ</a>
+      </div>
+      <div class="footerCol">
+        <h4>Empresa</h4>
+        <a href="/contacto.html">Contacto</a>
+        <a href="/agendar.html">Agendar reunión</a>
+        <a href="/dashboard">Dashboard</a>
+      </div>
+      <div class="footerCol">
+        <h4>Recursos</h4>
+        <a href="/formulario">Crear caso</a>
+        <a href="/cases">Casos</a>
+      </div>
+    </div>
+    <div class="footerBottom">
+      <div>© 2026 Ainspecciona. Todos los derechos reservados.</div>
+      <div>Audit-ready · Evidencia por slot · White-label</div>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Agendar reunión · Ainspecciona</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #F6F7F9;
+      color: #0f172a;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: #ffffff;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .nav {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: inherit;
+      font-weight: 800;
+    }
+    .brand img { height: 32px; }
+    .links {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .links a {
+      text-decoration: none;
+      color: #1f2937;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .cta {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      text-decoration: none;
+      font-weight: 800;
+      font-size: 14px;
+    }
+    .section {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 72px 20px;
+      text-align: center;
+    }
+    .card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 18px;
+      padding: 26px;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+    }
+    .ctaRow {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 18px;
+    }
+    .outline {
+      border: 1px solid #e5e7eb;
+      padding: 10px 14px;
+      border-radius: 999px;
+      text-decoration: none;
+      color: #1f2937;
+      font-weight: 700;
+      background: #fff;
+    }
+    footer {
+      background: linear-gradient(135deg, #0b1220 0%, #0f172a 60%, #0b1220 100%);
+      color: #e5e7eb;
+      padding: 60px 20px 40px;
+      border-top: 1px solid rgba(148, 163, 184, 0.2);
+    }
+    footer .footerWrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr 1fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    .footerBrand {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .footerBrand img { height: 36px; width: auto; }
+    .footerTitle { font-weight: 800; font-size: 16px; }
+    .footerDesc { color: #94a3b8; font-size: 14px; line-height: 1.5; }
+    .footerCol h4 { margin: 0 0 10px; font-size: 14px; }
+    .footerCol a { color: #cbd5e1; text-decoration: none; font-size: 14px; display: block; margin-bottom: 8px; }
+    .footerCol a:hover { color: #ffffff; }
+    .footerCta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #39c6ff 0%, #2c7bff 100%);
+      color: #07101a;
+      font-weight: 800;
+      text-decoration: none;
+      font-size: 14px;
+      margin-top: 8px;
+    }
+    .footerBottom {
+      max-width: 1200px;
+      margin: 28px auto 0;
+      padding-top: 18px;
+      border-top: 1px solid rgba(148, 163, 184, 0.2);
+      color: #94a3b8;
+      font-size: 12px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    @media (max-width: 900px) {
+      footer .footerWrap { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav">
+      <a class="brand" href="/">
+        <img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" />
+      </a>
+      <div class="links">
+        <a href="/como-funciona.html">Cómo funciona</a>
+        <a href="/modelo.html">Modelo</a>
+        <a href="/integracion.html">Integración</a>
+        <a href="/faq.html">FAQ</a>
+        <a href="/contacto.html">Contacto</a>
+        <a class="cta" href="/formulario">Generar inspección</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="section">
+      <div class="card">
+        <h1>Agenda una demo técnica</h1>
+        <p>Te mostramos el flujo completo: captura, análisis por slot y reporte final con trazabilidad.</p>
+        <div class="ctaRow">
+          <a class="cta" href="/contacto.html">Solicitar demo</a>
+          <a class="outline" href="/formulario">Crear un caso</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footerWrap">
+      <div class="footerBrand">
+        <img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" />
+        <div class="footerTitle">Ainspecciona</div>
+        <div class="footerDesc">Inspección técnica automatizada con evidencia por slot y trazabilidad completa.</div>
+        <a class="footerCta" href="/formulario">Generar inspección</a>
+      </div>
+      <div class="footerCol">
+        <h4>Producto</h4>
+        <a href="/como-funciona.html">Cómo funciona</a>
+        <a href="/modelo.html">Modelo</a>
+        <a href="/integracion.html">Integración</a>
+        <a href="/faq.html">FAQ</a>
+      </div>
+      <div class="footerCol">
+        <h4>Empresa</h4>
+        <a href="/contacto.html">Contacto</a>
+        <a href="/agendar.html">Agendar reunión</a>
+        <a href="/dashboard">Dashboard</a>
+      </div>
+      <div class="footerCol">
+        <h4>Recursos</h4>
+        <a href="/formulario">Crear caso</a>
+        <a href="/cases">Casos</a>
+      </div>
+    </div>
+    <div class="footerBottom">
+      <div>© 2026 Ainspecciona. Todos los derechos reservados.</div>
+      <div>Audit-ready · Evidencia por slot · White-label</div>
+    </div>
+  </footer>
+</body>
+</html>

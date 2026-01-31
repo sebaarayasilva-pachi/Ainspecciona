@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Modelo de análisis · Ainspecciona</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #F6F7F9;
+      color: #0f172a;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: #ffffff;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .nav {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: inherit;
+      font-weight: 800;
+    }
+    .brand img { height: 32px; }
+    .links {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .links a {
+      text-decoration: none;
+      color: #1f2937;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .cta {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      text-decoration: none;
+      font-weight: 800;
+      font-size: 14px;
+    }
+    footer {
+      background: linear-gradient(135deg, #0b1220 0%, #0f172a 60%, #0b1220 100%);
+      color: #e5e7eb;
+      padding: 60px 20px 40px;
+      border-top: 1px solid rgba(148, 163, 184, 0.2);
+    }
+    footer .footerWrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr 1fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    .footerBrand {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .footerBrand img { height: 36px; width: auto; }
+    .footerTitle { font-weight: 800; font-size: 16px; }
+    .footerDesc { color: #94a3b8; font-size: 14px; line-height: 1.5; }
+    .footerCol h4 { margin: 0 0 10px; font-size: 14px; }
+    .footerCol a { color: #cbd5e1; text-decoration: none; font-size: 14px; display: block; margin-bottom: 8px; }
+    .footerCol a:hover { color: #ffffff; }
+    .footerCta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #39c6ff 0%, #2c7bff 100%);
+      color: #07101a;
+      font-weight: 800;
+      text-decoration: none;
+      font-size: 14px;
+      margin-top: 8px;
+    }
+    .footerBottom {
+      max-width: 1200px;
+      margin: 28px auto 0;
+      padding-top: 18px;
+      border-top: 1px solid rgba(148, 163, 184, 0.2);
+      color: #94a3b8;
+      font-size: 12px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    @media (max-width: 900px) {
+      footer .footerWrap { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav">
+      <a class="brand" href="/">
+        <img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" />
+      </a>
+      <div class="links">
+        <a href="/como-funciona.html">Cómo funciona</a>
+        <a href="/modelo.html">Modelo</a>
+        <a href="/integracion.html">Integración</a>
+        <a href="/faq.html">FAQ</a>
+        <a href="/contacto.html">Contacto</a>
+        <a class="cta" href="/formulario">Generar inspección</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="modelo-analisis">
+      <div style="width:100%; overflow:hidden;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1440" height="560" viewBox="0 0 1440 560" style="display:block; width:100%; height:auto;">
+          <defs>
+            <linearGradient id="bg2" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#05090F"/>
+              <stop offset="55%" stop-color="#07101A"/>
+              <stop offset="100%" stop-color="#05080D"/>
+            </linearGradient>
+            <radialGradient id="glow2" cx="28%" cy="28%" r="85%">
+              <stop offset="0%" stop-color="#0E2B44" stop-opacity="0.42"/>
+              <stop offset="55%" stop-color="#07101A" stop-opacity="0.55"/>
+              <stop offset="100%" stop-color="#05080D" stop-opacity="1"/>
+            </radialGradient>
+            <pattern id="grid2" width="36" height="36" patternUnits="userSpaceOnUse">
+              <path d="M36 0H0V36" fill="none" stroke="#142333" stroke-opacity="0.5" stroke-width="1"/>
+            </pattern>
+            <linearGradient id="card2" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#0F1C28"/>
+              <stop offset="100%" stop-color="#0B1520"/>
+            </linearGradient>
+            <linearGradient id="accent2" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#39C6FF"/>
+              <stop offset="100%" stop-color="#2C7BFF"/>
+            </linearGradient>
+            <linearGradient id="gGreen2" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#27E38B"/>
+              <stop offset="100%" stop-color="#1AAE69"/>
+            </linearGradient>
+            <linearGradient id="gYellow2" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#FFD36A"/>
+              <stop offset="100%" stop-color="#E8A93A"/>
+            </linearGradient>
+            <linearGradient id="gRed2" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#FF6B6B"/>
+              <stop offset="100%" stop-color="#E54242"/>
+            </linearGradient>
+            <filter id="shadow2" x="-30%" y="-30%" width="160%" height="160%">
+              <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000" flood-opacity="0.45"/>
+            </filter>
+            <filter id="shadowLite2" x="-30%" y="-30%" width="160%" height="160%">
+              <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#000" flood-opacity="0.35"/>
+            </filter>
+            <style>
+              .kicker2 { font-family: Inter, ui-sans-serif, system-ui; font-size:12px; font-weight:700; letter-spacing:.6px; fill:#8EA2BA; text-transform:uppercase; }
+              .h2_2 { font-family: Inter, ui-sans-serif, system-ui; font-size:30px; font-weight:650; fill:#EAF2FF; }
+              .p2 { font-family: Inter, ui-sans-serif, system-ui; font-size:16px; font-weight:450; fill:#A9B8CC; }
+              .b2 { font-family: Inter, ui-sans-serif, system-ui; font-size:15px; font-weight:560; fill:#D7E6FA; }
+              .muted2 { font-family: Inter, ui-sans-serif, system-ui; font-size:13px; font-weight:500; fill:#8EA2BA; }
+              .mono2 { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas; font-size:11px; fill:#8EA2BA; }
+              .label2 { font-family: Inter, ui-sans-serif, system-ui; font-size:12px; font-weight:700; letter-spacing:.2px; }
+              .stroke2 { stroke:#203142; stroke-opacity:.9; }
+            </style>
+          </defs>
+
+          <rect x="0" y="0" width="1440" height="560" fill="url(#bg2)"/>
+          <rect x="0" y="0" width="1440" height="560" fill="url(#glow2)"/>
+          <rect x="0" y="0" width="1440" height="560" fill="url(#grid2)" opacity="0.33"/>
+
+          <g transform="translate(92,90)">
+            <text class="kicker2">Modelo de análisis</text>
+            <text class="h2_2" x="0" y="44">Análisis por slot, no por propiedad genérica</text>
+            <text class="p2" x="0" y="78">
+              <tspan x="0" dy="0">Cada inmueble se descompone en componentes técnicos (slots). Cada slot genera hallazgos con</tspan>
+              <tspan x="0" dy="26">severidad, confianza y evidencia visual. Esto habilita trazabilidad, auditoría y mejora continua.</tspan>
+            </text>
+          </g>
+
+          <g transform="translate(92,210)">
+            <g filter="url(#shadow2)">
+              <rect x="0" y="0" width="708" height="300" rx="18" fill="url(#card2)" class="stroke2"/>
+              <g transform="translate(22,22)">
+                <text class="b2" x="0" y="18" style="font-size:16px; font-weight:700;">Slots técnicos (ejemplo)</text>
+                <text class="muted2" x="0" y="42">Selecciona un slot para ver su diagnóstico</text>
+
+                <g transform="translate(0,66)">
+                  <g>
+                    <rect x="0" y="0" width="214" height="74" rx="14" fill="#0B1520" class="stroke2"/>
+                    <text class="b2" x="16" y="30">Baño</text>
+                    <text class="muted2" x="16" y="54">ducha / sellos</text>
+                    <rect x="146" y="18" width="52" height="26" rx="10" fill="url(#gYellow2)"/>
+                    <text class="label2" x="160" y="36" fill="#07101A">MED</text>
+                  </g>
+
+                  <g transform="translate(232,0)">
+                    <rect x="0" y="0" width="214" height="74" rx="14" fill="#0B1520" class="stroke2"/>
+                    <text class="b2" x="16" y="30">Cocina</text>
+                    <text class="muted2" x="16" y="54">fugas / sifón</text>
+                    <rect x="146" y="18" width="52" height="26" rx="10" fill="url(#gGreen2)"/>
+                    <text class="label2" x="162" y="36" fill="#07101A">OK</text>
+                  </g>
+
+                  <g transform="translate(464,0)">
+                    <rect x="0" y="0" width="214" height="74" rx="14" fill="#0B1520" class="stroke2"/>
+                    <text class="b2" x="16" y="30">Muros</text>
+                    <text class="muted2" x="16" y="54">fisuras / pintura</text>
+                    <rect x="146" y="18" width="52" height="26" rx="10" fill="url(#gYellow2)"/>
+                    <text class="label2" x="160" y="36" fill="#07101A">MED</text>
+                  </g>
+
+                  <g transform="translate(0,92)">
+                    <rect x="0" y="0" width="214" height="74" rx="14" fill="#0B1520" class="stroke2"/>
+                    <text class="b2" x="16" y="30">Instalaciones</text>
+                    <text class="muted2" x="16" y="54">eléctrico / gas</text>
+                    <rect x="146" y="18" width="52" height="26" rx="10" fill="url(#gRed2)"/>
+                    <text class="label2" x="158" y="36" fill="#07101A">ALTO</text>
+                  </g>
+
+                  <g transform="translate(232,92)">
+                    <rect x="0" y="0" width="214" height="74" rx="14" fill="#0B1520" class="stroke2"/>
+                    <text class="b2" x="16" y="30">Cielos</text>
+                    <text class="muted2" x="16" y="54">manchas / nivel</text>
+                    <rect x="146" y="18" width="52" height="26" rx="10" fill="url(#gYellow2)"/>
+                    <text class="label2" x="160" y="36" fill="#07101A">MED</text>
+                  </g>
+
+                  <g transform="translate(464,92)">
+                    <rect x="0" y="0" width="214" height="74" rx="14" fill="#0B1520" class="stroke2"/>
+                    <text class="b2" x="16" y="30">Exterior</text>
+                    <text class="muted2" x="16" y="54">fachada / agua</text>
+                    <rect x="146" y="18" width="52" height="26" rx="10" fill="url(#gGreen2)"/>
+                    <text class="label2" x="162" y="36" fill="#07101A">OK</text>
+                  </g>
+                </g>
+
+                <g transform="translate(0,262)" opacity="0.9">
+                  <text class="mono2">Cada slot mantiene su evidencia (photo_id) y su último análisis (analysis_code, severity, confidence, message).</text>
+                </g>
+              </g>
+            </g>
+
+            <g transform="translate(732,0)" filter="url(#shadow2)">
+              <rect x="0" y="0" width="524" height="300" rx="18" fill="url(#card2)" class="stroke2"/>
+              <g transform="translate(22,22)">
+                <text class="b2" x="0" y="18" style="font-size:16px; font-weight:700;">Diagnóstico del slot</text>
+                <text class="muted2" x="0" y="42">Detalle estructurado y auditable</text>
+
+                <g transform="translate(0,66)" filter="url(#shadowLite2)">
+                  <rect x="0" y="0" width="480" height="110" rx="16" fill="#0B1520" class="stroke2"/>
+                  <text class="b2" x="16" y="30">Instalaciones</text>
+                  <rect x="380" y="18" width="84" height="26" rx="10" fill="url(#gRed2)"/>
+                  <text class="label2" x="404" y="36" fill="#07101A">ROJO</text>
+                  <text class="mono2" x="16" y="56">analysis_code: ELEC_RISK_01</text>
+                  <text class="mono2" x="16" y="74">severity: 1.5   ·   confidence: 0.82</text>
+                  <text class="mono2" x="16" y="92">analyzed_at: 2026-01-25T11:14:32-03:00</text>
+                </g>
+
+                <g transform="translate(0,190)" filter="url(#shadowLite2)">
+                  <rect x="0" y="0" width="480" height="88" rx="16" fill="#0B1520" class="stroke2"/>
+                  <text class="muted2" x="16" y="26">Mensaje</text>
+                  <text class="b2" x="16" y="52" style="font-size:14px; font-weight:520; fill:#D7E6FA;">
+                    <tspan x="16" dy="0">Se observan señales compatibles con</tspan>
+                    <tspan x="16" dy="20">instalación expuesta / terminación deficiente.</tspan>
+                  </text>
+                </g>
+              </g>
+            </g>
+          </g>
+        </svg>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footerWrap">
+      <div class="footerBrand">
+        <img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" />
+        <div class="footerTitle">Ainspecciona</div>
+        <div class="footerDesc">Inspección técnica automatizada con evidencia por slot y trazabilidad completa.</div>
+        <a class="footerCta" href="/formulario">Generar inspección</a>
+      </div>
+      <div class="footerCol">
+        <h4>Producto</h4>
+        <a href="/como-funciona.html">Cómo funciona</a>
+        <a href="/modelo.html">Modelo</a>
+        <a href="/integracion.html">Integración</a>
+        <a href="/faq.html">FAQ</a>
+      </div>
+      <div class="footerCol">
+        <h4>Empresa</h4>
+        <a href="/contacto.html">Contacto</a>
+        <a href="/agendar.html">Agendar reunión</a>
+        <a href="/dashboard">Dashboard</a>
+      </div>
+      <div class="footerCol">
+        <h4>Recursos</h4>
+        <a href="/formulario">Crear caso</a>
+        <a href="/cases">Casos</a>
+      </div>
+    </div>
+    <div class="footerBottom">
+      <div>© 2026 Ainspecciona. Todos los derechos reservados.</div>
+      <div>Audit-ready · Evidencia por slot · White-label</div>
+    </div>
+  </footer>
+</body>
+</html>

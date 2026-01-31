@@ -1,0 +1,160 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum PropertyType {
+  HOUSE
+  DEPARTMENT
+}
+
+enum FloorType {
+  CONCRETE
+  WOOD
+  MIXED
+}
+
+enum PropertyAgeRange {
+  LESS_THAN_10_YEARS
+  BETWEEN_10_AND_30_YEARS
+  MORE_THAN_30_YEARS
+}
+
+enum CaseStatus {
+  DRAFT
+  IN_PROGRESS
+  DONE
+}
+
+enum SlotStatus {
+  PENDING
+  UPLOADED
+  ANALYZED
+  REJECTED
+  NOT_CAPTURABLE
+}
+
+model Case {
+  id           String       @id @default(uuid())
+  propertyId   String?
+  property     Property?    @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  propertyType PropertyType
+  bathroomsCount Int           @default(1)
+  bedroomsCount  Int           @default(1)
+  propertyAgeRange PropertyAgeRange?
+  bedrooms     Int
+  bathrooms    Int
+  yearBuilt    Int?
+  floorType    FloorType
+  hasPatio     Boolean      @default(false)
+  hasAttic     Boolean      @default(false)
+  hasLaundry   Boolean      @default(false)
+  planVersion  String       @default("v1")
+  status       CaseStatus   @default(DRAFT)
+  createdAt    DateTime     @default(now())
+
+  slots        Slot[]
+  photos       Photo[]
+  captureTokens CaptureToken[]
+
+  @@index([propertyId])
+}
+
+model Owner {
+  id         String     @id @default(uuid())
+  fullName   String
+  rut        String?    @unique
+  createdAt  DateTime   @default(now())
+
+  properties Property[]
+}
+
+model Property {
+  id             String   @id @default(uuid())
+  ownerId        String?
+  owner          Owner?   @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+
+  rol            String?
+  address        String?
+  operationType  String?
+  surface        String?
+
+  createdAt      DateTime @default(now())
+
+  cases          Case[]
+
+  @@index([ownerId])
+}
+
+model Slot {
+  id           String     @id @default(uuid())
+  caseId       String
+  case         Case       @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  // Opcional: referencia a la ultima foto subida para este slot
+  photoId      String?
+  photo        Photo?     @relation("SlotLastPhoto", fields: [photoId], references: [id], onDelete: SetNull)
+  photos       Photo[]    @relation("SlotPhotos")
+
+  slotCode     String
+  title        String
+  instructions String
+  required     Boolean    @default(true)
+  orderIndex   Int
+  status       SlotStatus @default(PENDING)
+
+  // Resultado del analisis (ultima ejecucion)
+  analysisCode     String?
+  analysisSeverity String?
+  analysisConfidence Float?
+  analysisMessage  String?   @db.Text
+  analysisDebug    Json?
+  analyzedAt       DateTime?
+
+  createdAt    DateTime   @default(now())
+
+  @@index([caseId])
+  @@index([slotCode])
+  @@index([photoId])
+}
+
+model Photo {
+  id        String   @id @default(uuid())
+
+  slotId    String
+  slot      Slot     @relation("SlotPhotos", fields: [slotId], references: [id], onDelete: Cascade)
+  // Relacion inversa para "ultima foto" en Slot
+  asLastForSlots Slot[] @relation("SlotLastPhoto")
+
+  caseId    String
+  case      Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  filePath  String
+  fileName  String
+  mimeType  String
+  fileSize  Int
+  width     Int?
+  height    Int?
+  createdAt DateTime @default(now())
+
+  @@index([slotId])
+  @@index([caseId])
+}
+
+model CaptureToken {
+  id        String   @id @default(uuid())
+  caseId    String
+  case      Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  token     String   @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([caseId])
+  @@index([expiresAt])
+}

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#667eea" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <title>Ainspecciona – Dashboard</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+      background: #f5f7fa;
+      color: #1f2a44;
+      line-height: 1.5;
+    }
+
+    header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 18px 0;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+    }
+
+    .header-content {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 18px;
+      text-decoration: none;
+      color: white;
+    }
+
+    .nav {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .nav a {
+      appearance: none;
+      border: 1px solid rgba(255,255,255,0.25);
+      background: rgba(255,255,255,0.12);
+      color: white;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-weight: 800;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .nav a:hover {
+      background: rgba(255,255,255,0.18);
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 22px auto;
+      padding: 0 16px 30px;
+    }
+
+    .card {
+      background: white;
+      border: 1px solid #e7e9f2;
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 6px 18px rgba(31, 38, 135, 0.08);
+    }
+
+    .title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .title h1 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .muted { color: #5b677a; }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+
+    .table th, .table td {
+      text-align: left;
+      padding: 10px 8px;
+      border-bottom: 1px solid #eef1f8;
+      font-size: 13px;
+    }
+
+    .table th {
+      color: #4b5563;
+      font-weight: 900;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 12px;
+      border: 1px solid #e7e9f2;
+      background: #f3f6ff;
+      color: #4050d6;
+    }
+
+    .pill.ok { background: #ecfbf1; color: #1c7a3a; border-color: #cfeedd; }
+    .pill.warn { background: #fff7e6; color: #9a6a00; border-color: #ffe2a6; }
+    .pill.bad { background: #ffecec; color: #b3261e; border-color: #ffd0d0; }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 800;
+      font-size: 12px;
+      border: 1px solid #e7e9f2;
+      background: #f3f6ff;
+      color: #4050d6;
+      cursor: pointer;
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+    }
+
+    .empty {
+      padding: 16px;
+      text-align: center;
+      color: #6b7280;
+    }
+
+    .thumbSmall {
+      width: 64px;
+      height: 64px;
+      border-radius: 10px;
+      border: 1px solid #e7e9f2;
+      object-fit: cover;
+      box-shadow: 0 2px 8px rgba(31, 38, 135, 0.08);
+      margin-top: 6px;
+    }
+
+    @media (max-width: 800px) {
+      .table { display: block; }
+      .table thead { display: none; }
+      .table tr { display: block; padding: 10px 0; }
+      .table td { display: block; padding: 6px 0; }
+      .table td::before {
+        content: attr(data-label);
+        display: block;
+        font-weight: 800;
+        color: #6b7280;
+        margin-bottom: 4px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a class="brand" href="/">Ainspecciona</a>
+      <div class="nav">
+        <a href="/formulario">Crear caso</a>
+        <a href="/">Inicio</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="card">
+      <div class="title">
+        <h1>Dashboard de casos</h1>
+        <a class="btn primary" href="/formulario">+ Nuevo caso</a>
+      </div>
+      <div class="muted" id="summary">Cargando…</div>
+
+      <table class="table" id="casesTable" style="display:none;">
+        <thead>
+          <tr>
+            <th>Casos</th>
+            <th>Inmueble</th>
+            <th>Estado</th>
+            <th>Progreso</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="casesBody"></tbody>
+      </table>
+
+      <div class="empty" id="emptyState" style="display:none;">
+        No hay casos todavía. Crea el primero desde el formulario.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function statusPill(progress) {
+      if (progress.total === 0) return { cls: 'warn', text: 'SIN SLOTS' };
+      if (progress.uploaded === 0) return { cls: 'warn', text: 'PENDIENTE' };
+      if (progress.analyzed === progress.total) return { cls: 'ok', text: 'COMPLETO' };
+      if (progress.rejected > 0) return { cls: 'bad', text: 'CON RECHAZOS' };
+      return { cls: 'warn', text: 'EN PROGRESO' };
+    }
+
+    async function loadCases() {
+      const summary = document.getElementById('summary');
+      const table = document.getElementById('casesTable');
+      const body = document.getElementById('casesBody');
+      const empty = document.getElementById('emptyState');
+
+      const res = await fetch('/api/cases');
+      const json = await res.json().catch(() => ({}));
+
+      if (!res.ok || !json.ok) {
+        summary.textContent = `Error: ${json.message || json.error || 'No se pudo cargar'}`;
+        table.style.display = 'none';
+        empty.style.display = 'block';
+        return;
+      }
+
+      const cases = json.cases || [];
+      summary.textContent = `Casos encontrados: ${cases.length}`;
+
+      if (cases.length === 0) {
+        table.style.display = 'none';
+        empty.style.display = 'block';
+        return;
+      }
+
+      table.style.display = 'table';
+      empty.style.display = 'none';
+      body.innerHTML = '';
+
+      cases.forEach((c) => {
+        const createdAt = c.createdAt ? new Date(c.createdAt).toLocaleString() : '—';
+        const prop = `${c.propertyType || ''} · ${c.bedrooms ?? ''} dorm · ${c.bathrooms ?? ''} baños`;
+        const progress = c.progress || { uploaded: 0, analyzed: 0, rejected: 0, total: 0, pct: 0, openaiAnalyzed: 0 };
+        const pill = statusPill(progress);
+        const reportUrl = `/cases/${encodeURIComponent(c.id)}/report`;
+        const captureUrl = c.captureUrl || '';
+        const openaiCount = progress.openaiAnalyzed ?? 0;
+        const openaiText = openaiCount ? ` · IA: ${openaiCount}` : '';
+        const firstPhotoUrl = c.firstPhotoUrl || '';
+
+        body.insertAdjacentHTML('beforeend', `
+          <tr>
+            <td data-label="Caso">
+              <div><strong>${escapeHtml(c.id || '')}</strong></div>
+              <div class="muted">${escapeHtml(createdAt)}</div>
+              ${firstPhotoUrl ? `<img class="thumbSmall" src="${escapeHtml(firstPhotoUrl)}" alt="Primera foto" />` : ''}
+            </td>
+            <td data-label="Inmueble">${escapeHtml(prop)}</td>
+            <td data-label="Estado">
+              <span class="pill ${pill.cls}">${pill.text}</span>
+            </td>
+            <td data-label="Progreso">
+              ${progress.uploaded}/${progress.total} · ${progress.pct}%${openaiText}
+            </td>
+            <td data-label="Acciones">
+              <div class="actions">
+                <a class="btn" href="${escapeHtml(reportUrl)}" target="_blank" rel="noreferrer">Ver informe</a>
+                ${captureUrl ? `<a class="btn" href="${escapeHtml(captureUrl)}" target="_blank" rel="noreferrer">Abrir captura</a>` : ''}
+              </div>
+            </td>
+          </tr>
+        `);
+      });
+    }
+
+    loadCases().catch((e) => {
+      document.getElementById('summary').textContent = `Error: ${e.message || e}`;
+    });
+  </script>
+</body>
+</html>
