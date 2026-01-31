@@ -20,9 +20,9 @@
       border-bottom: 1px solid #e5e7eb;
     }
     .nav {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 14px 20px;
+      max-width: none;
+      margin: 0;
+      padding: 20px 20px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -37,7 +37,20 @@
       color: inherit;
       font-weight: 800;
     }
-    .brand img { height: 32px; }
+    .brand img { height: 70px; }
+    .primaryLinks {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      margin-right: auto;
+      padding-left: 8px;
+    }
+    .primaryLinks a {
+      text-decoration: none;
+      color: #1f2937;
+      font-weight: 700;
+      font-size: 14px;
+    }
     .links {
       display: flex;
       gap: 14px;
@@ -120,6 +133,10 @@
       <a class="brand" href="/">
         <img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" />
       </a>
+      <div class="primaryLinks">
+        <a href="/personas.html">Personas</a>
+        <a href="/corredores.html">Corredores</a>
+      </div>
       <div class="links">
         <a href="/como-funciona.html">Cómo funciona</a>
         <a href="/modelo.html">Modelo</a>
