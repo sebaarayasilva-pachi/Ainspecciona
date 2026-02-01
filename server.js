@@ -380,6 +380,7 @@ fastify.get('/dashboard', (req, reply) => reply.sendFile('dashboard.html'));
 fastify.get('/cases/:caseId/report', (req, reply) => reply.sendFile('report.html'));
 fastify.get('/admin', (req, reply) => reply.sendFile('admin.html'));
 fastify.get('/activate', (req, reply) => reply.sendFile('activate.html'));
+fastify.get('/install', (req, reply) => reply.sendFile('install.html'));
 fastify.get('/tenant', (req, reply) => reply.sendFile('tenant.html'));
 fastify.get('/executive', (req, reply) => reply.sendFile('executive.html'));
 
