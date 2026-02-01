@@ -71,6 +71,12 @@
       color: #1f2937;
       border-color: #e5e7eb;
     }
+    .btn.primary {
+      font-size: 15px;
+      padding: 12px 16px;
+      border-radius: 14px;
+      width: 100%;
+    }
     .hidden { display: none; }
     .note {
       margin-top: 10px;
@@ -93,7 +99,7 @@
   <main>
     <div class="card">
       <h2>Instalar app</h2>
-      <div class="muted">Si es tu primera vez, activa tu cuenta y luego instala la app.</div>
+      <div class="muted">En Android puedes instalar desde aquí en 1 toque.</div>
 
       <div class="row" id="activateWrap">
         <a class="btn" id="activateBtn" href="/activate">Activar cuenta</a>
@@ -101,15 +107,18 @@
       <div class="note hidden" id="activateNote">Si ya activaste tu cuenta, continúa con la instalación.</div>
 
       <div class="row">
-        <button class="btn outline hidden" id="installBtn" type="button">Instalar app</button>
+        <button class="btn primary hidden" id="installBtn" type="button">Instalar app</button>
         <a class="btn" id="openAppBtn" href="/executive">Abrir app</a>
       </div>
 
-      <div class="note">
+      <div class="note" id="androidNote">
         <strong>Android (Chrome):</strong> menú ⋮ → Agregar a pantalla de inicio.<br />
+        Si aparece el botón "Instalar app", úsalo.
+      </div>
+      <div class="note" id="iosNote">
         <strong>iPhone (Safari):</strong> compartir → Añadir a pantalla de inicio.
       </div>
-      <div class="note">Si no aparece el botón "Instalar app", usa el menú del navegador.</div>
+      <div class="note" id="fallbackNote">Si no aparece el botón "Instalar app", usa el menú del navegador.</div>
     </div>
   </main>
 
@@ -119,6 +128,9 @@
     const activateBtn = document.getElementById("activateBtn");
     const activateWrap = document.getElementById("activateWrap");
     const activateNote = document.getElementById("activateNote");
+    const androidNote = document.getElementById("androidNote");
+    const iosNote = document.getElementById("iosNote");
+    const fallbackNote = document.getElementById("fallbackNote");
 
     if (token) {
       activateBtn.href = `/activate?token=${encodeURIComponent(token)}`;
@@ -128,6 +140,11 @@
       activateNote.classList.remove("hidden");
     }
 
+    const ua = navigator.userAgent || "";
+    const isAndroid = /Android/i.test(ua);
+    androidNote.classList.toggle("hidden", !isAndroid);
+    iosNote.classList.toggle("hidden", isAndroid);
+
     let deferredInstallPrompt = null;
     const installBtn = document.getElementById("installBtn");
 
@@ -135,6 +152,7 @@
       event.preventDefault();
       deferredInstallPrompt = event;
       installBtn.classList.remove("hidden");
+      fallbackNote.classList.add("hidden");
     });
 
     installBtn.addEventListener("click", async () => {
@@ -143,6 +161,7 @@
       await deferredInstallPrompt.userChoice;
       deferredInstallPrompt = null;
       installBtn.classList.add("hidden");
+      fallbackNote.classList.remove("hidden");
     });
   </script>
 </body>
