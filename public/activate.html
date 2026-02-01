@@ -116,11 +116,7 @@
         });
         if (res.ok) {
           status.textContent = "Cuenta activada.";
-          nextSteps.textContent = "Redirigiendo a instalación...";
-          const installUrl = `/install?token=${encodeURIComponent(val)}`;
-          setTimeout(() => {
-            window.location.href = installUrl;
-          }, 600);
+          nextSteps.innerHTML = `Paso siguiente: instala la app en <a href="/install">/install</a> o abre <a href="/executive">/executive</a>.`;
         } else {
           status.textContent = "Token inválido o expirado.";
         }
