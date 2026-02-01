@@ -116,12 +116,11 @@
         });
         if (res.ok) {
           status.textContent = "Cuenta activada.";
-          nextSteps.innerHTML = `Siguiente paso: abre la app en <a href="/executive">/executive</a>.`;
-          installGuide.innerHTML = [
-            "Instalar en el celular:",
-            "Android (Chrome): menú ⋮ → Agregar a pantalla de inicio.",
-            "iPhone (Safari): compartir → Añadir a pantalla de inicio."
-          ].join("<br/>");
+          nextSteps.textContent = "Redirigiendo a instalación...";
+          const installUrl = `/install?token=${encodeURIComponent(val)}`;
+          setTimeout(() => {
+            window.location.href = installUrl;
+          }, 600);
         } else {
           status.textContent = "Token inválido o expirado.";
         }
