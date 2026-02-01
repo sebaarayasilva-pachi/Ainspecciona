@@ -268,6 +268,14 @@
       return new Intl.DateTimeFormat("es-CL", { dateStyle: "medium" }).format(d);
     }
 
+    function handleUnauthorized(res) {
+      if (res.status === 401) {
+        window.location.href = "/";
+        return true;
+      }
+      return false;
+    }
+
     function buildInstallLink(activationUrl) {
       if (!activationUrl) return `${window.location.origin}/install`;
       const link = new URL(activationUrl, window.location.origin);
@@ -290,6 +298,7 @@
 
     async function loadUsers() {
       const res = await fetch("/api/tenant/users");
+      if (handleUnauthorized(res)) return [];
       if (!res.ok) return [];
       const data = await res.json();
       return data?.users || [];
@@ -332,6 +341,7 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ status: "ACTIVE" })
           });
+          if (handleUnauthorized(res)) return;
           const note = document.getElementById("userNote");
           if (res.ok) {
             note.textContent = "Usuario activado.";
@@ -354,6 +364,7 @@
             body: JSON.stringify({ fullName, phone, role })
           });
           const note = document.getElementById("userNote");
+          if (handleUnauthorized(res)) return;
           if (res.ok) {
             note.textContent = "Usuario actualizado.";
             renderUsers().catch(() => {});
@@ -367,6 +378,7 @@
         reinviteBtn.textContent = "Reinvitar";
         reinviteBtn.addEventListener("click", async () => {
           const res = await fetch(`/api/tenant/users/${u.id}/invite`, { method: "POST" });
+          if (handleUnauthorized(res)) return;
           const data = await res.json();
           const note = document.getElementById("userNote");
           if (res.ok) {
@@ -392,6 +404,7 @@
           if (!confirm("¿Eliminar este usuario?")) return;
           const res = await fetch(`/api/tenant/users/${u.id}`, { method: "DELETE" });
           const note = document.getElementById("userNote");
+          if (handleUnauthorized(res)) return;
           if (res.ok) {
             note.textContent = "Usuario eliminado.";
             renderUsers().catch(() => {});
@@ -437,6 +450,7 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ fullName, email, phone, role, action: "save" })
       });
+      if (handleUnauthorized(res)) return;
       if (res.ok) {
         note.textContent = "Usuario guardado sin invitación.";
         document.getElementById("userFullName").value = "";
@@ -466,6 +480,7 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ fullName, email, phone, role, action: "invite" })
       });
+      if (handleUnauthorized(res)) return;
       const data = await res.json();
       if (res.ok) {
         const phoneSafe = phone.replace(/\D/g, "");
@@ -503,6 +518,7 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
+      if (handleUnauthorized(res)) return;
       const data = await res.json();
       if (res.ok) {
         note.innerHTML = `Inspección creada. Link captura: <a href="${data.captureUrl}" target="_blank">${data.captureUrl}</a>`;
