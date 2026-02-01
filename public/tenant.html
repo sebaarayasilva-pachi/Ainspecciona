@@ -276,6 +276,15 @@
       return false;
     }
 
+    async function readErrorMessage(res) {
+      try {
+        const data = await res.json();
+        return data?.error || data?.message || `Error ${res.status}`;
+      } catch {
+        return `Error ${res.status}`;
+      }
+    }
+
     function buildInstallLink(activationUrl) {
       if (!activationUrl) return `${window.location.origin}/install`;
       const link = new URL(activationUrl, window.location.origin);
@@ -379,6 +388,14 @@
         reinviteBtn.addEventListener("click", async () => {
           const res = await fetch(`/api/tenant/users/${u.id}/invite`, { method: "POST" });
           if (handleUnauthorized(res)) return;
+          if (!res.ok) {
+            const msg = await readErrorMessage(res);
+            const note = document.getElementById("userNote");
+            note.textContent = msg === "USER_NOT_FOUND"
+              ? "Usuario no encontrado."
+              : `No se pudo reinvitar (${msg}).`;
+            return;
+          }
           const data = await res.json();
           const note = document.getElementById("userNote");
           if (res.ok) {
@@ -461,7 +478,8 @@
       } else if (res.status === 409) {
         note.textContent = "El email ya está en uso en otra corredora.";
       } else {
-        note.textContent = "No se pudo guardar el usuario.";
+        const msg = await readErrorMessage(res);
+        note.textContent = `No se pudo guardar (${msg}).`;
       }
     });
 
@@ -481,6 +499,15 @@
         body: JSON.stringify({ fullName, email, phone, role, action: "invite" })
       });
       if (handleUnauthorized(res)) return;
+      if (!res.ok) {
+        if (res.status === 409) {
+          note.textContent = "El email ya está en uso en otra corredora.";
+        } else {
+          const msg = await readErrorMessage(res);
+          note.textContent = `No se pudo invitar (${msg}).`;
+        }
+        return;
+      }
       const data = await res.json();
       if (res.ok) {
         const phoneSafe = phone.replace(/\D/g, "");
@@ -497,10 +524,6 @@
         document.getElementById("userPhone").value = "";
         document.getElementById("userRole").value = "TENANT_USER";
         renderUsers().catch(() => {});
-      } else if (res.status === 409) {
-        note.textContent = "El email ya está en uso en otra corredora.";
-      } else {
-        note.textContent = "No se pudo invitar.";
       }
     });
 
