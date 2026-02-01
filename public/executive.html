@@ -107,7 +107,10 @@
       <a class="brand" href="/">
         <img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" />
       </a>
-      <button class="btn outline hidden" id="logoutBtn" type="button">Salir</button>
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <button class="btn outline hidden" id="installBtn" type="button">Instalar app</button>
+        <button class="btn outline hidden" id="logoutBtn" type="button">Salir</button>
+      </div>
     </div>
   </header>
 
@@ -230,6 +233,23 @@
       const cases = await getCases();
       renderCases(cases);
     }
+
+    let deferredInstallPrompt = null;
+    const installBtn = document.getElementById("installBtn");
+
+    window.addEventListener("beforeinstallprompt", (event) => {
+      event.preventDefault();
+      deferredInstallPrompt = event;
+      installBtn.classList.remove("hidden");
+    });
+
+    installBtn.addEventListener("click", async () => {
+      if (!deferredInstallPrompt) return;
+      deferredInstallPrompt.prompt();
+      await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt = null;
+      installBtn.classList.add("hidden");
+    });
 
     document.getElementById("loginBtn").addEventListener("click", handleLogin);
     document.getElementById("logoutBtn").addEventListener("click", async () => {
