@@ -6,9 +6,9 @@ function normalizeSource(code) {
   return 'V1';
 }
 
-export async function getCaseSummary({ prisma, storage, caseId, slotGroupTitleFromCode, scoreConfig }) {
-  const c = await prisma.case.findUnique({
-    where: { id: caseId },
+export async function getCaseSummary({ prisma, storage, caseId, slotGroupTitleFromCode, scoreConfig, tenantId }) {
+  const c = await prisma.case.findFirst({
+    where: { id: caseId, ...(tenantId ? { tenantId } : {}) },
     include: {
       property: { include: { owner: true } },
       slots: { include: { photo: true } }

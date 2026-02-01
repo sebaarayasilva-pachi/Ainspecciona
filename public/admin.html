@@ -205,12 +205,56 @@
       color: #64748b;
       margin-top: 10px;
     }
+    .content.hidden {
+      display: none;
+    }
+    .tenantGrid {
+      display: grid;
+      grid-template-columns: 1.2fr 1.2fr 0.8fr 1fr 1fr 1fr 120px 120px;
+      gap: 10px;
+      align-items: center;
+    }
+    .userGrid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr 140px 160px 140px 120px 160px;
+      gap: 10px;
+      align-items: center;
+    }
+    .tenantRow { display: contents; }
+    .userRow { display: contents; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      background: #EEF2FF;
+      color: #1D4ED8;
+    }
+    .smallInput {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      font-size: 13px;
+    }
+    .userCard {
+      border: 1px dashed #e5e7eb;
+      border-radius: 12px;
+      padding: 14px;
+      margin-top: 10px;
+      background: #f8fafc;
+    }
     @media (max-width: 900px) {
       main { grid-template-columns: 1fr; }
       aside { border-right: none; border-bottom: 1px solid #e5e7eb; }
       .grid { grid-template-columns: 1fr; }
       .kpiRows { grid-template-columns: 1fr; }
       .recRows { grid-template-columns: 1fr; }
+      .tenantGrid { grid-template-columns: 1fr; }
+      .userGrid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -231,11 +275,12 @@
     <aside>
       <div class="asideTitle">Admin</div>
       <nav class="menu">
-        <a class="active" href="#score">Score</a>
+        <a class="active" data-section-link="score" href="#score">Score</a>
+        <a data-section-link="tenants" href="#tenants">Corredoras</a>
       </nav>
     </aside>
 
-    <section class="content" id="score">
+    <section class="content" id="score" data-section="score">
       <h1>Score por KPI</h1>
       <div class="muted">Organiza el score y el mensaje base por cada KPI.</div>
 
@@ -440,6 +485,52 @@
         <button class="btn outline" id="resetBtn" type="button">Restaurar valores</button>
       </div>
       <div class="note">Los cambios se guardan en este navegador (local). Luego podemos conectarlo al backend.</div>
+    </section>
+
+    <section class="content" id="tenants" data-section="tenants">
+      <h1>Corredoras</h1>
+      <div class="muted">Mantenedor de corredoras (tenant) y datos de contacto.</div>
+
+      <div class="card">
+        <h3>Crear corredora</h3>
+        <div class="grid">
+          <div class="row">
+            <label for="tenantName">Nombre</label>
+            <input id="tenantName" type="text" class="smallInput" />
+          </div>
+          <div class="row">
+            <label for="tenantLegalName">Razón social</label>
+            <input id="tenantLegalName" type="text" class="smallInput" />
+          </div>
+          <div class="row">
+            <label for="tenantRut">RUT</label>
+            <input id="tenantRut" type="text" class="smallInput" />
+          </div>
+          <div class="row">
+            <label for="tenantPassword">Clave</label>
+            <input id="tenantPassword" type="password" class="smallInput" />
+          </div>
+          <div class="row">
+            <label for="tenantEmail">Email</label>
+            <input id="tenantEmail" type="email" class="smallInput" />
+          </div>
+          <div class="row">
+            <label for="tenantPhone">Teléfono</label>
+            <input id="tenantPhone" type="text" class="smallInput" />
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn" id="createTenantBtn" type="button">Crear corredora</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Listado de corredoras</h3>
+        <div class="kpiSubtle">Edita nombre, razón social, RUT, contacto y estado.</div>
+        <div id="tenantsEmpty" class="note">Aún no hay corredoras registradas.</div>
+        <div class="tenantGrid" id="tenantsTable"></div>
+        <div id="tenantUsersWrap"></div>
+      </div>
     </section>
   </main>
 
@@ -669,6 +760,331 @@
     document.getElementById("saveBtn").addEventListener("click", () => saveForm());
     document.getElementById("resetBtn").addEventListener("click", () => resetForm());
     loadForm().catch(() => {});
+
+    async function fetchTenants() {
+      const res = await fetch("/api/admin/tenants");
+      const data = await res.json();
+      return data?.tenants || [];
+    }
+
+    async function fetchTenantUsers(tenantId) {
+      const res = await fetch(`/api/admin/tenants/${tenantId}/users`);
+      const data = await res.json();
+      return data?.users || [];
+    }
+
+    function formatDateShort(value) {
+      if (!value) return "—";
+      const d = new Date(value);
+      if (Number.isNaN(d.getTime())) return "—";
+      return new Intl.DateTimeFormat("es-CL", { dateStyle: "medium" }).format(d);
+    }
+
+    function renderTenants(list) {
+      const container = document.getElementById("tenantsTable");
+      const empty = document.getElementById("tenantsEmpty");
+      const usersWrap = document.getElementById("tenantUsersWrap");
+      container.innerHTML = "";
+      usersWrap.innerHTML = "";
+      if (!list.length) {
+        empty.style.display = "block";
+        return;
+      }
+      empty.style.display = "none";
+
+      container.appendChild(Object.assign(document.createElement("div"), { className: "kpiHeader", textContent: "Corredora" }));
+      container.appendChild(Object.assign(document.createElement("div"), { className: "kpiHeader", textContent: "Razón social" }));
+      container.appendChild(Object.assign(document.createElement("div"), { className: "kpiHeader", textContent: "RUT" }));
+      container.appendChild(Object.assign(document.createElement("div"), { className: "kpiHeader", textContent: "Clave" }));
+      container.appendChild(Object.assign(document.createElement("div"), { className: "kpiHeader", textContent: "Email" }));
+      container.appendChild(Object.assign(document.createElement("div"), { className: "kpiHeader", textContent: "Teléfono" }));
+      container.appendChild(Object.assign(document.createElement("div"), { className: "kpiHeader", textContent: "Estado" }));
+      container.appendChild(Object.assign(document.createElement("div"), { className: "kpiHeader", textContent: "Acciones" }));
+
+      list.forEach((t) => {
+        const name = document.createElement("input");
+        name.value = t.name || "";
+        name.className = "smallInput";
+
+        const email = document.createElement("input");
+        email.value = t.email || "";
+        email.className = "smallInput";
+
+        const phone = document.createElement("input");
+        phone.value = t.phone || "";
+        phone.className = "smallInput";
+
+        const legalName = document.createElement("input");
+        legalName.value = t.legalName || "";
+        legalName.className = "smallInput";
+
+        const rut = document.createElement("input");
+        rut.value = t.rut || "";
+        rut.className = "smallInput";
+
+        const password = document.createElement("input");
+        password.type = "password";
+        password.placeholder = "Nueva clave";
+        password.className = "smallInput";
+
+        const status = document.createElement("select");
+        status.className = "smallInput";
+        ["ACTIVE", "INACTIVE"].forEach((s) => {
+          const opt = document.createElement("option");
+          opt.value = s;
+          opt.textContent = s === "ACTIVE" ? "Activa" : "Inactiva";
+          if (String(t.status || "ACTIVE") === s) opt.selected = true;
+          status.appendChild(opt);
+        });
+
+        const btn = document.createElement("button");
+        btn.className = "btn outline";
+        btn.type = "button";
+        btn.textContent = "Guardar";
+        btn.addEventListener("click", async () => {
+          await fetch(`/api/admin/tenants/${t.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: name.value,
+              legalName: legalName.value,
+              rut: rut.value,
+              password: password.value || undefined,
+              email: email.value,
+              phone: phone.value,
+              status: status.value
+            })
+          });
+          password.value = "";
+          loadTenants().catch(() => {});
+        });
+
+        const nameWrap = document.createElement("div");
+        nameWrap.style.display = "grid";
+        nameWrap.style.gap = "6px";
+        nameWrap.appendChild(name);
+        const idBadge = document.createElement("div");
+        idBadge.className = "badge";
+        idBadge.textContent = `ID: ${t.id.slice(0, 8)}...`;
+        idBadge.title = t.id;
+        nameWrap.appendChild(idBadge);
+        const date = document.createElement("div");
+        date.className = "note";
+        date.textContent = `Creada: ${formatDateShort(t.createdAt)}`;
+        nameWrap.appendChild(date);
+
+        container.appendChild(nameWrap);
+        container.appendChild(legalName);
+        container.appendChild(rut);
+        container.appendChild(password);
+        container.appendChild(email);
+        container.appendChild(phone);
+        container.appendChild(status);
+        container.appendChild(btn);
+
+        const userCard = document.createElement("div");
+        userCard.className = "userCard";
+        userCard.innerHTML = `
+          <div class="kpiSubtle">Usuarios (${t.name})</div>
+          <div class="userGrid" data-users-header>
+            <div class="kpiHeader">Nombre</div>
+            <div class="kpiHeader">Email</div>
+            <div class="kpiHeader">Teléfono</div>
+            <div class="kpiHeader">Rol</div>
+            <div class="kpiHeader">Invitación</div>
+            <div class="kpiHeader">Estado</div>
+            <div class="kpiHeader">Acción</div>
+          </div>
+          <div class="userGrid" data-users-body></div>
+          <div class="row" style="margin-top: 10px;">
+            <label>Nuevo usuario</label>
+            <div></div>
+          </div>
+          <div class="userGrid" data-users-create>
+            <input type="text" class="smallInput" placeholder="Nombre completo" />
+            <input type="email" class="smallInput" placeholder="correo@empresa.com" />
+            <input type="text" class="smallInput" placeholder="+569..." />
+            <select class="smallInput">
+              <option value="TENANT_ADMIN">Admin</option>
+              <option value="TENANT_USER" selected>Ejecutivo</option>
+            </select>
+            <div class="badge">—</div>
+            <div class="badge">PENDIENTE</div>
+            <div style="display:flex; gap:8px;">
+              <button class="btn outline" data-action="save">Guardar</button>
+              <button class="btn" data-action="invite">Invitar</button>
+            </div>
+          </div>
+          <div class="note" data-users-note></div>
+        `;
+        usersWrap.appendChild(userCard);
+
+        const body = userCard.querySelector("[data-users-body]");
+        const note = userCard.querySelector("[data-users-note]");
+        const createInputs = userCard.querySelectorAll("[data-users-create] input, [data-users-create] select");
+        const actionButtons = userCard.querySelectorAll("[data-users-create] button");
+        const nameInput = createInputs[0];
+        const emailInput = createInputs[1];
+        const phoneInput = createInputs[2];
+        const roleSelect = createInputs[3];
+
+        actionButtons.forEach((btn) => btn.addEventListener("click", async () => {
+          const action = btn.getAttribute("data-action") || "invite";
+          const fullName = nameInput.value.trim();
+          const emailVal = emailInput.value.trim();
+          const phone = phoneInput.value.trim();
+          const role = roleSelect.value;
+          if (!fullName || !emailVal) {
+            note.textContent = "Nombre y email son obligatorios.";
+            return;
+          }
+          const res = await fetch(`/api/admin/tenants/${t.id}/users`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ fullName, email: emailVal, phone, role, action })
+          });
+          const data = await res.json();
+          if (res.ok) {
+            if (action === "invite") {
+              const phoneSafe = phone.replace(/\D/g, "");
+              const fullUrl = data.activationUrl
+                ? `${window.location.origin}${data.activationUrl}`
+                : "";
+              const text = `Hola ${fullName}, activa tu cuenta Ainspecciona aquí: ${fullUrl}`;
+              const waUrl = phoneSafe
+                ? `https://wa.me/${phoneSafe}?text=${encodeURIComponent(text)}`
+                : null;
+              note.innerHTML = waUrl
+                ? `Invitación creada. <a href="${waUrl}" target="_blank">Enviar por WhatsApp</a>`
+                : `Invitación creada. Link: ${fullUrl}`;
+            } else {
+              note.textContent = "Usuario guardado sin invitación.";
+            }
+            nameInput.value = "";
+            emailInput.value = "";
+            phoneInput.value = "";
+            roleSelect.value = "TENANT_USER";
+            loadTenants().catch(() => {});
+          } else if (res.status === 409) {
+            note.textContent = "El email ya está en uso en otra corredora.";
+          } else {
+            note.textContent = "No se pudo crear el usuario.";
+          }
+        }));
+
+        fetchTenantUsers(t.id).then((users) => {
+          body.innerHTML = "";
+          if (!users.length) {
+            body.appendChild(Object.assign(document.createElement("div"), { className: "note", textContent: "Sin usuarios aún." }));
+            return;
+          }
+          users.forEach((u) => {
+            const fullName = document.createElement("div");
+            fullName.textContent = u.fullName || "—";
+            const email = document.createElement("div");
+            email.textContent = u.email || "—";
+            const phone = document.createElement("div");
+            phone.textContent = u.phone || "—";
+            const role = document.createElement("div");
+            role.textContent = u.role === "TENANT_ADMIN" ? "Admin" : "Ejecutivo";
+            const invited = document.createElement("div");
+            invited.textContent = formatDateShort(u.invitedAt);
+            const status = document.createElement("div");
+            status.textContent = u.status || "PENDING";
+            const action = document.createElement("div");
+            if (String(u.status || "").toUpperCase() === "PENDING" && !u.invitedAt) {
+              const inviteBtn = document.createElement("button");
+              inviteBtn.className = "btn outline";
+              inviteBtn.textContent = "Invitar";
+              inviteBtn.addEventListener("click", async () => {
+                const res = await fetch(`/api/admin/users/${u.id}/invite`, { method: "POST" });
+                const data = await res.json();
+              if (res.ok) {
+                const phoneSafe = String(u.phone || "").replace(/\D/g, "");
+                const fullUrl = data.activationUrl
+                  ? `${window.location.origin}${data.activationUrl}`
+                  : "";
+                const text = `Hola ${u.fullName || ""}, activa tu cuenta Ainspecciona aquí: ${fullUrl}`;
+                const waUrl = phoneSafe
+                  ? `https://wa.me/${phoneSafe}?text=${encodeURIComponent(text)}`
+                  : null;
+                note.innerHTML = waUrl
+                  ? `Invitación creada. <a href="${waUrl}" target="_blank">Enviar por WhatsApp</a>`
+                  : `Invitación creada. Link: ${fullUrl}`;
+                loadTenants().catch(() => {});
+              } else {
+                note.textContent = "No se pudo invitar.";
+              }
+              });
+              action.appendChild(inviteBtn);
+            } else {
+              action.textContent = "—";
+            }
+            body.appendChild(fullName);
+            body.appendChild(email);
+            body.appendChild(phone);
+            body.appendChild(role);
+            body.appendChild(invited);
+            body.appendChild(status);
+            body.appendChild(action);
+          });
+        }).catch(() => {});
+      });
+    }
+
+    async function loadTenants() {
+      try {
+        const list = await fetchTenants();
+        renderTenants(list);
+      } catch {}
+    }
+
+    document.getElementById("createTenantBtn").addEventListener("click", async () => {
+      const name = document.getElementById("tenantName").value.trim();
+      const legalName = document.getElementById("tenantLegalName").value.trim();
+      const rut = document.getElementById("tenantRut").value.trim();
+      const password = document.getElementById("tenantPassword").value.trim();
+      const email = document.getElementById("tenantEmail").value.trim();
+      const phone = document.getElementById("tenantPhone").value.trim();
+      if (!name) return alert("Nombre requerido.");
+      await fetch("/api/admin/tenants", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          legalName: legalName || null,
+          rut: rut || null,
+          password: password || null,
+          email: email || null,
+          phone: phone || null
+        })
+      });
+      document.getElementById("tenantName").value = "";
+      document.getElementById("tenantLegalName").value = "";
+      document.getElementById("tenantRut").value = "";
+      document.getElementById("tenantPassword").value = "";
+      document.getElementById("tenantEmail").value = "";
+      document.getElementById("tenantPhone").value = "";
+      loadTenants().catch(() => {});
+    });
+
+    loadTenants().catch(() => {});
+
+    function setActiveSection() {
+      const hash = String(window.location.hash || "").replace("#", "");
+      const section = hash || "score";
+      document.querySelectorAll("[data-section]").forEach((el) => {
+        const key = el.getAttribute("data-section");
+        el.classList.toggle("hidden", key !== section);
+      });
+      document.querySelectorAll("[data-section-link]").forEach((el) => {
+        const key = el.getAttribute("data-section-link");
+        el.classList.toggle("active", key === section);
+      });
+    }
+
+    window.addEventListener("hashchange", setActiveSection);
+    setActiveSection();
   </script>
 </body>
 </html>

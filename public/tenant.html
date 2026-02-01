@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Panel · Ainspecciona</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #F6F7F9;
+      color: #0f172a;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: #ffffff;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .nav {
+      max-width: none;
+      margin: 0;
+      padding: 20px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: inherit;
+      font-weight: 800;
+    }
+    .brand img { height: 56px; }
+    .topActions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-weight: 700;
+      border: 1px solid transparent;
+      background: #2563eb;
+      color: #fff;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .btn.outline {
+      background: #fff;
+      color: #1f2937;
+      border-color: #e5e7eb;
+    }
+    main {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      min-height: calc(100vh - 96px);
+    }
+    aside {
+      background: #ffffff;
+      border-right: 1px solid #e5e7eb;
+      padding: 24px 18px;
+    }
+    .asideTitle {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #64748b;
+      margin: 0 0 12px;
+      font-weight: 700;
+    }
+    .menu {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .menu a {
+      text-decoration: none;
+      color: #0f172a;
+      font-weight: 600;
+      padding: 10px 12px;
+      border-radius: 10px;
+    }
+    .menu a.active {
+      background: #eef2ff;
+      color: #1d4ed8;
+    }
+    .content {
+      padding: 28px 28px 80px;
+    }
+    .content.hidden { display: none; }
+    .card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+      margin-bottom: 18px;
+    }
+    h1 { margin: 0 0 8px; font-size: 26px; }
+    .muted { color: #64748b; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .row:last-child { border-bottom: none; }
+    label { font-weight: 600; font-size: 14px; }
+    input, select {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      font-size: 14px;
+    }
+    .note {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 10px;
+    }
+    .userGrid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr 140px 160px 140px 120px 140px;
+      gap: 10px;
+      align-items: center;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      background: #EEF2FF;
+      color: #1D4ED8;
+    }
+    @media (max-width: 900px) {
+      main { grid-template-columns: 1fr; }
+      aside { border-right: none; border-bottom: 1px solid #e5e7eb; }
+      .grid { grid-template-columns: 1fr; }
+      .userGrid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav">
+      <a class="brand" href="/">
+        <img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" />
+      </a>
+      <div class="topActions">
+        <div id="tenantName" class="muted"></div>
+        <button class="btn outline" id="logoutBtn" type="button">Salir</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <aside>
+      <div class="asideTitle">Panel Tenant</div>
+      <nav class="menu">
+        <a class="active" data-section-link="users" href="#users">Usuarios</a>
+        <a data-section-link="inspections" href="#inspections">Inspecciones</a>
+      </nav>
+    </aside>
+
+    <section class="content" id="users" data-section="users">
+      <h1>Usuarios</h1>
+      <div class="muted">Crea usuarios y asigna roles.</div>
+
+      <div class="card">
+        <h3>Nuevo usuario</h3>
+        <div class="userGrid" style="margin-top: 10px;">
+          <input id="userFullName" type="text" placeholder="Nombre completo" />
+          <input id="userEmail" type="email" placeholder="correo@empresa.com" />
+          <input id="userPhone" type="text" placeholder="+569..." />
+          <select id="userRole">
+            <option value="TENANT_ADMIN">Administrador</option>
+            <option value="TENANT_USER" selected>Ejecutivo</option>
+          </select>
+          <div class="badge">PENDIENTE</div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn outline" id="saveUserBtn" type="button">Guardar</button>
+            <button class="btn" id="inviteUserBtn" type="button">Invitar</button>
+          </div>
+        </div>
+        <div class="note" id="userNote"></div>
+      </div>
+
+      <div class="card">
+        <h3>Listado de usuarios</h3>
+        <div class="userGrid" id="userHeader">
+          <div class="muted">Nombre</div>
+          <div class="muted">Email</div>
+          <div class="muted">Teléfono</div>
+          <div class="muted">Rol</div>
+          <div class="muted">Invitación</div>
+          <div class="muted">Estado</div>
+          <div class="muted">Acción</div>
+        </div>
+        <div class="userGrid" id="userList"></div>
+      </div>
+    </section>
+
+    <section class="content hidden" id="inspections" data-section="inspections">
+      <h1>Inspecciones</h1>
+      <div class="muted">Genera una nueva inspección y asigna a un ejecutivo.</div>
+
+      <div class="card">
+        <h3>Nueva inspección</h3>
+        <div class="grid">
+          <div class="row">
+            <label for="casePropertyType">Tipo de propiedad</label>
+            <select id="casePropertyType">
+              <option value="DEPARTMENT">Departamento</option>
+              <option value="HOUSE">Casa</option>
+            </select>
+          </div>
+          <div class="row">
+            <label for="caseBedrooms">Dormitorios</label>
+            <input id="caseBedrooms" type="number" min="0" value="1" />
+          </div>
+          <div class="row">
+            <label for="caseBathrooms">Baños</label>
+            <input id="caseBathrooms" type="number" min="0" value="1" />
+          </div>
+          <div class="row">
+            <label for="caseAddress">Dirección</label>
+            <input id="caseAddress" type="text" />
+          </div>
+          <div class="row">
+            <label for="caseExecutive">Ejecutivo</label>
+            <select id="caseExecutive"></select>
+          </div>
+        </div>
+        <div class="actions" style="margin-top: 12px;">
+          <button class="btn" id="createCaseBtn" type="button">Crear inspección</button>
+        </div>
+        <div class="note" id="caseNote"></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    function formatDateShort(value) {
+      if (!value) return "—";
+      const d = new Date(value);
+      if (Number.isNaN(d.getTime())) return "—";
+      return new Intl.DateTimeFormat("es-CL", { dateStyle: "medium" }).format(d);
+    }
+
+    async function loadTenant() {
+      const res = await fetch("/api/tenant/me");
+      if (!res.ok) {
+        window.location.href = "/";
+        return null;
+      }
+      const data = await res.json();
+      document.getElementById("tenantName").textContent = data?.tenant?.name || "";
+      return data?.tenant;
+    }
+
+    async function loadUsers() {
+      const res = await fetch("/api/tenant/users");
+      if (!res.ok) return [];
+      const data = await res.json();
+      return data?.users || [];
+    }
+
+    async function renderUsers() {
+      const users = await loadUsers();
+      const list = document.getElementById("userList");
+      const execSelect = document.getElementById("caseExecutive");
+      list.innerHTML = "";
+      execSelect.innerHTML = "";
+      if (!users.length) {
+        list.appendChild(Object.assign(document.createElement("div"), { className: "note", textContent: "Sin usuarios aún." }));
+        return;
+      }
+      users.forEach((u) => {
+        const fullName = document.createElement("div");
+        fullName.textContent = u.fullName || "—";
+        const email = document.createElement("div");
+        email.textContent = u.email || "—";
+        const phone = document.createElement("div");
+        phone.textContent = u.phone || "—";
+        const role = document.createElement("div");
+        role.textContent = u.role === "TENANT_ADMIN" ? "Administrador" : "Ejecutivo";
+        const invited = document.createElement("div");
+        invited.textContent = formatDateShort(u.invitedAt);
+        const status = document.createElement("div");
+        status.textContent = u.status || "PENDING";
+        const action = document.createElement("div");
+        action.style.display = "flex";
+        action.style.gap = "8px";
+        action.style.flexWrap = "wrap";
+
+        const activateBtn = document.createElement("button");
+        activateBtn.className = "btn outline";
+        activateBtn.textContent = "Activar";
+        activateBtn.addEventListener("click", async () => {
+          const res = await fetch(`/api/tenant/users/${u.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: "ACTIVE" })
+          });
+          const note = document.getElementById("userNote");
+          if (res.ok) {
+            note.textContent = "Usuario activado.";
+            renderUsers().catch(() => {});
+          } else {
+            note.textContent = "No se pudo activar.";
+          }
+        });
+
+        const editBtn = document.createElement("button");
+        editBtn.className = "btn outline";
+        editBtn.textContent = "Editar";
+        editBtn.addEventListener("click", async () => {
+          const fullName = prompt("Nombre", u.fullName || "") || u.fullName || "";
+          const phone = prompt("Teléfono", u.phone || "") || u.phone || "";
+          const role = prompt("Rol (TENANT_ADMIN/TENANT_USER)", u.role || "TENANT_USER") || u.role || "TENANT_USER";
+          const res = await fetch(`/api/tenant/users/${u.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ fullName, phone, role })
+          });
+          const note = document.getElementById("userNote");
+          if (res.ok) {
+            note.textContent = "Usuario actualizado.";
+            renderUsers().catch(() => {});
+          } else {
+            note.textContent = "No se pudo editar.";
+          }
+        });
+
+        const reinviteBtn = document.createElement("button");
+        reinviteBtn.className = "btn outline";
+        reinviteBtn.textContent = "Reinvitar";
+        reinviteBtn.addEventListener("click", async () => {
+          const res = await fetch(`/api/tenant/users/${u.id}/invite`, { method: "POST" });
+          const data = await res.json();
+          const note = document.getElementById("userNote");
+          if (res.ok) {
+            const phoneSafe = String(u.phone || "").replace(/\D/g, "");
+            const fullUrl = data.activationUrl
+              ? `${window.location.origin}${data.activationUrl}`
+              : "";
+            const text = `Hola ${u.fullName || ""}, activa tu cuenta Ainspecciona aquí: ${fullUrl}`;
+            const waUrl = phoneSafe
+              ? `https://wa.me/${phoneSafe}?text=${encodeURIComponent(text)}`
+              : null;
+            note.innerHTML = waUrl
+              ? `Invitación creada. <a href="${waUrl}" target="_blank">Enviar por WhatsApp</a>`
+              : `Invitación creada. Link: ${fullUrl}`;
+            renderUsers().catch(() => {});
+          } else {
+            note.textContent = "No se pudo reinvitar.";
+          }
+        });
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.className = "btn outline";
+        deleteBtn.textContent = "Eliminar";
+        deleteBtn.addEventListener("click", async () => {
+          if (!confirm("¿Eliminar este usuario?")) return;
+          const res = await fetch(`/api/tenant/users/${u.id}`, { method: "DELETE" });
+          const note = document.getElementById("userNote");
+          if (res.ok) {
+            note.textContent = "Usuario eliminado.";
+            renderUsers().catch(() => {});
+          } else {
+            note.textContent = "No se pudo eliminar.";
+          }
+        });
+
+        action.appendChild(activateBtn);
+        action.appendChild(editBtn);
+        action.appendChild(reinviteBtn);
+        action.appendChild(deleteBtn);
+
+        list.appendChild(fullName);
+        list.appendChild(email);
+        list.appendChild(phone);
+        list.appendChild(role);
+        list.appendChild(invited);
+        list.appendChild(status);
+        list.appendChild(action);
+
+        if (u.role === "TENANT_USER") {
+          const opt = document.createElement("option");
+          opt.value = u.id;
+          opt.textContent = u.fullName || u.email;
+          execSelect.appendChild(opt);
+        }
+      });
+    }
+
+    document.getElementById("saveUserBtn").addEventListener("click", async () => {
+      const note = document.getElementById("userNote");
+      const fullName = document.getElementById("userFullName").value.trim();
+      const email = document.getElementById("userEmail").value.trim();
+      const phone = document.getElementById("userPhone").value.trim();
+      const role = document.getElementById("userRole").value;
+      if (!fullName || !email) {
+        note.textContent = "Nombre y email son obligatorios.";
+        return;
+      }
+      const res = await fetch("/api/tenant/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fullName, email, phone, role, action: "save" })
+      });
+      if (res.ok) {
+        note.textContent = "Usuario guardado sin invitación.";
+        document.getElementById("userFullName").value = "";
+        document.getElementById("userEmail").value = "";
+        document.getElementById("userPhone").value = "";
+        document.getElementById("userRole").value = "TENANT_USER";
+        renderUsers().catch(() => {});
+      } else if (res.status === 409) {
+        note.textContent = "El email ya está en uso en otra corredora.";
+      } else {
+        note.textContent = "No se pudo guardar el usuario.";
+      }
+    });
+
+    document.getElementById("inviteUserBtn").addEventListener("click", async () => {
+      const note = document.getElementById("userNote");
+      const fullName = document.getElementById("userFullName").value.trim();
+      const email = document.getElementById("userEmail").value.trim();
+      const phone = document.getElementById("userPhone").value.trim();
+      const role = document.getElementById("userRole").value;
+      if (!fullName || !email) {
+        note.textContent = "Nombre y email son obligatorios.";
+        return;
+      }
+      const res = await fetch("/api/tenant/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fullName, email, phone, role, action: "invite" })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        const phoneSafe = phone.replace(/\D/g, "");
+        const fullUrl = data.activationUrl
+          ? `${window.location.origin}${data.activationUrl}`
+          : "";
+        const text = `Hola ${fullName}, activa tu cuenta Ainspecciona aquí: ${fullUrl}`;
+        const waUrl = phoneSafe
+          ? `https://wa.me/${phoneSafe}?text=${encodeURIComponent(text)}`
+          : null;
+        note.innerHTML = waUrl
+          ? `Invitación creada. <a href="${waUrl}" target="_blank">Enviar por WhatsApp</a>`
+          : `Invitación creada. Link: ${fullUrl}`;
+        document.getElementById("userFullName").value = "";
+        document.getElementById("userEmail").value = "";
+        document.getElementById("userPhone").value = "";
+        document.getElementById("userRole").value = "TENANT_USER";
+        renderUsers().catch(() => {});
+      } else if (res.status === 409) {
+        note.textContent = "El email ya está en uso en otra corredora.";
+      } else {
+        note.textContent = "No se pudo invitar.";
+      }
+    });
+
+    document.getElementById("createCaseBtn").addEventListener("click", async () => {
+      const note = document.getElementById("caseNote");
+      const payload = {
+        propertyType: document.getElementById("casePropertyType").value,
+        bedrooms: Number(document.getElementById("caseBedrooms").value || 0),
+        bathrooms: Number(document.getElementById("caseBathrooms").value || 0),
+        propertyAddress: document.getElementById("caseAddress").value,
+        assignedUserId: document.getElementById("caseExecutive").value || null
+      };
+      const res = await fetch("/api/tenant/inspections", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (res.ok) {
+        note.innerHTML = `Inspección creada. Link captura: <a href="${data.captureUrl}" target="_blank">${data.captureUrl}</a>`;
+      } else {
+        note.textContent = "No se pudo crear la inspección.";
+      }
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      await fetch("/api/tenant/logout", { method: "POST" });
+      window.location.href = "/";
+    });
+
+    function setActiveSection() {
+      const hash = String(window.location.hash || "").replace("#", "");
+      const section = hash || "users";
+      document.querySelectorAll("[data-section]").forEach((el) => {
+        const key = el.getAttribute("data-section");
+        el.classList.toggle("hidden", key !== section);
+      });
+      document.querySelectorAll("[data-section-link]").forEach((el) => {
+        const key = el.getAttribute("data-section-link");
+        el.classList.toggle("active", key === section);
+      });
+    }
+
+    window.addEventListener("hashchange", setActiveSection);
+    setActiveSection();
+
+    loadTenant().then(() => renderUsers()).catch(() => {});
+  </script>
+</body>
+</html>

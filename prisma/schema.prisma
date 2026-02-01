@@ -1,6 +1,7 @@
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 generator client {
@@ -38,8 +39,84 @@ enum SlotStatus {
   NOT_CAPTURABLE
 }
 
+enum TenantStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  TENANT_ADMIN
+  TENANT_USER
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  DISABLED
+}
+
+model Tenant {
+  id        String       @id @default(uuid())
+  name      String
+  legalName String?
+  rut       String?
+  passwordHash String?
+  email     String?
+  phone     String?
+  status    TenantStatus @default(ACTIVE)
+  createdAt DateTime     @default(now())
+
+  users        User[]
+  cases        Case[]
+  owners       Owner[]
+  properties   Property[]
+  slots        Slot[]
+  photos       Photo[]
+  captureTokens CaptureToken[]
+
+  @@index([rut])
+}
+
+model User {
+  id        String     @id @default(uuid())
+  tenantId  String?
+  tenant    Tenant?    @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  email     String     @unique
+  fullName  String
+  phone     String?
+  passwordHash String?
+  role      UserRole   @default(TENANT_USER)
+  status    UserStatus @default(PENDING)
+  invitedAt DateTime?
+  activatedAt DateTime?
+  createdAt DateTime   @default(now())
+
+  activationTokens ActivationToken[]
+  assignedCases Case[] @relation("AssignedCases")
+
+  @@index([tenantId])
+}
+
+model ActivationToken {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
 model Case {
   id           String       @id @default(uuid())
+  tenantId     String?
+  tenant       Tenant?      @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  assignedUserId String?
+  assignedUser   User?      @relation("AssignedCases", fields: [assignedUserId], references: [id], onDelete: SetNull)
   propertyId   String?
   property     Property?    @relation(fields: [propertyId], references: [id], onDelete: SetNull)
   propertyType PropertyType
@@ -62,19 +139,27 @@ model Case {
   captureTokens CaptureToken[]
 
   @@index([propertyId])
+  @@index([tenantId])
+  @@index([assignedUserId])
 }
 
 model Owner {
   id         String     @id @default(uuid())
+  tenantId   String?
+  tenant     Tenant?    @relation(fields: [tenantId], references: [id], onDelete: SetNull)
   fullName   String
   rut        String?    @unique
   createdAt  DateTime   @default(now())
 
   properties Property[]
+
+  @@index([tenantId])
 }
 
 model Property {
   id             String   @id @default(uuid())
+  tenantId       String?
+  tenant         Tenant?  @relation(fields: [tenantId], references: [id], onDelete: SetNull)
   ownerId        String?
   owner          Owner?   @relation(fields: [ownerId], references: [id], onDelete: SetNull)
 
@@ -88,10 +173,13 @@ model Property {
   cases          Case[]
 
   @@index([ownerId])
+  @@index([tenantId])
 }
 
 model Slot {
   id           String     @id @default(uuid())
+  tenantId     String?
+  tenant       Tenant?    @relation(fields: [tenantId], references: [id], onDelete: SetNull)
   caseId       String
   case         Case       @relation(fields: [caseId], references: [id], onDelete: Cascade)
 
@@ -120,6 +208,7 @@ model Slot {
   @@index([caseId])
   @@index([slotCode])
   @@index([photoId])
+  @@index([tenantId])
 }
 
 model Photo {
@@ -130,6 +219,8 @@ model Photo {
   // Relacion inversa para "ultima foto" en Slot
   asLastForSlots Slot[] @relation("SlotLastPhoto")
 
+  tenantId  String?
+  tenant    Tenant?  @relation(fields: [tenantId], references: [id], onDelete: SetNull)
   caseId    String
   case      Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
 
@@ -143,10 +234,13 @@ model Photo {
 
   @@index([slotId])
   @@index([caseId])
+  @@index([tenantId])
 }
 
 model CaptureToken {
   id        String   @id @default(uuid())
+  tenantId  String?
+  tenant    Tenant?  @relation(fields: [tenantId], references: [id], onDelete: SetNull)
   caseId    String
   case      Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
 
@@ -157,4 +251,5 @@ model CaptureToken {
 
   @@index([caseId])
   @@index([expiresAt])
+  @@index([tenantId])
 }

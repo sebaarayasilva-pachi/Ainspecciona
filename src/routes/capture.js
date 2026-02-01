@@ -14,7 +14,7 @@ function isExpired(tokenRow) {
 async function requireCaptureToken(prisma, token) {
   const row = await prisma.captureToken.findUnique({
     where: { token },
-    select: { id: true, token: true, caseId: true, expiresAt: true, revokedAt: true }
+    select: { id: true, token: true, caseId: true, tenantId: true, expiresAt: true, revokedAt: true }
   });
   if (isExpired(row)) return null;
   return row;
@@ -223,6 +223,7 @@ export async function registerCaptureRoutes(app, { prisma, storage, safeExtFromM
         data: {
           id: saved.id,
           slotId: slot.id,
+          tenantId: t.tenantId || null,
           caseId: slot.caseId,
           filePath,
           fileName: originalFileName,

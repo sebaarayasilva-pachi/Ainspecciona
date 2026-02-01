@@ -73,6 +73,33 @@
       font-weight: 800;
       font-size: 14px;
     }
+    .tenantLogin {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .tenantLogin input {
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      font-size: 13px;
+      width: 140px;
+    }
+    .tenantLogin button {
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: none;
+      background: #111827;
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .loginNote {
+      font-size: 12px;
+      color: #64748b;
+    }
     .heroWrap {
       background: #ffffff;
       color: #0f172a;
@@ -209,6 +236,11 @@
         <a href="/faq.html">FAQ</a>
         <a href="/contacto.html">Contacto</a>
         <a class="cta" href="/formulario">Generar inspección</a>
+        <form class="tenantLogin" id="tenantLoginForm">
+          <input id="tenantRut" type="text" placeholder="RUT empresa" />
+          <input id="tenantPass" type="password" placeholder="Clave" />
+          <button type="submit">Login</button>
+        </form>
       </div>
     </div>
   </header>
@@ -274,5 +306,35 @@
       <div>Audit-ready · Evidencia por slot · White-label</div>
     </div>
   </footer>
+  <script>
+    const loginForm = document.getElementById("tenantLoginForm");
+    const loginRut = document.getElementById("tenantRut");
+    const loginPass = document.getElementById("tenantPass");
+    if (loginForm) {
+      const note = document.createElement("div");
+      note.className = "loginNote";
+      loginForm.appendChild(note);
+      loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        note.textContent = "";
+        const rut = loginRut.value.trim();
+        const password = loginPass.value;
+        if (!rut || !password) {
+          note.textContent = "Completa RUT y clave.";
+          return;
+        }
+        const res = await fetch("/api/tenant/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ rut, password })
+        });
+        if (res.ok) {
+          window.location.href = "/tenant";
+          return;
+        }
+        note.textContent = "Credenciales inválidas.";
+      });
+    }
+  </script>
 </body>
 </html>
