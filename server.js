@@ -398,7 +398,18 @@ fastify.get('/api/admin/tenants', async (req, reply) => {
   const tenants = await prisma.tenant.findMany({
     orderBy: { createdAt: 'desc' }
   });
-  return reply.send({ ok: true, tenants });
+  const rows = tenants.map((t) => ({
+    id: t.id,
+    name: t.name,
+    legalName: t.legalName,
+    rut: t.rut,
+    email: t.email,
+    phone: t.phone,
+    status: t.status,
+    createdAt: t.createdAt,
+    passwordSet: !!t.passwordHash
+  }));
+  return reply.send({ ok: true, tenants: rows });
 });
 
 fastify.post('/api/admin/tenants', async (req, reply) => {
@@ -406,12 +417,16 @@ fastify.post('/api/admin/tenants', async (req, reply) => {
   const name = String(payload.name || '').trim();
   if (!name) return reply.code(400).send({ ok: false, error: 'NAME_REQUIRED' });
   const rut = normalizeRut(payload.rut);
+  const passwordRaw = String(payload.password || '').trim();
+  if (passwordRaw && passwordRaw.length < 6) {
+    return reply.code(400).send({ ok: false, error: 'PASSWORD_TOO_SHORT' });
+  }
   const tenant = await prisma.tenant.create({
     data: {
       name,
       legalName: payload.legalName ? String(payload.legalName).trim() : null,
       rut: rut || null,
-      passwordHash: payload.password ? hashPassword(String(payload.password)) : null,
+      passwordHash: passwordRaw ? hashPassword(passwordRaw) : null,
       email: payload.email ? String(payload.email).trim() : null,
       phone: payload.phone ? String(payload.phone).trim() : null,
       status: 'ACTIVE'
@@ -424,13 +439,17 @@ fastify.put('/api/admin/tenants/:tenantId', async (req, reply) => {
   const tenantId = String(req.params.tenantId || '');
   const payload = req.body || {};
   const rut = payload.rut !== undefined ? normalizeRut(payload.rut) : undefined;
+  const passwordRaw = String(payload.password || '').trim();
+  if (passwordRaw && passwordRaw.length < 6) {
+    return reply.code(400).send({ ok: false, error: 'PASSWORD_TOO_SHORT' });
+  }
   const tenant = await prisma.tenant.update({
     where: { id: tenantId },
     data: {
       name: payload.name ? String(payload.name).trim() : undefined,
       legalName: payload.legalName !== undefined ? (payload.legalName ? String(payload.legalName).trim() : null) : undefined,
       rut: rut !== undefined ? (rut || null) : undefined,
-      passwordHash: payload.password ? hashPassword(String(payload.password)) : undefined,
+      passwordHash: passwordRaw ? hashPassword(passwordRaw) : undefined,
       email: payload.email !== undefined ? (payload.email ? String(payload.email).trim() : null) : undefined,
       phone: payload.phone !== undefined ? (payload.phone ? String(payload.phone).trim() : null) : undefined,
       status: payload.status ? String(payload.status) : undefined

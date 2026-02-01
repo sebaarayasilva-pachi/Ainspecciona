@@ -827,6 +827,9 @@
         password.type = "password";
         password.placeholder = "Nueva clave";
         password.className = "smallInput";
+        const passNote = document.createElement("div");
+        passNote.className = "note";
+        passNote.textContent = t.passwordSet ? "Clave configurada." : "Clave pendiente.";
 
         const status = document.createElement("select");
         status.className = "smallInput";
@@ -885,7 +888,12 @@
         container.appendChild(nameWrap);
         container.appendChild(legalName);
         container.appendChild(rut);
-        container.appendChild(password);
+        const passWrap = document.createElement("div");
+        passWrap.style.display = "grid";
+        passWrap.style.gap = "6px";
+        passWrap.appendChild(password);
+        passWrap.appendChild(passNote);
+        container.appendChild(passWrap);
         container.appendChild(email);
         container.appendChild(phone);
         container.appendChild(status);
