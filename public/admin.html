@@ -527,6 +527,7 @@
       <div class="card">
         <h3>Listado de corredoras</h3>
         <div class="kpiSubtle">Edita nombre, razón social, RUT, contacto y estado.</div>
+        <div id="tenantNote" class="note"></div>
         <div id="tenantsEmpty" class="note">Aún no hay corredoras registradas.</div>
         <div class="tenantGrid" id="tenantsTable"></div>
         <div id="tenantUsersWrap"></div>
@@ -842,7 +843,7 @@
         btn.type = "button";
         btn.textContent = "Guardar";
         btn.addEventListener("click", async () => {
-          await fetch(`/api/admin/tenants/${t.id}`, {
+          const res = await fetch(`/api/admin/tenants/${t.id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -855,6 +856,14 @@
               status: status.value
             })
           });
+          const note = document.getElementById("tenantNote");
+          if (res.ok) {
+            note.textContent = password.value
+              ? "Corredora guardada y clave actualizada."
+              : "Corredora guardada.";
+          } else {
+            note.textContent = "No se pudo guardar la corredora.";
+          }
           password.value = "";
           loadTenants().catch(() => {});
         });
@@ -1047,7 +1056,7 @@
       const email = document.getElementById("tenantEmail").value.trim();
       const phone = document.getElementById("tenantPhone").value.trim();
       if (!name) return alert("Nombre requerido.");
-      await fetch("/api/admin/tenants", {
+      const res = await fetch("/api/admin/tenants", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1059,6 +1068,12 @@
           phone: phone || null
         })
       });
+      const note = document.getElementById("tenantNote");
+      if (res.ok) {
+        note.textContent = "Corredora creada.";
+      } else {
+        note.textContent = "No se pudo crear la corredora.";
+      }
       document.getElementById("tenantName").value = "";
       document.getElementById("tenantLegalName").value = "";
       document.getElementById("tenantRut").value = "";

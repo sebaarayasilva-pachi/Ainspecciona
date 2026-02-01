@@ -85,6 +85,12 @@ function verifyPassword(password, stored) {
   return crypto.timingSafeEqual(Buffer.from(hash, 'hex'), Buffer.from(derived, 'hex'));
 }
 
+function normalizeRut(value) {
+  return String(value || '')
+    .replace(/[^0-9kK]/g, '')
+    .toUpperCase();
+}
+
 function createTenantSession(tenantId) {
   const token = crypto.randomUUID();
   tenantSessions.set(token, { tenantId, createdAt: Date.now() });
@@ -399,11 +405,12 @@ fastify.post('/api/admin/tenants', async (req, reply) => {
   const payload = req.body || {};
   const name = String(payload.name || '').trim();
   if (!name) return reply.code(400).send({ ok: false, error: 'NAME_REQUIRED' });
+  const rut = normalizeRut(payload.rut);
   const tenant = await prisma.tenant.create({
     data: {
       name,
       legalName: payload.legalName ? String(payload.legalName).trim() : null,
-      rut: payload.rut ? String(payload.rut).trim() : null,
+      rut: rut || null,
       passwordHash: payload.password ? hashPassword(String(payload.password)) : null,
       email: payload.email ? String(payload.email).trim() : null,
       phone: payload.phone ? String(payload.phone).trim() : null,
@@ -416,12 +423,13 @@ fastify.post('/api/admin/tenants', async (req, reply) => {
 fastify.put('/api/admin/tenants/:tenantId', async (req, reply) => {
   const tenantId = String(req.params.tenantId || '');
   const payload = req.body || {};
+  const rut = payload.rut !== undefined ? normalizeRut(payload.rut) : undefined;
   const tenant = await prisma.tenant.update({
     where: { id: tenantId },
     data: {
       name: payload.name ? String(payload.name).trim() : undefined,
       legalName: payload.legalName !== undefined ? (payload.legalName ? String(payload.legalName).trim() : null) : undefined,
-      rut: payload.rut !== undefined ? (payload.rut ? String(payload.rut).trim() : null) : undefined,
+      rut: rut !== undefined ? (rut || null) : undefined,
       passwordHash: payload.password ? hashPassword(String(payload.password)) : undefined,
       email: payload.email !== undefined ? (payload.email ? String(payload.email).trim() : null) : undefined,
       phone: payload.phone !== undefined ? (payload.phone ? String(payload.phone).trim() : null) : undefined,
@@ -517,14 +525,27 @@ fastify.post('/api/admin/users/:userId/invite', async (req, reply) => {
 
 fastify.post('/api/tenant/login', async (req, reply) => {
   const payload = req.body || {};
-  const rut = String(payload.rut || '').trim();
+  const rutRaw = String(payload.rut || '').trim();
+  const rut = normalizeRut(rutRaw);
   const password = String(payload.password || '');
   if (!rut || !password) return reply.code(400).send({ ok: false, error: 'RUT_AND_PASSWORD_REQUIRED' });
 
   const tenant = await prisma.tenant.findFirst({
-    where: { rut, status: 'ACTIVE' }
+    where: {
+      status: 'ACTIVE',
+      OR: [
+        { rut },
+        { rut: rutRaw }
+      ]
+    }
   });
-  if (!tenant || !verifyPassword(password, tenant.passwordHash)) {
+  if (!tenant) {
+    return reply.code(401).send({ ok: false, error: 'INVALID_CREDENTIALS' });
+  }
+  if (!tenant.passwordHash) {
+    return reply.code(401).send({ ok: false, error: 'PASSWORD_NOT_SET' });
+  }
+  if (!verifyPassword(password, tenant.passwordHash)) {
     return reply.code(401).send({ ok: false, error: 'INVALID_CREDENTIALS' });
   }
 

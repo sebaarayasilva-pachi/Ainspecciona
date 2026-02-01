@@ -332,7 +332,14 @@
           window.location.href = "/tenant";
           return;
         }
-        note.textContent = "Credenciales inválidas.";
+        let msg = "Credenciales inválidas.";
+        try {
+          const data = await res.json();
+          if (data?.error === "PASSWORD_NOT_SET") {
+            msg = "Clave no configurada. Define clave en admin.";
+          }
+        } catch {}
+        note.textContent = msg;
       });
     }
   </script>
