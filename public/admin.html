@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin · Ainspecciona</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #F6F7F9;
+      color: #0f172a;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: #ffffff;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .nav {
+      max-width: none;
+      margin: 0;
+      padding: 20px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: inherit;
+      font-weight: 800;
+    }
+    .brand img { height: 70px; }
+    .links {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .links a {
+      text-decoration: none;
+      color: #1f2937;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .cta {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      text-decoration: none;
+      font-weight: 800;
+      font-size: 14px;
+    }
+    main {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: calc(100vh - 96px);
+    }
+    aside {
+      background: #ffffff;
+      border-right: 1px solid #e5e7eb;
+      padding: 24px 18px;
+    }
+    .asideTitle {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #64748b;
+      margin: 0 0 12px;
+      font-weight: 700;
+    }
+    .menu {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .menu a {
+      text-decoration: none;
+      color: #0f172a;
+      font-weight: 600;
+      padding: 10px 12px;
+      border-radius: 10px;
+    }
+    .menu a.active {
+      background: #eef2ff;
+      color: #1d4ed8;
+    }
+    .content {
+      padding: 28px 28px 80px;
+    }
+    .card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+      margin-bottom: 18px;
+    }
+    h1 { margin: 0 0 8px; font-size: 26px; }
+    .muted { color: #64748b; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .kpiRows {
+      display: grid;
+      grid-template-columns: 120px 120px 1fr;
+      gap: 10px;
+      align-items: center;
+    }
+    .recRows {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 10px;
+      align-items: center;
+    }
+    .kpiRow { display: contents; }
+    .kpiHeader {
+      font-size: 12px;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 700;
+    }
+    .kpiCard {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    .kpiTitle {
+      margin: 0 0 6px;
+      font-size: 18px;
+    }
+    .kpiSubtle {
+      font-size: 12px;
+      color: #64748b;
+      margin-bottom: 10px;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 120px;
+      gap: 10px;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .row:last-child { border-bottom: none; }
+    label { font-weight: 600; font-size: 14px; }
+    input[type="number"] {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      font-size: 14px;
+    }
+    textarea {
+      width: 100%;
+      min-height: 70px;
+      resize: vertical;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      font-size: 13px;
+      font-family: inherit;
+    }
+    .kpiBlock {
+      border-top: 1px solid #f1f5f9;
+      padding-top: 12px;
+      margin-top: 12px;
+    }
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-weight: 700;
+      border: 1px solid transparent;
+      background: #2563eb;
+      color: #fff;
+      cursor: pointer;
+    }
+    .btn.outline {
+      background: #fff;
+      color: #1f2937;
+      border-color: #e5e7eb;
+    }
+    .note {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 10px;
+    }
+    @media (max-width: 900px) {
+      main { grid-template-columns: 1fr; }
+      aside { border-right: none; border-bottom: 1px solid #e5e7eb; }
+      .grid { grid-template-columns: 1fr; }
+      .kpiRows { grid-template-columns: 1fr; }
+      .recRows { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav">
+      <a class="brand" href="/">
+        <img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" />
+      </a>
+      <div class="links">
+        <a href="/dashboard">Dashboard</a>
+        <a class="cta" href="/formulario">Generar inspección</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <aside>
+      <div class="asideTitle">Admin</div>
+      <nav class="menu">
+        <a class="active" href="#score">Score</a>
+      </nav>
+    </aside>
+
+    <section class="content" id="score">
+      <h1>Score por KPI</h1>
+      <div class="muted">Organiza el score y el mensaje base por cada KPI.</div>
+
+      <div class="card kpiCard">
+        <div>
+          <h3 class="kpiTitle">Humedad</h3>
+          <div class="kpiSubtle">Severidad, puntaje y mensaje base</div>
+          <div class="kpiRows">
+            <div class="kpiHeader">Severidad</div>
+            <div class="kpiHeader">Puntaje</div>
+            <div class="kpiHeader">Mensaje base</div>
+            <div class="kpiRow">
+              <label>Bajo</label>
+              <input id="kpiHumedadLow" type="number" step="1" min="0" />
+              <textarea id="msgHumedadLow"></textarea>
+            </div>
+            <div class="kpiRow">
+              <label>Medio</label>
+              <input id="kpiHumedadMed" type="number" step="1" min="0" />
+              <textarea id="msgHumedadMed"></textarea>
+            </div>
+            <div class="kpiRow">
+              <label>Alto</label>
+              <input id="kpiHumedadHigh" type="number" step="1" min="0" />
+              <textarea id="msgHumedadHigh"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card kpiCard">
+        <div>
+          <h3 class="kpiTitle">Pintura</h3>
+          <div class="kpiSubtle">Severidad, puntaje y mensaje base</div>
+          <div class="kpiRows">
+            <div class="kpiHeader">Severidad</div>
+            <div class="kpiHeader">Puntaje</div>
+            <div class="kpiHeader">Mensaje base</div>
+            <div class="kpiRow">
+              <label>Bajo</label>
+              <input id="kpiPinturaLow" type="number" step="1" min="0" />
+              <textarea id="msgPinturaLow"></textarea>
+            </div>
+            <div class="kpiRow">
+              <label>Medio</label>
+              <input id="kpiPinturaMed" type="number" step="1" min="0" />
+              <textarea id="msgPinturaMed"></textarea>
+            </div>
+            <div class="kpiRow">
+              <label>Alto</label>
+              <input id="kpiPinturaHigh" type="number" step="1" min="0" />
+              <textarea id="msgPinturaHigh"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card kpiCard">
+        <div>
+          <h3 class="kpiTitle">Pisos</h3>
+          <div class="kpiSubtle">Severidad, puntaje y mensaje base</div>
+          <div class="kpiRows">
+            <div class="kpiHeader">Severidad</div>
+            <div class="kpiHeader">Puntaje</div>
+            <div class="kpiHeader">Mensaje base</div>
+            <div class="kpiRow">
+              <label>Bajo</label>
+              <input id="kpiPisosLow" type="number" step="1" min="0" />
+              <textarea id="msgPisosLow"></textarea>
+            </div>
+            <div class="kpiRow">
+              <label>Medio</label>
+              <input id="kpiPisosMed" type="number" step="1" min="0" />
+              <textarea id="msgPisosMed"></textarea>
+            </div>
+            <div class="kpiRow">
+              <label>Alto</label>
+              <input id="kpiPisosHigh" type="number" step="1" min="0" />
+              <textarea id="msgPisosHigh"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card kpiCard">
+        <div>
+          <h3 class="kpiTitle">Sanitarios</h3>
+          <div class="kpiSubtle">Severidad, puntaje y mensaje base</div>
+          <div class="kpiRows">
+            <div class="kpiHeader">Severidad</div>
+            <div class="kpiHeader">Puntaje</div>
+            <div class="kpiHeader">Mensaje base</div>
+            <div class="kpiRow">
+              <label>Bajo</label>
+              <input id="kpiSanitariosLow" type="number" step="1" min="0" />
+              <textarea id="msgSanitariosLow"></textarea>
+            </div>
+            <div class="kpiRow">
+              <label>Medio</label>
+              <input id="kpiSanitariosMed" type="number" step="1" min="0" />
+              <textarea id="msgSanitariosMed"></textarea>
+            </div>
+            <div class="kpiRow">
+              <label>Alto</label>
+              <input id="kpiSanitariosHigh" type="number" step="1" min="0" />
+              <textarea id="msgSanitariosHigh"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card kpiCard">
+        <div>
+          <h3 class="kpiTitle">Electricidad</h3>
+          <div class="kpiSubtle">Severidad, puntaje y mensaje base</div>
+          <div class="kpiRows">
+            <div class="kpiHeader">Severidad</div>
+            <div class="kpiHeader">Puntaje</div>
+            <div class="kpiHeader">Mensaje base</div>
+            <div class="kpiRow">
+              <label>Bajo</label>
+              <input id="kpiElectricidadLow" type="number" step="1" min="0" />
+              <textarea id="msgElectricidadLow"></textarea>
+            </div>
+            <div class="kpiRow">
+              <label>Medio</label>
+              <input id="kpiElectricidadMed" type="number" step="1" min="0" />
+              <textarea id="msgElectricidadMed"></textarea>
+            </div>
+            <div class="kpiRow">
+              <label>Alto</label>
+              <input id="kpiElectricidadHigh" type="number" step="1" min="0" />
+              <textarea id="msgElectricidadHigh"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card kpiCard">
+        <div>
+          <h3 class="kpiTitle">Ventanas</h3>
+          <div class="kpiSubtle">Severidad, puntaje y mensaje base</div>
+          <div class="kpiRows">
+            <div class="kpiHeader">Severidad</div>
+            <div class="kpiHeader">Puntaje</div>
+            <div class="kpiHeader">Mensaje base</div>
+            <div class="kpiRow">
+              <label>Bajo</label>
+              <input id="kpiVentanasLow" type="number" step="1" min="0" />
+              <textarea id="msgVentanasLow"></textarea>
+            </div>
+            <div class="kpiRow">
+              <label>Medio</label>
+              <input id="kpiVentanasMed" type="number" step="1" min="0" />
+              <textarea id="msgVentanasMed"></textarea>
+            </div>
+            <div class="kpiRow">
+              <label>Alto</label>
+              <input id="kpiVentanasHigh" type="number" step="1" min="0" />
+              <textarea id="msgVentanasHigh"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Rangos de badge</h3>
+        <div class="row">
+          <label for="badgeYellow">Amarillo desde</label>
+          <input id="badgeYellow" type="number" step="1" min="0" max="100" />
+        </div>
+        <div class="row">
+          <label for="badgeGreen">Verde desde</label>
+          <input id="badgeGreen" type="number" step="1" min="0" max="100" />
+        </div>
+      </div>
+
+
+      <div class="card">
+        <h3>Recomendación por badge</h3>
+        <div class="kpiSubtle">Badge y recomendación</div>
+        <div class="recRows">
+          <div class="kpiHeader">Badge</div>
+          <div class="kpiHeader">Mensaje</div>
+          <div class="kpiRow">
+            <label for="recGreen">Verde</label>
+            <textarea id="recGreen"></textarea>
+          </div>
+          <div class="kpiRow">
+            <label for="recYellow">Amarillo</label>
+            <textarea id="recYellow"></textarea>
+          </div>
+          <div class="kpiRow">
+            <label for="recRed">Rojo</label>
+            <textarea id="recRed"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn" id="saveBtn" type="button">Guardar cambios</button>
+        <button class="btn outline" id="resetBtn" type="button">Restaurar valores</button>
+      </div>
+      <div class="note">Los cambios se guardan en este navegador (local). Luego podemos conectarlo al backend.</div>
+    </section>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "ainspectaScoreConfig";
+    const defaultConfig = {
+      kpis: {
+        HUMEDAD: { low: 5, medium: 15, high: 30 },
+        PINTURA: { low: 5, medium: 15, high: 30 },
+        PISOS: { low: 5, medium: 15, high: 30 },
+        SANITARIOS: { low: 5, medium: 15, high: 30 },
+        ELECTRICIDAD: { low: 5, medium: 15, high: 30 },
+        VENTANAS: { low: 5, medium: 15, high: 30 }
+      },
+      messages: {
+        HUMEDAD: {
+          low: "Se observan indicios leves de humedad superficial en el área inspeccionada.",
+          medium: "Se observan señales visibles de humedad en el área inspeccionada.",
+          high: "Se observan evidencias visibles de humedad extendida en el área inspeccionada."
+        },
+        PINTURA: {
+          low: "Se observan imperfecciones menores en la pintura del área inspeccionada.",
+          medium: "Se observan deterioros visibles en la pintura del área inspeccionada.",
+          high: "Se observan deterioros relevantes en la pintura del área inspeccionada."
+        },
+        PISOS: {
+          low: "Se observan marcas o desgaste leve en el piso del área inspeccionada.",
+          medium: "Se observan desgaste o daños visibles en el piso del área inspeccionada.",
+          high: "Se observan daños visibles relevantes en el piso del área inspeccionada."
+        },
+        SANITARIOS: {
+          low: "Se observan condiciones visibles menores en artefactos sanitarios del área inspeccionada.",
+          medium: "Se observan condiciones visibles en artefactos sanitarios del área inspeccionada.",
+          high: "Se observan condiciones visibles relevantes en artefactos sanitarios del área inspeccionada."
+        },
+        ELECTRICIDAD: {
+          low: "Se observan condiciones visibles menores en elementos eléctricos del área inspeccionada.",
+          medium: "Se observan condiciones visibles en elementos eléctricos del área inspeccionada.",
+          high: "Se observan condiciones visibles relevantes en elementos eléctricos del área inspeccionada."
+        },
+        VENTANAS: {
+          low: "Se observan condiciones visibles menores en ventanas o marcos del área inspeccionada.",
+          medium: "Se observan condiciones visibles en ventanas o marcos del área inspeccionada.",
+          high: "Se observan condiciones visibles relevantes en ventanas o marcos del área inspeccionada."
+        }
+      },
+      recommendations: {
+        GREEN: "Se recomienda mantener seguimiento y control preventivo.",
+        YELLOW: "Se recomienda revisar y monitorear el estado observado.",
+        RED: "Se recomienda una revisión técnica detallada del hallazgo."
+      },
+      badge: { yellowFrom: 60, greenFrom: 85 }
+    };
+
+    const fields = [
+      { id: "kpiHumedadLow", path: "kpis.HUMEDAD.low", type: "number" },
+      { id: "kpiHumedadMed", path: "kpis.HUMEDAD.medium", type: "number" },
+      { id: "kpiHumedadHigh", path: "kpis.HUMEDAD.high", type: "number" },
+      { id: "kpiPinturaLow", path: "kpis.PINTURA.low", type: "number" },
+      { id: "kpiPinturaMed", path: "kpis.PINTURA.medium", type: "number" },
+      { id: "kpiPinturaHigh", path: "kpis.PINTURA.high", type: "number" },
+      { id: "kpiPisosLow", path: "kpis.PISOS.low", type: "number" },
+      { id: "kpiPisosMed", path: "kpis.PISOS.medium", type: "number" },
+      { id: "kpiPisosHigh", path: "kpis.PISOS.high", type: "number" },
+      { id: "kpiSanitariosLow", path: "kpis.SANITARIOS.low", type: "number" },
+      { id: "kpiSanitariosMed", path: "kpis.SANITARIOS.medium", type: "number" },
+      { id: "kpiSanitariosHigh", path: "kpis.SANITARIOS.high", type: "number" },
+      { id: "kpiElectricidadLow", path: "kpis.ELECTRICIDAD.low", type: "number" },
+      { id: "kpiElectricidadMed", path: "kpis.ELECTRICIDAD.medium", type: "number" },
+      { id: "kpiElectricidadHigh", path: "kpis.ELECTRICIDAD.high", type: "number" },
+      { id: "kpiVentanasLow", path: "kpis.VENTANAS.low", type: "number" },
+      { id: "kpiVentanasMed", path: "kpis.VENTANAS.medium", type: "number" },
+      { id: "kpiVentanasHigh", path: "kpis.VENTANAS.high", type: "number" },
+      { id: "badgeYellow", path: "badge.yellowFrom", type: "number" },
+      { id: "badgeGreen", path: "badge.greenFrom", type: "number" },
+      { id: "msgHumedadLow", path: "messages.HUMEDAD.low", type: "text" },
+      { id: "msgHumedadMed", path: "messages.HUMEDAD.medium", type: "text" },
+      { id: "msgHumedadHigh", path: "messages.HUMEDAD.high", type: "text" },
+      { id: "msgPinturaLow", path: "messages.PINTURA.low", type: "text" },
+      { id: "msgPinturaMed", path: "messages.PINTURA.medium", type: "text" },
+      { id: "msgPinturaHigh", path: "messages.PINTURA.high", type: "text" },
+      { id: "msgPisosLow", path: "messages.PISOS.low", type: "text" },
+      { id: "msgPisosMed", path: "messages.PISOS.medium", type: "text" },
+      { id: "msgPisosHigh", path: "messages.PISOS.high", type: "text" },
+      { id: "msgSanitariosLow", path: "messages.SANITARIOS.low", type: "text" },
+      { id: "msgSanitariosMed", path: "messages.SANITARIOS.medium", type: "text" },
+      { id: "msgSanitariosHigh", path: "messages.SANITARIOS.high", type: "text" },
+      { id: "msgElectricidadLow", path: "messages.ELECTRICIDAD.low", type: "text" },
+      { id: "msgElectricidadMed", path: "messages.ELECTRICIDAD.medium", type: "text" },
+      { id: "msgElectricidadHigh", path: "messages.ELECTRICIDAD.high", type: "text" },
+      { id: "msgVentanasLow", path: "messages.VENTANAS.low", type: "text" },
+      { id: "msgVentanasMed", path: "messages.VENTANAS.medium", type: "text" },
+      { id: "msgVentanasHigh", path: "messages.VENTANAS.high", type: "text" },
+      { id: "recGreen", path: "recommendations.GREEN", type: "text" },
+      { id: "recYellow", path: "recommendations.YELLOW", type: "text" },
+      { id: "recRed", path: "recommendations.RED", type: "text" }
+    ];
+
+    function normalizeConfig(input) {
+      const next = JSON.parse(JSON.stringify(defaultConfig));
+      if (!input || typeof input !== "object") return next;
+      if (input.kpis) {
+        Object.keys(next.kpis).forEach((key) => {
+          const src = input.kpis[key] || {};
+          next.kpis[key] = {
+            low: Number.isFinite(src.low) ? src.low : next.kpis[key].low,
+            medium: Number.isFinite(src.medium) ? src.medium : next.kpis[key].medium,
+            high: Number.isFinite(src.high) ? src.high : next.kpis[key].high
+          };
+        });
+      }
+      if (input.messages) {
+        Object.keys(next.messages).forEach((key) => {
+          const src = input.messages[key] || {};
+          next.messages[key] = {
+            low: src.low || next.messages[key].low,
+            medium: src.medium || next.messages[key].medium,
+            high: src.high || next.messages[key].high
+          };
+        });
+      }
+      if (input.recommendations) {
+        next.recommendations = {
+          GREEN: input.recommendations.GREEN || next.recommendations.GREEN,
+          YELLOW: input.recommendations.YELLOW || next.recommendations.YELLOW,
+          RED: input.recommendations.RED || next.recommendations.RED
+        };
+      }
+      if (input.badge) {
+        next.badge = {
+          yellowFrom: Number.isFinite(input.badge.yellowFrom) ? input.badge.yellowFrom : next.badge.yellowFrom,
+          greenFrom: Number.isFinite(input.badge.greenFrom) ? input.badge.greenFrom : next.badge.greenFrom
+        };
+      }
+      return next;
+    }
+
+    async function fetchConfig() {
+      try {
+        const res = await fetch("/api/admin/score-config");
+        const data = await res.json();
+        if (res.ok && data?.config?.kpis) {
+          const normalized = normalizeConfig(data.config);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
+          return normalized;
+        }
+      } catch {}
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return normalizeConfig(null);
+      try {
+        const parsed = JSON.parse(raw);
+        if (!parsed?.kpis) return normalizeConfig(null);
+        return normalizeConfig(parsed);
+      } catch {
+        return normalizeConfig(null);
+      }
+    }
+
+    function setLocalConfig(cfg) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg));
+    }
+
+    function getByPath(obj, path) {
+      return path.split(".").reduce((acc, key) => acc?.[key], obj);
+    }
+
+    function setByPath(obj, path, value) {
+      const keys = path.split(".");
+      let ref = obj;
+      keys.slice(0, -1).forEach((k) => {
+        if (!ref[k]) ref[k] = {};
+        ref = ref[k];
+      });
+      ref[keys[keys.length - 1]] = value;
+    }
+
+    async function loadForm() {
+      const cfg = await fetchConfig();
+      fields.forEach(({ id, path }) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.value = getByPath(cfg, path);
+      });
+    }
+
+    async function saveForm() {
+      const cfg = await fetchConfig();
+      fields.forEach(({ id, path, type }) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (type === "number") {
+          const val = Number(el.value);
+          setByPath(cfg, path, Number.isFinite(val) ? val : getByPath(defaultConfig, path));
+        } else {
+          const val = String(el.value || "").trim();
+          setByPath(cfg, path, val || getByPath(defaultConfig, path));
+        }
+      });
+      setLocalConfig(cfg);
+      try {
+        const res = await fetch("/api/admin/score-config", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ config: cfg })
+        });
+        if (res.ok) {
+          alert("Cambios guardados.");
+          return;
+        }
+      } catch {}
+      alert("Cambios guardados localmente.");
+    }
+
+    async function resetForm() {
+      const reset = JSON.parse(JSON.stringify(defaultConfig));
+      setLocalConfig(reset);
+      try {
+        await fetch("/api/admin/score-config", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ config: reset })
+        });
+      } catch {}
+      await loadForm();
+    }
+
+    document.getElementById("saveBtn").addEventListener("click", () => saveForm());
+    document.getElementById("resetBtn").addEventListener("click", () => resetForm());
+    loadForm().catch(() => {});
+  </script>
+</body>
+</html>

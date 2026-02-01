@@ -1,4 +1,4 @@
-import { computeScoringV2_2, badgeFromScore } from '../scoring/scoringV2_2.js';
+import { computeScoringV2_2, badgeFromScore, classifyKpiFromSlot } from '../scoring/scoringV2_2.js';
 import { mapFindingToProblemType } from '../scoring/problemMapV2_2.js';
 
 function normalizeSource(code) {
@@ -6,7 +6,7 @@ function normalizeSource(code) {
   return 'V1';
 }
 
-export async function getCaseSummary({ prisma, storage, caseId, slotGroupTitleFromCode }) {
+export async function getCaseSummary({ prisma, storage, caseId, slotGroupTitleFromCode, scoreConfig }) {
   const c = await prisma.case.findUnique({
     where: { id: caseId },
     include: {
@@ -18,6 +18,13 @@ export async function getCaseSummary({ prisma, storage, caseId, slotGroupTitleFr
 
   const slots = (c.slots || []).map((s) => {
     const group = slotGroupTitleFromCode ? slotGroupTitleFromCode(s.slotCode) : { groupKey: 'OTHER', groupTitle: 'Otros' };
+    const kpiKey = classifyKpiFromSlot({
+      findingCode: s.analysisCode,
+      slotCode: s.slotCode,
+      title: s.title,
+      message: s.analysisMessage
+    });
+
     return {
       id: s.id,
       slotCode: s.slotCode,
@@ -32,6 +39,7 @@ export async function getCaseSummary({ prisma, storage, caseId, slotGroupTitleFr
       source: normalizeSource(s.analysisCode),
       groupKey: group.groupKey,
       groupTitle: group.groupTitle,
+      kpiKey,
       photoUrl: s.photo?.filePath ? storage.publicUrl(s.photo.filePath) : null
     };
   });
@@ -48,14 +56,14 @@ export async function getCaseSummary({ prisma, storage, caseId, slotGroupTitleFr
     }))
     .filter((f) => !!f.problemType);
 
-  const scoring = computeScoringV2_2(findingsNormalized, slots);
+  const scoring = computeScoringV2_2(findingsNormalized, slots, scoreConfig);
 
   return {
     ok: true,
     case: c,
     slots,
     score: scoring.score ?? 0,
-    badge: scoring.badge || badgeFromScore(scoring.score ?? 0),
+    badge: scoring.badge || badgeFromScore(scoring.score ?? 0, scoreConfig),
     byGroup: scoring.byGroup || []
   };
 }

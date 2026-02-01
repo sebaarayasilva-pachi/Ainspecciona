@@ -254,7 +254,7 @@
       });
     }
 
-    function renderKpiSections(kpiGroups) {
+    function renderKpiSections(kpiGroups, scoreConfig) {
       const container = document.getElementById("kpiSections");
       const defs = document.querySelector("#reportSvg defs");
       container.innerHTML = "";
@@ -263,7 +263,7 @@
       const cardW = 1040;
       const headerOffset = 55;
       const slotStartOffset = 110;
-      const slotH = 78;
+      const slotH = 96;
       const slotGap = 8;
 
       kpiGroups.forEach((g) => {
@@ -310,6 +310,13 @@
           const analyzedAt = s.analyzedAt ? formatDate(s.analyzedAt) : "—";
           const code = s.findingCode || s.slotCode || "";
           const evidenceUrl = s.photoUrl || null;
+          const baseMsg = baseMessageFor(s, scoreConfig);
+          const aiCtx = aiContextFrom(s);
+          const recMsg = recommendationFor(g.badge, scoreConfig);
+          const baseLine = `${baseMsg} · Recomendación: ${recMsg}`;
+          const aiLine = aiCtx
+            ? `En la imagen se observa: ${aiCtx}`
+            : "En la imagen se observa: Sin observaciones adicionales.";
 
           container.appendChild(createSvg("rect", { x: 72, y: slotY, width: 1000, height: slotH, rx: 12, fill: "#FFFFFF", stroke: "#E5E7EB" }));
           container.appendChild(createSvg("rect", { x: 88, y: slotY + 12, width: 64, height: 54, rx: 10, fill: "#E5E7EB" }));
@@ -344,15 +351,17 @@
           container.appendChild(createSvg("text", { x: 170, y: slotY + 52, "font-size": 12, fill: "#111827", "font-weight": 700 })).textContent =
             `Ambiente: ${s.groupTitle || ""} · Slot: ${s.title || ""} · Confianza: ${conf} · Fuente: ${sourceLabel} · Fecha: ${analyzedAt}`;
           container.appendChild(createSvg("text", { x: 170, y: slotY + 72, "font-size": 11, fill: "#6B7280" })).textContent =
-            s.message || "Sin observaciones.";
+            baseLine;
+          container.appendChild(createSvg("text", { x: 170, y: slotY + 88, "font-size": 11, fill: "#6B7280" })).textContent =
+            aiLine;
 
           if (evidenceUrl) {
             const link = createSvg("a", { href: evidenceUrl, target: "_blank" });
-            const txt = createSvg("text", { x: 965, y: slotY + 62, "font-size": 12, fill: "#2563EB", "text-anchor": "end" });
+            const txt = createSvg("text", { x: 965, y: slotY + 80, "font-size": 12, fill: "#2563EB", "text-anchor": "end" });
             txt.textContent = "Ver evidencia";
             link.appendChild(txt);
             container.appendChild(link);
-            container.appendChild(createSvg("line", { x1: 890, y1: slotY + 66, x2: 965, y2: slotY + 66, stroke: "#2563EB", "stroke-width": 1 }));
+            container.appendChild(createSvg("line", { x1: 890, y1: slotY + 84, x2: 965, y2: slotY + 84, stroke: "#2563EB", "stroke-width": 1 }));
           }
         });
 
@@ -376,6 +385,90 @@
       document.getElementById("pageCard").setAttribute("height", String(newHeight - 140));
     }
 
+    const DEFAULT_SCORE_CONFIG = {
+      kpis: {
+        HUMEDAD: { low: 5, medium: 15, high: 30 },
+        PINTURA: { low: 5, medium: 15, high: 30 },
+        PISOS: { low: 5, medium: 15, high: 30 },
+        SANITARIOS: { low: 5, medium: 15, high: 30 },
+        ELECTRICIDAD: { low: 5, medium: 15, high: 30 },
+        VENTANAS: { low: 5, medium: 15, high: 30 }
+      },
+      messages: {
+        HUMEDAD: {
+          low: "Se observan indicios leves de humedad superficial en el área inspeccionada.",
+          medium: "Se observan señales visibles de humedad en el área inspeccionada.",
+          high: "Se observan evidencias visibles de humedad extendida en el área inspeccionada."
+        },
+        PINTURA: {
+          low: "Se observan imperfecciones menores en la pintura del área inspeccionada.",
+          medium: "Se observan deterioros visibles en la pintura del área inspeccionada.",
+          high: "Se observan deterioros relevantes en la pintura del área inspeccionada."
+        },
+        PISOS: {
+          low: "Se observan marcas o desgaste leve en el piso del área inspeccionada.",
+          medium: "Se observan desgaste o daños visibles en el piso del área inspeccionada.",
+          high: "Se observan daños visibles relevantes en el piso del área inspeccionada."
+        },
+        SANITARIOS: {
+          low: "Se observan condiciones visibles menores en artefactos sanitarios del área inspeccionada.",
+          medium: "Se observan condiciones visibles en artefactos sanitarios del área inspeccionada.",
+          high: "Se observan condiciones visibles relevantes en artefactos sanitarios del área inspeccionada."
+        },
+        ELECTRICIDAD: {
+          low: "Se observan condiciones visibles menores en elementos eléctricos del área inspeccionada.",
+          medium: "Se observan condiciones visibles en elementos eléctricos del área inspeccionada.",
+          high: "Se observan condiciones visibles relevantes en elementos eléctricos del área inspeccionada."
+        },
+        VENTANAS: {
+          low: "Se observan condiciones visibles menores en ventanas o marcos del área inspeccionada.",
+          medium: "Se observan condiciones visibles en ventanas o marcos del área inspeccionada.",
+          high: "Se observan condiciones visibles relevantes en ventanas o marcos del área inspeccionada."
+        }
+      },
+      recommendations: {
+        GREEN: "Se recomienda mantener seguimiento y control preventivo.",
+        YELLOW: "Se recomienda revisar y monitorear el estado observado.",
+        RED: "Se recomienda una revisión técnica detallada del hallazgo."
+      },
+      badge: { yellowFrom: 60, greenFrom: 85 }
+    };
+
+    async function loadScoreConfig() {
+      try {
+        const res = await fetch("/api/admin/score-config");
+        const data = await res.json();
+        if (res.ok && data?.config?.kpis) return data.config;
+      } catch {}
+      return DEFAULT_SCORE_CONFIG;
+    }
+
+    function baseMessageFor(slot, cfg) {
+      const kpi = String(slot.kpiKey || classifyKpi(slot) || "").toUpperCase();
+      const sev = String(slot.severity || "").toLowerCase();
+      const base = cfg?.messages?.[kpi]?.[sev] || DEFAULT_SCORE_CONFIG.messages?.[kpi]?.[sev];
+      return base || "Se observa una condición visible asociada a este KPI en el área inspeccionada.";
+    }
+
+    function recommendationFor(badge, cfg) {
+      const key = String(badge || "").toUpperCase();
+      return cfg?.recommendations?.[key] || DEFAULT_SCORE_CONFIG.recommendations?.[key] || "Se recomienda revisión técnica según corresponda.";
+    }
+
+    function aiContextFrom(slot) {
+      const msg = String(slot.message || "").trim();
+      if (!msg) return "";
+      if (msg.length > 240) return "";
+      const banned = [
+        "filtración", "capilaridad", "estructura", "peligroso", "urgente",
+        "costo", "presupuesto", "reparación inmediata", "reparacion inmediata",
+        "reparar", "debe repararse"
+      ];
+      const lower = msg.toLowerCase();
+      if (banned.some((w) => lower.includes(w))) return "";
+      return msg;
+    }
+
     function classifyKpi(slot) {
       const code = String(slot.findingCode || slot.slotCode || "").toLowerCase();
       const title = String(slot.title || "").toLowerCase();
@@ -393,14 +486,16 @@
       return null;
     }
 
-    function kpiBadgeFromScore(score) {
+    function kpiBadgeFromScore(score, cfg) {
+      const yellowFrom = cfg?.badge?.yellowFrom ?? DEFAULT_SCORE_CONFIG.badge.yellowFrom;
+      const greenFrom = cfg?.badge?.greenFrom ?? DEFAULT_SCORE_CONFIG.badge.greenFrom;
       if (score == null) return "GRAY";
-      if (score >= 80) return "GREEN";
-      if (score >= 60) return "YELLOW";
+      if (score >= greenFrom) return "GREEN";
+      if (score >= yellowFrom) return "YELLOW";
       return "RED";
     }
 
-    function buildKpis(slots) {
+    function buildKpis(slots, cfg) {
       const order = ["HUMEDAD", "PINTURA", "PISOS", "SANITARIOS", "ELECTRICIDAD", "VENTANAS"];
       const buckets = new Map(order.map((k) => [k, []]));
 
@@ -416,14 +511,15 @@
         }
         const penalties = items.map((s) => {
           const sev = String(s.severity || "").toLowerCase();
-          if (sev === "high") return 30;
-          if (sev === "medium") return 15;
-          if (sev === "low") return 5;
+          const kpiCfg = cfg?.kpis?.[key] || DEFAULT_SCORE_CONFIG.kpis[key];
+          if (sev === "high") return Number(kpiCfg.high ?? 0);
+          if (sev === "medium") return Number(kpiCfg.medium ?? 0);
+          if (sev === "low") return Number(kpiCfg.low ?? 0);
           return 0;
         });
         const totalPenalty = penalties.reduce((a, b) => a + b, 0);
         const score = Math.max(0, Math.min(100, 100 - totalPenalty));
-        return { title: key[0] + key.slice(1).toLowerCase(), score, badge: kpiBadgeFromScore(score) };
+        return { title: key[0] + key.slice(1).toLowerCase(), score, badge: kpiBadgeFromScore(score, cfg) };
       });
     }
 
@@ -449,6 +545,7 @@
       setText("analysisDate", formatDate(c.createdAt));
       setText("headerDate", formatDate(c.createdAt));
 
+      const scoreConfig = await loadScoreConfig();
       const score = clampScore(summary.score);
       setText("stiScore", `${Math.round(score)} / 100`);
       setText("stiLabel", badgeLabel(summary.badge));
@@ -459,14 +556,14 @@
       applyArcProgress(stiArc, score);
 
       const slots = summary.slots || [];
-      const kpis = buildKpis(slots);
+      const kpis = buildKpis(slots, scoreConfig);
       renderKpiSummary(kpis);
 
       const kpiOrder = ["HUMEDAD", "PINTURA", "PISOS", "SANITARIOS", "ELECTRICIDAD", "VENTANAS"];
       const kpiGroups = kpiOrder.map((key) => {
         const items = slots.filter((s) => classifyKpi(s) === key);
         const scoreValue = kpis.find((k) => k.title.toUpperCase() === key)?.score ?? null;
-        const badge = kpiBadgeFromScore(scoreValue);
+        const badge = kpiBadgeFromScore(scoreValue, scoreConfig);
         return {
           key,
           title: key[0] + key.slice(1).toLowerCase(),
@@ -476,7 +573,7 @@
         };
       });
 
-      renderKpiSections(kpiGroups);
+      renderKpiSections(kpiGroups, scoreConfig);
     }
 
     load().catch(() => {});

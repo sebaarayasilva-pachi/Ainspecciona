@@ -4,6 +4,7 @@ import staticPlugin from '@fastify/static';
 import dotenv from 'dotenv';
 import crypto from 'node:crypto';
 import path from 'node:path';
+import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 import { PrismaClient } from '@prisma/client';
@@ -11,6 +12,7 @@ import { PrismaClient } from '@prisma/client';
 import { createStorage } from './src/storage/storage.js';
 import { registerCaptureRoutes } from './src/routes/capture.js';
 import { getCaseSummary } from './src/routes/caseSummary.js';
+import { DEFAULT_SCORE_CONFIG, normalizeScoreConfig, classifyKpiFromSlot } from './src/scoring/scoringV2_2.js';
 
 dotenv.config();
 
@@ -22,6 +24,36 @@ const prisma = new PrismaClient();
 const storage = createStorage();
 
 const PORT = Number(process.env.PORT || 3000);
+
+const DATA_DIR = path.join(__dirname, 'data');
+const SCORE_CONFIG_PATH = path.join(DATA_DIR, 'score-config.json');
+
+function ensureDataDir() {
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
+}
+
+function loadScoreConfig() {
+  ensureDataDir();
+  if (!fs.existsSync(SCORE_CONFIG_PATH)) return normalizeScoreConfig(DEFAULT_SCORE_CONFIG);
+  try {
+    const raw = fs.readFileSync(SCORE_CONFIG_PATH, 'utf8');
+    const parsed = JSON.parse(raw);
+    return normalizeScoreConfig(parsed);
+  } catch {
+    return normalizeScoreConfig(DEFAULT_SCORE_CONFIG);
+  }
+}
+
+function saveScoreConfig(nextConfig) {
+  ensureDataDir();
+  const normalized = normalizeScoreConfig(nextConfig);
+  fs.writeFileSync(SCORE_CONFIG_PATH, JSON.stringify(normalized, null, 2), 'utf8');
+  return normalized;
+}
+
+let scoreConfig = loadScoreConfig();
 
 function safeExtFromMime(mime) {
   const map = {
@@ -239,7 +271,10 @@ function buildPhotoPlanV1(input) {
     que: 'Estado visual del tablero.'
   }), required: true });
 
-  return plan;
+  return plan.map((slot) => ({
+    ...slot,
+    kpiKey: classifyKpiFromSlot(slot)
+  }));
 }
 
 async function queueOpenAiSlotAnalysis() {
@@ -258,6 +293,18 @@ fastify.get('/', (req, reply) => reply.sendFile('index.html'));
 fastify.get('/formulario', (req, reply) => reply.sendFile('formulario.html'));
 fastify.get('/dashboard', (req, reply) => reply.sendFile('dashboard.html'));
 fastify.get('/cases/:caseId/report', (req, reply) => reply.sendFile('report.html'));
+fastify.get('/admin', (req, reply) => reply.sendFile('admin.html'));
+
+fastify.get('/api/admin/score-config', (req, reply) => {
+  return reply.send({ ok: true, config: scoreConfig });
+});
+
+fastify.post('/api/admin/score-config', async (req, reply) => {
+  const payload = req.body || {};
+  const incoming = payload.config ?? payload;
+  scoreConfig = saveScoreConfig(incoming);
+  return reply.send({ ok: true, config: scoreConfig });
+});
 
 await registerCaptureRoutes(fastify, {
   prisma,
@@ -402,7 +449,7 @@ fastify.get('/api/cases', async (req, reply) => {
 
 fastify.get('/api/cases/:caseId/summary', async (req, reply) => {
   const caseId = String(req.params.caseId || '');
-  const summary = await getCaseSummary({ prisma, storage, caseId, slotGroupTitleFromCode });
+  const summary = await getCaseSummary({ prisma, storage, caseId, slotGroupTitleFromCode, scoreConfig });
   if (!summary.ok) return reply.code(404).send(summary);
   return reply.send(summary);
 });
