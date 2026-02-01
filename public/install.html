@@ -102,7 +102,7 @@
       <div class="muted">Paso 1: instala la app. Paso 2: activa tu cuenta.</div>
 
       <div class="row">
-        <button class="btn primary hidden" id="installBtn" type="button">Instalar app</button>
+        <button class="btn primary" id="installBtn" type="button">Instalar app</button>
         <a class="btn" id="openAppBtn" href="/executive">Abrir app</a>
       </div>
 
@@ -151,16 +151,17 @@
     window.addEventListener("beforeinstallprompt", (event) => {
       event.preventDefault();
       deferredInstallPrompt = event;
-      installBtn.classList.remove("hidden");
       fallbackNote.classList.add("hidden");
     });
 
     installBtn.addEventListener("click", async () => {
-      if (!deferredInstallPrompt) return;
+      if (!deferredInstallPrompt) {
+        fallbackNote.classList.remove("hidden");
+        return;
+      }
       deferredInstallPrompt.prompt();
       await deferredInstallPrompt.userChoice;
       deferredInstallPrompt = null;
-      installBtn.classList.add("hidden");
       fallbackNote.classList.remove("hidden");
     });
   </script>
