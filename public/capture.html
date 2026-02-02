@@ -93,9 +93,46 @@
     .note { font-size: 13px; color: #475569; margin-top: 10px; }
     .hidden { display: none; }
     ul { margin: 8px 0 0 18px; padding: 0; }
+    .cameraFrame {
+      width: 100%;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #0f172a;
+      min-height: 220px;
+      display: grid;
+      place-items: center;
+    }
+    video, img.preview {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .splash {
+      position: fixed;
+      inset: 0;
+      background: #0f172a;
+      color: #fff;
+      display: grid;
+      place-items: center;
+      z-index: 50;
+    }
+    .splash .inner {
+      text-align: center;
+      display: grid;
+      gap: 8px;
+    }
+    .splash img { height: 60px; margin: 0 auto; }
   </style>
 </head>
 <body>
+  <div class="splash" id="splash">
+    <div class="inner">
+      <img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" />
+      <div style="font-size:18px;font-weight:700;">Preparando cámara...</div>
+      <div style="font-size:13px;color:#94a3b8;">Espera unos segundos</div>
+    </div>
+  </div>
+
   <header>
     <div class="nav">
       <a class="brand" href="/">
@@ -113,8 +150,14 @@
       <div class="note" id="slotInstructions"></div>
 
       <div class="row">
-        <input id="photoInput" type="file" accept="image/*" capture="environment" />
+        <div class="cameraFrame">
+          <video id="camera" autoplay playsinline muted></video>
+          <img id="preview" class="preview hidden" alt="Preview" />
+        </div>
+        <button class="btn" id="captureBtn" type="button">Tomar foto</button>
         <button class="btn" id="uploadBtn" type="button">Subir foto</button>
+        <button class="btn outline hidden" id="retryBtn" type="button">Reintentar cámara</button>
+        <input id="photoInput" type="file" accept="image/*" capture="environment" />
       </div>
       <div class="note" id="statusMsg"></div>
     </div>
@@ -135,13 +178,20 @@
     const slotInstructions = document.getElementById("slotInstructions");
     const progressText = document.getElementById("progressText");
     const progressBar = document.getElementById("progressBar");
+    const camera = document.getElementById("camera");
+    const preview = document.getElementById("preview");
+    const captureBtn = document.getElementById("captureBtn");
+    const retryBtn = document.getElementById("retryBtn");
     const photoInput = document.getElementById("photoInput");
     const uploadBtn = document.getElementById("uploadBtn");
     const statusMsg = document.getElementById("statusMsg");
     const slotCard = document.getElementById("slotCard");
     const doneCard = document.getElementById("doneCard");
+    const splash = document.getElementById("splash");
 
     let currentSlotId = null;
+    let capturedBlob = null;
+    let cameraStream = null;
 
     function setProgress(progress) {
       const pct = progress?.pct || 0;
@@ -160,6 +210,29 @@
         return;
       }
       slotInstructions.innerHTML = `<ul>${lines.map((l) => `<li>${l}</li>`).join("")}</ul>`;
+    }
+
+    async function startCamera() {
+      retryBtn.classList.add("hidden");
+      try {
+        cameraStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: "environment" } },
+          audio: false
+        });
+        camera.srcObject = cameraStream;
+        camera.classList.remove("hidden");
+        preview.classList.add("hidden");
+      } catch {
+        statusMsg.textContent = "No se pudo abrir la cámara. Usa el selector de archivo.";
+        retryBtn.classList.remove("hidden");
+      }
+    }
+
+    function stopCamera() {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach((t) => t.stop());
+        cameraStream = null;
+      }
     }
 
     async function loadNext() {
@@ -181,13 +254,53 @@
       slotCode.textContent = data.slot.slotCode || "";
       renderInstructions(data.slot.instructions || "");
       statusMsg.textContent = "";
+      capturedBlob = null;
+      photoInput.value = "";
     }
+
+    captureBtn.addEventListener("click", async () => {
+      if (!cameraStream) {
+        statusMsg.textContent = "Cámara no disponible.";
+        return;
+      }
+      const canvas = document.createElement("canvas");
+      const width = camera.videoWidth || 1280;
+      const height = camera.videoHeight || 720;
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(camera, 0, 0, width, height);
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.92));
+      if (!blob) {
+        statusMsg.textContent = "No se pudo capturar.";
+        return;
+      }
+      capturedBlob = blob;
+      preview.src = URL.createObjectURL(blob);
+      preview.classList.remove("hidden");
+      camera.classList.add("hidden");
+      statusMsg.textContent = "Foto capturada. Puedes subirla.";
+    });
+
+    retryBtn.addEventListener("click", async () => {
+      await startCamera();
+    });
+
+    photoInput.addEventListener("change", () => {
+      const file = photoInput.files?.[0];
+      if (!file) return;
+      capturedBlob = file;
+      preview.src = URL.createObjectURL(file);
+      preview.classList.remove("hidden");
+      camera.classList.add("hidden");
+      statusMsg.textContent = "Foto seleccionada. Puedes subirla.";
+    });
 
     uploadBtn.addEventListener("click", async () => {
       if (!currentSlotId) return;
-      const file = photoInput.files?.[0];
+      const file = capturedBlob || photoInput.files?.[0];
       if (!file) {
-        statusMsg.textContent = "Selecciona una foto.";
+        statusMsg.textContent = "Toma o selecciona una foto.";
         return;
       }
       statusMsg.textContent = "Subiendo...";
@@ -204,10 +317,16 @@
       }
       if (data.passed === false) {
         statusMsg.textContent = data?.problem?.message || "La foto no cumple, intenta nuevamente.";
+        capturedBlob = null;
         photoInput.value = "";
+        preview.classList.add("hidden");
+        camera.classList.remove("hidden");
         return;
       }
+      capturedBlob = null;
       photoInput.value = "";
+      preview.classList.add("hidden");
+      camera.classList.remove("hidden");
       await loadNext();
     });
 
@@ -217,7 +336,16 @@
       loadNext().catch(() => {
         statusMsg.textContent = "No se pudo cargar.";
       });
+      startCamera().catch(() => {});
     }
+
+    setTimeout(() => {
+      splash.classList.add("hidden");
+    }, 4000);
+
+    window.addEventListener("beforeunload", () => {
+      stopCamera();
+    });
   </script>
 </body>
 </html>
