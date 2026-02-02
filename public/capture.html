@@ -154,6 +154,7 @@
           <video id="camera" autoplay playsinline muted></video>
           <img id="preview" class="preview hidden" alt="Preview" />
         </div>
+        <button class="btn" id="startCameraBtn" type="button">Iniciar cámara</button>
         <button class="btn" id="captureBtn" type="button">Tomar foto</button>
         <button class="btn" id="uploadBtn" type="button">Subir foto</button>
         <button class="btn outline hidden" id="retryBtn" type="button">Reintentar cámara</button>
@@ -180,6 +181,7 @@
     const progressBar = document.getElementById("progressBar");
     const camera = document.getElementById("camera");
     const preview = document.getElementById("preview");
+    const startCameraBtn = document.getElementById("startCameraBtn");
     const captureBtn = document.getElementById("captureBtn");
     const retryBtn = document.getElementById("retryBtn");
     const photoInput = document.getElementById("photoInput");
@@ -222,9 +224,11 @@
         camera.srcObject = cameraStream;
         camera.classList.remove("hidden");
         preview.classList.add("hidden");
+        startCameraBtn.classList.add("hidden");
       } catch {
         statusMsg.textContent = "No se pudo abrir la cámara. Usa el selector de archivo.";
         retryBtn.classList.remove("hidden");
+        startCameraBtn.classList.remove("hidden");
       }
     }
 
@@ -258,9 +262,14 @@
       photoInput.value = "";
     }
 
+    startCameraBtn.addEventListener("click", async () => {
+      statusMsg.textContent = "Abriendo cámara...";
+      await startCamera();
+    });
+
     captureBtn.addEventListener("click", async () => {
       if (!cameraStream) {
-        statusMsg.textContent = "Cámara no disponible.";
+        statusMsg.textContent = "Cámara no disponible. Presiona \"Iniciar cámara\".";
         return;
       }
       const canvas = document.createElement("canvas");
@@ -336,7 +345,6 @@
       loadNext().catch(() => {
         statusMsg.textContent = "No se pudo cargar.";
       });
-      startCamera().catch(() => {});
     }
 
     setTimeout(() => {
