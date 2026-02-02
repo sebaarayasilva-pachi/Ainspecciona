@@ -115,6 +115,8 @@
       display: grid;
       place-items: center;
       z-index: 50;
+      pointer-events: none;
+      animation: splashFade 4s ease forwards;
     }
     .splash .inner {
       text-align: center;
@@ -122,6 +124,11 @@
       gap: 8px;
     }
     .splash img { height: 60px; margin: 0 auto; }
+    @keyframes splashFade {
+      0% { opacity: 1; visibility: visible; }
+      85% { opacity: 1; visibility: visible; }
+      100% { opacity: 0; visibility: hidden; }
+    }
   </style>
 </head>
 <body>
@@ -347,9 +354,7 @@
       });
     }
 
-    setTimeout(() => {
-      splash.classList.add("hidden");
-    }, 4000);
+    // Splash fades out via CSS animation.
 
     window.addEventListener("beforeunload", () => {
       stopCamera();
