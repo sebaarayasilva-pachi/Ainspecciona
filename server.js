@@ -128,7 +128,7 @@ function computeProgressFromSlots(slots) {
 
 async function createActivationForUser({ prismaClient, userId }) {
   const token = crypto.randomUUID();
-  const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7);
+  const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);
   await prismaClient.activationToken.create({
     data: {
       userId,
@@ -525,7 +525,7 @@ fastify.post('/api/admin/users/:userId/invite', async (req, reply) => {
   if (!user) return reply.code(404).send({ ok: false, error: 'USER_NOT_FOUND' });
 
   const token = crypto.randomUUID();
-  const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7);
+  const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);
   await prisma.activationToken.create({
     data: {
       userId: user.id,
@@ -675,7 +675,7 @@ fastify.post('/api/tenant/users/:userId/invite', async (req, reply) => {
   }
 
   const token = crypto.randomUUID();
-  const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7);
+  const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);
   await prisma.activationToken.create({
     data: {
       userId: user.id,
