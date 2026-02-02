@@ -285,13 +285,9 @@
       }
     }
 
-    function buildInstallLink(activationUrl) {
-      if (!activationUrl) return `${window.location.origin}/install`;
-      const link = new URL(activationUrl, window.location.origin);
-      const token = link.searchParams.get("token");
-      return token
-        ? `${window.location.origin}/install?token=${encodeURIComponent(token)}`
-        : `${window.location.origin}/install`;
+    function buildActivationLink(activationUrl) {
+      if (!activationUrl) return `${window.location.origin}/activate`;
+      return `${window.location.origin}${activationUrl}`;
     }
 
     async function loadTenant() {
@@ -400,14 +396,14 @@
           const note = document.getElementById("userNote");
           if (res.ok) {
             const phoneSafe = String(u.phone || "").replace(/\D/g, "");
-            const installUrl = buildInstallLink(data.activationUrl);
-            const text = `Hola ${u.fullName || ""}, instala la app y activa tu cuenta aquí: ${installUrl}`;
+            const activationLink = buildActivationLink(data.activationUrl);
+            const text = `Hola ${u.fullName || ""}, activa tu cuenta aquí: ${activationLink}`;
             const waUrl = phoneSafe
               ? `https://wa.me/${phoneSafe}?text=${encodeURIComponent(text)}`
               : null;
             note.innerHTML = waUrl
               ? `Invitación creada. <a href="${waUrl}" target="_blank">Enviar por WhatsApp</a>`
-              : `Invitación creada. Link: ${installUrl}`;
+              : `Invitación creada. Link: ${activationLink}`;
             renderUsers().catch(() => {});
           } else {
             note.textContent = "No se pudo reinvitar.";
@@ -511,14 +507,14 @@
       const data = await res.json();
       if (res.ok) {
         const phoneSafe = phone.replace(/\D/g, "");
-        const installUrl = buildInstallLink(data.activationUrl);
-        const text = `Hola ${fullName}, instala la app y activa tu cuenta aquí: ${installUrl}`;
+        const activationLink = buildActivationLink(data.activationUrl);
+        const text = `Hola ${fullName}, activa tu cuenta aquí: ${activationLink}`;
         const waUrl = phoneSafe
           ? `https://wa.me/${phoneSafe}?text=${encodeURIComponent(text)}`
           : null;
         note.innerHTML = waUrl
           ? `Invitación creada. <a href="${waUrl}" target="_blank">Enviar por WhatsApp</a>`
-          : `Invitación creada. Link: ${installUrl}`;
+          : `Invitación creada. Link: ${activationLink}`;
         document.getElementById("userFullName").value = "";
         document.getElementById("userEmail").value = "";
         document.getElementById("userPhone").value = "";

@@ -98,27 +98,17 @@
 
   <main>
     <div class="card">
-      <h2>Instalar app</h2>
-      <div class="muted">Paso 1: instala la app. Paso 2: activa tu cuenta.</div>
+      <h2>Acceso móvil</h2>
+      <div class="muted">Usa el navegador del celular para operar tus inspecciones.</div>
 
       <div class="row">
-        <button class="btn primary" id="installBtn" type="button">Instalar app</button>
-        <a class="btn" id="openAppBtn" href="/executive">Abrir app</a>
+        <a class="btn" id="openAppBtn" href="/executive">Abrir panel ejecutivo</a>
       </div>
 
       <div class="row" id="activateWrap">
-        <a class="btn" id="activateBtn" href="/activate">Activar cuenta</a>
+        <a class="btn outline" id="activateBtn" href="/activate">Activar cuenta</a>
       </div>
       <div class="note hidden" id="activateNote">Si no tienes token, solicita una invitación.</div>
-
-      <div class="note" id="androidNote">
-        <strong>Android (Chrome):</strong> menú ⋮ → Agregar a pantalla de inicio.<br />
-        Si aparece el botón "Instalar app", úsalo.
-      </div>
-      <div class="note" id="iosNote">
-        <strong>iPhone (Safari):</strong> compartir → Añadir a pantalla de inicio.
-      </div>
-      <div class="note" id="fallbackNote">Si no aparece el botón "Instalar app", usa el menú del navegador.</div>
     </div>
   </main>
 
@@ -128,10 +118,6 @@
     const activateBtn = document.getElementById("activateBtn");
     const activateWrap = document.getElementById("activateWrap");
     const activateNote = document.getElementById("activateNote");
-    const androidNote = document.getElementById("androidNote");
-    const iosNote = document.getElementById("iosNote");
-    const fallbackNote = document.getElementById("fallbackNote");
-
     if (token) {
       activateBtn.href = `/activate?token=${encodeURIComponent(token)}`;
       activateNote.classList.add("hidden");
@@ -139,31 +125,6 @@
       activateWrap.classList.add("hidden");
       activateNote.classList.remove("hidden");
     }
-
-    const ua = navigator.userAgent || "";
-    const isAndroid = /Android/i.test(ua);
-    androidNote.classList.toggle("hidden", !isAndroid);
-    iosNote.classList.toggle("hidden", isAndroid);
-
-    let deferredInstallPrompt = null;
-    const installBtn = document.getElementById("installBtn");
-
-    window.addEventListener("beforeinstallprompt", (event) => {
-      event.preventDefault();
-      deferredInstallPrompt = event;
-      fallbackNote.classList.add("hidden");
-    });
-
-    installBtn.addEventListener("click", async () => {
-      if (!deferredInstallPrompt) {
-        fallbackNote.classList.remove("hidden");
-        return;
-      }
-      deferredInstallPrompt.prompt();
-      await deferredInstallPrompt.userChoice;
-      deferredInstallPrompt = null;
-      fallbackNote.classList.remove("hidden");
-    });
   </script>
 </body>
 </html>
