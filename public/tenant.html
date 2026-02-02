@@ -397,7 +397,7 @@
           if (res.ok) {
             const phoneSafe = String(u.phone || "").replace(/\D/g, "");
             const activationLink = buildActivationLink(data.activationUrl);
-            const text = `Hola ${u.fullName || ""}, activa tu cuenta aquí: ${activationLink}`;
+            const text = `Hola ${u.fullName || ""}, activa tu cuenta aquí: ${activationLink}. Luego ingresa desde tu celular en ${window.location.origin}/executive`;
             const waUrl = phoneSafe
               ? `https://wa.me/${phoneSafe}?text=${encodeURIComponent(text)}`
               : null;
@@ -508,7 +508,7 @@
       if (res.ok) {
         const phoneSafe = phone.replace(/\D/g, "");
         const activationLink = buildActivationLink(data.activationUrl);
-        const text = `Hola ${fullName}, activa tu cuenta aquí: ${activationLink}`;
+        const text = `Hola ${fullName}, activa tu cuenta aquí: ${activationLink}. Luego ingresa desde tu celular en ${window.location.origin}/executive`;
         const waUrl = phoneSafe
           ? `https://wa.me/${phoneSafe}?text=${encodeURIComponent(text)}`
           : null;
