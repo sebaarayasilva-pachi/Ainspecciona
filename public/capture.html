@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Captura · Ainspecciona</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #F6F7F9;
+      color: #0f172a;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      background: #ffffff;
+      border-bottom: 1px solid #e5e7eb;
+      z-index: 10;
+    }
+    .nav {
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      color: inherit;
+      font-weight: 800;
+    }
+    .brand img { height: 32px; }
+    main {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+    .card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+      margin-bottom: 12px;
+    }
+    .title { font-size: 18px; font-weight: 700; margin: 0 0 6px; }
+    .muted { color: #64748b; font-size: 13px; }
+    .progress {
+      height: 8px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .progress > div {
+      height: 100%;
+      background: #2563eb;
+      width: 0%;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-weight: 700;
+      border: 1px solid transparent;
+      background: #2563eb;
+      color: #fff;
+      cursor: pointer;
+      font-size: 14px;
+      text-decoration: none;
+      width: 100%;
+    }
+    .btn.outline {
+      background: #fff;
+      color: #1f2937;
+      border-color: #e5e7eb;
+    }
+    .row { display: grid; gap: 10px; margin-top: 12px; }
+    input[type="file"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px dashed #cbd5f5;
+      border-radius: 12px;
+      background: #f8fafc;
+    }
+    .note { font-size: 13px; color: #475569; margin-top: 10px; }
+    .hidden { display: none; }
+    ul { margin: 8px 0 0 18px; padding: 0; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav">
+      <a class="brand" href="/">
+        <img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" />
+      </a>
+      <div class="muted" id="progressText"></div>
+    </div>
+  </header>
+
+  <main>
+    <div class="card" id="slotCard">
+      <div class="title" id="slotTitle">Cargando...</div>
+      <div class="muted" id="slotCode"></div>
+      <div class="progress"><div id="progressBar"></div></div>
+      <div class="note" id="slotInstructions"></div>
+
+      <div class="row">
+        <input id="photoInput" type="file" accept="image/*" capture="environment" />
+        <button class="btn" id="uploadBtn" type="button">Subir foto</button>
+      </div>
+      <div class="note" id="statusMsg"></div>
+    </div>
+
+    <div class="card hidden" id="doneCard">
+      <div class="title">Captura finalizada</div>
+      <div class="muted">Gracias, ya no quedan fotos pendientes.</div>
+      <div class="row">
+        <a class="btn outline" href="/executive">Volver al panel</a>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const token = (location.pathname.split("/capture/")[1] || "").trim();
+    const slotTitle = document.getElementById("slotTitle");
+    const slotCode = document.getElementById("slotCode");
+    const slotInstructions = document.getElementById("slotInstructions");
+    const progressText = document.getElementById("progressText");
+    const progressBar = document.getElementById("progressBar");
+    const photoInput = document.getElementById("photoInput");
+    const uploadBtn = document.getElementById("uploadBtn");
+    const statusMsg = document.getElementById("statusMsg");
+    const slotCard = document.getElementById("slotCard");
+    const doneCard = document.getElementById("doneCard");
+
+    let currentSlotId = null;
+
+    function setProgress(progress) {
+      const pct = progress?.pct || 0;
+      progressBar.style.width = `${pct}%`;
+      progressText.textContent = `Avance ${pct}%`;
+    }
+
+    function renderInstructions(text) {
+      if (!text) {
+        slotInstructions.textContent = "";
+        return;
+      }
+      const lines = String(text).split("\n").map((l) => l.trim()).filter(Boolean);
+      if (lines.length <= 1) {
+        slotInstructions.textContent = text;
+        return;
+      }
+      slotInstructions.innerHTML = `<ul>${lines.map((l) => `<li>${l}</li>`).join("")}</ul>`;
+    }
+
+    async function loadNext() {
+      statusMsg.textContent = "Cargando...";
+      const res = await fetch(`/api/capture/${token}/next`);
+      if (!res.ok) {
+        statusMsg.textContent = "Token inválido o expirado.";
+        return;
+      }
+      const data = await res.json();
+      setProgress(data.progress);
+      if (!data.slot) {
+        slotCard.classList.add("hidden");
+        doneCard.classList.remove("hidden");
+        return;
+      }
+      currentSlotId = data.slot.id;
+      slotTitle.textContent = data.slot.title || "Foto requerida";
+      slotCode.textContent = data.slot.slotCode || "";
+      renderInstructions(data.slot.instructions || "");
+      statusMsg.textContent = "";
+    }
+
+    uploadBtn.addEventListener("click", async () => {
+      if (!currentSlotId) return;
+      const file = photoInput.files?.[0];
+      if (!file) {
+        statusMsg.textContent = "Selecciona una foto.";
+        return;
+      }
+      statusMsg.textContent = "Subiendo...";
+      const body = new FormData();
+      body.append("photo", file);
+      const res = await fetch(`/api/capture/${token}/slots/${currentSlotId}/capture`, {
+        method: "POST",
+        body
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        statusMsg.textContent = data?.error ? `Error: ${data.error}` : "No se pudo subir.";
+        return;
+      }
+      if (data.passed === false) {
+        statusMsg.textContent = data?.problem?.message || "La foto no cumple, intenta nuevamente.";
+        photoInput.value = "";
+        return;
+      }
+      photoInput.value = "";
+      await loadNext();
+    });
+
+    if (!token) {
+      statusMsg.textContent = "Token inválido.";
+    } else {
+      loadNext().catch(() => {
+        statusMsg.textContent = "No se pudo cargar.";
+      });
+    }
+  </script>
+</body>
+</html>
