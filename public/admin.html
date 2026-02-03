@@ -242,6 +242,17 @@
       font-size: 13px;
       background: #fff;
     }
+    .promptGrid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-top: 8px;
+    }
+    .promptGrid textarea {
+      min-height: 180px;
+      font-size: 12px;
+      line-height: 1.4;
+    }
     .tenantRow { display: contents; }
     .userRow { display: contents; }
     .badge {
@@ -529,6 +540,45 @@
       </div>
 
       <div class="card">
+        <h3>Prompts IA por KPI</h3>
+        <div class="kpiSubtle">Plantillas de análisis para cada KPI.</div>
+        <div class="promptGrid">
+          <div>
+            <div class="kpiSubtle">Muros y pintura</div>
+            <textarea id="promptMurosPintura"></textarea>
+          </div>
+          <div>
+            <div class="kpiSubtle">Humedad visible</div>
+            <textarea id="promptHumedad"></textarea>
+          </div>
+          <div>
+            <div class="kpiSubtle">Pisos</div>
+            <textarea id="promptPisos"></textarea>
+          </div>
+          <div>
+            <div class="kpiSubtle">Sanitarios</div>
+            <textarea id="promptSanitarios"></textarea>
+          </div>
+          <div>
+            <div class="kpiSubtle">Electricidad visible</div>
+            <textarea id="promptElectricidad"></textarea>
+          </div>
+          <div>
+            <div class="kpiSubtle">Ventanas y cerramientos</div>
+            <textarea id="promptVentanas"></textarea>
+          </div>
+          <div>
+            <div class="kpiSubtle">Puertas y herrajes</div>
+            <textarea id="promptPuertas"></textarea>
+          </div>
+          <div>
+            <div class="kpiSubtle">Mobiliario fijo</div>
+            <textarea id="promptMobiliario"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
         <h3>Rangos de badge</h3>
         <div class="row">
           <label for="badgeYellow">Amarillo desde</label>
@@ -671,6 +721,224 @@
         LAUNDRY_WALLS_FLOOR: "HUMEDAD",
         ELECTRICAL_PANEL: "ELECTRICIDAD"
       },
+      aiPrompts: {
+        MOBILIARIO_FIJO: [
+          "Analiza la imagen correspondiente al slot {{SLOT_CODE}}",
+          "bajo el contexto técnico del KPI: MOBILIARIO FIJO.",
+          "",
+          "Evalúa exclusivamente la presencia visible de las siguientes señales:",
+          "",
+          "- rayones visibles",
+          "- golpes o daños superficiales",
+          "- hinchazón o deformación del material",
+          "- puertas desalineadas",
+          "- herrajes visibles dañados o sueltos",
+          "- cubiertas desteñidas o con pérdida visible de color",
+          "",
+          "Instrucciones estrictas:",
+          "- Analiza solo lo que sea visible en la imagen.",
+          "- No infieras causas ni funcionamiento.",
+          "- No evalúes calidad del material.",
+          "- No emitas juicios de severidad.",
+          "- No hagas recomendaciones.",
+          "",
+          "Entrega el resultado en formato estructurado.",
+          "",
+          "Si no se observa ninguna de las señales listadas,",
+          "indícalo explícitamente."
+        ].join("\\n"),
+        MUROS_PINTURA: [
+          "Analiza la imagen correspondiente al slot {{SLOT_CODE}}",
+          "bajo el contexto técnico del KPI: MUROS Y PINTURA.",
+          "",
+          "Evalúa exclusivamente la presencia visible de las siguientes señales:",
+          "",
+          "- rayones visibles",
+          "- manchas visibles",
+          "- descascaramiento o desprendimiento de pintura",
+          "- grietas superficiales",
+          "- pintura dispareja o con diferencias evidentes de tono",
+          "- marcas visibles por humedad (solo si son evidentes en superficie)",
+          "",
+          "Instrucciones estrictas:",
+          "- Analiza únicamente lo que sea visible en la imagen.",
+          "- No infieras causas ni condiciones internas.",
+          "- No evalúes estructura ni humedad no visible.",
+          "- No emitas juicios de severidad.",
+          "- No hagas recomendaciones.",
+          "",
+          "Entrega el resultado en formato estructurado.",
+          "",
+          "Si no se observa ninguna de las señales listadas,",
+          "indícalo explícitamente."
+        ].join("\\n"),
+        PISOS: [
+          "Analiza la imagen correspondiente al slot {{SLOT_CODE}}",
+          "bajo el contexto técnico del KPI: PISOS.",
+          "",
+          "Evalúa exclusivamente la presencia visible de las siguientes señales:",
+          "",
+          "- rayones visibles",
+          "- manchas visibles",
+          "- piezas sueltas o levantadas (si es visible)",
+          "- quiebres, trizaduras o piezas rotas",
+          "- desgaste evidente de la superficie",
+          "- diferencias visibles de color o tono entre piezas",
+          "",
+          "Instrucciones estrictas:",
+          "- Analiza únicamente lo que sea visible en la imagen.",
+          "- No infieras condiciones internas ni estructurales.",
+          "- No evalúes nivelación ni instalación.",
+          "- No emitas juicios de severidad.",
+          "- No hagas recomendaciones.",
+          "",
+          "Entrega el resultado en formato estructurado.",
+          "",
+          "Si no se observa ninguna de las señales listadas,",
+          "indícalo explícitamente."
+        ].join("\\n"),
+        HUMEDAD: [
+          "Analiza la imagen correspondiente al slot {{SLOT_CODE}}",
+          "bajo el contexto técnico del KPI: HUMEDAD VISIBLE.",
+          "",
+          "Evalúa exclusivamente la presencia visible de las siguientes señales:",
+          "",
+          "- manchas de humedad visibles",
+          "- moho visible",
+          "- salitre o eflorescencia visible",
+          "- pintura ampollada o levantada asociada a humedad",
+          "- oscurecimiento localizado compatible con humedad",
+          "",
+          "Instrucciones estrictas:",
+          "- Analiza únicamente lo que sea claramente visible en la imagen.",
+          "- No infieras causas, origen ni profundidad de la humedad.",
+          "- No evalúes humedad interna ni condiciones no visibles.",
+          "- No emitas juicios de severidad.",
+          "- No hagas recomendaciones.",
+          "",
+          "Entrega el resultado en formato estructurado.",
+          "",
+          "Si no se observa ninguna de las señales listadas,",
+          "indícalo explícitamente."
+        ].join("\\n"),
+        SANITARIOS: [
+          "Analiza la imagen correspondiente al slot {{SLOT_CODE}}",
+          "bajo el contexto técnico del KPI: SANITARIOS.",
+          "",
+          "Evalúa exclusivamente la presencia visible de las siguientes señales:",
+          "",
+          "- grietas o trizaduras visibles en artefactos",
+          "- quiebres o piezas rotas",
+          "- manchas visibles persistentes",
+          "- desgaste evidente de superficies",
+          "- sellos visibles deteriorados",
+          "- corrosión u óxido visible en grifería",
+          "- desalineación visible de artefactos (si es evidente)",
+          "",
+          "Instrucciones estrictas:",
+          "- Analiza únicamente lo que sea visible en la imagen.",
+          "- No evalúes funcionamiento ni condiciones internas.",
+          "- No infieras fugas, presión de agua ni fallas ocultas.",
+          "- No emitas juicios de severidad.",
+          "- No hagas recomendaciones.",
+          "",
+          "Entrega el resultado en formato estructurado.",
+          "",
+          "Si no se observa ninguna de las señales listadas,",
+          "indícalo explícitamente."
+        ].join("\\n"),
+        ELECTRICIDAD: [
+          "Analiza la imagen correspondiente al slot {{SLOT_CODE}}",
+          "bajo el contexto técnico del KPI: ELECTRICIDAD VISIBLE.",
+          "",
+          "Evalúa exclusivamente la condición visible de los elementos eléctricos accesibles.",
+          "No evalúes funcionamiento interno, normativa ni capacidad eléctrica.",
+          "",
+          "Detecta únicamente la presencia visible de las siguientes señales:",
+          "",
+          "- enchufes o interruptores rotos o quebrados",
+          "- tapas faltantes o sueltas en enchufes, interruptores o tablero",
+          "- cables visibles expuestos",
+          "- signos visibles de sobrecalentamiento (quemaduras, derretimiento)",
+          "- fijación deficiente visible de enchufes o interruptores",
+          "- tablero eléctrico visible sin tapa o con elementos dañados",
+          "- presencia visible de interruptor diferencial",
+          "- ausencia visible de interruptor diferencial",
+          "",
+          "Instrucciones estrictas:",
+          "- Analiza únicamente lo que sea claramente visible en la imagen.",
+          "- No infieras funcionamiento, capacidad, suficiencia ni cumplimiento normativo.",
+          "- No evalúes seguridad eléctrica general.",
+          "- No emitas juicios de severidad.",
+          "- No hagas recomendaciones.",
+          "- No utilices lenguaje interpretativo.",
+          "",
+          "Entrega el resultado en formato estructurado.",
+          "",
+          "Si no se observa ninguna de las señales listadas,",
+          "indícalo explícitamente."
+        ].join("\\n"),
+        VENTANAS_CERRAMIENTOS: [
+          "Analiza la imagen correspondiente al slot {{SLOT_CODE}}",
+          "bajo el contexto técnico del KPI: VENTANAS Y CERRAMIENTOS.",
+          "",
+          "Evalúa exclusivamente la condición visible de ventanas y cerramientos.",
+          "",
+          "Detecta únicamente la presencia visible de las siguientes señales:",
+          "",
+          "- vidrios trizados o quebrados",
+          "- rayones visibles en vidrios",
+          "- marcos dañados, deformados o golpeados",
+          "- sellos visibles deteriorados o faltantes",
+          "- fijación deficiente visible del marco",
+          "- corrosión visible en marcos o herrajes expuestos",
+          "- suciedad incrustada o manchas persistentes en vidrios (si es evidente)",
+          "",
+          "Instrucciones estrictas:",
+          "- Analiza únicamente lo que sea claramente visible en la imagen.",
+          "- No evalúes funcionamiento, apertura/cierre ni hermeticidad.",
+          "- No infieras filtraciones ni aislación.",
+          "- No emitas juicios de severidad.",
+          "- No hagas recomendaciones.",
+          "- No utilices lenguaje interpretativo.",
+          "",
+          "Entrega el resultado en formato estructurado.",
+          "",
+          "Si no se observa ninguna de las señales listadas,",
+          "indícalo explícitamente."
+        ].join("\\n"),
+        PUERTAS_HERRAJES: [
+          "Analiza la imagen correspondiente al slot {{SLOT_CODE}}",
+          "bajo el contexto técnico del KPI: PUERTAS Y HERRAJES.",
+          "",
+          "Evalúa exclusivamente la condición visible de puertas y sus herrajes asociados.",
+          "",
+          "Detecta únicamente la presencia visible de las siguientes señales:",
+          "",
+          "- puertas rayadas o con daños visibles",
+          "- golpes o abolladuras visibles",
+          "- desprendimiento o desgaste evidente de pintura o terminación",
+          "- puertas visiblemente deformadas",
+          "- marcos dañados o golpeados",
+          "- bisagras visibles dañadas o faltantes",
+          "- manillas o cerraduras visibles dañadas",
+          "- fijación deficiente visible de herrajes",
+          "- holguras visibles evidentes entre puerta y marco",
+          "",
+          "Instrucciones estrictas:",
+          "- Analiza únicamente lo que sea claramente visible en la imagen.",
+          "- No evalúes funcionamiento, ajuste ni seguridad.",
+          "- No infieras fallas ocultas.",
+          "- No emitas juicios de severidad.",
+          "- No hagas recomendaciones.",
+          "- No utilices lenguaje interpretativo.",
+          "",
+          "Entrega el resultado en formato estructurado.",
+          "",
+          "Si no se observa ninguna de las señales listadas,",
+          "indícalo explícitamente."
+        ].join("\\n")
+      },
       messages: {
         MUROS_PINTURA: {
           low: "Se observan imperfecciones menores en muros o pintura del área inspeccionada.",
@@ -772,6 +1040,14 @@
       { id: "msgMobiliarioFijoLow", path: "messages.MOBILIARIO_FIJO.low", type: "text" },
       { id: "msgMobiliarioFijoMed", path: "messages.MOBILIARIO_FIJO.medium", type: "text" },
       { id: "msgMobiliarioFijoHigh", path: "messages.MOBILIARIO_FIJO.high", type: "text" },
+      { id: "promptMurosPintura", path: "aiPrompts.MUROS_PINTURA", type: "text" },
+      { id: "promptHumedad", path: "aiPrompts.HUMEDAD", type: "text" },
+      { id: "promptPisos", path: "aiPrompts.PISOS", type: "text" },
+      { id: "promptSanitarios", path: "aiPrompts.SANITARIOS", type: "text" },
+      { id: "promptElectricidad", path: "aiPrompts.ELECTRICIDAD", type: "text" },
+      { id: "promptVentanas", path: "aiPrompts.VENTANAS_CERRAMIENTOS", type: "text" },
+      { id: "promptPuertas", path: "aiPrompts.PUERTAS_HERRAJES", type: "text" },
+      { id: "promptMobiliario", path: "aiPrompts.MOBILIARIO_FIJO", type: "text" },
       { id: "recGreen", path: "recommendations.GREEN", type: "text" },
       { id: "recYellow", path: "recommendations.YELLOW", type: "text" },
       { id: "recRed", path: "recommendations.RED", type: "text" }
@@ -848,6 +1124,12 @@
         next.slotKpiMap = {
           ...next.slotKpiMap,
           ...Object.fromEntries(Object.entries(input.slotKpiMap).map(([k, v]) => [String(k).toUpperCase(), String(v || "").toUpperCase()]))
+        };
+      }
+      if (input.aiPrompts && typeof input.aiPrompts === "object") {
+        next.aiPrompts = {
+          ...next.aiPrompts,
+          ...Object.fromEntries(Object.entries(input.aiPrompts).map(([k, v]) => [String(k).toUpperCase(), String(v || "").trim()]))
         };
       }
       if (input.messages) {

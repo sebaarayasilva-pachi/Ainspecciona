@@ -393,12 +393,24 @@ async function queueOpenAiSlotAnalysis({ slotId }) {
   try {
     const client = new OpenAI({ apiKey });
     const model = process.env.OPENAI_VISION_MODEL || 'gpt-4o-mini';
-    const prompt = [
-      'Describe brevemente lo que se observa en la foto de inspección.',
-      'Enfócate en detalles visibles y posibles hallazgos (humedad, pintura, pisos, sanitarios, electricidad, ventanas).',
-      'Si no hay hallazgos, responde exactamente: "Sin observaciones".',
-      'Máximo 160 caracteres, sin recomendaciones.'
-    ].join(' ');
+    const kpiKey = classifyKpiFromSlot(slot, scoreConfig?.slotKpiMap);
+    const promptTemplate = scoreConfig?.aiPrompts?.[kpiKey] || scoreConfig?.aiPrompts?.GENERAL || [
+      'Analiza la imagen correspondiente al slot {{SLOT_CODE}}.',
+      'Evalúa únicamente señales visibles.',
+      'Entrega el resultado en formato estructurado.'
+    ].join('\n');
+    const prompt = String(promptTemplate).replace('{{SLOT_CODE}}', slot.slotCode || '');
+    const outputFormat = [
+      '',
+      'Formato de salida (JSON válido):',
+      '{',
+      '  "signals_detected": ["..."],',
+      '  "details": [',
+      '    { "signal": "...", "location": "...", "extent": "localizado|moderado|extendido" }',
+      '  ],',
+      '  "confidence": 0.0',
+      '}'
+    ].join('\n');
 
     const response = await client.responses.create({
       model,
@@ -406,7 +418,7 @@ async function queueOpenAiSlotAnalysis({ slotId }) {
         {
           role: 'user',
           content: [
-            { type: 'input_text', text: prompt },
+            { type: 'input_text', text: `${prompt}\n${outputFormat}` },
             { type: 'input_image', image_url: photoUrl }
           ]
         }
@@ -414,8 +426,34 @@ async function queueOpenAiSlotAnalysis({ slotId }) {
       temperature: 0.2
     });
 
-    const summary = String(response.output_text || '').trim();
-    if (!summary) return;
+    const rawText = String(response.output_text || '').trim();
+    if (!rawText) return;
+
+    const parseJson = (text) => {
+      try {
+        return JSON.parse(text);
+      } catch {
+        const match = text.match(/\{[\s\S]*\}/);
+        if (!match) return null;
+        try {
+          return JSON.parse(match[0]);
+        } catch {
+          return null;
+        }
+      }
+    };
+
+    const parsed = parseJson(rawText) || {};
+    const signals = Array.isArray(parsed.signals_detected) ? parsed.signals_detected.map((s) => String(s)) : [];
+    const details = Array.isArray(parsed.details) ? parsed.details : [];
+    const confidence = Math.max(0, Math.min(1, Number(parsed.confidence ?? 0.7)));
+    const extentText = details.map((d) => String(d?.extent || '').toLowerCase());
+    const hasWide = extentText.some((t) => t.includes('extend') || t.includes('general') || t.includes('ampl'));
+    const severity = signals.length === 0 ? null : (hasWide ? 'high' : (signals.length >= 2 ? 'medium' : 'low'));
+    const analysisCode = signals.length === 0 ? 'OK' : 'COSMETIC_WEAR';
+    const message = signals.length
+      ? `Se detecta: ${signals.join(', ')}.`
+      : 'Sin observaciones.';
 
     const prevMessage = slot.analysisMessage || null;
     const nextDebug = {
@@ -423,7 +461,9 @@ async function queueOpenAiSlotAnalysis({ slotId }) {
       source: 'OPENAI',
       openai: {
         model,
-        summary,
+        raw: rawText,
+        parsed,
+        kpiKey,
         at: new Date().toISOString()
       },
       v1Message: prevMessage
@@ -432,7 +472,10 @@ async function queueOpenAiSlotAnalysis({ slotId }) {
     await prisma.slot.update({
       where: { id: slot.id },
       data: {
-        analysisMessage: summary,
+        analysisCode,
+        analysisSeverity: severity,
+        analysisConfidence: confidence,
+        analysisMessage: message,
         analysisDebug: nextDebug,
         analyzedAt: new Date()
       }
