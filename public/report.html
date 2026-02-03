@@ -344,10 +344,11 @@
           const analyzedAt = s.analyzedAt ? formatDate(s.analyzedAt) : "—";
           const code = s.findingCode || s.slotCode || "";
           const evidenceUrl = s.photoUrl || null;
-          const baseMsg = baseMessageFor(s, scoreConfig);
+          const hasIssue = Boolean(s.severity) && String(s.findingCode || "").toUpperCase() !== "OK";
+          const baseMsg = hasIssue ? baseMessageFor(s, scoreConfig) : "";
           const aiCtx = aiContextFrom(s);
-          const recMsg = recommendationFor(g.badge, scoreConfig);
-          const baseLine = `${baseMsg} · Recomendación: ${recMsg}`;
+          const recMsg = hasIssue ? recommendationFor(g.badge, scoreConfig) : "";
+          const baseLine = hasIssue ? `${baseMsg} · Recomendación: ${recMsg}` : "";
           const aiLine = aiCtx
             ? `En la imagen se observa: ${aiCtx}`
             : "En la imagen se observa: Sin observaciones adicionales.";
@@ -384,8 +385,10 @@
 
           container.appendChild(createSvg("text", { x: 170, y: slotY + 52, "font-size": 12, fill: "#111827", "font-weight": 700 })).textContent =
             `Ambiente: ${s.groupTitle || ""} · Slot: ${s.title || ""} · Confianza: ${conf} · Fuente: ${sourceLabel} · Fecha: ${analyzedAt}`;
-          container.appendChild(createSvg("text", { x: 170, y: slotY + 72, "font-size": 11, fill: "#6B7280" })).textContent =
-            baseLine;
+          if (baseLine) {
+            container.appendChild(createSvg("text", { x: 170, y: slotY + 72, "font-size": 11, fill: "#6B7280" })).textContent =
+              baseLine;
+          }
           container.appendChild(createSvg("text", { x: 170, y: slotY + 88, "font-size": 11, fill: "#6B7280" })).textContent =
             aiLine;
 
@@ -633,7 +636,7 @@
           return 0;
         });
         const totalPenalty = penalties.reduce((a, b) => a + b, 0);
-        const score = Math.max(0, totalPenalty);
+        const score = totalPenalty === 0 ? 100 : Math.max(0, totalPenalty);
         const inverted = Math.max(0, Math.min(100, 100 - totalPenalty));
         return { key, title: kpiLabel(key), score, badge: kpiBadgeFromScore(inverted, cfg) };
       });

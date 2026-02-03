@@ -152,6 +152,7 @@ export const DEFAULT_SCORE_CONFIG = {
       "- No evalúes humedad interna ni condiciones no visibles.",
       "- No emitas juicios de severidad.",
       "- No hagas recomendaciones.",
+      "- Describe con detalle lo que se observa cuando haya señales visibles (ubicación y extensión).",
       "",
       "Entrega el resultado en formato estructurado.",
       "",
