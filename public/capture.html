@@ -83,13 +83,7 @@
       border-color: #e5e7eb;
     }
     .row { display: grid; gap: 10px; margin-top: 12px; }
-    input[type="file"] {
-      width: 100%;
-      padding: 10px;
-      border: 1px dashed #cbd5f5;
-      border-radius: 12px;
-      background: #f8fafc;
-    }
+    input[type="file"] { display: none; }
     .note { font-size: 13px; color: #475569; margin-top: 10px; }
     .hidden { display: none; }
     ul { margin: 8px 0 0 18px; padding: 0; }
@@ -98,32 +92,68 @@
       border-radius: 14px;
       overflow: hidden;
       background: #0f172a;
-      min-height: 220px;
+      height: min(62vh, 520px);
+      min-height: 360px;
+      position: relative;
+    }
+    .actions {
       display: grid;
-      place-items: center;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .btn.secondary {
+      background: #0f172a;
     }
     video, img.preview {
       width: 100%;
-      height: auto;
+      height: 100%;
+      object-fit: cover;
       display: block;
+      position: absolute;
+      inset: 0;
     }
     .splash {
       position: fixed;
       inset: 0;
       background: #0f172a;
-      color: #fff;
       display: grid;
       place-items: center;
       z-index: 50;
       pointer-events: none;
       animation: splashFade 4s ease forwards;
     }
-    .splash .inner {
-      text-align: center;
+    .splash .loaderWrap {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 66%;
+      transform: translateY(-50%);
       display: grid;
-      gap: 8px;
+      place-items: center;
+      text-align: center;
+      color: #e2e8f0;
+      gap: 12px;
+      font-weight: 600;
     }
-    .splash img { height: 60px; margin: 0 auto; }
+    .spinner {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      border: 4px solid rgba(226, 232, 240, 0.25);
+      border-top-color: #e2e8f0;
+      animation: spin 0.9s linear infinite;
+      margin: 0 auto;
+    }
+    .splash img {
+      width: min(420px, 90vw);
+      height: auto;
+      max-height: 90vh;
+      object-fit: contain;
+      display: block;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
     @keyframes splashFade {
       0% { opacity: 1; visibility: visible; }
       85% { opacity: 1; visibility: visible; }
@@ -133,10 +163,10 @@
 </head>
 <body>
   <div class="splash" id="splash">
-    <div class="inner">
-      <img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" />
-      <div style="font-size:18px;font-weight:700;">Preparando cámara...</div>
-      <div style="font-size:13px;color:#94a3b8;">Espera unos segundos</div>
+    <img src="/assets/Foto_Landing_Mobile.png" alt="Ainspecciona" />
+    <div class="loaderWrap" aria-live="polite">
+      <div class="spinner" aria-hidden="true"></div>
+      <div>Iniciando sistema de inspección</div>
     </div>
   </div>
 
@@ -156,14 +186,17 @@
       <div class="progress"><div id="progressBar"></div></div>
       <div class="note" id="slotInstructions"></div>
 
+      <div class="actions">
+        <button class="btn" id="startCameraBtn" type="button">Iniciar cámara</button>
+      </div>
+
       <div class="row">
         <div class="cameraFrame">
           <video id="camera" autoplay playsinline muted></video>
-          <img id="preview" class="preview hidden" alt="Preview" />
+          <img id="preview" class="preview hidden" alt="" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" />
         </div>
-        <button class="btn" id="startCameraBtn" type="button">Iniciar cámara</button>
         <button class="btn" id="captureBtn" type="button">Tomar foto</button>
-        <button class="btn" id="uploadBtn" type="button">Subir foto</button>
+        <button class="btn hidden" id="uploadBtn" type="button">Subir foto</button>
         <button class="btn outline hidden" id="retryBtn" type="button">Reintentar cámara</button>
         <input id="photoInput" type="file" accept="image/*" capture="environment" />
       </div>
@@ -198,6 +231,7 @@
     const doneCard = document.getElementById("doneCard");
     const splash = document.getElementById("splash");
 
+    const blankPreviewSrc = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
     let currentSlotId = null;
     let capturedBlob = null;
     let cameraStream = null;
@@ -232,6 +266,8 @@
         camera.classList.remove("hidden");
         preview.classList.add("hidden");
         startCameraBtn.classList.add("hidden");
+        captureBtn.classList.remove("hidden");
+        uploadBtn.classList.add("hidden");
       } catch {
         statusMsg.textContent = "No se pudo abrir la cámara. Usa el selector de archivo.";
         retryBtn.classList.remove("hidden");
@@ -267,12 +303,19 @@
       statusMsg.textContent = "";
       capturedBlob = null;
       photoInput.value = "";
+      preview.classList.add("hidden");
+      preview.src = blankPreviewSrc;
+      camera.classList.remove("hidden");
+      captureBtn.classList.remove("hidden");
+      uploadBtn.classList.add("hidden");
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
     startCameraBtn.addEventListener("click", async () => {
       statusMsg.textContent = "Abriendo cámara...";
       await startCamera();
     });
+
 
     captureBtn.addEventListener("click", async () => {
       if (!cameraStream) {
@@ -295,6 +338,8 @@
       preview.src = URL.createObjectURL(blob);
       preview.classList.remove("hidden");
       camera.classList.add("hidden");
+      captureBtn.classList.add("hidden");
+      uploadBtn.classList.remove("hidden");
       statusMsg.textContent = "Foto capturada. Puedes subirla.";
     });
 
@@ -309,6 +354,8 @@
       preview.src = URL.createObjectURL(file);
       preview.classList.remove("hidden");
       camera.classList.add("hidden");
+      captureBtn.classList.add("hidden");
+      uploadBtn.classList.remove("hidden");
       statusMsg.textContent = "Foto seleccionada. Puedes subirla.";
     });
 
@@ -319,7 +366,7 @@
         statusMsg.textContent = "Toma o selecciona una foto.";
         return;
       }
-      statusMsg.textContent = "Subiendo...";
+      statusMsg.textContent = "Subiendo... avanzando al siguiente paso.";
       const body = new FormData();
       body.append("photo", file);
       const res = await fetch(`/api/capture/${token}/slots/${currentSlotId}/capture`, {
@@ -336,13 +383,19 @@
         capturedBlob = null;
         photoInput.value = "";
         preview.classList.add("hidden");
+        preview.src = blankPreviewSrc;
         camera.classList.remove("hidden");
+        captureBtn.classList.remove("hidden");
+        uploadBtn.classList.add("hidden");
         return;
       }
       capturedBlob = null;
       photoInput.value = "";
       preview.classList.add("hidden");
+      preview.src = blankPreviewSrc;
       camera.classList.remove("hidden");
+      captureBtn.classList.remove("hidden");
+      uploadBtn.classList.add("hidden");
       await loadNext();
     });
 

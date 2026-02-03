@@ -613,6 +613,42 @@ fastify.get('/api/tenant/users', async (req, reply) => {
   return reply.send({ ok: true, users });
 });
 
+fastify.get('/api/tenant/inspections', async (req, reply) => {
+  const session = getTenantSession(req);
+  if (!session) return reply.code(401).send({ ok: false, error: 'UNAUTHORIZED' });
+
+  const cases = await prisma.case.findMany({
+    where: { tenantId: session.tenantId },
+    orderBy: { createdAt: 'desc' },
+    include: {
+      property: true,
+      assignedUser: true,
+      slots: { select: { status: true } },
+      captureTokens: { orderBy: { createdAt: 'desc' } }
+    }
+  });
+
+  const inspections = cases.map((c) => {
+    const progress = computeProgressFromSlots(c.slots || []);
+    const captureToken = c.captureTokens?.[0]?.token || null;
+    const captureUrl = captureToken ? `/capture/${captureToken}` : null;
+    return {
+      id: c.id,
+      createdAt: c.createdAt,
+      status: c.status,
+      propertyType: c.propertyType,
+      bedrooms: c.bedrooms,
+      bathrooms: c.bathrooms,
+      address: c.property?.address || null,
+      assignedUserName: c.assignedUser?.fullName || null,
+      progress,
+      captureUrl
+    };
+  });
+
+  return reply.send({ ok: true, inspections });
+});
+
 fastify.post('/api/tenant/users', async (req, reply) => {
   const session = getTenantSession(req);
   if (!session) return reply.code(401).send({ ok: false, error: 'UNAUTHORIZED' });

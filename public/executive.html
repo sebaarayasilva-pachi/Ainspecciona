@@ -160,10 +160,13 @@
         const card = document.createElement("div");
         card.className = "caseCard";
         const title = document.createElement("div");
-        title.textContent = `${c.propertyType === "HOUSE" ? "Casa" : "Departamento"} · ${c.bedrooms}D / ${c.bathrooms}B`;
+        title.textContent = c.address || "Dirección no informada";
         const addr = document.createElement("div");
         addr.className = "muted";
-        addr.textContent = c.address || "Dirección no informada";
+        addr.textContent = c.ownerName || "Nombre no informado";
+        const meta = document.createElement("div");
+        meta.className = "muted";
+        meta.textContent = `${c.propertyType === "HOUSE" ? "Casa" : "Departamento"} · ${c.bedrooms}D / ${c.bathrooms}B`;
         const progress = document.createElement("div");
         progress.className = "progress";
         const bar = document.createElement("div");
@@ -174,7 +177,7 @@
         pct.textContent = `Avance: ${c.progress?.pct || 0}%`;
         const action = document.createElement("a");
         action.className = "btn";
-        action.textContent = "Continuar captura";
+        action.textContent = "Iniciar Inspección";
         action.href = c.captureUrl || "#";
         action.target = "_blank";
         if (!c.captureUrl) {
@@ -184,6 +187,7 @@
         }
         card.appendChild(title);
         card.appendChild(addr);
+        card.appendChild(meta);
         card.appendChild(progress);
         card.appendChild(pct);
         card.appendChild(action);

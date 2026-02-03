@@ -101,8 +101,28 @@
           <input id="propertyRol" placeholder="ROL" />
         </div>
         <div>
-          <label>Dirección</label>
-          <input id="propertyAddress" placeholder="Dirección" />
+          <label>Comuna</label>
+          <input id="propertyComuna" placeholder="Comuna" />
+        </div>
+      </div>
+      <div class="row-2">
+        <div>
+          <label>Calle</label>
+          <input id="propertyStreet" placeholder="Calle" />
+        </div>
+        <div>
+          <label>Número</label>
+          <input id="propertyNumber" placeholder="Número" />
+        </div>
+      </div>
+      <div class="row-2">
+        <div>
+          <label>Depto</label>
+          <input id="propertyDept" placeholder="Depto / Interior" />
+        </div>
+        <div>
+          <label>Dirección completa</label>
+          <input id="propertyAddress" placeholder="Dirección completa" />
         </div>
       </div>
       <div class="row-2">
@@ -214,11 +234,22 @@
     }
 
     generateBtn.addEventListener('click', async () => {
+      const comuna = $('propertyComuna').value;
+      const street = $('propertyStreet').value;
+      const number = $('propertyNumber').value;
+      const dept = $('propertyDept').value;
+      const fullAddress = $('propertyAddress').value;
+      const addressParts = [
+        [street, number].filter(Boolean).join(" "),
+        dept ? `Depto ${dept}` : "",
+        comuna
+      ].filter(Boolean);
+      const addressValue = addressParts.length ? addressParts.join(", ") : fullAddress;
       const payload = {
         ownerName: $('ownerName').value,
         ownerRut: $('ownerRut').value,
         propertyRol: $('propertyRol').value,
-        propertyAddress: $('propertyAddress').value,
+        propertyAddress: addressValue,
         propertyOperationType: $('propertyOperationType').value,
         propertySurface: $('propertySurface').value,
         propertyType: $('propertyType').value,

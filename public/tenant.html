@@ -114,6 +114,45 @@
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 12px;
     }
+    .inspectionForm {
+      display: grid;
+      gap: 16px;
+      margin-top: 12px;
+    }
+    .inspectionForm .row {
+      border-bottom: none;
+      padding: 0;
+      grid-template-columns: 1fr;
+      gap: 6px;
+    }
+    .formSectionTitle {
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #64748b;
+      margin: 2px 0 6px;
+    }
+    .formHint {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-top: -4px;
+    }
+    .row-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .checks {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 10px;
+    }
+    .checks label {
+      font-weight: 600;
+      color: #374151;
+    }
     .row {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -142,6 +181,12 @@
       gap: 10px;
       align-items: center;
     }
+    .inspectionGrid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr 140px 120px 120px 140px;
+      gap: 10px;
+      align-items: center;
+    }
     .badge {
       display: inline-flex;
       align-items: center;
@@ -157,7 +202,10 @@
       main { grid-template-columns: 1fr; }
       aside { border-right: none; border-bottom: 1px solid #e5e7eb; }
       .grid { grid-template-columns: 1fr; }
+      .row-2 { grid-template-columns: 1fr; }
+      .checks { grid-template-columns: 1fr; }
       .userGrid { grid-template-columns: 1fr; }
+      .inspectionGrid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -225,37 +273,140 @@
       <h1>Inspecciones</h1>
       <div class="muted">Genera una nueva inspección y asigna a un ejecutivo.</div>
 
-      <div class="card">
-        <h3>Nueva inspección</h3>
-        <div class="grid">
-          <div class="row">
-            <label for="casePropertyType">Tipo de propiedad</label>
-            <select id="casePropertyType">
-              <option value="DEPARTMENT">Departamento</option>
-              <option value="HOUSE">Casa</option>
-            </select>
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:12px;">
+        <h3 style="margin:0;">Inspecciones</h3>
+        <button class="btn outline" id="toggleInspectionFormBtn" type="button">Agregar inspección</button>
+      </div>
+
+      <div class="inspectionForm hidden" id="inspectionFormCard">
+        <div class="card">
+          <h3 style="margin:0 0 8px;">Propietario</h3>
+          <div class="row-2">
+            <div class="row">
+              <label for="ownerName">Nombre</label>
+              <input id="ownerName" type="text" placeholder="Nombre completo" />
+            </div>
+            <div class="row">
+              <label for="ownerRut">RUT</label>
+              <input id="ownerRut" type="text" placeholder="RUT" />
+            </div>
           </div>
-          <div class="row">
-            <label for="caseBedrooms">Dormitorios</label>
-            <input id="caseBedrooms" type="number" min="0" value="1" />
+        </div>
+
+        <div class="card">
+          <h3 style="margin:0 0 8px;">Propiedad</h3>
+          <div class="row-2">
+            <div class="row">
+              <label for="propertyRol">ROL</label>
+              <input id="propertyRol" type="text" placeholder="ROL" />
+            </div>
+            <div class="row">
+              <label for="propertyComuna">Comuna</label>
+              <input id="propertyComuna" type="text" placeholder="Comuna" />
+            </div>
           </div>
-          <div class="row">
-            <label for="caseBathrooms">Baños</label>
-            <input id="caseBathrooms" type="number" min="0" value="1" />
+          <div class="row-2">
+            <div class="row">
+              <label for="propertyStreet">Calle</label>
+              <input id="propertyStreet" type="text" placeholder="Calle" />
+            </div>
+            <div class="row">
+              <label for="propertyNumber">Número</label>
+              <input id="propertyNumber" type="text" placeholder="Número" />
+            </div>
           </div>
-          <div class="row">
-            <label for="caseAddress">Dirección</label>
-            <input id="caseAddress" type="text" />
+          <div class="row-2">
+            <div class="row">
+              <label for="propertyDept">Depto</label>
+              <input id="propertyDept" type="text" placeholder="Depto / Interior" />
+            </div>
+            <div class="row">
+              <label for="propertyAddress">Dirección completa</label>
+              <input id="propertyAddress" type="text" placeholder="Dirección completa" />
+            </div>
           </div>
-          <div class="row">
+          <div class="row-2">
+            <div class="row">
+              <label for="propertyOperationType">Tipo operación</label>
+              <input id="propertyOperationType" type="text" placeholder="Venta / Arriendo" />
+            </div>
+            <div class="row">
+              <label for="propertySurface">Superficie (m2)</label>
+              <input id="propertySurface" type="text" placeholder="Ej: 45" />
+            </div>
+          </div>
+          <div class="formHint">Si completas calle, número y comuna, la dirección se arma sola.</div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin:0 0 8px;">Características</h3>
+          <div class="grid">
+            <div class="row">
+              <label for="propertyType">Tipo de propiedad</label>
+              <select id="propertyType">
+                <option value="DEPARTMENT">Departamento</option>
+                <option value="HOUSE">Casa</option>
+              </select>
+            </div>
+            <div class="row">
+              <label for="bathroomsCount">Baños</label>
+              <input id="bathroomsCount" type="number" min="1" value="1" />
+            </div>
+            <div class="row">
+              <label for="bedroomsCount">Dormitorios</label>
+              <input id="bedroomsCount" type="number" min="0" value="1" />
+            </div>
+          </div>
+          <div class="grid">
+            <div class="row">
+              <label for="propertyAgeRange">Antigüedad</label>
+              <select id="propertyAgeRange">
+                <option value="">—</option>
+                <option value="LESS_THAN_10_YEARS">Menos de 10 años</option>
+                <option value="BETWEEN_10_AND_30_YEARS">Entre 10 y 30 años</option>
+                <option value="MORE_THAN_30_YEARS">Más de 30 años</option>
+              </select>
+            </div>
+            <div class="row">
+              <label for="floorType">Tipo de piso</label>
+              <select id="floorType">
+                <option value="CONCRETE">Hormigón</option>
+                <option value="WOOD">Madera</option>
+                <option value="MIXED">Mixto</option>
+              </select>
+            </div>
+            <div class="row">
+              <label for="yearBuilt">Año construcción</label>
+              <input id="yearBuilt" type="number" min="1900" max="2100" placeholder="Ej: 2015" />
+            </div>
+          </div>
+          <div class="checks">
+            <label><input type="checkbox" id="hasPatio" /> Tiene patio</label>
+            <label><input type="checkbox" id="hasAttic" /> Tiene entretecho</label>
+            <label><input type="checkbox" id="hasLaundry" /> Tiene loggia</label>
+          </div>
+          <div class="row" style="margin-top: 12px;">
             <label for="caseExecutive">Ejecutivo</label>
             <select id="caseExecutive"></select>
           </div>
+          <div class="actions">
+            <button class="btn" id="createCaseBtn" type="button">Crear inspección</button>
+          </div>
+          <div class="note" id="caseNote"></div>
         </div>
-        <div class="actions" style="margin-top: 12px;">
-          <button class="btn" id="createCaseBtn" type="button">Crear inspección</button>
+      </div>
+
+      <div class="card">
+        <h3>Inspecciones ingresadas</h3>
+        <div class="inspectionGrid" id="inspectionHeader">
+          <div class="muted">Dirección</div>
+          <div class="muted">Ejecutivo</div>
+          <div class="muted">Tipo</div>
+          <div class="muted">Estado</div>
+          <div class="muted">Avance</div>
+          <div class="muted">Creada</div>
         </div>
-        <div class="note" id="caseNote"></div>
+        <div class="inspectionGrid" id="inspectionList"></div>
       </div>
     </section>
   </main>
@@ -307,6 +458,14 @@
       if (!res.ok) return [];
       const data = await res.json();
       return data?.users || [];
+    }
+
+    async function loadInspections() {
+      const res = await fetch("/api/tenant/inspections");
+      if (handleUnauthorized(res)) return [];
+      if (!res.ok) return [];
+      const data = await res.json();
+      return data?.inspections || [];
     }
 
     async function renderUsers() {
@@ -448,6 +607,43 @@
       });
     }
 
+    async function renderInspections() {
+      const list = document.getElementById("inspectionList");
+      list.innerHTML = "";
+      const inspections = await loadInspections();
+      if (!inspections.length) {
+        list.appendChild(Object.assign(document.createElement("div"), {
+          className: "note",
+          textContent: "Sin inspecciones aún."
+        }));
+        return;
+      }
+      inspections.forEach((c) => {
+        const address = document.createElement("div");
+        address.textContent = c.address || "Dirección no informada";
+        const exec = document.createElement("div");
+        exec.textContent = c.assignedUserName || "Sin asignar";
+        const type = document.createElement("div");
+        type.textContent = `${c.propertyType === "HOUSE" ? "Casa" : "Departamento"} · ${c.bedrooms}D / ${c.bathrooms}B`;
+        const status = document.createElement("div");
+        const badge = document.createElement("div");
+        badge.className = "badge";
+        badge.textContent = c.status || "DRAFT";
+        status.appendChild(badge);
+        const progress = document.createElement("div");
+        progress.textContent = `${c.progress?.pct || 0}%`;
+        const created = document.createElement("div");
+        created.textContent = formatDateShort(c.createdAt);
+
+        list.appendChild(address);
+        list.appendChild(exec);
+        list.appendChild(type);
+        list.appendChild(status);
+        list.appendChild(progress);
+        list.appendChild(created);
+      });
+    }
+
     document.getElementById("saveUserBtn").addEventListener("click", async () => {
       const note = document.getElementById("userNote");
       const fullName = document.getElementById("userFullName").value.trim();
@@ -525,11 +721,33 @@
 
     document.getElementById("createCaseBtn").addEventListener("click", async () => {
       const note = document.getElementById("caseNote");
+      const comuna = document.getElementById("propertyComuna").value;
+      const street = document.getElementById("propertyStreet").value;
+      const number = document.getElementById("propertyNumber").value;
+      const dept = document.getElementById("propertyDept").value;
+      const fullAddress = document.getElementById("propertyAddress").value;
+      const addressParts = [
+        [street, number].filter(Boolean).join(" "),
+        dept ? `Depto ${dept}` : "",
+        comuna
+      ].filter(Boolean);
+      const addressValue = addressParts.length ? addressParts.join(", ") : fullAddress;
       const payload = {
-        propertyType: document.getElementById("casePropertyType").value,
-        bedrooms: Number(document.getElementById("caseBedrooms").value || 0),
-        bathrooms: Number(document.getElementById("caseBathrooms").value || 0),
-        propertyAddress: document.getElementById("caseAddress").value,
+        ownerName: document.getElementById("ownerName").value,
+        ownerRut: document.getElementById("ownerRut").value,
+        propertyRol: document.getElementById("propertyRol").value,
+        propertyAddress: addressValue,
+        propertyOperationType: document.getElementById("propertyOperationType").value,
+        propertySurface: document.getElementById("propertySurface").value,
+        propertyType: document.getElementById("propertyType").value,
+        bathroomsCount: Number(document.getElementById("bathroomsCount").value || 1),
+        bedroomsCount: Number(document.getElementById("bedroomsCount").value || 0),
+        propertyAgeRange: document.getElementById("propertyAgeRange").value || null,
+        floorType: document.getElementById("floorType").value,
+        yearBuilt: document.getElementById("yearBuilt").value ? Number(document.getElementById("yearBuilt").value) : null,
+        hasPatio: document.getElementById("hasPatio").checked,
+        hasAttic: document.getElementById("hasAttic").checked,
+        hasLaundry: document.getElementById("hasLaundry").checked,
         assignedUserId: document.getElementById("caseExecutive").value || null
       };
       const res = await fetch("/api/tenant/inspections", {
@@ -541,6 +759,7 @@
       const data = await res.json();
       if (res.ok) {
         note.innerHTML = `Inspección creada. Link captura: <a href="${data.captureUrl}" target="_blank">${data.captureUrl}</a>`;
+        renderInspections().catch(() => {});
       } else {
         note.textContent = "No se pudo crear la inspección.";
       }
@@ -562,12 +781,37 @@
         const key = el.getAttribute("data-section-link");
         el.classList.toggle("active", key === section);
       });
+      if (section === "inspections") {
+        renderInspections().catch(() => {});
+      }
+    }
+
+    const inspectionFormCard = document.getElementById("inspectionFormCard");
+    const toggleInspectionFormBtn = document.getElementById("toggleInspectionFormBtn");
+    if (inspectionFormCard && toggleInspectionFormBtn) {
+      inspectionFormCard.classList.add("hidden");
+      inspectionFormCard.style.display = "none";
+      const setLabel = () => {
+        toggleInspectionFormBtn.textContent = inspectionFormCard.classList.contains("hidden")
+          ? "Agregar inspección"
+          : "Ocultar formulario";
+      };
+      setLabel();
+      toggleInspectionFormBtn.addEventListener("click", () => {
+        const isHidden = inspectionFormCard.classList.contains("hidden");
+        inspectionFormCard.classList.toggle("hidden");
+        inspectionFormCard.style.display = isHidden ? "" : "none";
+        setLabel();
+      });
     }
 
     window.addEventListener("hashchange", setActiveSection);
     setActiveSection();
 
-    loadTenant().then(() => renderUsers()).catch(() => {});
+    loadTenant().then(() => {
+      renderUsers().catch(() => {});
+      renderInspections().catch(() => {});
+    }).catch(() => {});
   </script>
 </body>
 </html>
