@@ -337,9 +337,7 @@
 
         list.forEach((s, idx) => {
           const slotY = currentY + slotStartOffset + idx * (slotH + slotGap);
-          const conf = s.confidence != null ? Number(s.confidence).toFixed(2) : "—";
           const sev = severityLabel(s.severity);
-          const scoreSlot = s.confidence != null ? Math.round(Number(s.confidence) * 100) : 0;
           const sourceLabel = String(s.source || "").toUpperCase() === "OPENAI" ? "OpenAI" : "V1";
           const analyzedAt = s.analyzedAt ? formatDate(s.analyzedAt) : "—";
           const code = s.findingCode || s.slotCode || "";
@@ -372,19 +370,16 @@
             container.appendChild(img);
           }
 
-          container.appendChild(createSvg("rect", { x: 170, y: slotY + 12, width: 90, height: 22, rx: 11, fill: "#F3F4F6", stroke: "#E5E7EB" }));
-          container.appendChild(createSvg("text", { x: 215, y: slotY + 28, "font-size": 11, fill: "#111827", "font-weight": 700, "text-anchor": "middle" })).textContent = `${scoreSlot}/100`;
+          container.appendChild(createSvg("rect", { x: 170, y: slotY + 12, width: 72, height: 22, rx: 11, fill: sev.bg, stroke: "#E5E7EB" }));
+          container.appendChild(createSvg("text", { x: 206, y: slotY + 28, "font-size": 11, fill: sev.fill, "font-weight": 700, "text-anchor": "middle" })).textContent = sev.text;
 
-          container.appendChild(createSvg("rect", { x: 270, y: slotY + 12, width: 72, height: 22, rx: 11, fill: sev.bg, stroke: "#E5E7EB" }));
-          container.appendChild(createSvg("text", { x: 306, y: slotY + 28, "font-size": 11, fill: sev.fill, "font-weight": 700, "text-anchor": "middle" })).textContent = sev.text;
-
-          container.appendChild(createSvg("text", { x: 360, y: slotY + 28, "font-size": 12, fill: "#111827", "font-weight": 700 })).textContent = code;
+          container.appendChild(createSvg("text", { x: 260, y: slotY + 28, "font-size": 12, fill: "#111827", "font-weight": 700 })).textContent = code;
 
           container.appendChild(createSvg("rect", { x: 520, y: slotY + 14, width: 26, height: 18, rx: 9, fill: "#EEF2FF", stroke: "#E5E7EB" }));
           container.appendChild(createSvg("text", { x: 533, y: slotY + 27, "font-size": 10, fill: "#111827", "font-weight": 700, "text-anchor": "middle" })).textContent = sourceLabel;
 
           container.appendChild(createSvg("text", { x: 170, y: slotY + 52, "font-size": 12, fill: "#111827", "font-weight": 700 })).textContent =
-            `Ambiente: ${s.groupTitle || ""} · Slot: ${s.title || ""} · Confianza: ${conf} · Fuente: ${sourceLabel} · Fecha: ${analyzedAt}`;
+            `Ambiente: ${s.groupTitle || ""} · Slot: ${s.title || ""} · Fuente: ${sourceLabel} · Fecha: ${analyzedAt}`;
           if (baseLine) {
             container.appendChild(createSvg("text", { x: 170, y: slotY + 72, "font-size": 11, fill: "#6B7280" })).textContent =
               baseLine;
