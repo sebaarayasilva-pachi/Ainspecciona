@@ -1,7 +1,9 @@
 import { computeScoringV2_2, badgeFromScore, classifyKpiFromSlot } from '../scoring/scoringV2_2.js';
 import { mapFindingToProblemType } from '../scoring/problemMapV2_2.js';
 
-function normalizeSource(code) {
+function normalizeSource(code, debug) {
+  const source = String(debug?.source || '').toUpperCase();
+  if (source === 'OPENAI') return 'OPENAI';
   if (!code) return 'V1';
   return 'V1';
 }
@@ -36,7 +38,7 @@ export async function getCaseSummary({ prisma, storage, caseId, slotGroupTitleFr
       confidence: s.analysisConfidence,
       message: s.analysisMessage,
       analyzedAt: s.analyzedAt,
-      source: normalizeSource(s.analysisCode),
+      source: normalizeSource(s.analysisCode, s.analysisDebug),
       groupKey: group.groupKey,
       groupTitle: group.groupTitle,
       kpiKey,

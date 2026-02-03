@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import crypto from 'node:crypto';
 import path from 'node:path';
 import fs from 'node:fs';
+import OpenAI from 'openai';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 import { PrismaClient } from '@prisma/client';
@@ -361,8 +362,69 @@ function buildPhotoPlanV1(input) {
   }));
 }
 
-async function queueOpenAiSlotAnalysis() {
-  // Placeholder - async OpenAI not enabled in local.
+async function queueOpenAiSlotAnalysis({ slotId }) {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) return;
+
+  const slot = await prisma.slot.findUnique({
+    where: { id: slotId },
+    include: { photo: true }
+  }).catch(() => null);
+  if (!slot?.photo?.filePath) return;
+
+  const photoUrl = storage.publicUrl(slot.photo.filePath);
+  if (!photoUrl) return;
+
+  try {
+    const client = new OpenAI({ apiKey });
+    const model = process.env.OPENAI_VISION_MODEL || 'gpt-4o-mini';
+    const prompt = [
+      'Describe brevemente lo que se observa en la foto de inspección.',
+      'Enfócate en detalles visibles y posibles hallazgos (humedad, pintura, pisos, sanitarios, electricidad, ventanas).',
+      'Si no hay hallazgos, responde exactamente: "Sin observaciones".',
+      'Máximo 160 caracteres, sin recomendaciones.'
+    ].join(' ');
+
+    const response = await client.responses.create({
+      model,
+      input: [
+        {
+          role: 'user',
+          content: [
+            { type: 'input_text', text: prompt },
+            { type: 'input_image', image_url: photoUrl }
+          ]
+        }
+      ],
+      temperature: 0.2
+    });
+
+    const summary = String(response.output_text || '').trim();
+    if (!summary) return;
+
+    const prevMessage = slot.analysisMessage || null;
+    const nextDebug = {
+      ...(slot.analysisDebug || {}),
+      source: 'OPENAI',
+      openai: {
+        model,
+        summary,
+        at: new Date().toISOString()
+      },
+      v1Message: prevMessage
+    };
+
+    await prisma.slot.update({
+      where: { id: slot.id },
+      data: {
+        analysisMessage: summary,
+        analysisDebug: nextDebug,
+        analyzedAt: new Date()
+      }
+    });
+  } catch (err) {
+    console.error('OpenAI analysis failed', err?.message || err);
+  }
 }
 
 fastify.register(multipart, {
