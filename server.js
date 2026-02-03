@@ -280,6 +280,16 @@ function buildPhotoPlanV1(input) {
       donde: 'Muro/encuentro lavaplatos.',
       que: 'Manchas, sellos o humedad en muro.'
     }), required: true },
+    { slotCode: 'KITCHEN_COUNTERTOP', title: 'Cocina – Cubiertas', instructions: buildInstruction({
+      indicaciones: '',
+      donde: 'Cubierta de cocina y encuentros con muro.',
+      que: 'Golpes, sellos, fisuras o desprendimientos.'
+    }), required: true },
+    { slotCode: 'KITCHEN_CABINETS', title: 'Cocina – Muebles', instructions: buildInstruction({
+      indicaciones: '',
+      donde: 'Muebles de cocina (puertas y bisagras).',
+      que: 'Hinchazón, desprendimientos o herrajes sueltos.'
+    }), required: true },
     { slotCode: 'KITCHEN_OUTLETS', title: 'Cocina – Enchufes', instructions: buildInstruction({
       indicaciones: '',
       donde: 'Enchufes y entorno.',
@@ -331,6 +341,11 @@ function buildPhotoPlanV1(input) {
         indicaciones: '',
         donde: 'Piso del dormitorio, terminaciones visibles.',
         que: 'Estado de piso/terminación.'
+      }), required: true },
+      { slotCode: `BEDROOM_${i}_CLOSET`, title: `Dormitorio ${i} – Clóset`, instructions: buildInstruction({
+        indicaciones: '',
+        donde: 'Puertas, repisas y herrajes del clóset.',
+        que: 'Hinchazón, desprendimientos o herrajes sueltos.'
       }), required: true },
       { slotCode: `BEDROOM_${i}_WINDOWS`, title: `Dormitorio ${i} – Ventanas`, instructions: buildInstruction({
         indicaciones: '',
