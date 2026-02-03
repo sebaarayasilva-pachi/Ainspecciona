@@ -660,9 +660,8 @@
           return 0;
         });
         const totalPenalty = penalties.reduce((a, b) => a + b, 0);
-        const score = Math.max(0, totalPenalty);
         const inverted = Math.max(0, Math.min(100, 100 - totalPenalty));
-        return { key, title: kpiLabel(key), score, badge: kpiBadgeFromScore(inverted, cfg) };
+        return { key, title: kpiLabel(key), score: inverted, badge: kpiBadgeFromScore(inverted, cfg) };
       });
     }
 
