@@ -135,11 +135,10 @@ export function normalizeScoreConfig(input) {
 }
 
 export function classifyKpiFromSlot(slot) {
-  const code = String(slot.findingCode || slot.slotCode || "").toLowerCase();
+  const code = String(slot.slotCode || "").toLowerCase();
   const title = String(slot.title || "").toLowerCase();
-  const msg = String(slot.message || "").toLowerCase();
 
-  const has = (txt) => title.includes(txt) || code.includes(txt) || msg.includes(txt);
+  const has = (txt) => title.includes(txt) || code.includes(txt);
   const hasAny = (arr) => arr.some(has);
 
   if (hasAny(["electrical", "tablero", "enchufe", "interruptor"])) return "ELECTRICIDAD";
