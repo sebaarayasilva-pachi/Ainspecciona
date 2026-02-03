@@ -259,7 +259,11 @@
       retryBtn.classList.add("hidden");
       try {
         cameraStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: "environment" } },
+          video: {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          },
           audio: false
         });
         camera.srcObject = cameraStream;

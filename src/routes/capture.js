@@ -165,7 +165,7 @@ export async function registerCaptureRoutes(app, { prisma, storage, safeExtFromM
 
     // 1) Blur check (antes de todo)
     const blur = await laplacianVarianceFromBuffer(buffer);
-    const blurThreshold = 60; // MVP: ajustar con data real
+    const blurThreshold = 30; // MVP: ajustar con data real
     let analysis;
     if (blur.variance < blurThreshold) {
       analysis = {

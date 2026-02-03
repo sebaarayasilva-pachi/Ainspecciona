@@ -161,15 +161,15 @@ async function analyzeImageBufferV1({ buffer }) {
   const width = meta.width || 0;
   const height = meta.height || 0;
 
-  if (width < 800 || height < 600) {
+  if (width < 640 || height < 480) {
     return {
       meta: { width, height },
       problem: {
         code: 'PHOTO_TOO_SMALL',
         severity: 'medium',
         confidence: 0.95,
-        message: 'La imagen es demasiado pequeña. Se recomienda una resolución mínima de 800x600 píxeles.',
-        debug: { width, height }
+        message: 'La imagen es demasiado pequeña. Se recomienda una resolución mínima de 640x480 píxeles.',
+        debug: { width, height, min: { width: 640, height: 480 } }
       }
     };
   }
