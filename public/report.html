@@ -712,7 +712,7 @@
       }
       if (note) note.textContent = "Procesando en segundo plano...";
 
-      const res = await fetch(`/api/cases/${encodeURIComponent(caseId)}/reanalyze`, { method: "POST" });
+      const res = await fetch(`/api/cases/${encodeURIComponent(caseId)}/reanalyze?force=1`, { method: "POST" });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data?.ok) {
         if (note) note.textContent = data?.error ? `Error: ${data.error}` : "No se pudo iniciar el reanálisis.";

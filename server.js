@@ -1277,12 +1277,15 @@ fastify.post('/api/cases/:caseId/reanalyze', async (req, reply) => {
     return reply.code(400).send({ ok: false, error: 'OPENAI_NOT_CONFIGURED' });
   }
 
+  const force = String(req.query?.force || '').toLowerCase() === 'true' || String(req.query?.force || '') === '1';
   const slots = await prisma.slot.findMany({
     where: { caseId, photoId: { not: null } },
     select: { id: true, analysisDebug: true }
   });
 
-  const targets = slots.filter((s) => String(s.analysisDebug?.source || '').toUpperCase() !== 'OPENAI');
+  const targets = force
+    ? slots
+    : slots.filter((s) => String(s.analysisDebug?.source || '').toUpperCase() !== 'OPENAI');
   const queued = targets.length;
 
   setTimeout(() => {
@@ -1291,7 +1294,7 @@ fastify.post('/api/cases/:caseId/reanalyze', async (req, reply) => {
     });
   }, 0);
 
-  return reply.send({ ok: true, queued });
+  return reply.send({ ok: true, queued, forced: force });
 });
 
 fastify.listen({ port: PORT, host: '0.0.0.0' });
