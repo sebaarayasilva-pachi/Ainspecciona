@@ -394,7 +394,10 @@ async function queueOpenAiSlotAnalysis({ slotId }) {
     const client = new OpenAI({ apiKey });
     const model = process.env.OPENAI_VISION_MODEL || 'gpt-4o-mini';
     const kpiKey = classifyKpiFromSlot(slot, scoreConfig?.slotKpiMap);
-    const promptTemplate = scoreConfig?.aiPrompts?.[kpiKey] || scoreConfig?.aiPrompts?.GENERAL || [
+    const promptTemplate = DEFAULT_SCORE_CONFIG?.aiPrompts?.[kpiKey]
+      || scoreConfig?.aiPrompts?.[kpiKey]
+      || scoreConfig?.aiPrompts?.GENERAL
+      || [
       'Analiza la imagen correspondiente al slot {{SLOT_CODE}}.',
       'Evalúa únicamente señales visibles.',
       'Entrega el resultado en formato estructurado.'
