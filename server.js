@@ -358,7 +358,7 @@ function buildPhotoPlanV1(input) {
 
   return plan.map((slot) => ({
     ...slot,
-    kpiKey: classifyKpiFromSlot(slot)
+    kpiKey: classifyKpiFromSlot(slot, scoreConfig?.slotKpiMap)
   }));
 }
 
@@ -1211,6 +1211,29 @@ fastify.get('/api/cases/:caseId/summary', async (req, reply) => {
   const summary = await getCaseSummary({ prisma, storage, caseId, slotGroupTitleFromCode, scoreConfig, tenantId });
   if (!summary.ok) return reply.code(404).send(summary);
   return reply.send(summary);
+});
+
+fastify.post('/api/cases/:caseId/reanalyze', async (req, reply) => {
+  const caseId = String(req.params.caseId || '');
+  if (!process.env.OPENAI_API_KEY) {
+    return reply.code(400).send({ ok: false, error: 'OPENAI_NOT_CONFIGURED' });
+  }
+
+  const slots = await prisma.slot.findMany({
+    where: { caseId, photoId: { not: null } },
+    select: { id: true, analysisDebug: true }
+  });
+
+  const targets = slots.filter((s) => String(s.analysisDebug?.source || '').toUpperCase() !== 'OPENAI');
+  const queued = targets.length;
+
+  setTimeout(() => {
+    targets.forEach((s) => {
+      queueOpenAiSlotAnalysis({ slotId: s.id }).catch(() => {});
+    });
+  }, 0);
+
+  return reply.send({ ok: true, queued });
 });
 
 fastify.listen({ port: PORT, host: '0.0.0.0' });

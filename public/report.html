@@ -58,7 +58,7 @@
     <div id="reanalyzeNote" class="toolnote"></div>
   </div>
   <div class="canvas">
-    <svg id="reportSvg" width="1143" height="2720" viewBox="0 0 1143 2720" xmlns="http://www.w3.org/2000/svg">
+    <svg id="reportSvg" width="1143" height="2780" viewBox="0 0 1143 2780" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
           <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#0F172A" flood-opacity="0.10"/>
@@ -68,7 +68,7 @@
         </filter>
       </defs>
 
-      <rect id="bgRect" width="1143" height="2720" fill="#F6F7F9"/>
+      <rect id="bgRect" width="1143" height="2780" fill="#F6F7F9"/>
 
       <rect x="0" y="0" width="1143" height="92" fill="#7A7471"/>
       <rect x="32" y="22" width="46" height="46" rx="10" fill="#E5E7EB" opacity="0.35"/>
@@ -78,7 +78,7 @@
       <text x="1080" y="34" font-size="12" fill="#E5E7EB" text-anchor="end">STI · v1.0</text>
       <text id="headerDate" x="1080" y="58" font-size="12" fill="#E5E7EB" text-anchor="end">—</text>
 
-      <rect id="pageCard" x="28" y="112" width="1087" height="2580" rx="18" fill="#FFFFFF" filter="url(#shadow)"/>
+      <rect id="pageCard" x="28" y="112" width="1087" height="2640" rx="18" fill="#FFFFFF" filter="url(#shadow)"/>
 
       <rect x="52" y="136" width="1040" height="260" rx="14" fill="#FFFFFF" filter="url(#shadowSmall)"/>
 
@@ -122,18 +122,18 @@
 
       <text x="80" y="440" font-size="14" fill="#111827" font-weight="700">KPIs técnicos clave (resumen)</text>
 
-      <rect x="52" y="462" width="1040" height="150" rx="14" fill="#FFFFFF" filter="url(#shadowSmall)"/>
+      <rect x="52" y="462" width="1040" height="210" rx="14" fill="#FFFFFF" filter="url(#shadowSmall)"/>
       <g id="kpiSummary"></g>
 
-      <text x="80" y="660" font-size="14" fill="#111827" font-weight="700">Detalle por KPI (slots)</text>
+      <text x="80" y="720" font-size="14" fill="#111827" font-weight="700">Detalle por KPI (slots)</text>
       <g id="kpiSections"></g>
 
       <g id="techDoc">
-        <text id="techDocTitle" x="80" y="2625" font-size="14" fill="#111827" font-weight="700">Documentación técnica del análisis automatizado</text>
-        <text id="techDocLine1" x="80" y="2655" font-size="12" fill="#111827">
+        <text id="techDocTitle" x="80" y="2685" font-size="14" fill="#111827" font-weight="700">Documentación técnica del análisis automatizado</text>
+        <text id="techDocLine1" x="80" y="2715" font-size="12" fill="#111827">
           Análisis ejecutado por un worker en Google Cloud, utilizando modelos de análisis de imágenes provistos por OpenAI (versión vigente al momento del análisis).
         </text>
-        <text id="techDocLine2" x="80" y="2678" font-size="12" fill="#111827">
+        <text id="techDocLine2" x="80" y="2738" font-size="12" fill="#111827">
           El proceso considera análisis de píxel, histogramas, detección de bordes/formas y relaciones espaciales para identificar indicios compatibles con condiciones técnicas relevantes.
         </text>
       </g>
@@ -259,13 +259,15 @@
     function renderKpiSummary(kpis) {
       const group = document.getElementById("kpiSummary");
       group.innerHTML = "";
-      const xs = [110, 280, 450, 620, 790, 960];
-      const y = 520;
-      kpis.slice(0, 6).forEach((kpi, idx) => {
+      const rowXs = [140, 400, 660, 920];
+      const rowYs = [510, 610];
+      kpis.slice(0, 8).forEach((kpi, idx) => {
+        const row = idx < 4 ? 0 : 1;
+        const x = rowXs[idx % 4] ?? rowXs[rowXs.length - 1];
+        const y = rowYs[row] ?? rowYs[0];
         const color = badgeColor(kpi.badge);
         const label = badgeLabel(kpi.badge);
         const score = (kpi.score == null) ? "—" : Math.round(Number(kpi.score ?? 0));
-        const x = xs[idx] ?? xs[xs.length - 1];
 
         const ringGroup = createSvg("g", {});
         const radius = 24;
@@ -290,7 +292,7 @@
       const container = document.getElementById("kpiSections");
       const defs = document.querySelector("#reportSvg defs");
       container.innerHTML = "";
-      let currentY = 690;
+      let currentY = 750;
       const cardX = 52;
       const cardW = 1040;
       const headerOffset = 55;
@@ -419,23 +421,61 @@
 
     const DEFAULT_SCORE_CONFIG = {
       kpis: {
+        MUROS_PINTURA: { low: 5, medium: 15, high: 30 },
         HUMEDAD: { low: 5, medium: 15, high: 30 },
-        PINTURA: { low: 5, medium: 15, high: 30 },
         PISOS: { low: 5, medium: 15, high: 30 },
         SANITARIOS: { low: 5, medium: 15, high: 30 },
         ELECTRICIDAD: { low: 5, medium: 15, high: 30 },
-        VENTANAS: { low: 5, medium: 15, high: 30 }
+        VENTANAS_CERRAMIENTOS: { low: 5, medium: 15, high: 30 },
+        PUERTAS_HERRAJES: { low: 5, medium: 15, high: 30 },
+        MOBILIARIO_FIJO: { low: 5, medium: 15, high: 30 }
+      },
+      slotKpiMap: {
+        BATHROOM_1_SHOWER: "SANITARIOS",
+        BATHROOM_1_SINK: "SANITARIOS",
+        BATHROOM_1_SINK_PIPES: "SANITARIOS",
+        BATHROOM_1_WC: "SANITARIOS",
+        BATHROOM_1_WC_PIPES: "SANITARIOS",
+        BATHROOM_1_CEILING: "HUMEDAD",
+        BATHROOM_1_OUTLETS: "ELECTRICIDAD",
+        BATHROOM_2_SHOWER: "SANITARIOS",
+        BATHROOM_2_SINK: "SANITARIOS",
+        BATHROOM_2_SINK_PIPES: "SANITARIOS",
+        BATHROOM_2_WC: "SANITARIOS",
+        BATHROOM_2_WC_PIPES: "SANITARIOS",
+        BATHROOM_2_CEILING: "HUMEDAD",
+        BATHROOM_2_OUTLETS: "ELECTRICIDAD",
+        KITCHEN_UNDER_SINK: "HUMEDAD",
+        KITCHEN_SINK_WALL: "HUMEDAD",
+        KITCHEN_OUTLETS: "ELECTRICIDAD",
+        KITCHEN_WINDOW: "VENTANAS_CERRAMIENTOS",
+        LIVING_WALLS: "MUROS_PINTURA",
+        LIVING_CEILING: "MUROS_PINTURA",
+        LIVING_FLOOR: "PISOS",
+        LIVING_WINDOWS: "VENTANAS_CERRAMIENTOS",
+        LIVING_SWITCHES: "ELECTRICIDAD",
+        BEDROOM_1_WALLS: "MUROS_PINTURA",
+        BEDROOM_1_FLOOR: "PISOS",
+        BEDROOM_1_WINDOWS: "VENTANAS_CERRAMIENTOS",
+        BEDROOM_2_WALLS: "MUROS_PINTURA",
+        BEDROOM_2_FLOOR: "PISOS",
+        BEDROOM_2_WINDOWS: "VENTANAS_CERRAMIENTOS",
+        BEDROOM_3_WALLS: "MUROS_PINTURA",
+        BEDROOM_3_FLOOR: "PISOS",
+        BEDROOM_3_WINDOWS: "VENTANAS_CERRAMIENTOS",
+        LAUNDRY_WALLS_FLOOR: "HUMEDAD",
+        ELECTRICAL_PANEL: "ELECTRICIDAD"
       },
       messages: {
+        MUROS_PINTURA: {
+          low: "Se observan imperfecciones menores en muros o pintura del área inspeccionada.",
+          medium: "Se observan deterioros visibles en muros o pintura del área inspeccionada.",
+          high: "Se observan deterioros relevantes en muros o pintura del área inspeccionada."
+        },
         HUMEDAD: {
           low: "Se observan indicios leves de humedad superficial en el área inspeccionada.",
           medium: "Se observan señales visibles de humedad en el área inspeccionada.",
           high: "Se observan evidencias visibles de humedad extendida en el área inspeccionada."
-        },
-        PINTURA: {
-          low: "Se observan imperfecciones menores en la pintura del área inspeccionada.",
-          medium: "Se observan deterioros visibles en la pintura del área inspeccionada.",
-          high: "Se observan deterioros relevantes en la pintura del área inspeccionada."
         },
         PISOS: {
           low: "Se observan marcas o desgaste leve en el piso del área inspeccionada.",
@@ -452,10 +492,20 @@
           medium: "Se observan condiciones visibles en elementos eléctricos del área inspeccionada.",
           high: "Se observan condiciones visibles relevantes en elementos eléctricos del área inspeccionada."
         },
-        VENTANAS: {
-          low: "Se observan condiciones visibles menores en ventanas o marcos del área inspeccionada.",
-          medium: "Se observan condiciones visibles en ventanas o marcos del área inspeccionada.",
-          high: "Se observan condiciones visibles relevantes en ventanas o marcos del área inspeccionada."
+        VENTANAS_CERRAMIENTOS: {
+          low: "Se observan condiciones visibles menores en ventanas o cerramientos del área inspeccionada.",
+          medium: "Se observan condiciones visibles en ventanas o cerramientos del área inspeccionada.",
+          high: "Se observan condiciones visibles relevantes en ventanas o cerramientos del área inspeccionada."
+        },
+        PUERTAS_HERRAJES: {
+          low: "Se observan condiciones visibles menores en puertas o herrajes del área inspeccionada.",
+          medium: "Se observan condiciones visibles en puertas o herrajes del área inspeccionada.",
+          high: "Se observan condiciones visibles relevantes en puertas o herrajes del área inspeccionada."
+        },
+        MOBILIARIO_FIJO: {
+          low: "Se observan condiciones visibles menores en mobiliario fijo del área inspeccionada.",
+          medium: "Se observan condiciones visibles en mobiliario fijo del área inspeccionada.",
+          high: "Se observan condiciones visibles relevantes en mobiliario fijo del área inspeccionada."
         }
       },
       recommendations: {
@@ -501,20 +551,40 @@
       return msg;
     }
 
-    function classifyKpi(slot) {
+    function classifyKpi(slot, cfg) {
+      const mapKey = String(cfg?.slotKpiMap?.[slot.slotCode] || "").toUpperCase();
+      if (mapKey) return mapKey;
+
       const code = String(slot.slotCode || "").toLowerCase();
       const title = String(slot.title || "").toLowerCase();
+      const msg = String(slot.message || "").toLowerCase();
 
       const has = (txt) => title.includes(txt) || code.includes(txt);
       const hasAny = (arr) => arr.some(has);
 
-      if (hasAny(["electrical", "tablero", "enchufe", "interruptor"])) return "ELECTRICIDAD";
-      if (hasAny(["ventana", "vidrio", "marco"])) return "VENTANAS";
-      if (hasAny(["humedad", "moho", "filtr", "water", "mold"])) return "HUMEDAD";
+      if (msg && ["humedad", "moho", "filtr", "water", "mold"].some((w) => msg.includes(w))) return "HUMEDAD";
+      if (hasAny(["muros", "pintura", "pared", "cielo", "paint"])) return "MUROS_PINTURA";
       if (hasAny(["piso", "pisos", "floor"])) return "PISOS";
-      if (hasAny(["pintura", "muros", "cielos", "paint"])) return "PINTURA";
       if (hasAny(["wc", "lavamanos", "lavaplatos", "grifer", "ducha", "tina", "sanitario", "sifon", "cañer", "baño", "baño"])) return "SANITARIOS";
+      if (hasAny(["electrical", "tablero", "enchufe", "interruptor"])) return "ELECTRICIDAD";
+      if (hasAny(["ventana", "vidrio", "marco", "cerramiento"])) return "VENTANAS_CERRAMIENTOS";
+      if (hasAny(["puerta", "cerradura", "bisagra", "manilla", "herraje"])) return "PUERTAS_HERRAJES";
+      if (hasAny(["mueble", "mobiliario", "closet", "clóset", "clósets", "gabinete", "cajon", "alacena"])) return "MOBILIARIO_FIJO";
       return null;
+    }
+
+    function kpiLabel(key) {
+      const map = {
+        MUROS_PINTURA: "Muros y pintura",
+        HUMEDAD: "Humedad visible",
+        PISOS: "Pisos",
+        SANITARIOS: "Sanitarios",
+        ELECTRICIDAD: "Electricidad visible",
+        VENTANAS_CERRAMIENTOS: "Ventanas y cerramientos",
+        PUERTAS_HERRAJES: "Puertas y herrajes",
+        MOBILIARIO_FIJO: "Mobiliario fijo"
+      };
+      return map[key] || key[0] + key.slice(1).toLowerCase();
     }
 
     function kpiBadgeFromScore(score, cfg) {
@@ -527,18 +597,27 @@
     }
 
     function buildKpis(slots, cfg) {
-      const order = ["HUMEDAD", "PINTURA", "PISOS", "SANITARIOS", "ELECTRICIDAD", "VENTANAS"];
+      const order = [
+        "MUROS_PINTURA",
+        "HUMEDAD",
+        "PISOS",
+        "SANITARIOS",
+        "ELECTRICIDAD",
+        "VENTANAS_CERRAMIENTOS",
+        "PUERTAS_HERRAJES",
+        "MOBILIARIO_FIJO"
+      ];
       const buckets = new Map(order.map((k) => [k, []]));
 
       slots.forEach((s) => {
-        const key = classifyKpi(s);
+        const key = classifyKpi(s, cfg);
         if (key && buckets.has(key)) buckets.get(key).push(s);
       });
 
       return order.map((key) => {
         const items = buckets.get(key) || [];
         if (!items.length) {
-          return { title: key[0] + key.slice(1).toLowerCase(), score: null, badge: "GRAY" };
+          return { key, title: kpiLabel(key), score: null, badge: "GRAY" };
         }
         const penalties = items.map((s) => {
           const sev = String(s.severity || "").toLowerCase();
@@ -551,7 +630,7 @@
         const totalPenalty = penalties.reduce((a, b) => a + b, 0);
         const score = Math.max(0, totalPenalty);
         const inverted = Math.max(0, Math.min(100, 100 - totalPenalty));
-        return { title: key[0] + key.slice(1).toLowerCase(), score, badge: kpiBadgeFromScore(inverted, cfg) };
+        return { key, title: kpiLabel(key), score, badge: kpiBadgeFromScore(inverted, cfg) };
       });
     }
 
@@ -591,14 +670,23 @@
       const kpis = buildKpis(slots, scoreConfig);
       renderKpiSummary(kpis);
 
-      const kpiOrder = ["HUMEDAD", "PINTURA", "PISOS", "SANITARIOS", "ELECTRICIDAD", "VENTANAS"];
+      const kpiOrder = [
+        "MUROS_PINTURA",
+        "HUMEDAD",
+        "PISOS",
+        "SANITARIOS",
+        "ELECTRICIDAD",
+        "VENTANAS_CERRAMIENTOS",
+        "PUERTAS_HERRAJES",
+        "MOBILIARIO_FIJO"
+      ];
       const kpiGroups = kpiOrder.map((key) => {
-        const items = slots.filter((s) => classifyKpi(s) === key);
-        const scoreValue = kpis.find((k) => k.title.toUpperCase() === key)?.score ?? null;
+        const items = slots.filter((s) => classifyKpi(s, scoreConfig) === key);
+        const scoreValue = kpis.find((k) => k.key === key)?.score ?? null;
         const badge = kpiBadgeFromScore(scoreValue, scoreConfig);
         return {
           key,
-          title: key[0] + key.slice(1).toLowerCase(),
+          title: kpiLabel(key),
           scoreIfOnlyGroup: scoreValue ?? 0,
           badge,
           items

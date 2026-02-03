@@ -25,7 +25,7 @@ export async function getCaseSummary({ prisma, storage, caseId, slotGroupTitleFr
       slotCode: s.slotCode,
       title: s.title,
       message: s.analysisMessage
-    });
+    }, scoreConfig?.slotKpiMap);
 
     return {
       id: s.id,

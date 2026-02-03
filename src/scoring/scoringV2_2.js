@@ -8,23 +8,61 @@ export const SEVERITY_FACTOR_V22 = {
 
 export const DEFAULT_SCORE_CONFIG = {
   kpis: {
+    MUROS_PINTURA: { low: 5, medium: 15, high: 30 },
     HUMEDAD: { low: 5, medium: 15, high: 30 },
-    PINTURA: { low: 5, medium: 15, high: 30 },
     PISOS: { low: 5, medium: 15, high: 30 },
     SANITARIOS: { low: 5, medium: 15, high: 30 },
     ELECTRICIDAD: { low: 5, medium: 15, high: 30 },
-    VENTANAS: { low: 5, medium: 15, high: 30 }
+    VENTANAS_CERRAMIENTOS: { low: 5, medium: 15, high: 30 },
+    PUERTAS_HERRAJES: { low: 5, medium: 15, high: 30 },
+    MOBILIARIO_FIJO: { low: 5, medium: 15, high: 30 }
+  },
+  slotKpiMap: {
+    BATHROOM_1_SHOWER: "SANITARIOS",
+    BATHROOM_1_SINK: "SANITARIOS",
+    BATHROOM_1_SINK_PIPES: "SANITARIOS",
+    BATHROOM_1_WC: "SANITARIOS",
+    BATHROOM_1_WC_PIPES: "SANITARIOS",
+    BATHROOM_1_CEILING: "HUMEDAD",
+    BATHROOM_1_OUTLETS: "ELECTRICIDAD",
+    BATHROOM_2_SHOWER: "SANITARIOS",
+    BATHROOM_2_SINK: "SANITARIOS",
+    BATHROOM_2_SINK_PIPES: "SANITARIOS",
+    BATHROOM_2_WC: "SANITARIOS",
+    BATHROOM_2_WC_PIPES: "SANITARIOS",
+    BATHROOM_2_CEILING: "HUMEDAD",
+    BATHROOM_2_OUTLETS: "ELECTRICIDAD",
+    KITCHEN_UNDER_SINK: "HUMEDAD",
+    KITCHEN_SINK_WALL: "HUMEDAD",
+    KITCHEN_OUTLETS: "ELECTRICIDAD",
+    KITCHEN_WINDOW: "VENTANAS_CERRAMIENTOS",
+    LIVING_WALLS: "MUROS_PINTURA",
+    LIVING_CEILING: "MUROS_PINTURA",
+    LIVING_FLOOR: "PISOS",
+    LIVING_WINDOWS: "VENTANAS_CERRAMIENTOS",
+    LIVING_SWITCHES: "ELECTRICIDAD",
+    BEDROOM_1_WALLS: "MUROS_PINTURA",
+    BEDROOM_1_FLOOR: "PISOS",
+    BEDROOM_1_WINDOWS: "VENTANAS_CERRAMIENTOS",
+    BEDROOM_2_WALLS: "MUROS_PINTURA",
+    BEDROOM_2_FLOOR: "PISOS",
+    BEDROOM_2_WINDOWS: "VENTANAS_CERRAMIENTOS",
+    BEDROOM_3_WALLS: "MUROS_PINTURA",
+    BEDROOM_3_FLOOR: "PISOS",
+    BEDROOM_3_WINDOWS: "VENTANAS_CERRAMIENTOS",
+    LAUNDRY_WALLS_FLOOR: "HUMEDAD",
+    ELECTRICAL_PANEL: "ELECTRICIDAD"
   },
   messages: {
+    MUROS_PINTURA: {
+      low: "Se observan imperfecciones menores en muros o pintura del área inspeccionada.",
+      medium: "Se observan deterioros visibles en muros o pintura del área inspeccionada.",
+      high: "Se observan deterioros relevantes en muros o pintura del área inspeccionada."
+    },
     HUMEDAD: {
       low: "Se observan indicios leves de humedad superficial en el área inspeccionada.",
       medium: "Se observan señales visibles de humedad en el área inspeccionada.",
       high: "Se observan evidencias visibles de humedad extendida en el área inspeccionada."
-    },
-    PINTURA: {
-      low: "Se observan imperfecciones menores en la pintura del área inspeccionada.",
-      medium: "Se observan deterioros visibles en la pintura del área inspeccionada.",
-      high: "Se observan deterioros relevantes en la pintura del área inspeccionada."
     },
     PISOS: {
       low: "Se observan marcas o desgaste leve en el piso del área inspeccionada.",
@@ -41,10 +79,20 @@ export const DEFAULT_SCORE_CONFIG = {
       medium: "Se observan condiciones visibles en elementos eléctricos del área inspeccionada.",
       high: "Se observan condiciones visibles relevantes en elementos eléctricos del área inspeccionada."
     },
-    VENTANAS: {
-      low: "Se observan condiciones visibles menores en ventanas o marcos del área inspeccionada.",
-      medium: "Se observan condiciones visibles en ventanas o marcos del área inspeccionada.",
-      high: "Se observan condiciones visibles relevantes en ventanas o marcos del área inspeccionada."
+    VENTANAS_CERRAMIENTOS: {
+      low: "Se observan condiciones visibles menores en ventanas o cerramientos del área inspeccionada.",
+      medium: "Se observan condiciones visibles en ventanas o cerramientos del área inspeccionada.",
+      high: "Se observan condiciones visibles relevantes en ventanas o cerramientos del área inspeccionada."
+    },
+    PUERTAS_HERRAJES: {
+      low: "Se observan condiciones visibles menores en puertas o herrajes del área inspeccionada.",
+      medium: "Se observan condiciones visibles en puertas o herrajes del área inspeccionada.",
+      high: "Se observan condiciones visibles relevantes en puertas o herrajes del área inspeccionada."
+    },
+    MOBILIARIO_FIJO: {
+      low: "Se observan condiciones visibles menores en mobiliario fijo del área inspeccionada.",
+      medium: "Se observan condiciones visibles en mobiliario fijo del área inspeccionada.",
+      high: "Se observan condiciones visibles relevantes en mobiliario fijo del área inspeccionada."
     }
   },
   recommendations: {
@@ -107,6 +155,7 @@ export function normalizeScoreConfig(input) {
   if (!next.kpis || typeof next.kpis !== "object") next.kpis = base.kpis;
   if (!next.messages || typeof next.messages !== "object") next.messages = base.messages;
   if (!next.recommendations || typeof next.recommendations !== "object") next.recommendations = base.recommendations;
+  if (!next.slotKpiMap || typeof next.slotKpiMap !== "object") next.slotKpiMap = base.slotKpiMap;
   const kpiKeys = Object.keys(base.kpis);
   kpiKeys.forEach((k) => {
     const src = next.kpis[k] || {};
@@ -131,27 +180,50 @@ export function normalizeScoreConfig(input) {
     yellowFrom: Number.isFinite(Number(next.badge?.yellowFrom)) ? Number(next.badge.yellowFrom) : base.badge.yellowFrom,
     greenFrom: Number.isFinite(Number(next.badge?.greenFrom)) ? Number(next.badge.greenFrom) : base.badge.greenFrom
   };
+  next.slotKpiMap = {
+    ...base.slotKpiMap,
+    ...Object.fromEntries(
+      Object.entries(next.slotKpiMap || {}).map(([key, value]) => [String(key).toUpperCase(), String(value || "").toUpperCase()])
+    )
+  };
   return next;
 }
 
-export function classifyKpiFromSlot(slot) {
-  const code = String(slot.slotCode || "").toLowerCase();
+export function classifyKpiFromSlot(slot, slotKpiMap) {
+  const rawCode = String(slot.slotCode || "");
+  const mapKey = String(slotKpiMap?.[rawCode] || "").toUpperCase();
+  if (mapKey) return mapKey;
+
+  const code = rawCode.toLowerCase();
   const title = String(slot.title || "").toLowerCase();
+  const msg = String(slot.message || "").toLowerCase();
 
   const has = (txt) => title.includes(txt) || code.includes(txt);
   const hasAny = (arr) => arr.some(has);
 
-  if (hasAny(["electrical", "tablero", "enchufe", "interruptor"])) return "ELECTRICIDAD";
-  if (hasAny(["ventana", "vidrio", "marco"])) return "VENTANAS";
-  if (hasAny(["humedad", "moho", "filtr", "water", "mold"])) return "HUMEDAD";
+  if (msg && ["humedad", "moho", "filtr", "water", "mold"].some((w) => msg.includes(w))) return "HUMEDAD";
+  if (hasAny(["muros", "pintura", "pared", "cielo", "paint"])) return "MUROS_PINTURA";
   if (hasAny(["piso", "pisos", "floor"])) return "PISOS";
-  if (hasAny(["pintura", "muros", "cielos", "paint"])) return "PINTURA";
   if (hasAny(["wc", "lavamanos", "lavaplatos", "grifer", "ducha", "tina", "sanitario", "sifon", "cañer", "baño", "baño"])) return "SANITARIOS";
+  if (hasAny(["electrical", "tablero", "enchufe", "interruptor"])) return "ELECTRICIDAD";
+  if (hasAny(["ventana", "vidrio", "marco", "cerramiento"])) return "VENTANAS_CERRAMIENTOS";
+  if (hasAny(["puerta", "cerradura", "bisagra", "manilla", "herraje"])) return "PUERTAS_HERRAJES";
+  if (hasAny(["mueble", "mobiliario", "closet", "clóset", "clósets", "gabinete", "cajon", "alacena"])) return "MOBILIARIO_FIJO";
   return null;
 }
 
 function kpiTitleFromKey(key) {
-  return key[0] + key.slice(1).toLowerCase();
+  const map = {
+    MUROS_PINTURA: "Muros y pintura",
+    HUMEDAD: "Humedad visible",
+    PISOS: "Pisos",
+    SANITARIOS: "Sanitarios",
+    ELECTRICIDAD: "Electricidad visible",
+    VENTANAS_CERRAMIENTOS: "Ventanas y cerramientos",
+    PUERTAS_HERRAJES: "Puertas y herrajes",
+    MOBILIARIO_FIJO: "Mobiliario fijo"
+  };
+  return map[key] || key[0] + key.slice(1).toLowerCase();
 }
 
 function computeScoringByKpi(slots, scoreConfig) {
@@ -161,7 +233,7 @@ function computeScoringByKpi(slots, scoreConfig) {
 
   slots.forEach((s) => {
     if (!s.severity) return;
-    const key = classifyKpiFromSlot(s);
+    const key = classifyKpiFromSlot(s, cfg.slotKpiMap);
     if (!key || !cfg.kpis[key]) return;
     const sev = String(s.severity || "").toLowerCase();
     const penalty = Number(cfg.kpis[key][sev] ?? 0);

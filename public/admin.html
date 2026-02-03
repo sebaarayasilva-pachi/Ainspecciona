@@ -220,6 +220,28 @@
       gap: 10px;
       align-items: center;
     }
+    .slotMapGrid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 10px 12px;
+      align-items: center;
+      margin-top: 8px;
+    }
+    .slotMapHeader {
+      font-size: 12px;
+      color: #64748b;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+    .slotMapGrid select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      font-size: 13px;
+      background: #fff;
+    }
     .tenantRow { display: contents; }
     .userRow { display: contents; }
     .badge {
@@ -286,7 +308,34 @@
 
       <div class="card kpiCard">
         <div>
-          <h3 class="kpiTitle">Humedad</h3>
+          <h3 class="kpiTitle">Muros y pintura</h3>
+          <div class="kpiSubtle">Severidad, puntaje y mensaje base</div>
+          <div class="kpiRows">
+            <div class="kpiHeader">Severidad</div>
+            <div class="kpiHeader">Puntaje</div>
+            <div class="kpiHeader">Mensaje base</div>
+            <div class="kpiRow">
+              <label>Bajo</label>
+              <input id="kpiMurosPinturaLow" type="number" step="1" min="0" />
+              <textarea id="msgMurosPinturaLow"></textarea>
+            </div>
+            <div class="kpiRow">
+              <label>Medio</label>
+              <input id="kpiMurosPinturaMed" type="number" step="1" min="0" />
+              <textarea id="msgMurosPinturaMed"></textarea>
+            </div>
+            <div class="kpiRow">
+              <label>Alto</label>
+              <input id="kpiMurosPinturaHigh" type="number" step="1" min="0" />
+              <textarea id="msgMurosPinturaHigh"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card kpiCard">
+        <div>
+          <h3 class="kpiTitle">Humedad visible</h3>
           <div class="kpiSubtle">Severidad, puntaje y mensaje base</div>
           <div class="kpiRows">
             <div class="kpiHeader">Severidad</div>
@@ -306,33 +355,6 @@
               <label>Alto</label>
               <input id="kpiHumedadHigh" type="number" step="1" min="0" />
               <textarea id="msgHumedadHigh"></textarea>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card kpiCard">
-        <div>
-          <h3 class="kpiTitle">Pintura</h3>
-          <div class="kpiSubtle">Severidad, puntaje y mensaje base</div>
-          <div class="kpiRows">
-            <div class="kpiHeader">Severidad</div>
-            <div class="kpiHeader">Puntaje</div>
-            <div class="kpiHeader">Mensaje base</div>
-            <div class="kpiRow">
-              <label>Bajo</label>
-              <input id="kpiPinturaLow" type="number" step="1" min="0" />
-              <textarea id="msgPinturaLow"></textarea>
-            </div>
-            <div class="kpiRow">
-              <label>Medio</label>
-              <input id="kpiPinturaMed" type="number" step="1" min="0" />
-              <textarea id="msgPinturaMed"></textarea>
-            </div>
-            <div class="kpiRow">
-              <label>Alto</label>
-              <input id="kpiPinturaHigh" type="number" step="1" min="0" />
-              <textarea id="msgPinturaHigh"></textarea>
             </div>
           </div>
         </div>
@@ -394,7 +416,7 @@
 
       <div class="card kpiCard">
         <div>
-          <h3 class="kpiTitle">Electricidad</h3>
+          <h3 class="kpiTitle">Electricidad visible</h3>
           <div class="kpiSubtle">Severidad, puntaje y mensaje base</div>
           <div class="kpiRows">
             <div class="kpiHeader">Severidad</div>
@@ -421,7 +443,7 @@
 
       <div class="card kpiCard">
         <div>
-          <h3 class="kpiTitle">Ventanas</h3>
+          <h3 class="kpiTitle">Ventanas y cerramientos</h3>
           <div class="kpiSubtle">Severidad, puntaje y mensaje base</div>
           <div class="kpiRows">
             <div class="kpiHeader">Severidad</div>
@@ -429,21 +451,81 @@
             <div class="kpiHeader">Mensaje base</div>
             <div class="kpiRow">
               <label>Bajo</label>
-              <input id="kpiVentanasLow" type="number" step="1" min="0" />
-              <textarea id="msgVentanasLow"></textarea>
+              <input id="kpiVentanasCerramientosLow" type="number" step="1" min="0" />
+              <textarea id="msgVentanasCerramientosLow"></textarea>
             </div>
             <div class="kpiRow">
               <label>Medio</label>
-              <input id="kpiVentanasMed" type="number" step="1" min="0" />
-              <textarea id="msgVentanasMed"></textarea>
+              <input id="kpiVentanasCerramientosMed" type="number" step="1" min="0" />
+              <textarea id="msgVentanasCerramientosMed"></textarea>
             </div>
             <div class="kpiRow">
               <label>Alto</label>
-              <input id="kpiVentanasHigh" type="number" step="1" min="0" />
-              <textarea id="msgVentanasHigh"></textarea>
+              <input id="kpiVentanasCerramientosHigh" type="number" step="1" min="0" />
+              <textarea id="msgVentanasCerramientosHigh"></textarea>
             </div>
           </div>
         </div>
+      </div>
+
+      <div class="card kpiCard">
+        <div>
+          <h3 class="kpiTitle">Puertas y herrajes</h3>
+          <div class="kpiSubtle">Severidad, puntaje y mensaje base</div>
+          <div class="kpiRows">
+            <div class="kpiHeader">Severidad</div>
+            <div class="kpiHeader">Puntaje</div>
+            <div class="kpiHeader">Mensaje base</div>
+            <div class="kpiRow">
+              <label>Bajo</label>
+              <input id="kpiPuertasHerrajesLow" type="number" step="1" min="0" />
+              <textarea id="msgPuertasHerrajesLow"></textarea>
+            </div>
+            <div class="kpiRow">
+              <label>Medio</label>
+              <input id="kpiPuertasHerrajesMed" type="number" step="1" min="0" />
+              <textarea id="msgPuertasHerrajesMed"></textarea>
+            </div>
+            <div class="kpiRow">
+              <label>Alto</label>
+              <input id="kpiPuertasHerrajesHigh" type="number" step="1" min="0" />
+              <textarea id="msgPuertasHerrajesHigh"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card kpiCard">
+        <div>
+          <h3 class="kpiTitle">Mobiliario fijo (cocina y closets)</h3>
+          <div class="kpiSubtle">Severidad, puntaje y mensaje base</div>
+          <div class="kpiRows">
+            <div class="kpiHeader">Severidad</div>
+            <div class="kpiHeader">Puntaje</div>
+            <div class="kpiHeader">Mensaje base</div>
+            <div class="kpiRow">
+              <label>Bajo</label>
+              <input id="kpiMobiliarioFijoLow" type="number" step="1" min="0" />
+              <textarea id="msgMobiliarioFijoLow"></textarea>
+            </div>
+            <div class="kpiRow">
+              <label>Medio</label>
+              <input id="kpiMobiliarioFijoMed" type="number" step="1" min="0" />
+              <textarea id="msgMobiliarioFijoMed"></textarea>
+            </div>
+            <div class="kpiRow">
+              <label>Alto</label>
+              <input id="kpiMobiliarioFijoHigh" type="number" step="1" min="0" />
+              <textarea id="msgMobiliarioFijoHigh"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Mapa de slots a KPI</h3>
+        <div class="kpiSubtle">Define el KPI de cada slot de captura.</div>
+        <div class="slotMapGrid" id="slotMapGrid"></div>
       </div>
 
       <div class="card">
@@ -539,23 +621,61 @@
     const STORAGE_KEY = "ainspectaScoreConfig";
     const defaultConfig = {
       kpis: {
+        MUROS_PINTURA: { low: 5, medium: 15, high: 30 },
         HUMEDAD: { low: 5, medium: 15, high: 30 },
-        PINTURA: { low: 5, medium: 15, high: 30 },
         PISOS: { low: 5, medium: 15, high: 30 },
         SANITARIOS: { low: 5, medium: 15, high: 30 },
         ELECTRICIDAD: { low: 5, medium: 15, high: 30 },
-        VENTANAS: { low: 5, medium: 15, high: 30 }
+        VENTANAS_CERRAMIENTOS: { low: 5, medium: 15, high: 30 },
+        PUERTAS_HERRAJES: { low: 5, medium: 15, high: 30 },
+        MOBILIARIO_FIJO: { low: 5, medium: 15, high: 30 }
+      },
+      slotKpiMap: {
+        BATHROOM_1_SHOWER: "SANITARIOS",
+        BATHROOM_1_SINK: "SANITARIOS",
+        BATHROOM_1_SINK_PIPES: "SANITARIOS",
+        BATHROOM_1_WC: "SANITARIOS",
+        BATHROOM_1_WC_PIPES: "SANITARIOS",
+        BATHROOM_1_CEILING: "HUMEDAD",
+        BATHROOM_1_OUTLETS: "ELECTRICIDAD",
+        BATHROOM_2_SHOWER: "SANITARIOS",
+        BATHROOM_2_SINK: "SANITARIOS",
+        BATHROOM_2_SINK_PIPES: "SANITARIOS",
+        BATHROOM_2_WC: "SANITARIOS",
+        BATHROOM_2_WC_PIPES: "SANITARIOS",
+        BATHROOM_2_CEILING: "HUMEDAD",
+        BATHROOM_2_OUTLETS: "ELECTRICIDAD",
+        KITCHEN_UNDER_SINK: "HUMEDAD",
+        KITCHEN_SINK_WALL: "HUMEDAD",
+        KITCHEN_OUTLETS: "ELECTRICIDAD",
+        KITCHEN_WINDOW: "VENTANAS_CERRAMIENTOS",
+        LIVING_WALLS: "MUROS_PINTURA",
+        LIVING_CEILING: "MUROS_PINTURA",
+        LIVING_FLOOR: "PISOS",
+        LIVING_WINDOWS: "VENTANAS_CERRAMIENTOS",
+        LIVING_SWITCHES: "ELECTRICIDAD",
+        BEDROOM_1_WALLS: "MUROS_PINTURA",
+        BEDROOM_1_FLOOR: "PISOS",
+        BEDROOM_1_WINDOWS: "VENTANAS_CERRAMIENTOS",
+        BEDROOM_2_WALLS: "MUROS_PINTURA",
+        BEDROOM_2_FLOOR: "PISOS",
+        BEDROOM_2_WINDOWS: "VENTANAS_CERRAMIENTOS",
+        BEDROOM_3_WALLS: "MUROS_PINTURA",
+        BEDROOM_3_FLOOR: "PISOS",
+        BEDROOM_3_WINDOWS: "VENTANAS_CERRAMIENTOS",
+        LAUNDRY_WALLS_FLOOR: "HUMEDAD",
+        ELECTRICAL_PANEL: "ELECTRICIDAD"
       },
       messages: {
+        MUROS_PINTURA: {
+          low: "Se observan imperfecciones menores en muros o pintura del área inspeccionada.",
+          medium: "Se observan deterioros visibles en muros o pintura del área inspeccionada.",
+          high: "Se observan deterioros relevantes en muros o pintura del área inspeccionada."
+        },
         HUMEDAD: {
           low: "Se observan indicios leves de humedad superficial en el área inspeccionada.",
           medium: "Se observan señales visibles de humedad en el área inspeccionada.",
           high: "Se observan evidencias visibles de humedad extendida en el área inspeccionada."
-        },
-        PINTURA: {
-          low: "Se observan imperfecciones menores en la pintura del área inspeccionada.",
-          medium: "Se observan deterioros visibles en la pintura del área inspeccionada.",
-          high: "Se observan deterioros relevantes en la pintura del área inspeccionada."
         },
         PISOS: {
           low: "Se observan marcas o desgaste leve en el piso del área inspeccionada.",
@@ -572,10 +692,20 @@
           medium: "Se observan condiciones visibles en elementos eléctricos del área inspeccionada.",
           high: "Se observan condiciones visibles relevantes en elementos eléctricos del área inspeccionada."
         },
-        VENTANAS: {
-          low: "Se observan condiciones visibles menores en ventanas o marcos del área inspeccionada.",
-          medium: "Se observan condiciones visibles en ventanas o marcos del área inspeccionada.",
-          high: "Se observan condiciones visibles relevantes en ventanas o marcos del área inspeccionada."
+        VENTANAS_CERRAMIENTOS: {
+          low: "Se observan condiciones visibles menores en ventanas o cerramientos del área inspeccionada.",
+          medium: "Se observan condiciones visibles en ventanas o cerramientos del área inspeccionada.",
+          high: "Se observan condiciones visibles relevantes en ventanas o cerramientos del área inspeccionada."
+        },
+        PUERTAS_HERRAJES: {
+          low: "Se observan condiciones visibles menores en puertas o herrajes del área inspeccionada.",
+          medium: "Se observan condiciones visibles en puertas o herrajes del área inspeccionada.",
+          high: "Se observan condiciones visibles relevantes en puertas o herrajes del área inspeccionada."
+        },
+        MOBILIARIO_FIJO: {
+          low: "Se observan condiciones visibles menores en mobiliario fijo del área inspeccionada.",
+          medium: "Se observan condiciones visibles en mobiliario fijo del área inspeccionada.",
+          high: "Se observan condiciones visibles relevantes en mobiliario fijo del área inspeccionada."
         }
       },
       recommendations: {
@@ -587,12 +717,12 @@
     };
 
     const fields = [
+      { id: "kpiMurosPinturaLow", path: "kpis.MUROS_PINTURA.low", type: "number" },
+      { id: "kpiMurosPinturaMed", path: "kpis.MUROS_PINTURA.medium", type: "number" },
+      { id: "kpiMurosPinturaHigh", path: "kpis.MUROS_PINTURA.high", type: "number" },
       { id: "kpiHumedadLow", path: "kpis.HUMEDAD.low", type: "number" },
       { id: "kpiHumedadMed", path: "kpis.HUMEDAD.medium", type: "number" },
       { id: "kpiHumedadHigh", path: "kpis.HUMEDAD.high", type: "number" },
-      { id: "kpiPinturaLow", path: "kpis.PINTURA.low", type: "number" },
-      { id: "kpiPinturaMed", path: "kpis.PINTURA.medium", type: "number" },
-      { id: "kpiPinturaHigh", path: "kpis.PINTURA.high", type: "number" },
       { id: "kpiPisosLow", path: "kpis.PISOS.low", type: "number" },
       { id: "kpiPisosMed", path: "kpis.PISOS.medium", type: "number" },
       { id: "kpiPisosHigh", path: "kpis.PISOS.high", type: "number" },
@@ -602,17 +732,23 @@
       { id: "kpiElectricidadLow", path: "kpis.ELECTRICIDAD.low", type: "number" },
       { id: "kpiElectricidadMed", path: "kpis.ELECTRICIDAD.medium", type: "number" },
       { id: "kpiElectricidadHigh", path: "kpis.ELECTRICIDAD.high", type: "number" },
-      { id: "kpiVentanasLow", path: "kpis.VENTANAS.low", type: "number" },
-      { id: "kpiVentanasMed", path: "kpis.VENTANAS.medium", type: "number" },
-      { id: "kpiVentanasHigh", path: "kpis.VENTANAS.high", type: "number" },
+      { id: "kpiVentanasCerramientosLow", path: "kpis.VENTANAS_CERRAMIENTOS.low", type: "number" },
+      { id: "kpiVentanasCerramientosMed", path: "kpis.VENTANAS_CERRAMIENTOS.medium", type: "number" },
+      { id: "kpiVentanasCerramientosHigh", path: "kpis.VENTANAS_CERRAMIENTOS.high", type: "number" },
+      { id: "kpiPuertasHerrajesLow", path: "kpis.PUERTAS_HERRAJES.low", type: "number" },
+      { id: "kpiPuertasHerrajesMed", path: "kpis.PUERTAS_HERRAJES.medium", type: "number" },
+      { id: "kpiPuertasHerrajesHigh", path: "kpis.PUERTAS_HERRAJES.high", type: "number" },
+      { id: "kpiMobiliarioFijoLow", path: "kpis.MOBILIARIO_FIJO.low", type: "number" },
+      { id: "kpiMobiliarioFijoMed", path: "kpis.MOBILIARIO_FIJO.medium", type: "number" },
+      { id: "kpiMobiliarioFijoHigh", path: "kpis.MOBILIARIO_FIJO.high", type: "number" },
       { id: "badgeYellow", path: "badge.yellowFrom", type: "number" },
       { id: "badgeGreen", path: "badge.greenFrom", type: "number" },
+      { id: "msgMurosPinturaLow", path: "messages.MUROS_PINTURA.low", type: "text" },
+      { id: "msgMurosPinturaMed", path: "messages.MUROS_PINTURA.medium", type: "text" },
+      { id: "msgMurosPinturaHigh", path: "messages.MUROS_PINTURA.high", type: "text" },
       { id: "msgHumedadLow", path: "messages.HUMEDAD.low", type: "text" },
       { id: "msgHumedadMed", path: "messages.HUMEDAD.medium", type: "text" },
       { id: "msgHumedadHigh", path: "messages.HUMEDAD.high", type: "text" },
-      { id: "msgPinturaLow", path: "messages.PINTURA.low", type: "text" },
-      { id: "msgPinturaMed", path: "messages.PINTURA.medium", type: "text" },
-      { id: "msgPinturaHigh", path: "messages.PINTURA.high", type: "text" },
       { id: "msgPisosLow", path: "messages.PISOS.low", type: "text" },
       { id: "msgPisosMed", path: "messages.PISOS.medium", type: "text" },
       { id: "msgPisosHigh", path: "messages.PISOS.high", type: "text" },
@@ -622,12 +758,67 @@
       { id: "msgElectricidadLow", path: "messages.ELECTRICIDAD.low", type: "text" },
       { id: "msgElectricidadMed", path: "messages.ELECTRICIDAD.medium", type: "text" },
       { id: "msgElectricidadHigh", path: "messages.ELECTRICIDAD.high", type: "text" },
-      { id: "msgVentanasLow", path: "messages.VENTANAS.low", type: "text" },
-      { id: "msgVentanasMed", path: "messages.VENTANAS.medium", type: "text" },
-      { id: "msgVentanasHigh", path: "messages.VENTANAS.high", type: "text" },
+      { id: "msgVentanasCerramientosLow", path: "messages.VENTANAS_CERRAMIENTOS.low", type: "text" },
+      { id: "msgVentanasCerramientosMed", path: "messages.VENTANAS_CERRAMIENTOS.medium", type: "text" },
+      { id: "msgVentanasCerramientosHigh", path: "messages.VENTANAS_CERRAMIENTOS.high", type: "text" },
+      { id: "msgPuertasHerrajesLow", path: "messages.PUERTAS_HERRAJES.low", type: "text" },
+      { id: "msgPuertasHerrajesMed", path: "messages.PUERTAS_HERRAJES.medium", type: "text" },
+      { id: "msgPuertasHerrajesHigh", path: "messages.PUERTAS_HERRAJES.high", type: "text" },
+      { id: "msgMobiliarioFijoLow", path: "messages.MOBILIARIO_FIJO.low", type: "text" },
+      { id: "msgMobiliarioFijoMed", path: "messages.MOBILIARIO_FIJO.medium", type: "text" },
+      { id: "msgMobiliarioFijoHigh", path: "messages.MOBILIARIO_FIJO.high", type: "text" },
       { id: "recGreen", path: "recommendations.GREEN", type: "text" },
       { id: "recYellow", path: "recommendations.YELLOW", type: "text" },
       { id: "recRed", path: "recommendations.RED", type: "text" }
+    ];
+
+    const KPI_OPTIONS = [
+      { value: "", label: "Sin KPI" },
+      { value: "MUROS_PINTURA", label: "Muros y pintura" },
+      { value: "HUMEDAD", label: "Humedad visible" },
+      { value: "PISOS", label: "Pisos" },
+      { value: "SANITARIOS", label: "Sanitarios" },
+      { value: "ELECTRICIDAD", label: "Electricidad visible" },
+      { value: "VENTANAS_CERRAMIENTOS", label: "Ventanas y cerramientos" },
+      { value: "PUERTAS_HERRAJES", label: "Puertas y herrajes" },
+      { value: "MOBILIARIO_FIJO", label: "Mobiliario fijo" }
+    ];
+
+    const SLOT_CODES = [
+      "BATHROOM_1_SHOWER",
+      "BATHROOM_1_SINK",
+      "BATHROOM_1_SINK_PIPES",
+      "BATHROOM_1_WC",
+      "BATHROOM_1_WC_PIPES",
+      "BATHROOM_1_CEILING",
+      "BATHROOM_1_OUTLETS",
+      "BATHROOM_2_SHOWER",
+      "BATHROOM_2_SINK",
+      "BATHROOM_2_SINK_PIPES",
+      "BATHROOM_2_WC",
+      "BATHROOM_2_WC_PIPES",
+      "BATHROOM_2_CEILING",
+      "BATHROOM_2_OUTLETS",
+      "KITCHEN_UNDER_SINK",
+      "KITCHEN_SINK_WALL",
+      "KITCHEN_OUTLETS",
+      "KITCHEN_WINDOW",
+      "LIVING_WALLS",
+      "LIVING_CEILING",
+      "LIVING_FLOOR",
+      "LIVING_WINDOWS",
+      "LIVING_SWITCHES",
+      "BEDROOM_1_WALLS",
+      "BEDROOM_1_FLOOR",
+      "BEDROOM_1_WINDOWS",
+      "BEDROOM_2_WALLS",
+      "BEDROOM_2_FLOOR",
+      "BEDROOM_2_WINDOWS",
+      "BEDROOM_3_WALLS",
+      "BEDROOM_3_FLOOR",
+      "BEDROOM_3_WINDOWS",
+      "LAUNDRY_WALLS_FLOOR",
+      "ELECTRICAL_PANEL"
     ];
 
     function normalizeConfig(input) {
@@ -642,6 +833,12 @@
             high: Number.isFinite(src.high) ? src.high : next.kpis[key].high
           };
         });
+      }
+      if (input.slotKpiMap && typeof input.slotKpiMap === "object") {
+        next.slotKpiMap = {
+          ...next.slotKpiMap,
+          ...Object.fromEntries(Object.entries(input.slotKpiMap).map(([k, v]) => [String(k).toUpperCase(), String(v || "").toUpperCase()]))
+        };
       }
       if (input.messages) {
         Object.keys(next.messages).forEach((key) => {
@@ -708,6 +905,35 @@
       ref[keys[keys.length - 1]] = value;
     }
 
+    function renderSlotMap(cfg) {
+      const grid = document.getElementById("slotMapGrid");
+      if (!grid) return;
+      grid.innerHTML = "";
+      grid.appendChild(Object.assign(document.createElement("div"), { className: "slotMapHeader", textContent: "Slot" }));
+      grid.appendChild(Object.assign(document.createElement("div"), { className: "slotMapHeader", textContent: "KPI" }));
+
+      const map = cfg?.slotKpiMap || {};
+      SLOT_CODES.forEach((slotCode) => {
+        const label = document.createElement("div");
+        label.textContent = slotCode;
+
+        const select = document.createElement("select");
+        select.setAttribute("data-slot-code", slotCode);
+        KPI_OPTIONS.forEach((opt) => {
+          const option = document.createElement("option");
+          option.value = opt.value;
+          option.textContent = opt.label;
+          if (String(map[slotCode] || "").toUpperCase() === opt.value) {
+            option.selected = true;
+          }
+          select.appendChild(option);
+        });
+
+        grid.appendChild(label);
+        grid.appendChild(select);
+      });
+    }
+
     async function loadForm() {
       const cfg = await fetchConfig();
       fields.forEach(({ id, path }) => {
@@ -715,6 +941,7 @@
         if (!el) return;
         el.value = getByPath(cfg, path);
       });
+      renderSlotMap(cfg);
     }
 
     async function saveForm() {
@@ -730,6 +957,13 @@
           setByPath(cfg, path, val || getByPath(defaultConfig, path));
         }
       });
+      const slotMap = {};
+      document.querySelectorAll("#slotMapGrid select").forEach((el) => {
+        const slotCode = el.getAttribute("data-slot-code");
+        const value = String(el.value || "").toUpperCase();
+        if (slotCode && value) slotMap[slotCode] = value;
+      });
+      cfg.slotKpiMap = slotMap;
       setLocalConfig(cfg);
       try {
         const res = await fetch("/api/admin/score-config", {
