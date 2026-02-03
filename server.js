@@ -453,6 +453,16 @@ async function queueOpenAiSlotAnalysis({ slotId }) {
     const confidence = Math.max(0, Math.min(1, Number(parsed.confidence ?? 0.7)));
     const extentText = details.map((d) => String(d?.extent || '').toLowerCase());
     const hasWide = extentText.some((t) => t.includes('extend') || t.includes('general') || t.includes('ampl'));
+    const analysisLower = kpiAnalysis.toLowerCase();
+    const analysisSaysNoIssue = [
+      "sin observaciones",
+      "no se observan",
+      "no se identifican",
+      "no se detectan"
+    ].some((t) => analysisLower.includes(t));
+    if (analysisSaysNoIssue && signals.length) {
+      signals.length = 0;
+    }
     const hasSignals = signals.length > 0;
     const severity = hasSignals ? (hasWide ? 'high' : (signals.length >= 2 ? 'medium' : 'low')) : null;
     const analysisCode = hasSignals ? 'COSMETIC_WEAR' : 'OK';
