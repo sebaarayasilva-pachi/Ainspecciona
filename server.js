@@ -458,7 +458,16 @@ async function queueOpenAiSlotAnalysis({ slotId }) {
       "sin observaciones",
       "no se observan",
       "no se identifican",
-      "no se detectan"
+      "no se detectan",
+      "sin señales",
+      "sin señales evidentes",
+      "condiciones adecuadas",
+      "condición adecuada",
+      "sin daños",
+      "sin deterioros",
+      "sin anomalías",
+      "sin signos",
+      "no presenta señales"
     ].some((t) => analysisLower.includes(t));
     if (analysisSaysNoIssue && signals.length) {
       signals.length = 0;

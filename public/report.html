@@ -298,7 +298,7 @@
       const cardW = 1040;
       const headerOffset = 55;
       const slotStartOffset = 110;
-      const slotH = 96;
+      const slotH = 130;
       const slotGap = 8;
 
       kpiGroups.forEach((g) => {
@@ -399,30 +399,35 @@
           const desc = s?.analysisDebug?.openai?.parsed?.description || "";
           const kpiAnalysis = s?.analysisDebug?.openai?.parsed?.kpi_analysis || "";
           const hasStructured = desc || kpiAnalysis;
-          const descText = desc ? `Descripción: ${desc}` : "";
-          const analysisText = kpiAnalysis ? `Análisis KPI: ${kpiAnalysis}` : "";
+          const clampText = (text, max = 170) => {
+            const str = String(text || "");
+            return str.length > max ? `${str.slice(0, max - 1)}…` : str;
+          };
 
           if (hasStructured) {
+            const descText = desc ? `Descripción: ${desc}` : "";
+            const analysisText = kpiAnalysis ? `Análisis KPI: ${kpiAnalysis}` : "";
             if (descText) {
               container.appendChild(createSvg("text", { x: 170, y: slotY + 88, "font-size": 11, fill: "#6B7280" })).textContent =
-                descText;
+                clampText(descText);
             }
             if (analysisText) {
               container.appendChild(createSvg("text", { x: 170, y: slotY + 104, "font-size": 11, fill: "#6B7280" })).textContent =
-                analysisText;
+                clampText(analysisText);
             }
           } else {
+            const fallbackText = `Analisis de Imagen: ${aiCtx || "Sin observaciones."}`;
             container.appendChild(createSvg("text", { x: 170, y: slotY + 88, "font-size": 11, fill: "#6B7280" })).textContent =
-              aiLine;
+              clampText(fallbackText);
           }
 
           if (evidenceUrl) {
             const link = createSvg("a", { href: evidenceUrl, target: "_blank" });
-            const txt = createSvg("text", { x: 965, y: slotY + 80, "font-size": 12, fill: "#2563EB", "text-anchor": "end" });
+            const txt = createSvg("text", { x: 965, y: slotY + 112, "font-size": 12, fill: "#2563EB", "text-anchor": "end" });
             txt.textContent = "Ver evidencia";
             link.appendChild(txt);
             container.appendChild(link);
-            container.appendChild(createSvg("line", { x1: 890, y1: slotY + 84, x2: 965, y2: slotY + 84, stroke: "#2563EB", "stroke-width": 1 }));
+            container.appendChild(createSvg("line", { x1: 890, y1: slotY + 116, x2: 965, y2: slotY + 116, stroke: "#2563EB", "stroke-width": 1 }));
           }
         });
 
