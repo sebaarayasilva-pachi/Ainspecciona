@@ -404,6 +404,8 @@ async function queueOpenAiSlotAnalysis({ slotId }) {
       '',
       'Formato de salida (JSON válido):',
       '{',
+      '  "description": "Descripción objetiva de lo visible",',
+      '  "kpi_analysis": "Conclusión solo según el KPI",',
       '  "signals_detected": ["..."],',
       '  "details": [',
       '    { "signal": "...", "location": "...", "extent": "localizado|moderado|extendido" }',
@@ -444,6 +446,8 @@ async function queueOpenAiSlotAnalysis({ slotId }) {
     };
 
     const parsed = parseJson(rawText) || {};
+    const description = String(parsed.description || '').trim();
+    const kpiAnalysis = String(parsed.kpi_analysis || '').trim();
     const signals = Array.isArray(parsed.signals_detected) ? parsed.signals_detected.map((s) => String(s)) : [];
     const details = Array.isArray(parsed.details) ? parsed.details : [];
     const confidence = Math.max(0, Math.min(1, Number(parsed.confidence ?? 0.7)));
@@ -452,8 +456,8 @@ async function queueOpenAiSlotAnalysis({ slotId }) {
     const severity = signals.length === 0 ? null : (hasWide ? 'high' : (signals.length >= 2 ? 'medium' : 'low'));
     const analysisCode = signals.length === 0 ? 'OK' : 'COSMETIC_WEAR';
     const message = signals.length
-      ? `Se detecta: ${signals.join(', ')}.`
-      : 'Sin observaciones.';
+      ? (kpiAnalysis || `Se detecta: ${signals.join(', ')}.`)
+      : (kpiAnalysis || 'Sin observaciones.');
 
     const prevMessage = slot.analysisMessage || null;
     const nextDebug = {
@@ -462,7 +466,7 @@ async function queueOpenAiSlotAnalysis({ slotId }) {
       openai: {
         model,
         raw: rawText,
-        parsed,
+        parsed: { ...parsed, description, kpi_analysis: kpiAnalysis },
         kpiKey,
         at: new Date().toISOString()
       },

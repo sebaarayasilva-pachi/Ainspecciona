@@ -351,7 +351,7 @@
           const baseLine = hasIssue ? `${baseMsg} · Recomendación: ${recMsg}` : "";
           const aiLine = aiCtx
             ? `En la imagen se observa: ${aiCtx}`
-            : "En la imagen se observa: Sin observaciones adicionales.";
+            : "En la imagen se observa: Sin observaciones.";
 
           container.appendChild(createSvg("rect", { x: 72, y: slotY, width: 1000, height: slotH, rx: 12, fill: "#FFFFFF", stroke: "#E5E7EB" }));
           container.appendChild(createSvg("rect", { x: 88, y: slotY + 12, width: 64, height: 54, rx: 10, fill: "#E5E7EB" }));
@@ -389,8 +389,26 @@
             container.appendChild(createSvg("text", { x: 170, y: slotY + 72, "font-size": 11, fill: "#6B7280" })).textContent =
               baseLine;
           }
-          container.appendChild(createSvg("text", { x: 170, y: slotY + 88, "font-size": 11, fill: "#6B7280" })).textContent =
-            aiLine;
+
+          const desc = s?.analysisDebug?.openai?.parsed?.description || "";
+          const kpiAnalysis = s?.analysisDebug?.openai?.parsed?.kpi_analysis || "";
+          const hasStructured = desc || kpiAnalysis;
+          const descText = desc ? `Descripción: ${desc}` : "";
+          const analysisText = kpiAnalysis ? `Análisis KPI: ${kpiAnalysis}` : "";
+
+          if (hasStructured) {
+            if (descText) {
+              container.appendChild(createSvg("text", { x: 170, y: slotY + 88, "font-size": 11, fill: "#6B7280" })).textContent =
+                descText;
+            }
+            if (analysisText) {
+              container.appendChild(createSvg("text", { x: 170, y: slotY + 104, "font-size": 11, fill: "#6B7280" })).textContent =
+                analysisText;
+            }
+          } else {
+            container.appendChild(createSvg("text", { x: 170, y: slotY + 88, "font-size": 11, fill: "#6B7280" })).textContent =
+              aiLine;
+          }
 
           if (evidenceUrl) {
             const link = createSvg("a", { href: evidenceUrl, target: "_blank" });
