@@ -55,6 +55,7 @@
 <body>
   <div class="toolbar">
     <button id="reanalyzeBtn" class="toolbtn" type="button">Reanalizar con IA</button>
+    <button id="downloadPdfBtn" class="toolbtn" type="button">Descargar PDF</button>
     <div id="reanalyzeNote" class="toolnote"></div>
   </div>
   <div class="canvas">
@@ -347,6 +348,7 @@
               : (sevKey === "low")
                 ? Number(kpiCfg.low ?? 0)
                 : 0;
+          const slotScore = Math.max(0, 100 - slotPenalty);
           const sourceLabel = String(s.source || "").toUpperCase() === "OPENAI" ? "OpenAI" : "V1";
           const analyzedAt = s.analyzedAt ? formatDate(s.analyzedAt) : "—";
           const code = s.findingCode || s.slotCode || "";
@@ -388,7 +390,7 @@
           container.appendChild(createSvg("text", { x: 533, y: slotY + 27, "font-size": 10, fill: "#111827", "font-weight": 700, "text-anchor": "middle" })).textContent = sourceLabel;
 
           container.appendChild(createSvg("text", { x: 170, y: slotY + 52, "font-size": 12, fill: "#111827", "font-weight": 700 })).textContent =
-            `Ambiente: ${s.groupTitle || ""} · Slot: ${s.title || ""} · Puntaje: ${slotPenalty} · Fuente: ${sourceLabel} · Fecha: ${analyzedAt}`;
+            `Ambiente: ${s.groupTitle || ""} · Slot: ${s.title || ""} · Puntaje: ${slotScore} · Fuente: ${sourceLabel} · Fecha: ${analyzedAt}`;
           if (baseLine) {
             container.appendChild(createSvg("text", { x: 170, y: slotY + 72, "font-size": 11, fill: "#6B7280" })).textContent =
               baseLine;
@@ -755,6 +757,13 @@
 
     const reBtn = document.getElementById("reanalyzeBtn");
     if (reBtn) reBtn.addEventListener("click", () => reanalyzeCase().catch(() => {}));
+
+    const pdfBtn = document.getElementById("downloadPdfBtn");
+    if (pdfBtn) {
+      pdfBtn.addEventListener("click", () => {
+        window.print();
+      });
+    }
   </script>
 </body>
 </html>
