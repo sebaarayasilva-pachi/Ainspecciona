@@ -12,8 +12,8 @@ RUN npm ci
 # Copy source
 COPY . .
 
-# Prisma client (build-time)
-RUN npx prisma generate
+# Prisma generate en build: prisma-build.env (no está en .gitignore)
+RUN cp prisma-build.env .env && npx prisma generate && rm .env
 
 ENV NODE_ENV=production
 ENV PORT=8080

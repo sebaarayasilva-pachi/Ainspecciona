@@ -1,4 +1,5 @@
 import sharp from 'sharp';
+import { validatePhotoQuality } from '../photoQuality/validatePhoto.js';
 
 function now() {
   return new Date();
@@ -20,47 +21,6 @@ async function requireCaptureToken(prisma, token) {
   return row;
 }
 
-async function laplacianVarianceFromBuffer(buffer) {
-  // Downsample to make it fast and stable
-  const { data, info } = await sharp(buffer)
-    .rotate()
-    .greyscale()
-    .resize({ width: 512, withoutEnlargement: true })
-    .raw()
-    .toBuffer({ resolveWithObject: true });
-
-  const w = info.width;
-  const h = info.height;
-  if (!w || !h || w < 5 || h < 5) return { variance: 0, width: w, height: h };
-
-  // Sample every 2px for speed
-  const step = 2;
-  let count = 0;
-  let mean = 0;
-  let m2 = 0;
-
-  for (let y = 1; y < h - 1; y += step) {
-    for (let x = 1; x < w - 1; x += step) {
-      const idx = y * w + x;
-      const c = data[idx];
-      const up = data[idx - w];
-      const dn = data[idx + w];
-      const lf = data[idx - 1];
-      const rt = data[idx + 1];
-      const lap = -4 * c + up + dn + lf + rt;
-
-      count++;
-      const delta = lap - mean;
-      mean += delta / count;
-      const delta2 = lap - mean;
-      m2 += delta * delta2;
-    }
-  }
-
-  const variance = count > 1 ? m2 / (count - 1) : 0;
-  return { variance, width: w, height: h };
-}
-
 function pickNextSlot(slots) {
   const pending = slots.find((s) => String(s.status || '').toUpperCase() === 'PENDING');
   if (pending) return pending;
@@ -69,22 +29,47 @@ function pickNextSlot(slots) {
 
 function computeProgress(slots) {
   const total = slots.length;
-  const uploaded = slots.filter((s) =>
-    ['UPLOADED', 'ANALYZED', 'REJECTED'].includes(String(s.status || '').toUpperCase())
-  ).length;
+  const uploaded = slots.filter((s) => ['UPLOADED', 'ANALYZED', 'REJECTED'].includes(String(s.status || '').toUpperCase())).length;
   const analyzed = slots.filter((s) => String(s.status || '').toUpperCase() === 'ANALYZED').length;
-  const pct = total ? Math.round((uploaded / total) * 100) : 0;
-  return { uploaded, analyzed, total, pct };
+  const omitted = slots.filter((s) => String(s.status || '').toUpperCase() === 'NOT_CAPTURABLE').length;
+  const rejected = slots.filter((s) => String(s.status || '').toUpperCase() === 'REJECTED').length;
+  const pending = slots.filter((s) => String(s.status || '').toUpperCase() === 'PENDING').length;
+  const closed = analyzed + omitted;
+  const pct = total ? Math.round((closed / total) * 100) : 0;
+  const doneCycle = total > 0 && pending === 0 && rejected === 0;
+  return { uploaded, analyzed, omitted, rejected, pending, closed, total, pct, doneCycle };
 }
 
 const REPEAT_CODES = new Set([
   'PHOTO_TOO_DARK',
   'PHOTO_TOO_SMALL',
   'PHOTO_TOO_BLURRY',
-  'NOT_PROPERTY_IMAGE'
+  'PHOTO_TOO_BRIGHT',
+  'NOT_PROPERTY_IMAGE',
+  'SLOT_MISMATCH'
 ]);
 
-export async function registerCaptureRoutes(app, { prisma, storage, safeExtFromMime, analyzeImageBufferV1, slotGroupFromSlotCode, queueOpenAiSlotAnalysis }) {
+export async function registerCaptureRoutes(app, {
+  prisma,
+  storage,
+  safeExtFromMime,
+  analyzeImageBufferV1,
+  validateSlotMatchWithOpenAI,
+  slotGroupFromSlotCode,
+  queueOpenAiSlotAnalysis,
+  sendCaseToReview
+}) {
+  const mapSlotForResponse = (next) => next
+    ? {
+        id: next.id,
+        slotCode: next.slotCode,
+        title: next.title,
+        instructions: next.instructions,
+        orderIndex: next.orderIndex,
+        status: next.status,
+        photoUrl: next.photo?.filePath ? storage.publicUrl(next.photo.filePath) : null
+      }
+    : null;
   // Página de captura (móvil)
   app.get('/capture/:token', async (req, reply) => {
     if (!prisma) return reply.code(500).send('DATABASE_NOT_CONFIGURED');
@@ -119,18 +104,128 @@ export async function registerCaptureRoutes(app, { prisma, storage, safeExtFromM
       caseId: t.caseId,
       expiresAt: t.expiresAt,
       progress,
-      slot: next
-        ? {
-            id: next.id,
-            slotCode: next.slotCode,
-            title: next.title,
-            instructions: next.instructions,
-            orderIndex: next.orderIndex,
-            status: next.status,
-            photoUrl: next.photo?.filePath ? storage.publicUrl(next.photo.filePath) : null
-          }
-        : null
+      canFinish: !!progress.doneCycle,
+      slot: mapSlotForResponse(next)
     });
+  });
+
+  // Listado completo de slots para revisión/retoma al final del flujo
+  app.get('/api/capture/:token/slots', async (req, reply) => {
+    if (!prisma) {
+      return reply.code(500).send({ ok: false, error: 'DATABASE_NOT_CONFIGURED' });
+    }
+
+    const token = String(req.params.token || '');
+    const t = await requireCaptureToken(prisma, token);
+    if (!t) return reply.code(401).send({ ok: false, error: 'INVALID_TOKEN' });
+
+    const slots = await prisma.slot.findMany({
+      where: { caseId: t.caseId },
+      orderBy: { orderIndex: 'asc' },
+      include: { photo: true }
+    });
+    const progress = computeProgress(slots);
+
+    return reply.send({
+      ok: true,
+      caseId: t.caseId,
+      progress,
+      canFinish: !!progress.doneCycle,
+      slots: slots.map((s) => ({
+        id: s.id,
+        slotCode: s.slotCode,
+        title: s.title,
+        instructions: s.instructions,
+        orderIndex: s.orderIndex,
+        status: s.status,
+        photoUrl: s.photo?.filePath ? storage.publicUrl(s.photo.filePath) : null
+      }))
+    });
+  });
+
+  app.post('/api/capture/:token/slots/:slotId/omit', async (req, reply) => {
+    if (!prisma) return reply.code(500).send({ ok: false, error: 'DATABASE_NOT_CONFIGURED' });
+    const token = String(req.params.token || '');
+    const slotId = String(req.params.slotId || '');
+    const t = await requireCaptureToken(prisma, token);
+    if (!t) return reply.code(401).send({ ok: false, error: 'INVALID_TOKEN' });
+
+    const slot = await prisma.slot.findUnique({
+      where: { id: slotId },
+      select: { id: true, caseId: true, status: true }
+    });
+    if (!slot || slot.caseId !== t.caseId) return reply.code(404).send({ ok: false, error: 'SLOT_NOT_FOUND' });
+
+    const current = String(slot.status || '').toUpperCase();
+    if (current === 'ANALYZED' || current === 'NOT_CAPTURABLE') {
+      const slots = await prisma.slot.findMany({
+        where: { caseId: slot.caseId },
+        orderBy: { orderIndex: 'asc' },
+        include: { photo: true }
+      });
+      const next = pickNextSlot(slots);
+      const progress = computeProgress(slots);
+      return reply.send({ ok: true, skipped: true, alreadyClosed: true, progress, canFinish: !!progress.doneCycle, nextSlotId: next?.id ?? null, slot: mapSlotForResponse(next) });
+    }
+
+    await prisma.slot.update({
+      where: { id: slot.id },
+      data: {
+        status: 'NOT_CAPTURABLE',
+        analysisCode: 'NOT_CAPTURABLE',
+        analysisSeverity: 'low',
+        analysisConfidence: 1,
+        analysisMessage: 'Foto omitida por el usuario: no fue posible capturar esta toma.',
+        analysisDebug: { source: 'USER_SKIP', at: now().toISOString() },
+        analyzedAt: now()
+      }
+    });
+
+    const slots = await prisma.slot.findMany({
+      where: { caseId: slot.caseId },
+      orderBy: { orderIndex: 'asc' },
+      include: { photo: true }
+    });
+    const next = pickNextSlot(slots);
+    const progress = computeProgress(slots);
+    return reply.send({ ok: true, skipped: true, progress, canFinish: !!progress.doneCycle, nextSlotId: next?.id ?? null, slot: mapSlotForResponse(next) });
+  });
+
+  app.post('/api/capture/:token/finish', async (req, reply) => {
+    if (!prisma) return reply.code(500).send({ ok: false, error: 'DATABASE_NOT_CONFIGURED' });
+    const token = String(req.params.token || '');
+    const t = await requireCaptureToken(prisma, token);
+    if (!t) return reply.code(401).send({ ok: false, error: 'INVALID_TOKEN' });
+
+    const slots = await prisma.slot.findMany({ where: { caseId: t.caseId }, orderBy: { orderIndex: 'asc' } });
+    const progress = computeProgress(slots);
+    if (!progress.doneCycle) return reply.code(400).send({ ok: false, error: 'CYCLE_NOT_COMPLETED', progress });
+
+    const c = await prisma.case.findUnique({
+      where: { id: t.caseId },
+      select: { id: true, reviewStatus: true }
+    });
+    if (!c) return reply.code(404).send({ ok: false, error: 'CASE_NOT_FOUND' });
+
+    const rev = String(c.reviewStatus || '').toLowerCase();
+    if (rev === 'pending_review' || rev === 'approved') {
+      return reply.send({ ok: true, alreadyFinished: true, reviewStatus: c.reviewStatus || 'pending_review', progress });
+    }
+
+    await prisma.case.update({
+      where: { id: c.id },
+      data: { status: 'DONE' }
+    });
+
+    let notified = false;
+    try {
+      if (typeof sendCaseToReview === 'function') {
+        const sent = await sendCaseToReview(c.id);
+        notified = !!sent?.ok;
+      }
+    } catch (_) {}
+
+    return reply.send({ ok: true, finished: true, reviewStatus: 'pending_review', notified, progress });
   });
 
   // Subir + validar captura (OK / REPEAT)
@@ -163,25 +258,15 @@ export async function registerCaptureRoutes(app, { prisma, storage, safeExtFromM
 
     const buffer = await part.toBuffer();
 
-    // 1) Blur check (antes de todo)
-    const blur = await laplacianVarianceFromBuffer(buffer);
-    const blurThreshold = 30; // MVP: ajustar con data real
+    // Validación de calidad: borrosidad, tamaño, iluminación, detalle
+    const qualityResult = await validatePhotoQuality(buffer, undefined, {
+      slotCode: slot.slotCode,
+      slotTitle: slot.title,
+      instructions: slot.instructions
+    });
     let analysis;
-    if (blur.variance < blurThreshold) {
-      analysis = {
-        meta: { width: null, height: null },
-        problem: {
-          code: 'PHOTO_TOO_BLURRY',
-          severity: 'high',
-          confidence: 0.85,
-          message: 'La foto está borrosa. Acércate, enfoca y vuelve a capturar.',
-          debug: {
-            laplacianVariance: Number(blur.variance.toFixed(2)),
-            threshold: blurThreshold,
-            resized: { width: blur.width, height: blur.height }
-          }
-        }
-      };
+    if (!qualityResult.ok) {
+      analysis = { meta: {}, problem: qualityResult.problem };
     } else {
       analysis = await analyzeImageBufferV1({
         buffer,
@@ -189,8 +274,9 @@ export async function registerCaptureRoutes(app, { prisma, storage, safeExtFromM
         mimetype: mimeType,
         slotGroup: slotGroupFromSlotCode(slot.slotCode)
       });
-      // incluir blur en debug para telemetría
-      analysis.problem.debug = { ...(analysis.problem.debug || {}), blur: { laplacianVariance: Number(blur.variance.toFixed(2)) } };
+      if (qualityResult.debug) {
+        analysis.problem.debug = { ...(analysis.problem.debug || {}), quality: qualityResult.debug };
+      }
     }
 
     const saved = await storage.saveImageBuffer({
@@ -215,7 +301,47 @@ export async function registerCaptureRoutes(app, { prisma, storage, safeExtFromM
     const filePath = saved.filePath;
 
     const code = String(analysis.problem.code || '').toUpperCase();
-    const passed = !REPEAT_CODES.has(code);
+    if (!REPEAT_CODES.has(code) && typeof validateSlotMatchWithOpenAI === 'function') {
+      const slotMatch = await validateSlotMatchWithOpenAI({
+        buffer,
+        mimeType,
+        slotTitle: slot.title,
+        slotCode: slot.slotCode,
+        instructions: slot.instructions
+      });
+      // failOpen=true por defecto: no bloquear el flujo si OpenAI falla o no está configurado.
+      const minPositiveConfidence = Math.max(0, Math.min(1, Number(process.env.SLOT_MATCH_MIN_POSITIVE_CONFIDENCE || 0.5)));
+      const failOpen = String(process.env.SLOT_MATCH_FAIL_OPEN || 'true').toLowerCase() === 'true';
+      const isMismatch = slotMatch.checked && slotMatch.matchesSlot === false;
+      const isLowConfidencePositive = slotMatch.checked && slotMatch.matchesSlot === true && slotMatch.confidence < minPositiveConfidence;
+      const isUncheckedAndStrict = !slotMatch.checked && !failOpen;
+      const currentDebug = analysis.problem.debug || {};
+      analysis.problem.debug = {
+        ...currentDebug,
+        slotMatch,
+        slotMatchMinPositiveConfidence: minPositiveConfidence,
+        slotMatchFailOpen: failOpen
+      };
+      if (isMismatch || isLowConfidencePositive || isUncheckedAndStrict) {
+        const reasonText = isUncheckedAndStrict
+          ? 'No fue posible validar con certeza que la foto corresponde al componente solicitado.'
+          : isMismatch
+          ? (slotMatch.reason || 'El componente detectado no coincide con el slot esperado.')
+          : isLowConfidencePositive
+          ? `La IA no tuvo suficiente certeza de correspondencia (${Math.round(slotMatch.confidence * 100)}%).`
+          : 'Validación de componente no superada.';
+        analysis.problem = {
+          code: 'SLOT_MISMATCH',
+          severity: 'medium',
+          confidence: slotMatch.confidence,
+          message: `La foto no parece corresponder a "${slot.title || slot.slotCode}". ${reasonText}`,
+          debug: { ...analysis.problem.debug, expectedSlot: { code: slot.slotCode, title: slot.title || null } }
+        };
+      }
+    }
+
+    const finalCode = String(analysis.problem.code || '').toUpperCase();
+    const passed = !REPEAT_CODES.has(finalCode);
     const nextStatus = passed ? 'ANALYZED' : 'REJECTED';
 
     const result = await prisma.$transaction(async (tx) => {

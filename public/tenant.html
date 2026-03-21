@@ -4,78 +4,108 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Panel · Ainspecciona</title>
+  <link rel="stylesheet" href="/assets/header.css" />
   <style>
     * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #F6F7F9;
-      color: #0f172a;
+      background: radial-gradient(circle at 20% 20%, #1f2b3a 0%, #0b121b 65%, #070b12 100%);
+      color: #e5eef7;
+      min-height: 100vh;
     }
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 20;
-      background: #ffffff;
-      border-bottom: 1px solid #e5e7eb;
+    .subBanner {
+      background: linear-gradient(135deg, rgba(124,58,237,0.15) 0%, rgba(34,211,238,0.10) 100%);
+      border-bottom: 1px solid rgba(124,58,237,0.3);
+      padding: 10px 24px;
     }
-    .nav {
-      max-width: none;
-      margin: 0;
-      padding: 20px 20px;
+    .subBannerInner {
+      max-width: 1200px;
+      margin: 0 auto;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 16px;
-      flex-wrap: wrap;
     }
-    .brand {
+    .subBannerLeft {
       display: flex;
       align-items: center;
       gap: 10px;
-      text-decoration: none;
-      color: inherit;
-      font-weight: 800;
     }
-    .brand img { height: 56px; }
+    .subBannerDot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      flex-shrink: 0;
+    }
+    .subBannerDot.cancelled { background: #ef4444; }
+    .subBannerDot.pending { background: #f59e0b; }
+    .subBanner strong { font-size: 14px; color: #ECF2FF; }
+    .subBannerMuted { font-size: 13px; color: #94a3b8; margin-left: 8px; }
+    .subBannerLink {
+      font-size: 13px;
+      font-weight: 700;
+      color: #A78BFA;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .subBannerLink:hover { color: #22D3EE; }
+    @media (max-width: 600px) {
+      .subBannerInner { flex-direction: column; align-items: flex-start; gap: 6px; }
+      .subBannerMuted { margin-left: 0; display: block; }
+    }
+
     .topActions {
       display: flex;
       gap: 12px;
       align-items: center;
+      flex-wrap: wrap;
     }
+    .creditsBadge {
+      padding: 6px 12px;
+      border-radius: 8px;
+      background: rgba(53, 208, 127, 0.15);
+      color: #35D07F;
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .creditsBadge.low { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
     .btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       padding: 10px 14px;
-      border-radius: 12px;
+      border-radius: 10px;
       font-weight: 700;
-      border: 1px solid transparent;
-      background: #2563eb;
-      color: #fff;
+      border: none;
+      background: linear-gradient(135deg, #35D07F 0%, #1AAE69 100%);
+      color: #0B1220;
       cursor: pointer;
       font-size: 13px;
     }
+    .btn:hover { opacity: 0.95; filter: brightness(1.05); }
+    a.btn { text-decoration: none; }
     .btn.outline {
-      background: #fff;
-      color: #1f2937;
-      border-color: #e5e7eb;
+      background: #0B1220;
+      color: #35D07F;
+      border: 1px solid #1E2B45;
     }
+    .btn.outline:hover { background: #1E2B45; color: #CFF9E1; }
     main {
       display: grid;
       grid-template-columns: 240px 1fr;
-      min-height: calc(100vh - 96px);
+      min-height: calc(100vh - 72px);
     }
     aside {
-      background: #ffffff;
-      border-right: 1px solid #e5e7eb;
+      background: #0F1A2E;
+      border-right: 1px solid #1E2B45;
       padding: 24px 18px;
     }
     .asideTitle {
       font-size: 12px;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      color: #64748b;
+      color: #94a3b8;
       margin: 0 0 12px;
       font-weight: 700;
     }
@@ -86,29 +116,31 @@
     }
     .menu a {
       text-decoration: none;
-      color: #0f172a;
+      color: #B9C7E2;
       font-weight: 600;
       padding: 10px 12px;
       border-radius: 10px;
     }
+    .menu a:hover { background: #1E2B45; color: #EAF0FF; }
     .menu a.active {
-      background: #eef2ff;
-      color: #1d4ed8;
+      background: rgba(53, 208, 127, 0.15);
+      color: #35D07F;
+      border: 1px solid #35D07F;
     }
     .content {
       padding: 28px 28px 80px;
     }
     .content.hidden { display: none; }
     .card {
-      background: #fff;
-      border: 1px solid #e5e7eb;
-      border-radius: 16px;
+      background: #0F1A2E;
+      border: 1px solid #1E2B45;
+      border-radius: 14px;
       padding: 20px;
-      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
       margin-bottom: 18px;
     }
-    h1 { margin: 0 0 8px; font-size: 26px; }
-    .muted { color: #64748b; }
+    h1 { margin: 0 0 8px; font-size: 26px; font-weight: 800; color: #EAF0FF; }
+    h3 { margin: 0 0 8px; font-size: 14px; font-weight: 700; color: #A9B7D0; text-transform: uppercase; letter-spacing: 0.04em; }
+    .muted { color: #94a3b8; }
     .grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -130,7 +162,7 @@
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.06em;
-      color: #64748b;
+      color: #94a3b8;
       margin: 2px 0 6px;
     }
     .formHint {
@@ -143,15 +175,59 @@
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
     }
+    .row-4 {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
     .checks {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 12px;
       margin-top: 10px;
     }
+    .inspectionFormCard {
+      max-width: 800px;
+    }
+    .inspectionFormCard .row-4 { gap: 10px; }
+    .inspectionFormCard .row-2 { gap: 10px; }
+    .inspectionFormCard .checks { gap: 8px 16px; margin-top: 8px; }
+    .inspectionFormCard .checks label { font-weight: 600; font-size: 13px; color: #B9C7E2; margin: 4px 0; }
+    .inspectionFormCard label { font-size: 11px; font-weight: 700; margin: 8px 0 4px; color: #94a3b8; }
+    .inspectionFormCard .btn {
+      margin-top: 14px;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 14px;
+    }
     .checks label {
       font-weight: 600;
-      color: #374151;
+      color: #B9C7E2;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .checks input[type="checkbox"] { width: auto; margin: 0; accent-color: #35D07F; }
+    .logoUpload .logoPreview {
+      width: 100px;
+      height: 80px;
+      border: 1px dashed #1E2B45;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: #0B1220;
+    }
+    .logoUpload .logoPreview img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    .logoUpload input[type="file"] {
+      font-size: 12px;
+      color: #94a3b8;
     }
     .row {
       display: grid;
@@ -159,34 +235,82 @@
       gap: 10px;
       align-items: center;
       padding: 8px 0;
-      border-bottom: 1px solid #f1f5f9;
+      border-bottom: 1px solid #1E2B45;
     }
     .row:last-child { border-bottom: none; }
-    label { font-weight: 600; font-size: 14px; }
+    label { font-weight: 600; font-size: 11px; color: #94a3b8; display: block; margin: 8px 0 4px; }
     input, select {
       width: 100%;
       padding: 8px 10px;
-      border-radius: 10px;
-      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      border: 1px solid #1E2B45;
       font-size: 14px;
+      background: #0B1220;
+      color: #EAF0FF;
+    }
+    input::placeholder { color: #7F93B8; }
+    select { color: #B9C7E2; }
+    select option { background: #0B1220; color: #EAF0FF; }
+    input:focus, select:focus {
+      outline: none;
+      border-color: #35D07F;
+      box-shadow: 0 0 0 2px rgba(53, 208, 127, 0.2);
     }
     .note {
       font-size: 12px;
-      color: #64748b;
+      color: #94a3b8;
       margin-top: 10px;
     }
+    .note a { color: #35D07F; text-decoration: none; }
+    .note a:hover { text-decoration: underline; }
     .userGrid {
       display: grid;
-      grid-template-columns: 1.2fr 1fr 140px 160px 140px 120px 140px;
+      grid-template-columns: 1.2fr 1fr 150px 140px 100px 90px minmax(280px, 1fr);
       gap: 10px;
       align-items: center;
+    }
+    .userGrid > div { color: #B9C7E2; }
+    .userActions {
+      display: flex !important;
+      flex-direction: row !important;
+      flex-wrap: nowrap !important;
+      gap: 6px;
+      align-items: center;
+    }
+    .userActions .btn, .userActions .btn.outline {
+      padding: 5px 8px;
+      font-size: 11px;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
     .inspectionGrid {
       display: grid;
-      grid-template-columns: 1.2fr 1fr 140px 120px 120px 140px;
+      grid-template-columns: 1.2fr 1fr 140px 120px 140px 120px 140px minmax(200px, 1fr);
       gap: 10px;
       align-items: center;
     }
+    .inspectionGrid > div { color: #B9C7E2; }
+    .creditsGrid {
+      display: grid;
+      grid-template-columns: 140px 1fr 100px 2fr;
+      gap: 10px;
+      align-items: center;
+    }
+    .creditsGrid > div { color: #B9C7E2; }
+    .inspectionActions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    .inspectionActions .btn { font-size: 12px; padding: 6px 10px; }
+    .inspectionActions .btn.outline {
+      background: #0B1220;
+      color: #35D07F;
+      border: 1px solid #1E2B45;
+      text-decoration: none;
+    }
+    .inspectionActions .btn.outline:hover { background: #1E2B45; color: #CFF9E1; }
     .badge {
       display: inline-flex;
       align-items: center;
@@ -195,14 +319,35 @@
       border-radius: 999px;
       font-size: 11px;
       font-weight: 700;
-      background: #EEF2FF;
-      color: #1D4ED8;
+      background: rgba(53, 208, 127, 0.15);
+      color: #35D07F;
+      border: 1px solid rgba(53, 208, 127, 0.3);
     }
+    .badge.scoreGreen { background: rgba(16, 185, 129, 0.2); color: #34D399; border-color: rgba(16, 185, 129, 0.4); }
+    .badge.scoreYellow { background: rgba(245, 158, 11, 0.2); color: #FBBF24; border-color: rgba(245, 158, 11, 0.4); }
+    .badge.scoreRed { background: rgba(249, 115, 22, 0.2); color: #FB923C; border-color: rgba(249, 115, 22, 0.4); }
+    .badge.scoreGray { background: rgba(148, 163, 184, 0.2); color: #94a3b8; border-color: rgba(148, 163, 184, 0.3); }
+    .scoreCell { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+    .scoreRecommendation { font-size: 11px; color: #94a3b8; line-height: 1.3; }
+    .scoreRecommendation .btn { font-size: 11px; padding: 4px 10px; margin-top: 4px; }
+    #userHeader > div, #inspectionHeader > div { color: #94a3b8 !important; }
+    .logoPreview {
+      width: 100px;
+      height: 80px;
+      border: 1px dashed #1E2B45;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: #0B1220;
+    }
+    .logoPreview img { max-width: 100%; max-height: 100%; object-fit: contain; }
     @media (max-width: 900px) {
       main { grid-template-columns: 1fr; }
-      aside { border-right: none; border-bottom: 1px solid #e5e7eb; }
+      aside { border-right: none; border-bottom: 1px solid #1E2B45; }
       .grid { grid-template-columns: 1fr; }
-      .row-2 { grid-template-columns: 1fr; }
+      .row-2, .row-4 { grid-template-columns: 1fr; }
       .checks { grid-template-columns: 1fr; }
       .userGrid { grid-template-columns: 1fr; }
       .inspectionGrid { grid-template-columns: 1fr; }
@@ -210,26 +355,160 @@
   </style>
 </head>
 <body>
-  <header>
+  <header class="site-header">
     <div class="nav">
       <a class="brand" href="/">
         <img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" />
       </a>
       <div class="topActions">
         <div id="tenantName" class="muted"></div>
+        <div id="creditsBadge" class="creditsBadge" title="Créditos disponibles">
+          <span id="creditsCount">—</span> créditos
+        </div>
+        <a href="/tenant/comprar-creditos" class="btn outline" id="buyCreditsBtn">Comprar créditos</a>
         <button class="btn outline" id="logoutBtn" type="button">Salir</button>
       </div>
     </div>
   </header>
 
+  <div class="subBanner" id="subBanner" style="display:none;">
+    <div class="subBannerInner">
+      <div class="subBannerLeft">
+        <span class="subBannerDot"></span>
+        <div>
+          <strong id="subBannerTitle">Plan Business activo</strong>
+          <span class="subBannerMuted" id="subBannerNext"></span>
+        </div>
+      </div>
+      <a href="#cuenta" class="subBannerLink" id="subBannerAction">Ver detalles</a>
+    </div>
+  </div>
+
   <main>
     <aside>
       <div class="asideTitle">Panel Tenant</div>
       <nav class="menu">
-        <a class="active" data-section-link="users" href="#users">Usuarios</a>
+        <a data-section-link="cuenta" href="#cuenta">Cuenta</a>
+        <a data-section-link="users" href="#users">Usuarios</a>
         <a data-section-link="inspections" href="#inspections">Inspecciones</a>
+        <a data-section-link="credits" href="#credits">Cuenta corriente</a>
       </nav>
     </aside>
+
+    <section class="content hidden" id="cuenta" data-section="cuenta">
+      <h1>Cuenta</h1>
+      <div class="muted">Datos comerciales de tu empresa.</div>
+      <div class="card" style="margin-top:16px; max-width:600px;">
+        <h3>Datos de la corredora</h3>
+        <form id="accountForm">
+          <div style="margin-top:12px; display:flex; align-items:flex-start; gap:24px; flex-wrap:wrap;">
+            <div>
+              <label for="accountLogo">Logo</label>
+              <div class="logoUpload" style="margin-top:6px;">
+                <div class="logoPreview" id="logoPreview">
+                  <img id="logoImg" src="" alt="Logo" style="max-width:100px; max-height:80px; object-fit:contain; display:none;" />
+                  <span id="logoPlaceholder" class="muted" style="font-size:12px;">Sin logo</span>
+                </div>
+                <input id="accountLogo" type="file" accept="image/jpeg,image/png,image/webp" style="margin-top:8px;" />
+                <div class="formHint" style="margin-top:4px;">JPG, PNG o WebP. Máx. 2 MB</div>
+              </div>
+            </div>
+            <div style="flex:1; min-width:200px;">
+              <label for="accountName">Nombre comercial</label>
+              <input id="accountName" type="text" placeholder="Ej: Inmobiliaria XYZ" />
+            </div>
+          </div>
+          <div class="row-2" style="margin-top:12px;">
+            <div>
+              <label for="accountLegalName">Razón social</label>
+              <input id="accountLegalName" type="text" placeholder="Razón social legal" />
+            </div>
+            <div>
+              <label for="accountRut">RUT empresa</label>
+              <input id="accountRut" type="text" placeholder="12.345.678-9" />
+            </div>
+          </div>
+          <div class="row-2" style="margin-top:12px;">
+            <div>
+              <label for="accountPhone">Teléfono</label>
+              <input id="accountPhone" type="text" placeholder="+569 1234 5678" />
+            </div>
+            <div>
+              <label for="accountEmail">Email</label>
+              <input id="accountEmail" type="email" placeholder="contacto@corredora.cl" />
+            </div>
+          </div>
+          <div class="note" id="accountNote"></div>
+          <button type="submit" class="btn" style="margin-top:16px;">Guardar datos</button>
+        </form>
+      </div>
+
+      <div class="card" id="subscriptionCard" style="margin-top:24px; max-width:600px; display:none;">
+        <h3>Suscripción Business</h3>
+        <div style="margin-top:12px;">
+          <div style="display:flex; justify-content:space-between; padding:6px 0;">
+            <span class="muted">Estado</span>
+            <span id="subStatus" style="font-weight:700;">—</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:6px 0;">
+            <span class="muted">Próxima renovación</span>
+            <span id="subExpires" style="font-weight:600;">—</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:6px 0;">
+            <span class="muted">Estado trial</span>
+            <span id="trialStatus" style="font-weight:600;">—</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:6px 0;">
+            <span class="muted">Fin de trial</span>
+            <span id="trialEndsAt" style="font-weight:600;">—</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:6px 0;">
+            <span class="muted">Cobro mensual</span>
+            <span style="font-weight:600;">$39.990 automático</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:6px 0;">
+            <span class="muted">Créditos incluidos</span>
+            <span style="font-weight:600;">2 por mes</span>
+          </div>
+        </div>
+        <div id="validateCardSection" style="margin-top:20px; padding-top:16px; border-top:1px solid #334155; display:none;">
+          <p style="font-size:13px; color:#94a3b8; line-height:1.5; margin:0 0 12px;">
+            Para activar tu trial debes registrar una tarjeta en MercadoPago. No se realizará ningún cobro hasta el fin del período de prueba.
+          </p>
+          <button type="button" class="btn" id="btnValidateCard" style="font-size:13px; padding:10px 18px;">Validar tarjeta</button>
+        </div>
+        <div id="cancelSection" style="margin-top:20px; padding-top:16px; border-top:1px solid #334155;">
+          <p style="font-size:13px; color:#94a3b8; line-height:1.5; margin:0 0 12px;">
+            Al cancelar, mantienes el acceso y los créditos restantes hasta el fin del período pagado. No se generarán nuevos cobros.
+          </p>
+          <button type="button" class="btn" id="btnCancelSub" style="background:#991b1b; font-size:13px; padding:10px 18px;">Cancelar suscripción</button>
+          <div class="note" id="subNote"></div>
+        </div>
+      </div>
+
+      <div class="card" id="creditOnlyAccountCard" style="margin-top:24px; max-width:600px; display:none;">
+        <h3>Plan y créditos</h3>
+        <p class="muted" style="margin:8px 0 12px; font-size:13px; line-height:1.5;">
+          Tu corredora está activa con <strong>créditos prepago</strong>. No hay suscripción Business ni trial de MercadoPago asociados a esta cuenta.
+        </p>
+        <div style="margin-top:12px;">
+          <div style="display:flex; justify-content:space-between; padding:6px 0;">
+            <span class="muted">Estado de la corredora</span>
+            <span id="creditOnlyTenantStatus" style="font-weight:700;">—</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:6px 0;">
+            <span class="muted">Créditos disponibles</span>
+            <span id="creditOnlyCredits" style="font-weight:700; color:#35D07F;">—</span>
+          </div>
+        </div>
+        <p style="font-size:13px; color:#94a3b8; margin:16px 0 0; line-height:1.5;">
+          Cada inspección consume créditos según tu operación. El detalle de movimientos está en <a href="#credits">Cuenta corriente</a>.
+        </p>
+        <p style="font-size:13px; color:#94a3b8; margin:12px 0 0; line-height:1.5;">
+          ¿Querés pasar a cobro mensual con plan Business? <a href="/business/activar">Activar plan Business</a>
+        </p>
+      </div>
+    </section>
 
     <section class="content" id="users" data-section="users">
       <h1>Usuarios</h1>
@@ -279,119 +558,78 @@
       </div>
 
       <div class="inspectionForm hidden" id="inspectionFormCard">
-        <div class="card">
-          <h3 style="margin:0 0 8px;">Propietario</h3>
-          <div class="row-2">
-            <div class="row">
-              <label for="ownerName">Nombre</label>
-              <input id="ownerName" type="text" placeholder="Nombre completo" />
+        <div class="card inspectionFormCard">
+          <h3>Propiedad</h3>
+          <div class="row-4">
+            <div>
+              <label>Calle</label>
+              <input id="propertyStreet" placeholder="Calle" />
             </div>
-            <div class="row">
-              <label for="ownerRut">RUT</label>
-              <input id="ownerRut" type="text" placeholder="RUT" />
+            <div>
+              <label>Número</label>
+              <input id="propertyNumber" placeholder="Número" />
             </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <h3 style="margin:0 0 8px;">Propiedad</h3>
-          <div class="row-2">
-            <div class="row">
-              <label for="propertyRol">ROL</label>
-              <input id="propertyRol" type="text" placeholder="ROL" />
+            <div>
+              <label>Depto</label>
+              <input id="propertyDept" placeholder="Depto / Interior" />
             </div>
-            <div class="row">
-              <label for="propertyComuna">Comuna</label>
-              <input id="propertyComuna" type="text" placeholder="Comuna" />
+            <div>
+              <label>Comuna</label>
+              <input id="propertyComuna" placeholder="Comuna" />
             </div>
           </div>
-          <div class="row-2">
-            <div class="row">
-              <label for="propertyStreet">Calle</label>
-              <input id="propertyStreet" type="text" placeholder="Calle" />
-            </div>
-            <div class="row">
-              <label for="propertyNumber">Número</label>
-              <input id="propertyNumber" type="text" placeholder="Número" />
-            </div>
-          </div>
-          <div class="row-2">
-            <div class="row">
-              <label for="propertyDept">Depto</label>
-              <input id="propertyDept" type="text" placeholder="Depto / Interior" />
-            </div>
-            <div class="row">
-              <label for="propertyAddress">Dirección completa</label>
-              <input id="propertyAddress" type="text" placeholder="Dirección completa" />
-            </div>
-          </div>
-          <div class="row-2">
-            <div class="row">
-              <label for="propertyOperationType">Tipo operación</label>
-              <input id="propertyOperationType" type="text" placeholder="Venta / Arriendo" />
-            </div>
-            <div class="row">
-              <label for="propertySurface">Superficie (m2)</label>
-              <input id="propertySurface" type="text" placeholder="Ej: 45" />
-            </div>
-          </div>
-          <div class="formHint">Si completas calle, número y comuna, la dirección se arma sola.</div>
-        </div>
-
-        <div class="card">
-          <h3 style="margin:0 0 8px;">Características</h3>
-          <div class="grid">
-            <div class="row">
-              <label for="propertyType">Tipo de propiedad</label>
+          <div class="row-4">
+            <div>
+              <label>Tipo de propiedad</label>
               <select id="propertyType">
                 <option value="DEPARTMENT">Departamento</option>
                 <option value="HOUSE">Casa</option>
               </select>
             </div>
-            <div class="row">
-              <label for="bathroomsCount">Baños</label>
-              <input id="bathroomsCount" type="number" min="1" value="1" />
+            <div>
+              <label>Baños</label>
+              <input type="number" id="bathroomsCount" min="1" value="1" />
             </div>
-            <div class="row">
-              <label for="bedroomsCount">Dormitorios</label>
-              <input id="bedroomsCount" type="number" min="0" value="1" />
+            <div>
+              <label>Dormitorios</label>
+              <input type="number" id="bedroomsCount" min="0" value="1" />
+            </div>
+            <div>
+              <label>Superficie (m2)</label>
+              <input id="propertySurface" placeholder="Ej: 45" />
             </div>
           </div>
-          <div class="grid">
-            <div class="row">
-              <label for="propertyAgeRange">Antigüedad</label>
-              <select id="propertyAgeRange">
+          <div class="row-2">
+            <div>
+              <label>ROL</label>
+              <input id="propertyRol" placeholder="ROL" />
+            </div>
+            <div>
+              <label>Tipo operación</label>
+              <select id="propertyOperationType">
                 <option value="">—</option>
-                <option value="LESS_THAN_10_YEARS">Menos de 10 años</option>
-                <option value="BETWEEN_10_AND_30_YEARS">Entre 10 y 30 años</option>
-                <option value="MORE_THAN_30_YEARS">Más de 30 años</option>
+                <option value="VENTA">Venta</option>
+                <option value="ARRENDO">Arriendo</option>
               </select>
-            </div>
-            <div class="row">
-              <label for="floorType">Tipo de piso</label>
-              <select id="floorType">
-                <option value="CONCRETE">Hormigón</option>
-                <option value="WOOD">Madera</option>
-                <option value="MIXED">Mixto</option>
-              </select>
-            </div>
-            <div class="row">
-              <label for="yearBuilt">Año construcción</label>
-              <input id="yearBuilt" type="number" min="1900" max="2100" placeholder="Ej: 2015" />
             </div>
           </div>
+
           <div class="checks">
             <label><input type="checkbox" id="hasPatio" /> Tiene patio</label>
             <label><input type="checkbox" id="hasAttic" /> Tiene entretecho</label>
             <label><input type="checkbox" id="hasLaundry" /> Tiene loggia</label>
+            <label><input type="checkbox" id="hasElevator" /> Tiene ascensor</label>
+            <label><input type="checkbox" id="hasParking" /> Tiene estacionamiento</label>
+            <label><input type="checkbox" id="hasGreenCertificate" /> Certificado verde</label>
           </div>
-          <div class="row" style="margin-top: 12px;">
-            <label for="caseExecutive">Ejecutivo</label>
-            <select id="caseExecutive"></select>
-          </div>
-          <div class="actions">
-            <button class="btn" id="createCaseBtn" type="button">Crear inspección</button>
-          </div>
+
+          <label>WhatsApp (opcional)</label>
+          <input id="phoneNumber" placeholder="Ej: 56912345678" />
+
+          <label>Ejecutivo</label>
+          <select id="caseExecutive"></select>
+
+          <button id="createCaseBtn" class="btn">Crear inspección</button>
           <div class="note" id="caseNote"></div>
         </div>
       </div>
@@ -403,15 +641,55 @@
           <div class="muted">Ejecutivo</div>
           <div class="muted">Tipo</div>
           <div class="muted">Estado</div>
+          <div class="muted">Score</div>
           <div class="muted">Avance</div>
           <div class="muted">Creada</div>
+          <div class="muted">Acciones</div>
         </div>
         <div class="inspectionGrid" id="inspectionList"></div>
+      </div>
+    </section>
+
+    <section class="content hidden" id="credits" data-section="credits">
+      <h1>Cuenta corriente</h1>
+      <div class="muted">Saldo y historial de créditos.</div>
+      <div class="card" style="margin-top:16px;">
+        <h3>Saldo actual</h3>
+        <div id="creditsBalance" style="font-size:28px; font-weight:800; color:#35D07F;">—</div>
+        <a href="/tenant/comprar-creditos" class="btn outline" style="margin-top:12px; display:inline-block;">Comprar créditos</a>
+      </div>
+      <div class="card" style="margin-top:16px;">
+        <h3>Historial de movimientos</h3>
+        <div class="creditsGrid" id="creditsHeader">
+          <div class="muted">Fecha</div>
+          <div class="muted">Tipo</div>
+          <div class="muted">Cantidad</div>
+          <div class="muted">Descripción</div>
+        </div>
+        <div id="creditsList"></div>
       </div>
     </section>
   </main>
 
   <script>
+    (function initSessionFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const t = params.get("t");
+      if (t) {
+        localStorage.setItem("tenant_session", t);
+        const url = new URL(window.location.href);
+        url.searchParams.delete("t");
+        window.history.replaceState({}, "", url.pathname + (url.hash || ""));
+      }
+    })();
+
+    function authHeaders(extra = {}) {
+      const token = localStorage.getItem("tenant_session");
+      const h = { ...extra };
+      if (token) h.Authorization = "Bearer " + token;
+      return h;
+    }
+
     function formatDateShort(value) {
       if (!value) return "—";
       const d = new Date(value);
@@ -421,6 +699,7 @@
 
     function handleUnauthorized(res) {
       if (res.status === 401) {
+        localStorage.removeItem("tenant_session");
         window.location.href = "/";
         return true;
       }
@@ -441,19 +720,47 @@
       return `${window.location.origin}${activationUrl}`;
     }
 
-    async function loadTenant() {
-      const res = await fetch("/api/tenant/me");
+    function executiveInviteEmailSuffix(data) {
+      if (!data) return "";
+      if (data.emailSent) return " Se envió un correo con el enlace de activación.";
+      if (data.emailSkipped) return " (SMTP no configurado: copia el enlace o usa WhatsApp.)";
+      if (data.emailError) return " (No se pudo enviar el correo; usa el enlace o WhatsApp.)";
+      return "";
+    }
+
+    let currentTenantId = null;
+    async function loadTenant(retry) {
+      const token = localStorage.getItem("tenant_session");
+      const headers = { "Content-Type": "application/json", ...authHeaders() };
+      if (token) headers.Authorization = "Bearer " + token;
+      const res = await fetch("/api/tenant/me", { credentials: "include", headers });
       if (!res.ok) {
+        if (!retry && token) {
+          await new Promise(r => setTimeout(r, 300));
+          return loadTenant(true);
+        }
+        localStorage.removeItem("tenant_session");
         window.location.href = "/";
         return null;
       }
       const data = await res.json();
+      currentTenantId = data?.tenant?.id || null;
+      if (currentTenantId) {
+        localStorage.setItem("tenant_id", currentTenantId);
+      }
       document.getElementById("tenantName").textContent = data?.tenant?.name || "";
+      const credits = data?.tenant?.credits ?? 0;
+      const badge = document.getElementById("creditsBadge");
+      const countEl = document.getElementById("creditsCount");
+      if (badge && countEl) {
+        countEl.textContent = credits;
+        badge.classList.toggle("low", credits < 1);
+      }
       return data?.tenant;
     }
 
     async function loadUsers() {
-      const res = await fetch("/api/tenant/users");
+      const res = await fetch("/api/tenant/users", { credentials: "include", headers: authHeaders() });
       if (handleUnauthorized(res)) return [];
       if (!res.ok) return [];
       const data = await res.json();
@@ -461,7 +768,7 @@
     }
 
     async function loadInspections() {
-      const res = await fetch("/api/tenant/inspections");
+      const res = await fetch("/api/tenant/inspections", { credentials: "include", headers: authHeaders() });
       if (handleUnauthorized(res)) return [];
       if (!res.ok) return [];
       const data = await res.json();
@@ -492,9 +799,8 @@
         const status = document.createElement("div");
         status.textContent = u.status || "PENDING";
         const action = document.createElement("div");
-        action.style.display = "flex";
-        action.style.gap = "8px";
-        action.style.flexWrap = "wrap";
+        action.className = "userActions";
+        action.style.cssText = "display:flex;flex-direction:row;flex-wrap:nowrap;gap:6px;align-items:center;";
 
         const activateBtn = document.createElement("button");
         activateBtn.className = "btn outline";
@@ -502,8 +808,9 @@
         activateBtn.addEventListener("click", async () => {
           const res = await fetch(`/api/tenant/users/${u.id}`, {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ status: "ACTIVE" })
+            headers: authHeaders({ "Content-Type": "application/json" }),
+            body: JSON.stringify({ status: "ACTIVE" }),
+            credentials: "include"
           });
           if (handleUnauthorized(res)) return;
           const note = document.getElementById("userNote");
@@ -524,8 +831,9 @@
           const role = prompt("Rol (TENANT_ADMIN/TENANT_USER)", u.role || "TENANT_USER") || u.role || "TENANT_USER";
           const res = await fetch(`/api/tenant/users/${u.id}`, {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ fullName, phone, role })
+            headers: authHeaders({ "Content-Type": "application/json" }),
+            body: JSON.stringify({ fullName, phone, role }),
+            credentials: "include"
           });
           const note = document.getElementById("userNote");
           if (handleUnauthorized(res)) return;
@@ -541,7 +849,7 @@
         reinviteBtn.className = "btn outline";
         reinviteBtn.textContent = "Reinvitar";
         reinviteBtn.addEventListener("click", async () => {
-          const res = await fetch(`/api/tenant/users/${u.id}/invite`, { method: "POST" });
+          const res = await fetch(`/api/tenant/users/${u.id}/invite`, { method: "POST", credentials: "include", headers: authHeaders() });
           if (handleUnauthorized(res)) return;
           if (!res.ok) {
             const msg = await readErrorMessage(res);
@@ -553,20 +861,17 @@
           }
           const data = await res.json();
           const note = document.getElementById("userNote");
-          if (res.ok) {
-            const phoneSafe = String(u.phone || "").replace(/\D/g, "");
-            const activationLink = buildActivationLink(data.activationUrl);
-            const text = `Hola ${u.fullName || ""}, activa tu cuenta aquí: ${activationLink}. Luego ingresa desde tu celular en ${window.location.origin}/executive`;
-            const waUrl = phoneSafe
-              ? `https://wa.me/${phoneSafe}?text=${encodeURIComponent(text)}`
-              : null;
-            note.innerHTML = waUrl
-              ? `Invitación creada. <a href="${waUrl}" target="_blank">Enviar por WhatsApp</a>`
-              : `Invitación creada. Link: ${activationLink}`;
-            renderUsers().catch(() => {});
-          } else {
-            note.textContent = "No se pudo reinvitar.";
-          }
+          const phoneSafe = String(u.phone || "").replace(/\D/g, "");
+          const activationLink = buildActivationLink(data.activationUrl);
+          const text = `Hola ${u.fullName || ""}, activa tu cuenta aquí: ${activationLink}. Luego ingresa desde tu celular en ${window.location.origin}/executive`;
+          const waUrl = phoneSafe
+            ? `https://wa.me/${phoneSafe}?text=${encodeURIComponent(text)}`
+            : null;
+          const mailHint = executiveInviteEmailSuffix(data);
+          note.innerHTML = waUrl
+            ? `Invitación creada.${mailHint} <a href="${waUrl}" target="_blank">Enviar por WhatsApp</a>`
+            : `Invitación creada.${mailHint} Link: ${activationLink}`;
+          renderUsers().catch(() => {});
         });
 
         const deleteBtn = document.createElement("button");
@@ -574,7 +879,7 @@
         deleteBtn.textContent = "Eliminar";
         deleteBtn.addEventListener("click", async () => {
           if (!confirm("¿Eliminar este usuario?")) return;
-          const res = await fetch(`/api/tenant/users/${u.id}`, { method: "DELETE" });
+          const res = await fetch(`/api/tenant/users/${u.id}`, { method: "DELETE", credentials: "include", headers: authHeaders() });
           const note = document.getElementById("userNote");
           if (handleUnauthorized(res)) return;
           if (res.ok) {
@@ -612,10 +917,11 @@
       list.innerHTML = "";
       const inspections = await loadInspections();
       if (!inspections.length) {
-        list.appendChild(Object.assign(document.createElement("div"), {
-          className: "note",
-          textContent: "Sin inspecciones aún."
-        }));
+        const empty = document.createElement("div");
+        empty.className = "note";
+        empty.style.gridColumn = "1 / -1";
+        empty.textContent = "Sin inspecciones aún.";
+        list.appendChild(empty);
         return;
       }
       inspections.forEach((c) => {
@@ -626,21 +932,77 @@
         const type = document.createElement("div");
         type.textContent = `${c.propertyType === "HOUSE" ? "Casa" : "Departamento"} · ${c.bedrooms}D / ${c.bathrooms}B`;
         const status = document.createElement("div");
-        const badge = document.createElement("div");
-        badge.className = "badge";
-        badge.textContent = c.status || "DRAFT";
-        status.appendChild(badge);
+        const statusBadge = document.createElement("div");
+        statusBadge.className = "badge";
+        statusBadge.textContent = c.status || "DRAFT";
+        status.appendChild(statusBadge);
+
+        const scoreCell = document.createElement("div");
+        scoreCell.className = "scoreCell";
+        const b = String(c.badge || "GRAY").toUpperCase();
+        if (b === "GREEN" || b === "YELLOW" || b === "RED") {
+          const scoreBadge = document.createElement("div");
+          scoreBadge.className = "badge score" + (b === "GREEN" ? "Green" : b === "YELLOW" ? "Yellow" : "Red");
+          scoreBadge.textContent = (c.score != null ? c.score + "/100 · " : "") + (b === "GREEN" ? "Favorable" : b === "YELLOW" ? "Intermedio" : "Revisión sugerida");
+          scoreCell.appendChild(scoreBadge);
+          if (b === "YELLOW") {
+            const rec = document.createElement("div");
+            rec.className = "scoreRecommendation";
+            rec.textContent = "Recomendamos una inspección técnica presencial.";
+            const btn = document.createElement("a");
+            btn.className = "btn";
+            btn.textContent = "Solicitar";
+            btn.href = "/pago?plan=inspeccion-presencial&caseId=" + encodeURIComponent(c.id) + "&surface=" + (c.surface || 45) + "&address=" + encodeURIComponent(c.address || "");
+            rec.appendChild(btn);
+            scoreCell.appendChild(rec);
+          } else if (b === "RED") {
+            const rec = document.createElement("div");
+            rec.className = "scoreRecommendation";
+            rec.textContent = "Se recomienda inspección técnica presencial prioritaria.";
+            const btn = document.createElement("a");
+            btn.className = "btn";
+            btn.textContent = "Solicitar";
+            btn.href = "/pago?plan=inspeccion-presencial&caseId=" + encodeURIComponent(c.id) + "&surface=" + (c.surface || 45) + "&address=" + encodeURIComponent(c.address || "");
+            rec.appendChild(btn);
+            scoreCell.appendChild(rec);
+          }
+        } else {
+          const grayBadge = document.createElement("div");
+          grayBadge.className = "badge scoreGray";
+          grayBadge.textContent = "Sin datos";
+          scoreCell.appendChild(grayBadge);
+        }
+
         const progress = document.createElement("div");
         progress.textContent = `${c.progress?.pct || 0}%`;
         const created = document.createElement("div");
         created.textContent = formatDateShort(c.createdAt);
 
+        const actions = document.createElement("div");
+        actions.className = "inspectionActions";
+        const reportLink = document.createElement("a");
+        reportLink.className = "btn outline";
+        reportLink.textContent = "Ver informe";
+        reportLink.href = `/cases/${encodeURIComponent(c.id)}/report${currentTenantId ? "?tenantId=" + encodeURIComponent(currentTenantId) : ""}`;
+        reportLink.target = "_blank";
+        reportLink.rel = "noreferrer";
+        const certLink = document.createElement("a");
+        certLink.className = "btn";
+        certLink.textContent = "Descargar certificado";
+        certLink.href = `/cases/${encodeURIComponent(c.id)}/certificate${currentTenantId ? "?tenantId=" + encodeURIComponent(currentTenantId) : ""}`;
+        certLink.target = "_blank";
+        certLink.rel = "noreferrer";
+        actions.appendChild(reportLink);
+        actions.appendChild(certLink);
+
         list.appendChild(address);
         list.appendChild(exec);
         list.appendChild(type);
         list.appendChild(status);
+        list.appendChild(scoreCell);
         list.appendChild(progress);
         list.appendChild(created);
+        list.appendChild(actions);
       });
     }
 
@@ -656,8 +1018,9 @@
       }
       const res = await fetch("/api/tenant/users", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fullName, email, phone, role, action: "save" })
+        headers: authHeaders({ "Content-Type": "application/json" }),
+        body: JSON.stringify({ fullName, email, phone, role, action: "save" }),
+        credentials: "include"
       });
       if (handleUnauthorized(res)) return;
       if (res.ok) {
@@ -687,8 +1050,9 @@
       }
       const res = await fetch("/api/tenant/users", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fullName, email, phone, role, action: "invite" })
+        headers: authHeaders({ "Content-Type": "application/json" }),
+        body: JSON.stringify({ fullName, email, phone, role, action: "invite" }),
+        credentials: "include"
       });
       if (handleUnauthorized(res)) return;
       if (!res.ok) {
@@ -708,9 +1072,10 @@
         const waUrl = phoneSafe
           ? `https://wa.me/${phoneSafe}?text=${encodeURIComponent(text)}`
           : null;
+        const mailHint = executiveInviteEmailSuffix(data);
         note.innerHTML = waUrl
-          ? `Invitación creada. <a href="${waUrl}" target="_blank">Enviar por WhatsApp</a>`
-          : `Invitación creada. Link: ${activationLink}`;
+          ? `Invitación creada.${mailHint} <a href="${waUrl}" target="_blank">Enviar por WhatsApp</a>`
+          : `Invitación creada.${mailHint} Link: ${activationLink}`;
         document.getElementById("userFullName").value = "";
         document.getElementById("userEmail").value = "";
         document.getElementById("userPhone").value = "";
@@ -721,58 +1086,98 @@
 
     document.getElementById("createCaseBtn").addEventListener("click", async () => {
       const note = document.getElementById("caseNote");
-      const comuna = document.getElementById("propertyComuna").value;
-      const street = document.getElementById("propertyStreet").value;
-      const number = document.getElementById("propertyNumber").value;
-      const dept = document.getElementById("propertyDept").value;
-      const fullAddress = document.getElementById("propertyAddress").value;
+      const comuna = document.getElementById("propertyComuna").value?.trim();
+      const street = document.getElementById("propertyStreet").value?.trim();
+      const number = document.getElementById("propertyNumber").value?.trim();
+      const dept = document.getElementById("propertyDept").value?.trim();
       const addressParts = [
         [street, number].filter(Boolean).join(" "),
         dept ? `Depto ${dept}` : "",
         comuna
       ].filter(Boolean);
-      const addressValue = addressParts.length ? addressParts.join(", ") : fullAddress;
+      const addressValue = addressParts.length ? addressParts.join(", ") : null;
       const payload = {
-        ownerName: document.getElementById("ownerName").value,
-        ownerRut: document.getElementById("ownerRut").value,
-        propertyRol: document.getElementById("propertyRol").value,
+        propertyRol: document.getElementById("propertyRol").value?.trim() || null,
         propertyAddress: addressValue,
-        propertyOperationType: document.getElementById("propertyOperationType").value,
-        propertySurface: document.getElementById("propertySurface").value,
+        propertyOperationType: document.getElementById("propertyOperationType").value || null,
+        propertySurface: document.getElementById("propertySurface").value?.trim() || null,
         propertyType: document.getElementById("propertyType").value,
         bathroomsCount: Number(document.getElementById("bathroomsCount").value || 1),
         bedroomsCount: Number(document.getElementById("bedroomsCount").value || 0),
-        propertyAgeRange: document.getElementById("propertyAgeRange").value || null,
-        floorType: document.getElementById("floorType").value,
-        yearBuilt: document.getElementById("yearBuilt").value ? Number(document.getElementById("yearBuilt").value) : null,
         hasPatio: document.getElementById("hasPatio").checked,
         hasAttic: document.getElementById("hasAttic").checked,
         hasLaundry: document.getElementById("hasLaundry").checked,
+        hasElevator: document.getElementById("hasElevator").checked,
+        hasParking: document.getElementById("hasParking").checked,
+        hasGreenCertificate: document.getElementById("hasGreenCertificate").checked,
         assignedUserId: document.getElementById("caseExecutive").value || null
       };
       const res = await fetch("/api/tenant/inspections", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        headers: authHeaders({ "Content-Type": "application/json" }),
+        body: JSON.stringify(payload),
+        credentials: "include"
       });
       if (handleUnauthorized(res)) return;
       const data = await res.json();
       if (res.ok) {
         note.innerHTML = `Inspección creada. Link captura: <a href="${data.captureUrl}" target="_blank">${data.captureUrl}</a>`;
         renderInspections().catch(() => {});
+        loadTenant().catch(() => {});
+      } else if (res.status === 402 && data?.error === "INSUFFICIENT_CREDITS") {
+        note.innerHTML = `No tienes créditos suficientes. <a href="/tenant/comprar-creditos">Comprar créditos</a>`;
       } else {
-        note.textContent = "No se pudo crear la inspección.";
+        note.textContent = data?.message || "No se pudo crear la inspección.";
       }
     });
 
     document.getElementById("logoutBtn").addEventListener("click", async () => {
-      await fetch("/api/tenant/logout", { method: "POST" });
+      await fetch("/api/tenant/logout", { method: "POST", credentials: "include", headers: authHeaders() });
+      localStorage.removeItem("tenant_session");
       window.location.href = "/";
     });
 
+    const accountForm = document.getElementById("accountForm");
+    if (accountForm) {
+      accountForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const note = document.getElementById("accountNote");
+        if (note) note.textContent = "";
+        const payload = {
+          name: document.getElementById("accountName").value.trim(),
+          legalName: document.getElementById("accountLegalName").value.trim() || null,
+          rut: document.getElementById("accountRut").value.trim() || null,
+          phone: document.getElementById("accountPhone").value.trim() || null,
+          email: document.getElementById("accountEmail").value.trim().toLowerCase() || null
+        };
+        if (!payload.name) {
+          if (note) note.textContent = "El nombre es obligatorio.";
+          return;
+        }
+        try {
+          const res = await fetch("/api/tenant/me", {
+            method: "PUT",
+            headers: authHeaders({ "Content-Type": "application/json" }),
+            body: JSON.stringify(payload),
+            credentials: "include"
+          });
+          if (handleUnauthorized(res)) return;
+          const data = await res.json().catch(() => ({}));
+          if (res.ok) {
+            if (note) note.textContent = "Datos guardados.";
+            loadTenant().catch(() => {});
+          } else {
+            if (note) note.textContent = data?.message || "Error al guardar.";
+          }
+        } catch (err) {
+          if (note) note.textContent = "Error de conexión.";
+        }
+      });
+    }
+
     function setActiveSection() {
       const hash = String(window.location.hash || "").replace("#", "");
-      const section = hash || "users";
+      const section = hash || "cuenta";
       document.querySelectorAll("[data-section]").forEach((el) => {
         const key = el.getAttribute("data-section");
         el.classList.toggle("hidden", key !== section);
@@ -781,9 +1186,330 @@
         const key = el.getAttribute("data-section-link");
         el.classList.toggle("active", key === section);
       });
+      if (section === "cuenta") {
+        renderAccountForm().catch(() => {});
+        renderSubscription().catch(() => {});
+      }
       if (section === "inspections") {
         renderInspections().catch(() => {});
       }
+      if (section === "credits") {
+        renderCredits().catch(() => {});
+      }
+    }
+
+    async function renderAccountForm() {
+      const tenant = await loadTenant();
+      if (!tenant) return;
+      const nameEl = document.getElementById("accountName");
+      const legalEl = document.getElementById("accountLegalName");
+      const rutEl = document.getElementById("accountRut");
+      const phoneEl = document.getElementById("accountPhone");
+      const emailEl = document.getElementById("accountEmail");
+      const logoImg = document.getElementById("logoImg");
+      const logoPlaceholder = document.getElementById("logoPlaceholder");
+      if (nameEl) nameEl.value = tenant.name || "";
+      if (legalEl) legalEl.value = tenant.legalName || "";
+      if (rutEl) rutEl.value = tenant.rut || "";
+      if (phoneEl) phoneEl.value = tenant.phone || "";
+      if (emailEl) emailEl.value = tenant.email || "";
+      if (logoImg && logoPlaceholder) {
+        if (tenant.logoUrl) {
+          logoImg.src = tenant.logoUrl;
+          logoImg.style.display = "";
+          logoPlaceholder.style.display = "none";
+        } else {
+          logoImg.src = "";
+          logoImg.style.display = "none";
+          logoPlaceholder.style.display = "";
+        }
+      }
+    }
+
+    const accountLogoInput = document.getElementById("accountLogo");
+    if (accountLogoInput) {
+      accountLogoInput.addEventListener("change", async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const logoImg = document.getElementById("logoImg");
+        const logoPlaceholder = document.getElementById("logoPlaceholder");
+        const note = document.getElementById("accountNote");
+        if (note) note.textContent = "";
+        const fd = new FormData();
+        fd.append("logo", file);
+        try {
+          const res = await fetch("/api/tenant/logo", {
+            method: "POST",
+            headers: authHeaders(),
+            body: fd,
+            credentials: "include"
+          });
+          if (handleUnauthorized(res)) return;
+          const data = await res.json().catch(() => ({}));
+          if (res.ok && data.logoUrl) {
+            if (logoImg) { logoImg.src = data.logoUrl; logoImg.style.display = ""; }
+            if (logoPlaceholder) logoPlaceholder.style.display = "none";
+            if (note) note.textContent = "Logo subido.";
+          } else {
+            if (note) note.textContent = data?.message || "Error al subir logo.";
+          }
+        } catch (err) {
+          if (note) note.textContent = "Error de conexión.";
+        }
+        e.target.value = "";
+      });
+    }
+
+    async function renderSubscription() {
+      const tenant = await loadTenant();
+      if (!tenant) return;
+      const card = document.getElementById("subscriptionCard");
+      const creditOnly = document.getElementById("creditOnlyAccountCard");
+      if (!card) return;
+      const hasSubOrTrial = tenant.mpSubscriptionId || tenant.trialStatus;
+
+      if (!hasSubOrTrial) {
+        card.style.display = "none";
+        if (creditOnly) {
+          creditOnly.style.display = "";
+          const stEl = document.getElementById("creditOnlyTenantStatus");
+          const crEl = document.getElementById("creditOnlyCredits");
+          const tenantStatusLabels = { ACTIVE: "Activa", INACTIVE: "Inactiva" };
+          if (stEl) {
+            stEl.textContent = tenantStatusLabels[tenant.status] || tenant.status || "—";
+            stEl.style.color = tenant.status === "ACTIVE" ? "#22c55e" : "#f59e0b";
+          }
+          if (crEl) {
+            const n = tenant.credits ?? 0;
+            crEl.textContent = String(n);
+            crEl.style.color = n < 1 ? "#ef4444" : "#35D07F";
+          }
+        }
+        return;
+      }
+
+      if (creditOnly) creditOnly.style.display = "none";
+      card.style.display = "";
+      const statusEl = document.getElementById("subStatus");
+      const expiresEl = document.getElementById("subExpires");
+      const trialStatusEl = document.getElementById("trialStatus");
+      const trialEndsAtEl = document.getElementById("trialEndsAt");
+
+      const statusLabels = {
+        pending: "Pendiente",
+        authorized: "Activa",
+        active: "Activa",
+        paused: "Pausada",
+        cancelled: "Cancelada"
+      };
+      const statusColors = {
+        pending: "#f59e0b",
+        authorized: "#22c55e",
+        active: "#22c55e",
+        paused: "#f59e0b",
+        cancelled: "#ef4444"
+      };
+      const st = tenant.subscriptionStatus || "pending";
+      if (statusEl) {
+        statusEl.textContent = statusLabels[st] || st;
+        statusEl.style.color = statusColors[st] || "#94a3b8";
+      }
+      if (expiresEl) {
+        if (tenant.subscriptionExpiresAt) {
+          const d = new Date(tenant.subscriptionExpiresAt);
+          expiresEl.textContent = d.toLocaleDateString("es-CL");
+        } else {
+          expiresEl.textContent = "—";
+        }
+      }
+      if (trialStatusEl) {
+        const trialLabels = {
+          active: "Activo",
+          converted: "Convertido",
+          expired: "Expirado",
+          cancelled: "Cancelado",
+          blocked: "Bloqueado",
+          pending_payment_method: "Pendiente (validar tarjeta)"
+        };
+        trialStatusEl.textContent = tenant.trialStatus ? (trialLabels[tenant.trialStatus] || tenant.trialStatus) : "No aplica";
+      }
+      if (trialEndsAtEl) {
+        trialEndsAtEl.textContent = tenant.trialEndsAt ? new Date(tenant.trialEndsAt).toLocaleDateString("es-CL") : "—";
+      }
+
+      const validateCardSection = document.getElementById("validateCardSection");
+      const cancelSection = document.getElementById("cancelSection");
+      if (validateCardSection) {
+        validateCardSection.style.display = tenant.trialStatus === "pending_payment_method" ? "block" : "none";
+      }
+      if (cancelSection) {
+        cancelSection.style.display = (tenant.trialStatus === "pending_payment_method" || st === "cancelled" || st === "paused") ? "none" : "block";
+      }
+    }
+
+    document.getElementById("btnValidateCard")?.addEventListener("click", async () => {
+      const tenant = await loadTenant();
+      if (!tenant || tenant.trialStatus !== "pending_payment_method") return;
+      try {
+        sessionStorage.setItem("trial_checkout_tenant_id", tenant.id);
+        if (tenant.email) sessionStorage.setItem("trial_checkout_payer_email", tenant.email);
+        let prevCtx = {};
+        try {
+          prevCtx = JSON.parse(sessionStorage.getItem("trial_checkout_context") || "{}");
+        } catch (e) {}
+        sessionStorage.setItem(
+          "trial_checkout_context",
+          JSON.stringify({
+            durationDays: prevCtx.durationDays || 14,
+            includedInspections: prevCtx.includedInspections ?? 1,
+            partnerCode: prevCtx.partnerCode
+          })
+        );
+        window.location.href = "/business/trial/pago";
+      } catch (e) {
+        console.error(e);
+      }
+    });
+
+    document.getElementById("btnCancelSub")?.addEventListener("click", async () => {
+      if (!confirm("¿Cancelar suscripción Business?\n\nAl cancelar:\n- Mantienes acceso y créditos restantes hasta el fin del periodo pagado\n- No se generarán nuevos cobros mensuales\n- Puedes reactivar cuando quieras")) return;
+      const btn = document.getElementById("btnCancelSub");
+      const note = document.getElementById("subNote");
+      btn.disabled = true;
+      btn.textContent = "Cancelando...";
+      try {
+        const res = await fetch("/api/business/cancel-subscription", {
+          method: "POST",
+          headers: authHeaders({ "Content-Type": "application/json" }),
+          credentials: "include"
+        });
+        if (handleUnauthorized(res)) return;
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.ok) {
+          note.textContent = "Suscripción cancelada. Mantienes acceso hasta el fin del periodo pagado.";
+          note.className = "note";
+          document.getElementById("subStatus").textContent = "Cancelada";
+          document.getElementById("subStatus").style.color = "#ef4444";
+          btn.style.display = "none";
+        } else {
+          note.textContent = data.error || "Error al cancelar.";
+          note.className = "note";
+        }
+      } catch (err) {
+        note.textContent = "Error de conexión.";
+      }
+      btn.disabled = false;
+      btn.textContent = "Cancelar suscripción";
+    });
+
+    function renderSubBanner(tenant) {
+      const banner = document.getElementById("subBanner");
+      if (!banner) return;
+      const st = tenant.subscriptionStatus;
+      if (!st && !tenant.mpSubscriptionId && !tenant.trialStatus) return;
+
+      banner.style.display = "";
+      const dot = banner.querySelector(".subBannerDot");
+      const title = document.getElementById("subBannerTitle");
+      const next = document.getElementById("subBannerNext");
+      const action = document.getElementById("subBannerAction");
+
+      if (tenant.trialStatus === "active") {
+        title.textContent = "Free trial corporativo activo";
+        if (dot) { dot.className = "subBannerDot"; }
+        if (tenant.trialEndsAt) {
+          const d = new Date(tenant.trialEndsAt);
+          next.textContent = "Termina: " + d.toLocaleDateString("es-CL") + " · luego inicia cobro automático";
+        } else {
+          next.textContent = "Incluye 1 inspección real · cobro automático al finalizar trial";
+        }
+        action.textContent = "Ver detalles";
+        action.href = "#cuenta";
+      } else if (tenant.trialStatus === "blocked") {
+        title.textContent = "Free trial bloqueado";
+        if (dot) { dot.className = "subBannerDot cancelled"; }
+        next.textContent = tenant.trialBlockedReason ? ("Motivo: " + tenant.trialBlockedReason) : "No cumples elegibilidad del trial";
+        action.textContent = "Activar plan";
+        action.href = "/business/activar";
+      } else if (st === "authorized" || st === "active") {
+        title.textContent = "Plan Business activo";
+        if (dot) { dot.className = "subBannerDot"; }
+        if (tenant.subscriptionExpiresAt) {
+          const d = new Date(tenant.subscriptionExpiresAt);
+          next.textContent = "Próximo cobro: " + d.toLocaleDateString("es-CL");
+        } else {
+          next.textContent = "Cobro automático mensual";
+        }
+        action.textContent = "Ver detalles";
+        action.href = "#cuenta";
+      } else if (st === "cancelled") {
+        title.textContent = "Suscripción cancelada";
+        if (dot) { dot.className = "subBannerDot cancelled"; }
+        if (tenant.subscriptionExpiresAt) {
+          const d = new Date(tenant.subscriptionExpiresAt);
+          next.textContent = "Acceso hasta: " + d.toLocaleDateString("es-CL");
+        } else {
+          next.textContent = "";
+        }
+        action.textContent = "Reactivar";
+        action.href = "/business/activar";
+      } else if (st === "pending") {
+        title.textContent = "Suscripción pendiente";
+        if (dot) { dot.className = "subBannerDot pending"; }
+        next.textContent = "Esperando confirmación de pago";
+        action.textContent = "Ver estado";
+        action.href = "#cuenta";
+      } else {
+        banner.style.display = "none";
+      }
+    }
+
+    async function loadCredits() {
+      const res = await fetch("/api/tenant/credits", { credentials: "include", headers: authHeaders() });
+      if (handleUnauthorized(res)) return { balance: 0 };
+      if (!res.ok) return { balance: 0 };
+      const data = await res.json();
+      return { balance: data?.balance ?? 0 };
+    }
+
+    async function loadCreditTransactions() {
+      const res = await fetch("/api/tenant/credits/transactions?limit=50", { credentials: "include", headers: authHeaders() });
+      if (handleUnauthorized(res)) return [];
+      if (!res.ok) return [];
+      const data = await res.json();
+      return data?.transactions ?? [];
+    }
+
+    async function renderCredits() {
+      const [credits, transactions] = await Promise.all([loadCredits(), loadCreditTransactions()]);
+      const balanceEl = document.getElementById("creditsBalance");
+      if (balanceEl) balanceEl.textContent = credits.balance;
+      const listEl = document.getElementById("creditsList");
+      if (!listEl) return;
+      listEl.innerHTML = "";
+      if (!transactions.length) {
+        listEl.appendChild(Object.assign(document.createElement("div"), { className: "muted", style: "grid-column:1/-1; padding:12px;", textContent: "Sin movimientos aún." }));
+        return;
+      }
+      const typeLabels = { PURCHASE: "Compra", CONSUMPTION: "Uso", ADJUSTMENT: "Ajuste" };
+      transactions.forEach((t) => {
+        const row = document.createElement("div");
+        row.className = "creditsGrid";
+        const date = document.createElement("div");
+        date.textContent = formatDateShort(t.createdAt);
+        const type = document.createElement("div");
+        type.textContent = typeLabels[t.type] || t.type;
+        const amount = document.createElement("div");
+        amount.textContent = t.amount > 0 ? `+${t.amount}` : String(t.amount);
+        amount.style.color = t.amount > 0 ? "#35D07F" : "#ef4444";
+        const desc = document.createElement("div");
+        desc.textContent = t.description || "—";
+        row.appendChild(date);
+        row.appendChild(type);
+        row.appendChild(amount);
+        row.appendChild(desc);
+        listEl.appendChild(row);
+      });
     }
 
     const inspectionFormCard = document.getElementById("inspectionFormCard");
@@ -808,10 +1534,12 @@
     window.addEventListener("hashchange", setActiveSection);
     setActiveSection();
 
-    loadTenant().then(() => {
+    loadTenant().then((tenant) => {
       renderUsers().catch(() => {});
       renderInspections().catch(() => {});
+      if (tenant) renderSubBanner(tenant);
     }).catch(() => {});
   </script>
+  <script src="/assets/tracker.js" defer></script>
 </body>
 </html>

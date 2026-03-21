@@ -18,7 +18,7 @@
     }
     .card {
       width: 100%;
-      max-width: 420px;
+      max-width: 440px;
       background: #fff;
       border: 1px solid #e5e7eb;
       border-radius: 16px;
@@ -26,7 +26,7 @@
       box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
     }
     h1 { margin: 0 0 8px; font-size: 22px; }
-    .muted { color: #64748b; font-size: 13px; }
+    .muted { color: #64748b; font-size: 13px; line-height: 1.5; }
     .row {
       display: grid;
       gap: 8px;
@@ -48,53 +48,135 @@
       color: #fff;
       font-weight: 700;
       cursor: pointer;
+      font-size: 15px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn.secondary {
+      background: #f1f5f9;
+      color: #0f172a;
+      border: 1px solid #e2e8f0;
+    }
+    .btn.play {
+      background: #0f172a;
+      color: #fff;
     }
     .note {
       margin-top: 12px;
       font-size: 12px;
       color: #64748b;
     }
+    .successIcon {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: #dcfce7;
+      color: #166534;
+      display: grid;
+      place-items: center;
+      font-size: 28px;
+      margin: 0 auto 16px;
+    }
+    .steps {
+      margin: 20px 0 0;
+      padding: 0 0 0 20px;
+      color: #475569;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+    .steps li { margin-bottom: 10px; }
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Activar cuenta</h1>
-    <div class="muted">Confirma tu activación para continuar.</div>
-    <div class="row">
-      <label for="tokenInput">Token de activación</label>
-      <input id="tokenInput" type="text" />
+  <div class="card" id="activateCard">
+    <div id="formPanel">
+      <h1>Activar cuenta</h1>
+      <div class="muted">Crea tu clave para acceder al panel ejecutivo y a la app móvil.</div>
+      <div class="row">
+        <label for="tokenInput">Token de activación</label>
+        <input id="tokenInput" type="text" autocomplete="one-time-code" />
+      </div>
+      <div class="row">
+        <label for="passwordInput">Crea tu clave</label>
+        <input id="passwordInput" type="password" autocomplete="new-password" />
+      </div>
+      <div class="row">
+        <label for="passwordConfirm">Repite tu clave</label>
+        <input id="passwordConfirm" type="password" autocomplete="new-password" />
+      </div>
+      <button class="btn" id="activateBtn" type="button">Activar</button>
+      <div class="note" id="statusMsg"></div>
     </div>
-    <div class="row">
-      <label for="passwordInput">Crea tu clave</label>
-      <input id="passwordInput" type="password" />
+
+    <div id="successPanel" class="hidden">
+      <div class="successIcon" aria-hidden="true">✓</div>
+      <h1 style="text-align:center">Cuenta lista</h1>
+      <p class="muted" style="text-align:center;margin-bottom:20px">
+        Ya puedes entrar con tu <strong>correo</strong> y la <strong>clave que elegiste</strong>.
+      </p>
+      <p class="note hidden" id="captureEmailNote" style="text-align:center;margin-bottom:16px;padding:10px 12px;border-radius:10px;background:#f0fdf4;border:1px solid #bbf7d0;color:#166534"></p>
+
+      <p class="muted" style="font-weight:600;color:#334155;margin:0 0 8px">1. Descarga la app</p>
+      <a class="btn play hidden" id="playStoreBtn" href="#" target="_blank" rel="noopener noreferrer">Abrir en Google Play</a>
+      <p class="note hidden" id="playStoreFallback">Busca <strong>Ainspecciona</strong> (app ejecutivo) en Google Play e instálala.</p>
+
+      <p class="muted" style="font-weight:600;color:#334155;margin:20px 0 8px">2. Inicia sesión</p>
+      <p class="muted" style="margin:0 0 12px">Al abrir la app verás tu <strong>dashboard</strong> con las inspecciones que te asignaron.</p>
+
+      <a class="btn secondary" id="webExecutiveBtn" href="/executive">Abrir panel web (opcional)</a>
+
+      <ul class="steps">
+        <li>Si no ves casos, espera a que tu corredora te asigne inspecciones.</li>
+        <li>Puedes usar la misma clave en la app y en el panel web.</li>
+      </ul>
     </div>
-    <div class="row">
-      <label for="passwordConfirm">Repite tu clave</label>
-      <input id="passwordConfirm" type="password" />
-    </div>
-    <button class="btn" id="activateBtn" type="button">Activar</button>
-    <div class="note" id="statusMsg"></div>
-    <div class="note" id="nextSteps"></div>
-    <div class="note" id="installGuide"></div>
   </div>
 
   <script>
     const params = new URLSearchParams(window.location.search);
-    const token = params.get("token") || "";
+    const tokenParam = params.get("token") || "";
     const input = document.getElementById("tokenInput");
     const status = document.getElementById("statusMsg");
-    const nextSteps = document.getElementById("nextSteps");
-    const installGuide = document.getElementById("installGuide");
     const passInput = document.getElementById("passwordInput");
     const passConfirm = document.getElementById("passwordConfirm");
-    input.value = token;
+    const formPanel = document.getElementById("formPanel");
+    const successPanel = document.getElementById("successPanel");
+    const playStoreBtn = document.getElementById("playStoreBtn");
+    const playStoreFallback = document.getElementById("playStoreFallback");
+    const webExecutiveBtn = document.getElementById("webExecutiveBtn");
+    const captureEmailNote = document.getElementById("captureEmailNote");
+
+    input.value = tokenParam;
+
+    async function loadAppLinks() {
+      try {
+        const res = await fetch("/api/public/executive-app");
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.executiveWebUrl) {
+          webExecutiveBtn.href = data.executiveWebUrl;
+        }
+        if (data.playStoreUrl) {
+          playStoreBtn.href = data.playStoreUrl;
+          playStoreBtn.classList.remove("hidden");
+          playStoreFallback.classList.add("hidden");
+        } else {
+          playStoreBtn.classList.add("hidden");
+          playStoreFallback.classList.remove("hidden");
+        }
+      } catch {
+        playStoreBtn.classList.add("hidden");
+        playStoreFallback.classList.remove("hidden");
+      }
+    }
 
     document.getElementById("activateBtn").addEventListener("click", async () => {
       const val = input.value.trim();
       const pass = passInput.value.trim();
       const pass2 = passConfirm.value.trim();
-      nextSteps.textContent = "";
-      installGuide.textContent = "";
+      status.textContent = "";
       if (!val) {
         status.textContent = "Token requerido.";
         return;
@@ -115,8 +197,31 @@
           body: JSON.stringify({ token: val, password: pass })
         });
         if (res.ok) {
-          status.textContent = "Cuenta activada.";
-          nextSteps.innerHTML = `Paso siguiente: abre <a href="/executive">/executive</a> en tu celular para ver tus inspecciones.`;
+          const data = await res.json().catch(() => ({}));
+          formPanel.classList.add("hidden");
+          successPanel.classList.remove("hidden");
+          if (captureEmailNote) {
+            if (data.captureEmailSent) {
+              captureEmailNote.textContent =
+                "Te enviamos un correo con el enlace para instalar Ainspecciona Capture (revisa spam).";
+              captureEmailNote.classList.remove("hidden");
+            } else if (data.captureEmailSkipped) {
+              captureEmailNote.style.background = "#fffbeb";
+              captureEmailNote.style.borderColor = "#fde68a";
+              captureEmailNote.style.color = "#92400e";
+              captureEmailNote.textContent =
+                "No pudimos enviar el correo con el enlace a la app. Usa el botón de abajo o pídeselo a tu corredora.";
+              captureEmailNote.classList.remove("hidden");
+            } else if (data.captureEmailAttempted && data.captureEmailError) {
+              captureEmailNote.style.background = "#fffbeb";
+              captureEmailNote.style.borderColor = "#fde68a";
+              captureEmailNote.style.color = "#92400e";
+              captureEmailNote.textContent =
+                "Hubo un problema al enviar el correo con el enlace. Usa el botón de abajo o contacta a tu corredora.";
+              captureEmailNote.classList.remove("hidden");
+            }
+          }
+          await loadAppLinks();
         } else {
           status.textContent = "Token inválido o expirado.";
         }
@@ -124,6 +229,8 @@
         status.textContent = "No se pudo activar. Intenta nuevamente.";
       }
     });
+
+    loadAppLinks();
   </script>
 </body>
 </html>

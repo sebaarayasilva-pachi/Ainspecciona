@@ -4,76 +4,31 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Admin · Ainspecciona</title>
+  <link rel="stylesheet" href="/assets/header.css" />
   <style>
     * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #F6F7F9;
-      color: #0f172a;
-    }
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 20;
-      background: #ffffff;
-      border-bottom: 1px solid #e5e7eb;
-    }
-    .nav {
-      max-width: none;
-      margin: 0;
-      padding: 20px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
-      color: inherit;
-      font-weight: 800;
-    }
-    .brand img { height: 70px; }
-    .links {
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    .links a {
-      text-decoration: none;
-      color: #1f2937;
-      font-weight: 600;
-      font-size: 14px;
-    }
-    .cta {
-      padding: 10px 14px;
-      border-radius: 999px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: #fff;
-      text-decoration: none;
-      font-weight: 800;
-      font-size: 14px;
+      background: radial-gradient(circle at 20% 20%, #1f2b3a 0%, #0b121b 65%, #070b12 100%);
+      color: #e5eef7;
+      min-height: 100vh;
     }
     main {
       display: grid;
-      grid-template-columns: 260px 1fr;
-      min-height: calc(100vh - 96px);
+      grid-template-columns: 240px 1fr;
+      min-height: calc(100vh - 72px);
     }
     aside {
-      background: #ffffff;
-      border-right: 1px solid #e5e7eb;
+      background: #0F1A2E;
+      border-right: 1px solid #1E2B45;
       padding: 24px 18px;
     }
     .asideTitle {
       font-size: 12px;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      color: #64748b;
+      color: #94a3b8;
       margin: 0 0 12px;
       font-weight: 700;
     }
@@ -84,28 +39,79 @@
     }
     .menu a {
       text-decoration: none;
-      color: #0f172a;
+      color: #B9C7E2;
       font-weight: 600;
       padding: 10px 12px;
       border-radius: 10px;
     }
+    .menu a:hover { background: #1E2B45; color: #EAF0FF; }
     .menu a.active {
-      background: #eef2ff;
-      color: #1d4ed8;
+      background: rgba(53, 208, 127, 0.15);
+      color: #35D07F;
+      border: 1px solid #35D07F;
     }
     .content {
       padding: 28px 28px 80px;
     }
+    .content.hidden { display: none; }
     .card {
-      background: #fff;
-      border: 1px solid #e5e7eb;
-      border-radius: 16px;
+      background: #0F1A2E;
+      border: 1px solid #1E2B45;
+      border-radius: 14px;
       padding: 20px;
-      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
       margin-bottom: 18px;
     }
-    h1 { margin: 0 0 8px; font-size: 26px; }
-    .muted { color: #64748b; }
+    h1 { margin: 0 0 8px; font-size: 26px; font-weight: 800; color: #EAF0FF; }
+    h3 { margin: 0 0 8px; font-size: 14px; font-weight: 700; color: #A9B7D0; }
+    .muted { color: #94a3b8; }
+    .statsGrid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-top: 20px;
+    }
+    @media (max-width: 900px) { .statsGrid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 500px) { .statsGrid { grid-template-columns: 1fr; } }
+    .statCard {
+      background: #0F1A2E;
+      border: 1px solid #1E2B45;
+      border-radius: 14px;
+      padding: 22px 20px;
+      text-align: center;
+      transition: border-color 0.2s;
+    }
+    .statCard:hover { border-color: #35D07F; }
+    .statCard.accent { border-color: #22c55e; background: linear-gradient(180deg, #0F1A2E 0%, #0B2218 100%); }
+    .statValue {
+      font-size: 32px;
+      font-weight: 900;
+      color: #EAF0FF;
+      line-height: 1;
+      letter-spacing: -0.5px;
+    }
+    .statCard.accent .statValue { color: #35D07F; }
+    .statLabel {
+      font-size: 12px;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 8px;
+    }
+    .statSub {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+    .statConvDetail {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      margin-top: 6px;
+      font-size: 12px;
+      color: #64748b;
+    }
+    .statConvDetail strong { color: #EAF0FF; font-weight: 800; }
     .grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -126,7 +132,7 @@
     .kpiRow { display: contents; }
     .kpiHeader {
       font-size: 12px;
-      color: #64748b;
+      color: #94a3b8;
       text-transform: uppercase;
       letter-spacing: 0.08em;
       font-weight: 700;
@@ -139,10 +145,11 @@
     .kpiTitle {
       margin: 0 0 6px;
       font-size: 18px;
+      color: #EAF0FF;
     }
     .kpiSubtle {
       font-size: 12px;
-      color: #64748b;
+      color: #94a3b8;
       margin-bottom: 10px;
     }
     .row {
@@ -151,16 +158,24 @@
       gap: 10px;
       align-items: center;
       padding: 8px 0;
-      border-bottom: 1px solid #f1f5f9;
+      border-bottom: 1px solid #1E2B45;
     }
     .row:last-child { border-bottom: none; }
-    label { font-weight: 600; font-size: 14px; }
-    input[type="number"] {
+    label { font-weight: 600; font-size: 14px; color: #B9C7E2; }
+    input[type="number"], input[type="text"], input[type="email"], input[type="password"] {
       width: 100%;
       padding: 8px 10px;
       border-radius: 10px;
-      border: 1px solid #e5e7eb;
+      border: 1px solid #1E2B45;
       font-size: 14px;
+      background: #0B1220;
+      color: #EAF0FF;
+    }
+    input::placeholder { color: #7F93B8; }
+    input:focus {
+      outline: none;
+      border-color: #35D07F;
+      box-shadow: 0 0 0 2px rgba(53, 208, 127, 0.2);
     }
     textarea {
       width: 100%;
@@ -168,12 +183,19 @@
       resize: vertical;
       padding: 8px 10px;
       border-radius: 10px;
-      border: 1px solid #e5e7eb;
+      border: 1px solid #1E2B45;
       font-size: 13px;
       font-family: inherit;
+      background: #0B1220;
+      color: #EAF0FF;
+    }
+    textarea::placeholder { color: #7F93B8; }
+    textarea:focus {
+      outline: none;
+      border-color: #35D07F;
     }
     .kpiBlock {
-      border-top: 1px solid #f1f5f9;
+      border-top: 1px solid #1E2B45;
       padding-top: 12px;
       margin-top: 12px;
     }
@@ -188,26 +210,61 @@
       align-items: center;
       justify-content: center;
       padding: 10px 14px;
-      border-radius: 12px;
+      border-radius: 10px;
       font-weight: 700;
-      border: 1px solid transparent;
-      background: #2563eb;
-      color: #fff;
+      border: none;
+      background: linear-gradient(135deg, #35D07F 0%, #1AAE69 100%);
+      color: #0B1220;
       cursor: pointer;
+      font-size: 13px;
     }
+    .btn:hover { opacity: 0.95; filter: brightness(1.05); }
     .btn.outline {
-      background: #fff;
-      color: #1f2937;
-      border-color: #e5e7eb;
+      background: #0B1220;
+      color: #35D07F;
+      border: 1px solid #1E2B45;
     }
+    .btn.outline:hover { background: #1E2B45; color: #CFF9E1; }
     .note {
       font-size: 12px;
-      color: #64748b;
+      color: #94a3b8;
       margin-top: 10px;
     }
-    .content.hidden {
-      display: none;
+    .note a { color: #35D07F; text-decoration: none; }
+    .note a:hover { text-decoration: underline; }
+    .tenantCreateCard { margin-bottom: 16px; }
+    .tenantCreateCard summary {
+      cursor: pointer;
+      padding: 12px 16px;
+      font-weight: 700;
+      color: #35D07F;
+      list-style: none;
+      border-radius: 12px;
+      border: 1px solid #1E2B45;
     }
+    .tenantCreateCard summary::-webkit-details-marker { display: none; }
+    .tenantCreateForm { padding: 16px 0 0; }
+    .tenantCard {
+      border: 1px solid #1E2B45;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      background: #0F1A2E;
+    }
+    .tenantCardHeader {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px 16px;
+      margin-bottom: 8px;
+    }
+    .tenantCardTitle { font-weight: 700; color: #EAF0FF; font-size: 15px; }
+    .tenantCardMeta { font-size: 12px; color: #94a3b8; }
+    .tenantCardActions { display: flex; gap: 8px; margin-top: 10px; }
+    .tenantCardBody { display: none; margin-top: 14px; padding-top: 14px; border-top: 1px solid #1E2B45; }
+    .tenantCardBody.open { display: block; }
+    .tenantCardBody .grid { max-width: 640px; }
+    .tenantList { display: flex; flex-direction: column; gap: 10px; }
     .tenantGrid {
       display: grid;
       grid-template-columns: 1.2fr 1.2fr 0.8fr 1fr 1fr 1fr 120px 120px;
@@ -216,9 +273,20 @@
     }
     .userGrid {
       display: grid;
-      grid-template-columns: 1.2fr 1fr 140px 160px 140px 120px 160px;
-      gap: 10px;
+      grid-template-columns: 1.2fr 1fr 150px 120px 100px 90px 1fr;
+      gap: 8px;
       align-items: center;
+    }
+    .userGrid > div { color: #B9C7E2; }
+    .btnGroup {
+      display: flex;
+      gap: 6px;
+      flex-wrap: nowrap;
+    }
+    .btnGroup .btn, .btnGroup .btn.outline {
+      padding: 6px 10px;
+      font-size: 12px;
+      white-space: nowrap;
     }
     .slotMapGrid {
       display: grid;
@@ -229,7 +297,7 @@
     }
     .slotMapHeader {
       font-size: 12px;
-      color: #64748b;
+      color: #94a3b8;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.02em;
@@ -237,11 +305,13 @@
     .slotMapGrid select {
       width: 100%;
       padding: 10px;
-      border-radius: 12px;
-      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      border: 1px solid #1E2B45;
       font-size: 13px;
-      background: #fff;
+      background: #0B1220;
+      color: #EAF0FF;
     }
+    .slotMapGrid select option { background: #0B1220; color: #EAF0FF; }
     .promptGrid {
       display: grid;
       grid-template-columns: 1fr;
@@ -263,26 +333,67 @@
       border-radius: 999px;
       font-size: 11px;
       font-weight: 700;
-      background: #EEF2FF;
-      color: #1D4ED8;
+      background: rgba(53, 208, 127, 0.15);
+      color: #35D07F;
+      border: 1px solid rgba(53, 208, 127, 0.3);
     }
     .smallInput {
       width: 100%;
       padding: 8px 10px;
       border-radius: 10px;
-      border: 1px solid #e5e7eb;
+      border: 1px solid #1E2B45;
       font-size: 13px;
+      background: #0B1220;
+      color: #EAF0FF;
     }
+    select.smallInput {
+      cursor: pointer;
+      color: #B9C7E2;
+    }
+    select.smallInput option { background: #0B1220; color: #EAF0FF; }
     .userCard {
-      border: 1px dashed #e5e7eb;
+      border: 1px solid #1E2B45;
       border-radius: 12px;
       padding: 14px;
       margin-top: 10px;
-      background: #f8fafc;
+      background: #0F1A2E;
     }
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+    .table th, .table td {
+      text-align: left;
+      padding: 10px 8px;
+      border-bottom: 1px solid #1E2B45;
+      font-size: 13px;
+    }
+    .table th { color: #94a3b8; font-weight: 900; }
+    .pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 10px; border-radius: 999px;
+      font-weight: 800; font-size: 12px;
+      border: 1px solid #1E2B45; background: #0F1A2E; color: #EAF0FF;
+    }
+    .pill.ok { background: rgba(53, 208, 127, 0.1); color: #35D07F; border-color: rgba(53, 208, 127, 0.3); }
+    .pill.warn { background: rgba(234, 179, 8, 0.1); color: #EAB308; border-color: rgba(234, 179, 8, 0.3); }
+    .pill.bad { background: rgba(239, 68, 68, 0.1); color: #EF4444; border-color: rgba(239, 68, 68, 0.3); }
+    .pill.plan { background: rgba(59, 130, 246, 0.1); color: #3B82F6; border-color: rgba(59, 130, 246, 0.3); }
+    .pill.plan.starter { background: rgba(245, 158, 11, 0.1); color: #F59E0B; border-color: rgba(245, 158, 11, 0.3); }
+    .thumbSmall {
+      width: 64px; height: 64px; border-radius: 10px;
+      border: 1px solid #1E2B45; object-fit: cover; margin-top: 6px;
+    }
+    .filters {
+      display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+      margin-bottom: 16px; padding: 12px 0; border-bottom: 1px solid #1E2B45;
+    }
+    .filters label { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #94a3b8; }
+    
     @media (max-width: 900px) {
       main { grid-template-columns: 1fr; }
-      aside { border-right: none; border-bottom: 1px solid #e5e7eb; }
+      aside { border-right: none; border-bottom: 1px solid #1E2B45; }
       .grid { grid-template-columns: 1fr; }
       .kpiRows { grid-template-columns: 1fr; }
       .recRows { grid-template-columns: 1fr; }
@@ -292,15 +403,16 @@
   </style>
 </head>
 <body>
-  <header>
+  <header class="site-header">
     <div class="nav">
       <a class="brand" href="/">
         <img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" />
       </a>
-      <div class="links">
-        <a href="/dashboard">Dashboard</a>
-        <a class="cta" href="/formulario">Generar inspección</a>
-      </div>
+      <nav class="navLinks">
+        <a href="/">Inicio</a>
+        <a href="/tenant">Panel corredoras</a>
+        <a class="cta" href="/admin">Admin</a>
+      </nav>
     </div>
   </header>
 
@@ -308,12 +420,85 @@
     <aside>
       <div class="asideTitle">Admin</div>
       <nav class="menu">
-        <a class="active" data-section-link="score" href="#score">Score</a>
+        <a class="active" data-section-link="dashboard" href="#dashboard">Dashboard</a>
+        <a data-section-link="score" href="#score">Score</a>
+        <a data-section-link="intelligence" href="#intelligence">Intelligence</a>
         <a data-section-link="tenants" href="#tenants">Corredoras</a>
+        <a data-section-link="inspecciones" href="#inspecciones">Inspecciones</a>
       </nav>
     </aside>
 
-    <section class="content" id="score" data-section="score">
+    <section class="content" id="dashboard" data-section="dashboard">
+      <h1>Dashboard</h1>
+      <div class="muted">Métricas generales de la plataforma.</div>
+
+      <div class="statsGrid">
+        <div class="statCard">
+          <div class="statValue" id="statTenants">--</div>
+          <div class="statLabel">Usuarios totales</div>
+          <div class="statSub" id="statTenantsToday">--</div>
+        </div>
+        <div class="statCard">
+          <div class="statValue" id="statToday">--</div>
+          <div class="statLabel">Nuevos hoy</div>
+          <div class="statSub">registros del dia</div>
+        </div>
+        <div class="statCard accent">
+          <div class="statValue" id="statOnline">--</div>
+          <div class="statLabel">Online</div>
+          <div class="statSub">visitantes ultimos 5 min</div>
+        </div>
+        <div class="statCard">
+          <div class="statValue" id="statConversion">--%</div>
+          <div class="statLabel">Conversion</div>
+          <div class="statConvDetail">
+            <span><strong id="statPaid">--</strong> pagadas</span>
+            <span><strong id="statDemo">--</strong> demo</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="statsGrid" style="margin-top:16px;">
+        <div class="statCard">
+          <div class="statValue" id="statCases">--</div>
+          <div class="statLabel">Inspecciones totales</div>
+          <div class="statSub" id="statCasesToday">--</div>
+        </div>
+        <div class="statCard">
+          <div class="statValue" id="statDone">--</div>
+          <div class="statLabel">Completadas</div>
+          <div class="statSub">estado DONE</div>
+        </div>
+        <div class="statCard">
+          <div class="statValue" id="statInProgress">--</div>
+          <div class="statLabel">En progreso</div>
+          <div class="statSub">estado IN_PROGRESS</div>
+        </div>
+        <div class="statCard">
+          <div class="statValue" id="statCredits">--</div>
+          <div class="statLabel">Creditos vendidos</div>
+          <div class="statSub" id="statCreditsUsed">--</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:24px;">
+        <h3>Visitas al sitio</h3>
+        <div style="display:flex; gap:12px; align-items:center; margin-bottom:12px;">
+          <select class="smallInput" id="visitDaysSelect" style="width:auto;">
+            <option value="7">Últimos 7 días</option>
+            <option value="14">Últimos 14 días</option>
+            <option value="30" selected>Últimos 30 días</option>
+            <option value="60">Últimos 60 días</option>
+          </select>
+          <span class="muted" id="visitTotal" style="font-size:13px;">--</span>
+        </div>
+        <div style="position:relative; height:280px;">
+          <canvas id="visitsChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <section class="content" id="score" data-section="score" style="display: none;">
       <h1>Score por KPI</h1>
       <div class="muted">Organiza el score y el mensaje base por cada KPI.</div>
 
@@ -535,14 +720,63 @@
 
       <div class="card">
         <h3>Mapa de slots a KPI</h3>
-        <div class="kpiSubtle">Define el KPI de cada slot de captura.</div>
+        <div class="kpiSubtle">Define el KPI de cada slot. BATHROOM_N y BEDROOM_N usan el mapeo del N.º 1.</div>
         <div class="slotMapGrid" id="slotMapGrid"></div>
+        <div style="margin-top:12px;">
+          <button type="button" class="btn outline" id="addSlotBtn">+ Agregar slot</button>
+        </div>
       </div>
 
       <div class="card">
-        <h3>Prompts IA por KPI</h3>
-        <div class="kpiSubtle">Plantillas de análisis para cada KPI.</div>
+        <h3>Rangos de badge</h3>
+        <div class="row">
+          <label for="badgeYellow">Amarillo desde</label>
+          <input id="badgeYellow" type="number" step="1" min="0" max="100" />
+        </div>
+        <div class="row">
+          <label for="badgeGreen">Verde desde</label>
+          <input id="badgeGreen" type="number" step="1" min="0" max="100" />
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Recomendación por badge</h3>
+        <div class="kpiSubtle">Badge y recomendación</div>
+        <div class="recRows">
+          <div class="kpiHeader">Badge</div>
+          <div class="kpiHeader">Mensaje</div>
+          <div class="kpiRow">
+            <label for="recGreen">Verde</label>
+            <textarea id="recGreen"></textarea>
+          </div>
+          <div class="kpiRow">
+            <label for="recYellow">Amarillo</label>
+            <textarea id="recYellow"></textarea>
+          </div>
+          <div class="kpiRow">
+            <label for="recRed">Rojo</label>
+            <textarea id="recRed"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn" id="saveBtn" type="button">Guardar cambios</button>
+        <button class="btn outline" id="resetBtn" type="button">Restaurar valores</button>
+      </div>
+      <div class="note">Los cambios se guardan directamente en el servidor y aplican para las nuevas inspecciones.</div>
+    </section>
+
+    <section class="content" id="intelligence" data-section="intelligence" style="display: none;">
+      <h1>Prompts IA por KPI</h1>
+      <div class="muted">Plantillas de análisis de Inteligencia Artificial para cada KPI.</div>
+      
+      <div class="card">
         <div class="promptGrid">
+          <div>
+            <div class="kpiSubtle">Prompt maestro (GENERAL)</div>
+            <textarea id="promptGeneral" placeholder="Se usa como base/fallback para todos los KPI"></textarea>
+          </div>
           <div>
             <div class="kpiSubtle">Muros y pintura</div>
             <textarea id="promptMurosPintura"></textarea>
@@ -577,97 +811,138 @@
           </div>
         </div>
       </div>
-
-      <div class="card">
-        <h3>Rangos de badge</h3>
-        <div class="row">
-          <label for="badgeYellow">Amarillo desde</label>
-          <input id="badgeYellow" type="number" step="1" min="0" max="100" />
-        </div>
-        <div class="row">
-          <label for="badgeGreen">Verde desde</label>
-          <input id="badgeGreen" type="number" step="1" min="0" max="100" />
-        </div>
-      </div>
-
-
-      <div class="card">
-        <h3>Recomendación por badge</h3>
-        <div class="kpiSubtle">Badge y recomendación</div>
-        <div class="recRows">
-          <div class="kpiHeader">Badge</div>
-          <div class="kpiHeader">Mensaje</div>
-          <div class="kpiRow">
-            <label for="recGreen">Verde</label>
-            <textarea id="recGreen"></textarea>
-          </div>
-          <div class="kpiRow">
-            <label for="recYellow">Amarillo</label>
-            <textarea id="recYellow"></textarea>
-          </div>
-          <div class="kpiRow">
-            <label for="recRed">Rojo</label>
-            <textarea id="recRed"></textarea>
-          </div>
-        </div>
-      </div>
-
+      
       <div class="actions">
-        <button class="btn" id="saveBtn" type="button">Guardar cambios</button>
-        <button class="btn outline" id="resetBtn" type="button">Restaurar valores</button>
+        <button class="btn" id="saveIntelligenceBtn" type="button">Guardar prompts</button>
       </div>
-      <div class="note">Los cambios se guardan en este navegador (local). Luego podemos conectarlo al backend.</div>
     </section>
 
     <section class="content" id="tenants" data-section="tenants">
       <h1>Corredoras</h1>
       <div class="muted">Mantenedor de corredoras (tenant) y datos de contacto.</div>
 
-      <div class="card">
-        <h3>Crear corredora</h3>
-        <div class="grid">
-          <div class="row">
-            <label for="tenantName">Nombre</label>
-            <input id="tenantName" type="text" class="smallInput" />
+      <details class="card tenantCreateCard">
+        <summary class="tenantCreateSummary">+ Nueva corredora</summary>
+        <div class="tenantCreateForm">
+          <div class="grid">
+            <div class="row">
+              <label for="tenantName">Nombre</label>
+              <input id="tenantName" type="text" class="smallInput" placeholder="Ej. Mi Corredora" />
+            </div>
+            <div class="row">
+              <label for="tenantLegalName">Razón social</label>
+              <input id="tenantLegalName" type="text" class="smallInput" placeholder="Razón social" />
+            </div>
+            <div class="row">
+              <label for="tenantRut">RUT</label>
+              <input id="tenantRut" type="text" class="smallInput" placeholder="12.345.678-9" />
+            </div>
+            <div class="row">
+              <label for="tenantPassword">Clave</label>
+              <input id="tenantPassword" type="password" class="smallInput" placeholder="Clave de acceso" />
+            </div>
+            <div class="row">
+              <label for="tenantEmail">Email</label>
+              <input id="tenantEmail" type="email" class="smallInput" placeholder="contacto@corredora.cl" />
+            </div>
+            <div class="row">
+              <label for="tenantPhone">Teléfono</label>
+              <input id="tenantPhone" type="text" class="smallInput" placeholder="+56912345678" />
+            </div>
           </div>
-          <div class="row">
-            <label for="tenantLegalName">Razón social</label>
-            <input id="tenantLegalName" type="text" class="smallInput" />
-          </div>
-          <div class="row">
-            <label for="tenantRut">RUT</label>
-            <input id="tenantRut" type="text" class="smallInput" />
-          </div>
-          <div class="row">
-            <label for="tenantPassword">Clave</label>
-            <input id="tenantPassword" type="password" class="smallInput" />
-          </div>
-          <div class="row">
-            <label for="tenantEmail">Email</label>
-            <input id="tenantEmail" type="email" class="smallInput" />
-          </div>
-          <div class="row">
-            <label for="tenantPhone">Teléfono</label>
-            <input id="tenantPhone" type="text" class="smallInput" />
+          <div class="actions">
+            <button class="btn" id="createTenantBtn" type="button">Crear corredora</button>
           </div>
         </div>
-        <div class="actions">
-          <button class="btn" id="createTenantBtn" type="button">Crear corredora</button>
-        </div>
-      </div>
+      </details>
 
       <div class="card">
         <h3>Listado de corredoras</h3>
-        <div class="kpiSubtle">Edita nombre, razón social, RUT, contacto y estado.</div>
+        <div class="kpiSubtle">Haz clic en Editar o Usuarios para gestionar cada corredora.</div>
         <div id="tenantNote" class="note"></div>
         <div id="tenantsEmpty" class="note">Aún no hay corredoras registradas.</div>
         <div class="tenantGrid" id="tenantsTable"></div>
         <div id="tenantUsersWrap"></div>
       </div>
     </section>
+    <section class="content" id="inspecciones" data-section="inspecciones" style="display: none;">
+      <h1>Inspecciones</h1>
+      <div class="muted">Listado global de inspecciones de todas las corredoras.</div>
+
+      <div class="card" style="margin-top:24px;">
+        <div class="filters">
+          <label>Tenant:
+            <select class="smallInput" id="filterTenant" style="min-width:200px;">
+              <option value="">Todos (Starter + Business)</option>
+            </select>
+          </label>
+          <label>Estado:
+            <select class="smallInput" id="filterStatus" style="min-width:140px;">
+              <option value="">Todos</option>
+              <option value="DRAFT">Borrador</option>
+              <option value="IN_PROGRESS">En progreso</option>
+              <option value="DONE">Completado</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="muted" id="inspectionsSummary">Cargando…</div>
+
+        <div style="overflow-x: auto;">
+          <table class="table" id="casesTable" style="display:none;">
+            <thead>
+              <tr>
+                <th>Solicitante</th>
+                <th>Caso</th>
+                <th>Plan</th>
+                <th>Inmueble</th>
+                <th>Estado</th>
+                <th>Revisión</th>
+                <th>Progreso</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="casesBody"></tbody>
+          </table>
+        </div>
+        <div id="casesEmpty" style="display:none; padding:16px; text-align:center; color:#94a3b8;">
+          No hay casos.
+        </div>
+      </div>
+    </section>
+
   </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
   <script>
+    let adminUser = localStorage.getItem("ainspectaAdminUser");
+    let adminPass = localStorage.getItem("ainspectaAdminPass");
+    if (!adminUser || !adminPass) {
+      adminUser = prompt("Usuario de administración (admin):");
+      if (adminUser) {
+        adminPass = prompt("Contraseña (admin123):");
+        if (adminPass) {
+          localStorage.setItem("ainspectaAdminUser", adminUser);
+          localStorage.setItem("ainspectaAdminPass", adminPass);
+        }
+      }
+    }
+
+    async function adminFetch(url, options = {}) {
+      const headers = { 
+        ...options.headers, 
+        "x-admin-user": adminUser || "",
+        "x-admin-pass": adminPass || ""
+      };
+      const res = await fetch(url, { ...options, headers });
+      if (res.status === 401) {
+        localStorage.removeItem("ainspectaAdminUser");
+        localStorage.removeItem("ainspectaAdminPass");
+        alert("Usuario o contraseña incorrectos. Recarga la página para ingresar de nuevo.");
+      }
+      return res;
+    }
+
     const STORAGE_KEY = "ainspectaScoreConfig";
     const defaultConfig = {
       kpis: {
@@ -719,9 +994,19 @@
         BEDROOM_3_CLOSET: "MOBILIARIO_FIJO",
         BEDROOM_3_WINDOWS: "VENTANAS_CERRAMIENTOS",
         LAUNDRY_WALLS_FLOOR: "HUMEDAD",
-        ELECTRICAL_PANEL: "ELECTRICIDAD"
+        ELECTRICAL_PANEL: "ELECTRICIDAD",
+        PUERTA_ENTRADA: "PUERTAS_HERRAJES",
+        ELEVATOR: "ELECTRICIDAD",
+        ESTACIONAMIENTO: "PISOS",
+        CERTIFICADO_VERDE: "ELECTRICIDAD"
       },
       aiPrompts: {
+        GENERAL: [
+          "Eres un inspector técnico profesional que realiza evaluaciones de inmuebles.",
+          "Evalúa la imagen del área: {{AREA_DESCRIPTION}}, en cuanto a {{CRITERIA_DESCRIPTION}}.",
+          "Redacta como un profesional: lenguaje claro, objetivo y técnico.",
+          "Entrega el resultado en formato estructurado."
+        ].join("\\n"),
         MOBILIARIO_FIJO: [
           "Analiza la imagen correspondiente al slot {{SLOT_CODE}}",
           "bajo el contexto técnico del KPI: MOBILIARIO FIJO.",
@@ -1065,6 +1350,7 @@
       { id: "msgMobiliarioFijoLow", path: "messages.MOBILIARIO_FIJO.low", type: "text" },
       { id: "msgMobiliarioFijoMed", path: "messages.MOBILIARIO_FIJO.medium", type: "text" },
       { id: "msgMobiliarioFijoHigh", path: "messages.MOBILIARIO_FIJO.high", type: "text" },
+      { id: "promptGeneral", path: "aiPrompts.GENERAL", type: "text" },
       { id: "promptMurosPintura", path: "aiPrompts.MUROS_PINTURA", type: "text" },
       { id: "promptHumedad", path: "aiPrompts.HUMEDAD", type: "text" },
       { id: "promptPisos", path: "aiPrompts.PISOS", type: "text" },
@@ -1129,7 +1415,11 @@
       "BEDROOM_3_CLOSET",
       "BEDROOM_3_WINDOWS",
       "LAUNDRY_WALLS_FLOOR",
-      "ELECTRICAL_PANEL"
+      "ELECTRICAL_PANEL",
+      "PUERTA_ENTRADA",
+      "ELEVATOR",
+      "ESTACIONAMIENTO",
+      "CERTIFICADO_VERDE"
     ];
 
     function normalizeConfig(input) {
@@ -1185,7 +1475,7 @@
 
     async function fetchConfig() {
       try {
-        const res = await fetch("/api/admin/score-config");
+        const res = await adminFetch("/api/admin/score-config");
         const data = await res.json();
         if (res.ok && data?.config?.kpis) {
           const normalized = normalizeConfig(data.config);
@@ -1249,6 +1539,61 @@
         grid.appendChild(label);
         grid.appendChild(select);
       });
+      
+      // Render custom slots added previously
+      Object.keys(map).forEach(slotCode => {
+        if (!SLOT_CODES.includes(slotCode)) {
+           addSlotRowWithData(slotCode, map[slotCode]);
+        }
+      });
+    }
+
+    function addSlotRowWithData(slotCode, kpiValue) {
+      const grid = document.getElementById("slotMapGrid");
+      if (!grid) return;
+      const row = document.createElement("div");
+      row.style.gridColumn = "1 / -1";
+      row.style.display = "flex";
+      row.style.gap = "8px";
+      row.style.alignItems = "center";
+      const inp = document.createElement("input");
+      inp.type = "text";
+      inp.value = slotCode || "";
+      inp.placeholder = "Código (ej: PUERTA_BALCON)";
+      inp.className = "slotMapInput";
+      inp.style.cssText = "padding:8px;border-radius:8px;border:1px solid #1E2B45;background:#0B1220;color:#EAF0FF;flex:1;";
+      
+      // Update data-slot-code when input changes
+      inp.addEventListener('input', (e) => {
+        select.setAttribute("data-slot-code", e.target.value.trim().toUpperCase());
+      });
+
+      const select = document.createElement("select");
+      select.setAttribute("data-slot-code", slotCode || "");
+      KPI_OPTIONS.forEach((opt) => {
+        const option = document.createElement("option");
+        option.value = opt.value;
+        option.textContent = opt.label;
+        if (kpiValue && String(kpiValue).toUpperCase() === opt.value) {
+            option.selected = true;
+        }
+        select.appendChild(option);
+      });
+      select.style.flex = "1";
+      const remBtn = document.createElement("button");
+      remBtn.type = "button";
+      remBtn.textContent = "✕";
+      remBtn.className = "outline";
+      remBtn.style.cssText = "padding:4px 8px;font-size:12px;";
+      remBtn.onclick = () => row.remove();
+      row.appendChild(inp);
+      row.appendChild(select);
+      row.appendChild(remBtn);
+      grid.appendChild(row);
+    }
+
+    function addSlotRow() {
+      addSlotRowWithData("", "");
     }
 
     async function loadForm() {
@@ -1276,31 +1621,35 @@
       });
       const slotMap = {};
       document.querySelectorAll("#slotMapGrid select").forEach((el) => {
-        const slotCode = el.getAttribute("data-slot-code");
+        let slotCode = el.getAttribute("data-slot-code");
+        if (!slotCode && el.parentElement?.querySelector) {
+          const inp = el.parentElement.querySelector('input[placeholder*="Código"]');
+          if (inp) slotCode = String(inp.value || "").trim().toUpperCase().replace(/\s+/g, "_");
+        }
         const value = String(el.value || "").toUpperCase();
         if (slotCode && value) slotMap[slotCode] = value;
       });
       cfg.slotKpiMap = slotMap;
       setLocalConfig(cfg);
       try {
-        const res = await fetch("/api/admin/score-config", {
+        const res = await adminFetch("/api/admin/score-config", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ config: cfg })
         });
         if (res.ok) {
-          alert("Cambios guardados.");
+          alert("Datos guardados en BD.");
           return;
         }
       } catch {}
-      alert("Cambios guardados localmente.");
+      alert("No se pudo guardar en BD. Solo guardado local.");
     }
 
     async function resetForm() {
       const reset = JSON.parse(JSON.stringify(defaultConfig));
       setLocalConfig(reset);
       try {
-        await fetch("/api/admin/score-config", {
+        await adminFetch("/api/admin/score-config", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ config: reset })
@@ -1310,17 +1659,39 @@
     }
 
     document.getElementById("saveBtn").addEventListener("click", () => saveForm());
+    document.getElementById("saveIntelligenceBtn").addEventListener("click", () => saveForm());
     document.getElementById("resetBtn").addEventListener("click", () => resetForm());
+    const addSlotBtn = document.getElementById("addSlotBtn");
+    if (addSlotBtn) addSlotBtn.addEventListener("click", addSlotRow);
+    
+    document.querySelectorAll('[data-section-link]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const sectionId = link.getAttribute('data-section-link');
+        document.querySelectorAll('.content').forEach(s => s.style.display = 'none');
+        const targetSection = document.getElementById(sectionId);
+        if (targetSection) targetSection.style.display = 'block';
+        document.querySelectorAll('.menu a').forEach(a => a.classList.remove('active'));
+        link.classList.add('active');
+        if (sectionId === 'inspecciones') {
+          loadInspections();
+        }
+      });
+    });
+
     loadForm().catch(() => {});
 
     async function fetchTenants() {
-      const res = await fetch("/api/admin/tenants");
-      const data = await res.json();
+      const res = await adminFetch("/api/admin/tenants");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data?.message || `Error ${res.status} al cargar corredoras`);
+      }
       return data?.tenants || [];
     }
 
     async function fetchTenantUsers(tenantId) {
-      const res = await fetch(`/api/admin/tenants/${tenantId}/users`);
+      const res = await adminFetch(`/api/admin/tenants/${tenantId}/users`);
       const data = await res.json();
       return data?.users || [];
     }
@@ -1329,12 +1700,37 @@
       if (!value) return "—";
       const d = new Date(value);
       if (Number.isNaN(d.getTime())) return "—";
-      return new Intl.DateTimeFormat("es-CL", { dateStyle: "medium" }).format(d);
+      const day = String(d.getDate()).padStart(2, "0");
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const year = d.getFullYear();
+      return `${day}-${month}-${year}`;
+    }
+
+    const DEFAULT_API_BASE = "https://ainspecciona-api-852721861524.southamerica-west1.run.app";
+
+    function getApiBase() {
+      const origin = window.location.origin;
+      if (origin.includes("ainspecciona-api")) return origin;
+      if (origin.includes("ainspecta-api")) return origin.replace("ainspecta-api", "ainspecciona-api");
+      return DEFAULT_API_BASE;
     }
 
     function buildActivationLink(activationUrl) {
-      if (!activationUrl) return `${window.location.origin}/activate`;
-      return `${window.location.origin}${activationUrl}`;
+      const base = getApiBase();
+      if (!activationUrl) return `${base}/activate`;
+      try {
+        return new URL(activationUrl, base).toString();
+      } catch {
+        return `${base}/activate`;
+      }
+    }
+
+    function executiveInviteEmailSuffix(data) {
+      if (!data) return "";
+      if (data.emailSent) return " Se envió un correo con el enlace de activación.";
+      if (data.emailSkipped) return " (SMTP no configurado: copia el enlace o usa WhatsApp.)";
+      if (data.emailError) return " (No se pudo enviar el correo; usa el enlace o WhatsApp.)";
+      return "";
     }
 
     function renderTenants(list) {
@@ -1342,51 +1738,40 @@
       const empty = document.getElementById("tenantsEmpty");
       const usersWrap = document.getElementById("tenantUsersWrap");
       container.innerHTML = "";
-      usersWrap.innerHTML = "";
+      if (usersWrap) usersWrap.innerHTML = "";
+      container.className = "tenantList";
       if (!list.length) {
         empty.style.display = "block";
+        empty.textContent = "Aún no hay corredoras registradas.";
+        empty.style.color = "";
         return;
       }
       empty.style.display = "none";
-
-      container.appendChild(Object.assign(document.createElement("div"), { className: "kpiHeader", textContent: "Corredora" }));
-      container.appendChild(Object.assign(document.createElement("div"), { className: "kpiHeader", textContent: "Razón social" }));
-      container.appendChild(Object.assign(document.createElement("div"), { className: "kpiHeader", textContent: "RUT" }));
-      container.appendChild(Object.assign(document.createElement("div"), { className: "kpiHeader", textContent: "Clave" }));
-      container.appendChild(Object.assign(document.createElement("div"), { className: "kpiHeader", textContent: "Email" }));
-      container.appendChild(Object.assign(document.createElement("div"), { className: "kpiHeader", textContent: "Teléfono" }));
-      container.appendChild(Object.assign(document.createElement("div"), { className: "kpiHeader", textContent: "Estado" }));
-      container.appendChild(Object.assign(document.createElement("div"), { className: "kpiHeader", textContent: "Acciones" }));
 
       list.forEach((t) => {
         const name = document.createElement("input");
         name.value = t.name || "";
         name.className = "smallInput";
-
         const email = document.createElement("input");
         email.value = t.email || "";
         email.className = "smallInput";
-
         const phone = document.createElement("input");
         phone.value = t.phone || "";
         phone.className = "smallInput";
-
         const legalName = document.createElement("input");
         legalName.value = t.legalName || "";
         legalName.className = "smallInput";
-
         const rut = document.createElement("input");
         rut.value = t.rut || "";
         rut.className = "smallInput";
-
         const password = document.createElement("input");
         password.type = "password";
-        password.placeholder = "Nueva clave";
+        password.placeholder = "Nueva clave (opcional, mín. 6 caracteres)";
         password.className = "smallInput";
+        password.setAttribute("autocomplete", "new-password");
         const passNote = document.createElement("div");
         passNote.className = "note";
         passNote.textContent = t.passwordSet ? "Clave configurada." : "Clave pendiente.";
-
         const status = document.createElement("select");
         status.className = "smallInput";
         ["ACTIVE", "INACTIVE"].forEach((s) => {
@@ -1397,12 +1782,65 @@
           status.appendChild(opt);
         });
 
-        const btn = document.createElement("button");
-        btn.className = "btn outline";
-        btn.type = "button";
-        btn.textContent = "Guardar";
-        btn.addEventListener("click", async () => {
-          const res = await fetch(`/api/admin/tenants/${t.id}`, {
+        const card = document.createElement("div");
+        card.className = "tenantCard";
+        const statusLabel = String(t.status || "ACTIVE") === "ACTIVE" ? "Activa" : "Inactiva";
+        const metaParts = [t.email || "", t.rut || "", t.legalName || ""].filter(Boolean).join(" · ") || "—";
+        card.innerHTML = `
+          <div class="tenantCardHeader">
+            <span class="tenantCardTitle">${escapeHtml(t.name || "—")}</span>
+            <span class="badge" title="${escapeHtml(t.id)}">ID: ${escapeHtml(t.id.slice(0, 8))}…</span>
+            <span class="tenantCardMeta">Creada: ${formatDateShort(t.createdAt)}</span>
+            <span class="pill ${statusLabel === "Activa" ? "ok" : ""}">${statusLabel}</span>
+            <span class="tenantCardMeta" style="width:100%;">${escapeHtml(metaParts)}</span>
+          </div>
+          <div class="tenantCardActions">
+            <button type="button" class="btn outline" data-toggle="edit">Editar</button>
+            <button type="button" class="btn outline" data-toggle="users">Usuarios (<span data-user-count>0</span>)</button>
+          </div>
+          <div class="tenantCardBody" data-body="edit"></div>
+          <div class="tenantCardBody" data-body="users"></div>
+        `;
+        const editBody = card.querySelector('[data-body="edit"]');
+        const usersBody = card.querySelector('[data-body="users"]');
+        const userCountSpan = card.querySelector("[data-user-count]");
+
+        const editForm = document.createElement("div");
+        editForm.className = "grid";
+        const row = (labelText, inputEl) => {
+          const r = document.createElement("div");
+          r.className = "row";
+          const label = document.createElement("label");
+          label.textContent = labelText;
+          r.appendChild(label);
+          r.appendChild(inputEl);
+          return r;
+        };
+        editForm.appendChild(row("Nombre", name));
+        editForm.appendChild(row("Razón social", legalName));
+        editForm.appendChild(row("RUT", rut));
+        editForm.appendChild(row("Email", email));
+        editForm.appendChild(row("Teléfono", phone));
+        editForm.appendChild(row("Estado", status));
+        const passRow = document.createElement("div");
+        passRow.className = "row";
+        passRow.innerHTML = "<label>Nueva clave</label>";
+        const passWrap = document.createElement("div");
+        passWrap.style.display = "grid";
+        passWrap.style.gap = "6px";
+        passWrap.appendChild(password);
+        passWrap.appendChild(passNote);
+        passRow.appendChild(passWrap);
+        editForm.appendChild(passRow);
+        const actionsDiv = document.createElement("div");
+        actionsDiv.className = "actions";
+        actionsDiv.style.gridColumn = "1 / -1";
+        const saveBtn = document.createElement("button");
+        saveBtn.className = "btn";
+        saveBtn.type = "button";
+        saveBtn.textContent = "Guardar";
+        saveBtn.addEventListener("click", async () => {
+          const res = await adminFetch(`/api/admin/tenants/${t.id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -1417,48 +1855,45 @@
           });
           const note = document.getElementById("tenantNote");
           if (res.ok) {
-            note.textContent = password.value
-              ? "Corredora guardada y clave actualizada."
-              : "Corredora guardada.";
+            note.textContent = password.value ? "Corredora guardada y clave actualizada." : "Corredora guardada.";
+            password.value = "";
+            loadTenants().catch(() => {});
           } else {
-            note.textContent = "No se pudo guardar la corredora.";
+            const errData = await res.json().catch(() => ({}));
+            note.textContent =
+              errData.message ||
+              (errData.error === "PASSWORD_TOO_SHORT"
+                ? "Clave demasiado corta: usa al menos 6 caracteres, o en el servidor define ADMIN_TENANT_PASSWORD_MIN_LEN=2 para pruebas (ej. clave «12»)."
+                : null) ||
+              errData.error ||
+              "No se pudo guardar la corredora.";
           }
-          password.value = "";
-          loadTenants().catch(() => {});
         });
-
-        const nameWrap = document.createElement("div");
-        nameWrap.style.display = "grid";
-        nameWrap.style.gap = "6px";
-        nameWrap.appendChild(name);
-        const idBadge = document.createElement("div");
-        idBadge.className = "badge";
-        idBadge.textContent = `ID: ${t.id.slice(0, 8)}...`;
-        idBadge.title = t.id;
-        nameWrap.appendChild(idBadge);
-        const date = document.createElement("div");
-        date.className = "note";
-        date.textContent = `Creada: ${formatDateShort(t.createdAt)}`;
-        nameWrap.appendChild(date);
-
-        container.appendChild(nameWrap);
-        container.appendChild(legalName);
-        container.appendChild(rut);
-        const passWrap = document.createElement("div");
-        passWrap.style.display = "grid";
-        passWrap.style.gap = "6px";
-        passWrap.appendChild(password);
-        passWrap.appendChild(passNote);
-        container.appendChild(passWrap);
-        container.appendChild(email);
-        container.appendChild(phone);
-        container.appendChild(status);
-        container.appendChild(btn);
+        actionsDiv.appendChild(saveBtn);
+        const trialBtn = document.createElement("button");
+        trialBtn.className = "btn outline";
+        trialBtn.type = "button";
+        trialBtn.textContent = "Marcar trial activo (pruebas)";
+        trialBtn.title = "Deja la corredora con trial activo para pruebas sin validar tarjeta";
+        trialBtn.addEventListener("click", async () => {
+          if (!confirm("¿Marcar esta corredora con trial activo para pruebas? Tendrá créditos de trial sin pasar por MercadoPago.")) return;
+          const res = await adminFetch(`/api/admin/tenants/${t.id}/set-trial-active`, { method: "POST" });
+          const note = document.getElementById("tenantNote");
+          if (res.ok) {
+            note.textContent = "Trial marcado como activo. La corredora puede usar el panel con créditos de prueba.";
+            loadTenants().catch(() => {});
+          } else {
+            note.textContent = "No se pudo activar el trial.";
+          }
+        });
+        actionsDiv.appendChild(trialBtn);
+        editForm.appendChild(actionsDiv);
+        editBody.appendChild(editForm);
 
         const userCard = document.createElement("div");
         userCard.className = "userCard";
         userCard.innerHTML = `
-          <div class="kpiSubtle">Usuarios (${t.name})</div>
+          <div class="kpiSubtle">Usuarios (${escapeHtml(t.name || "")})</div>
           <div class="userGrid" data-users-header>
             <div class="kpiHeader">Nombre</div>
             <div class="kpiHeader">Email</div>
@@ -1469,10 +1904,7 @@
             <div class="kpiHeader">Acción</div>
           </div>
           <div class="userGrid" data-users-body></div>
-          <div class="row" style="margin-top: 10px;">
-            <label>Nuevo usuario</label>
-            <div></div>
-          </div>
+          <div class="row" style="margin-top: 10px;"><label>Nuevo usuario</label><div></div></div>
           <div class="userGrid" data-users-create>
             <input type="text" class="smallInput" placeholder="Nombre completo" />
             <input type="email" class="smallInput" placeholder="correo@empresa.com" />
@@ -1483,14 +1915,23 @@
             </select>
             <div class="badge">—</div>
             <div class="badge">PENDIENTE</div>
-            <div style="display:flex; gap:8px;">
-              <button class="btn outline" data-action="save">Guardar</button>
-              <button class="btn" data-action="invite">Invitar</button>
+            <div class="btnGroup">
+              <button class="btn outline" data-action="save" type="button">Guardar</button>
+              <button class="btn" data-action="invite" type="button">Invitar</button>
             </div>
           </div>
           <div class="note" data-users-note></div>
         `;
-        usersWrap.appendChild(userCard);
+        usersBody.appendChild(userCard);
+
+        card.querySelector('[data-toggle="edit"]').addEventListener("click", () => {
+          editBody.classList.toggle("open");
+          if (usersBody.classList.contains("open")) usersBody.classList.remove("open");
+        });
+        card.querySelector('[data-toggle="users"]').addEventListener("click", () => {
+          usersBody.classList.toggle("open");
+          if (editBody.classList.contains("open")) editBody.classList.remove("open");
+        });
 
         const body = userCard.querySelector("[data-users-body]");
         const note = userCard.querySelector("[data-users-note]");
@@ -1500,9 +1941,10 @@
         const emailInput = createInputs[1];
         const phoneInput = createInputs[2];
         const roleSelect = createInputs[3];
-
-        actionButtons.forEach((btn) => btn.addEventListener("click", async () => {
-          const action = btn.getAttribute("data-action") || "invite";
+        actionButtons.forEach((btn) => btn.addEventListener("click", async (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          const action = btn.getAttribute("data-action") || "save";
           const fullName = nameInput.value.trim();
           const emailVal = emailInput.value.trim();
           const phone = phoneInput.value.trim();
@@ -1511,7 +1953,7 @@
             note.textContent = "Nombre y email son obligatorios.";
             return;
           }
-          const res = await fetch(`/api/admin/tenants/${t.id}/users`, {
+          const res = await adminFetch(`/api/admin/tenants/${t.id}/users`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ fullName, email: emailVal, phone, role, action })
@@ -1521,13 +1963,12 @@
             if (action === "invite") {
               const phoneSafe = phone.replace(/\D/g, "");
               const activationLink = buildActivationLink(data.activationUrl);
-              const text = `Hola ${fullName}, activa tu cuenta aquí: ${activationLink}. Luego ingresa desde tu celular en ${window.location.origin}/executive`;
-              const waUrl = phoneSafe
-                ? `https://wa.me/${phoneSafe}?text=${encodeURIComponent(text)}`
-                : null;
+              const text = `Hola ${fullName}, activa tu cuenta aqui:\n${activationLink}\nLuego ingresa desde tu celular en ${getApiBase()}/executive`;
+              const waUrl = phoneSafe ? `https://wa.me/${phoneSafe}?text=${encodeURIComponent(text)}` : null;
+              const mailHint = executiveInviteEmailSuffix(data);
               note.innerHTML = waUrl
-                ? `Invitación creada. <a href="${waUrl}" target="_blank">Enviar por WhatsApp</a>`
-                : `Invitación creada. Link: ${activationLink}`;
+                ? `Invitación creada.${mailHint} <a href="${waUrl}" target="_blank">Enviar por WhatsApp</a>`
+                : `Invitación creada.${mailHint} Link: ${activationLink}`;
             } else {
               note.textContent = "Usuario guardado sin invitación.";
             }
@@ -1539,65 +1980,94 @@
           } else if (res.status === 409) {
             note.textContent = "El email ya está en uso en otra corredora.";
           } else {
-            note.textContent = "No se pudo crear el usuario.";
+            note.textContent =
+              data?.message ||
+              data?.error ||
+              "No se pudo crear el usuario. Revisa nombre, email válido y vuelve a intentar.";
           }
         }));
 
         fetchTenantUsers(t.id).then((users) => {
+          userCountSpan.textContent = users.length;
           body.innerHTML = "";
           if (!users.length) {
-            body.appendChild(Object.assign(document.createElement("div"), { className: "note", textContent: "Sin usuarios aún." }));
+            body.appendChild(Object.assign(document.createElement("div"), { className: "note", textContent: "Sin usuarios aún.", style: "grid-column:1/-1;" }));
             return;
           }
           users.forEach((u) => {
             const fullName = document.createElement("div");
             fullName.textContent = u.fullName || "—";
-            const email = document.createElement("div");
-            email.textContent = u.email || "—";
-            const phone = document.createElement("div");
-            phone.textContent = u.phone || "—";
+            const emailEl = document.createElement("div");
+            emailEl.textContent = u.email || "—";
+            const phoneEl = document.createElement("div");
+            phoneEl.textContent = u.phone || "—";
             const role = document.createElement("div");
             role.textContent = u.role === "TENANT_ADMIN" ? "Admin" : "Ejecutivo";
             const invited = document.createElement("div");
             invited.textContent = formatDateShort(u.invitedAt);
-            const status = document.createElement("div");
-            status.textContent = u.status || "PENDING";
+            const statusEl = document.createElement("div");
+            statusEl.textContent = u.status || "PENDING";
             const action = document.createElement("div");
+            action.className = "btnGroup";
             if (String(u.status || "").toUpperCase() === "PENDING" && !u.invitedAt) {
               const inviteBtn = document.createElement("button");
               inviteBtn.className = "btn outline";
+              inviteBtn.type = "button";
               inviteBtn.textContent = "Invitar";
-              inviteBtn.addEventListener("click", async () => {
-                const res = await fetch(`/api/admin/users/${u.id}/invite`, { method: "POST" });
+              inviteBtn.addEventListener("click", async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const res = await adminFetch(`/api/admin/users/${u.id}/invite`, { method: "POST" });
                 const data = await res.json();
-              if (res.ok) {
-                const phoneSafe = String(u.phone || "").replace(/\D/g, "");
-                const activationLink = buildActivationLink(data.activationUrl);
-                const text = `Hola ${u.fullName || ""}, activa tu cuenta aquí: ${activationLink}. Luego ingresa desde tu celular en ${window.location.origin}/executive`;
-                const waUrl = phoneSafe
-                  ? `https://wa.me/${phoneSafe}?text=${encodeURIComponent(text)}`
-                  : null;
-                note.innerHTML = waUrl
-                  ? `Invitación creada. <a href="${waUrl}" target="_blank">Enviar por WhatsApp</a>`
-                  : `Invitación creada. Link: ${activationLink}`;
-                loadTenants().catch(() => {});
-              } else {
-                note.textContent = "No se pudo invitar.";
-              }
+                if (res.ok) {
+                  const phoneSafe = String(u.phone || "").replace(/\D/g, "");
+                  const activationLink = buildActivationLink(data.activationUrl);
+                  const text = `Hola ${u.fullName || ""}, activa tu cuenta aqui:\n${activationLink}\nLuego ingresa desde tu celular en ${getApiBase()}/executive`;
+                  const waUrl = phoneSafe ? `https://wa.me/${phoneSafe}?text=${encodeURIComponent(text)}` : null;
+                  const mailHint = executiveInviteEmailSuffix(data);
+                  note.innerHTML = waUrl
+                    ? `Invitación creada.${mailHint} <a href="${waUrl}" target="_blank">Enviar por WhatsApp</a>`
+                    : `Invitación creada.${mailHint} Link: ${activationLink}`;
+                  loadTenants().catch(() => {});
+                } else {
+                  note.textContent = "No se pudo invitar.";
+                }
               });
               action.appendChild(inviteBtn);
-            } else {
-              action.textContent = "—";
             }
+            const delBtn = document.createElement("button");
+            delBtn.className = "btn outline";
+            delBtn.type = "button";
+            delBtn.textContent = "Eliminar";
+            delBtn.title = u.id;
+            delBtn.style.borderColor = "#7f1d1d";
+            delBtn.style.color = "#fca5a5";
+            delBtn.addEventListener("click", async (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              const label = (u.fullName || u.email || "").trim() || u.id.slice(0, 8);
+              if (!confirm(`¿Eliminar al usuario «${label}» (${u.email})? Las inspecciones asignadas quedarán sin ejecutivo.`)) return;
+              const res = await adminFetch(`/api/admin/tenants/${t.id}/users/${u.id}`, { method: "DELETE" });
+              if (res.ok) {
+                note.textContent = "Usuario eliminado.";
+                loadTenants().catch(() => {});
+              } else {
+                const errData = await res.json().catch(() => ({}));
+                note.textContent = errData.message || errData.error || "No se pudo eliminar.";
+              }
+            });
+            action.appendChild(delBtn);
             body.appendChild(fullName);
-            body.appendChild(email);
-            body.appendChild(phone);
+            body.appendChild(emailEl);
+            body.appendChild(phoneEl);
             body.appendChild(role);
             body.appendChild(invited);
-            body.appendChild(status);
+            body.appendChild(statusEl);
             body.appendChild(action);
           });
         }).catch(() => {});
+
+        container.appendChild(card);
       });
     }
 
@@ -1605,7 +2075,14 @@
       try {
         const list = await fetchTenants();
         renderTenants(list);
-      } catch {}
+      } catch (err) {
+        const empty = document.getElementById("tenantsEmpty");
+        if (empty) {
+          empty.style.display = "block";
+          empty.textContent = "Error al cargar: " + (err?.message || "Revisa la consola (F12)");
+          empty.style.color = "#f87171";
+        }
+      }
     }
 
     document.getElementById("createTenantBtn").addEventListener("click", async () => {
@@ -1616,7 +2093,7 @@
       const email = document.getElementById("tenantEmail").value.trim();
       const phone = document.getElementById("tenantPhone").value.trim();
       if (!name) return alert("Nombre requerido.");
-      const res = await fetch("/api/admin/tenants", {
+      const res = await adminFetch("/api/admin/tenants", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1645,9 +2122,135 @@
 
     loadTenants().catch(() => {});
 
+    function escapeHtml(str) {
+      return String(str ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;');
+    }
+    function statusPill(progress) {
+      if (progress.total === 0) return { cls: 'warn', text: 'SIN SLOTS' };
+      if (progress.uploaded === 0) return { cls: 'warn', text: 'PENDIENTE' };
+      if ((progress.analyzed + (progress.omitted || 0)) === progress.total) return { cls: 'ok', text: 'COMPLETO' };
+      if (progress.rejected > 0) return { cls: 'bad', text: 'CON RECHAZOS' };
+      return { cls: 'warn', text: 'EN PROGRESO' };
+    }
+    async function loadFilterTenants() {
+      const res = await fetch('/api/tenants');
+      const json = await res.json().catch(() => ({}));
+      const select = document.getElementById('filterTenant');
+      if (!json.ok || !select) return;
+      const tenants = json.tenants || [];
+      tenants.forEach((t) => {
+        const opt = document.createElement('option');
+        opt.value = t.id;
+        opt.textContent = `${t.name} (${t.planType})`;
+        select.appendChild(opt);
+      });
+    }
+    async function loadInspections() {
+      const summary = document.getElementById('inspectionsSummary');
+      const table = document.getElementById('casesTable');
+      const body = document.getElementById('casesBody');
+      const empty = document.getElementById('casesEmpty');
+      const filterTenant = document.getElementById('filterTenant')?.value || '';
+      const filterStatus = document.getElementById('filterStatus')?.value || '';
+      const params = new URLSearchParams();
+      if (filterTenant) params.set('tenantId', filterTenant);
+      if (filterStatus) params.set('status', filterStatus);
+      const url = '/api/cases' + (params.toString() ? '?' + params.toString() : '');
+      const res = await fetch(url);
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || !json.ok) {
+        summary.textContent = `Error: ${json.message || json.error || 'No se pudo cargar'}`;
+        table.style.display = 'none'; empty.style.display = 'block'; return;
+      }
+      const cases = json.cases || [];
+      summary.textContent = `Casos encontrados: ${cases.length}`;
+      if (cases.length === 0) {
+        table.style.display = 'none'; empty.style.display = 'block'; return;
+      }
+      table.style.display = 'table'; empty.style.display = 'none'; body.innerHTML = '';
+      cases.forEach((c) => {
+        const createdAt = c.createdAt ? new Date(c.createdAt).toLocaleString() : '—';
+        const prop = `${c.propertyType || ''} · ${c.bedrooms ?? ''} dorm · ${c.bathrooms ?? ''} baños`;
+        const progress = c.progress || { uploaded: 0, analyzed: 0, omitted: 0, rejected: 0, total: 0, pct: 0, openaiAnalyzed: 0 };
+        const pill = statusPill(progress);
+        const reportUrl = `/cases/${encodeURIComponent(c.id)}/report?reviewer=1`;
+        const captureUrl = c.captureUrl || '';
+        const openaiCount = progress.openaiAnalyzed ?? 0;
+        const openaiText = openaiCount ? ` · IA: ${openaiCount}` : '';
+        const firstPhotoUrl = c.firstPhotoUrl || '';
+        const planType = c.planType || '—';
+        const planCls = planType === 'Starter' ? 'plan starter' : 'plan';
+
+        let reviewCell = '<span class="muted">—</span>';
+        const hasAnalyzedSlots = progress.analyzed > 0;
+        if (c.reviewStatus === 'approved') {
+          reviewCell = '<span class="pill" style="background:#059669;color:#fff;">Aprobado</span>';
+        } else if (planType === 'Starter' && hasAnalyzedSlots) {
+          const statusLabel = c.reviewStatus === 'pending_review' ? 'Pendiente' : 'Sin revisar';
+          const statusColor = c.reviewStatus === 'pending_review' ? '#d97706' : '#64748b';
+          reviewCell = `<span class="pill" style="background:${statusColor};color:#fff;font-size:11px;">${statusLabel}</span>
+            <button class="btn" style="margin-top:4px;font-size:11px;padding:4px 10px;background:#059669;border:none;color:#fff;border-radius:6px;cursor:pointer;" onclick="approveFromAdmin('${escapeHtml(c.id)}', this)">Aprobar</button>`;
+        }
+
+        const solicitante = c.contactName || c.tenantName || '—';
+        const contactInfo = c.contactEmail ? `<div class="muted" style="font-size:11px;">${escapeHtml(c.contactEmail)}</div>` : '';
+
+        body.insertAdjacentHTML('beforeend', `
+          <tr>
+            <td data-label="Solicitante">
+              <div><strong>${escapeHtml(solicitante)}</strong></div>
+              ${contactInfo}
+            </td>
+            <td data-label="Caso">
+              <div><strong>${escapeHtml(c.id || '')}</strong></div>
+              <div class="muted">${escapeHtml(createdAt)}</div>
+              ${firstPhotoUrl ? `<img class="thumbSmall" src="${escapeHtml(firstPhotoUrl)}" alt="Primera foto" />` : ''}
+            </td>
+            <td data-label="Plan"><span class="pill ${planCls}">${escapeHtml(planType)}</span></td>
+            <td data-label="Inmueble">${escapeHtml(prop)}</td>
+            <td data-label="Estado"><span class="pill ${pill.cls}">${pill.text}</span></td>
+            <td data-label="Revisión">${reviewCell}</td>
+            <td data-label="Progreso">${progress.uploaded}/${progress.total} · ${progress.pct}%${openaiText}</td>
+            <td data-label="Acciones">
+              <div class="actions">
+                <a class="btn" href="${escapeHtml(reportUrl)}" target="_blank" rel="noreferrer">Ver informe</a>
+                ${captureUrl ? `<a class="btn outline" style="margin-left:8px;" href="${escapeHtml(captureUrl)}" target="_blank" rel="noreferrer">Abrir captura</a>` : ''}
+              </div>
+            </td>
+          </tr>
+        `);
+      });
+    }
+    window.approveFromAdmin = async function(caseId, btnEl) {
+      if (!confirm('¿Aprobar este informe y enviarlo al cliente por email?')) return;
+      btnEl.disabled = true;
+      btnEl.textContent = 'Aprobando...';
+      try {
+        const res = await fetch(`/api/cases/${encodeURIComponent(caseId)}/approve`, { method: 'POST' });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data?.ok) {
+          const parent = btnEl.parentElement;
+          parent.innerHTML = '<span class="pill" style="background:#059669;color:#fff;">Aprobado</span>' +
+            (data.emailSent ? '<div class="muted" style="font-size:11px;margin-top:4px;">Email enviado</div>' : '');
+        } else {
+          btnEl.textContent = 'Error';
+          btnEl.disabled = false;
+        }
+      } catch (e) {
+        btnEl.textContent = 'Error';
+        btnEl.disabled = false;
+      }
+    };
+
+    document.getElementById('filterTenant')?.addEventListener('change', () => loadInspections());
+    document.getElementById('filterStatus')?.addEventListener('change', () => loadInspections());
+
+    loadFilterTenants().catch(() => {});
+    loadInspections().catch(() => {});
+
     function setActiveSection() {
       const hash = String(window.location.hash || "").replace("#", "");
-      const section = hash || "score";
+      const section = hash || "dashboard";
       document.querySelectorAll("[data-section]").forEach((el) => {
         const key = el.getAttribute("data-section");
         el.classList.toggle("hidden", key !== section);
@@ -1657,6 +2260,124 @@
         el.classList.toggle("active", key === section);
       });
     }
+
+    async function loadDashboardStats() {
+      try {
+        const res = await adminFetch("/api/admin/stats");
+        const d = await res.json();
+        if (!d.ok) return;
+        const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+        set("statTenants", d.tenantCount);
+        set("statTenantsToday", d.tenantCountToday > 0 ? "+" + d.tenantCountToday + " hoy" : "sin nuevos hoy");
+        set("statToday", d.tenantCountToday + d.caseCountToday);
+        set("statOnline", d.activeSessions);
+        set("statConversion", d.conversionRate + "%");
+        set("statPaid", d.casesPaid);
+        set("statDemo", d.casesDemo);
+        set("statCases", d.caseCount);
+        set("statCasesToday", d.caseCountToday > 0 ? "+" + d.caseCountToday + " hoy" : "sin nuevas hoy");
+        set("statDone", d.casesDone);
+        set("statInProgress", d.casesInProgress);
+        set("statCredits", d.creditsPurchased);
+        set("statCreditsUsed", d.creditsConsumed + " consumidos");
+      } catch (e) {}
+    }
+
+    loadDashboardStats();
+
+    // --- Visits chart ---
+    let visitsChart = null;
+    async function loadVisitsChart(days) {
+      try {
+        const res = await adminFetch("/api/admin/visits?days=" + days);
+        const d = await res.json();
+        if (!d.ok) return;
+        const visits = d.visits || [];
+
+        const allDays = [];
+        const now = new Date();
+        for (let i = days - 1; i >= 0; i--) {
+          const dt = new Date(now);
+          dt.setDate(dt.getDate() - i);
+          allDays.push(dt.toISOString().slice(0, 10));
+        }
+        const dataMap = {};
+        visits.forEach(v => { dataMap[v.day] = v; });
+        const labels = allDays.map(d => { const p = d.split("-"); return p[2] + "/" + p[1]; });
+        const viewsData = allDays.map(d => (dataMap[d]?.views || 0));
+        const visitorsData = allDays.map(d => (dataMap[d]?.visitors || 0));
+
+        const totalViews = viewsData.reduce((a, b) => a + b, 0);
+        const totalVisitors = visitorsData.reduce((a, b) => a + b, 0);
+        const el = document.getElementById("visitTotal");
+        if (el) el.textContent = totalViews + " visitas · " + totalVisitors + " visitantes unicos";
+
+        const ctx = document.getElementById("visitsChart");
+        if (!ctx) return;
+        if (visitsChart) visitsChart.destroy();
+        visitsChart = new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels,
+            datasets: [
+              {
+                label: "Visitas",
+                data: viewsData,
+                backgroundColor: "rgba(53, 208, 127, 0.35)",
+                borderColor: "#35D07F",
+                borderWidth: 1.5,
+                borderRadius: 4,
+                order: 2
+              },
+              {
+                label: "Visitantes unicos",
+                data: visitorsData,
+                type: "line",
+                borderColor: "#3B82F6",
+                backgroundColor: "rgba(59, 130, 246, 0.1)",
+                borderWidth: 2,
+                pointRadius: 3,
+                pointBackgroundColor: "#3B82F6",
+                fill: true,
+                tension: 0.3,
+                order: 1
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: "index", intersect: false },
+            plugins: {
+              legend: { labels: { color: "#94a3b8", font: { size: 11 } } },
+              tooltip: {
+                backgroundColor: "#0F1A2E",
+                borderColor: "#1E2B45",
+                borderWidth: 1,
+                titleColor: "#EAF0FF",
+                bodyColor: "#B9C7E2"
+              }
+            },
+            scales: {
+              x: {
+                ticks: { color: "#64748b", font: { size: 10 }, maxRotation: 45 },
+                grid: { color: "rgba(30,43,69,0.5)" }
+              },
+              y: {
+                beginAtZero: true,
+                ticks: { color: "#64748b", font: { size: 11 }, stepSize: 1 },
+                grid: { color: "rgba(30,43,69,0.5)" }
+              }
+            }
+          }
+        });
+      } catch (e) {}
+    }
+    const daysSelect = document.getElementById("visitDaysSelect");
+    if (daysSelect) {
+      daysSelect.addEventListener("change", () => loadVisitsChart(parseInt(daysSelect.value) || 30));
+    }
+    loadVisitsChart(30);
 
     window.addEventListener("hashchange", setActiveSection);
     setActiveSection();

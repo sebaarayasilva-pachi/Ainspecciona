@@ -2,8 +2,12 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0B1220" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Captura · Ainspecciona</title>
+  <link rel="stylesheet" href="/assets/header.css" />
   <style>
     * { box-sizing: border-box; }
     body {
@@ -12,34 +16,31 @@
       background: #F6F7F9;
       color: #0f172a;
     }
-    header {
-      position: sticky;
-      top: 0;
-      background: #ffffff;
-      border-bottom: 1px solid #e5e7eb;
-      z-index: 10;
-    }
-    .nav {
-      padding: 14px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-    .brand {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      text-decoration: none;
-      color: inherit;
-      font-weight: 800;
-    }
-    .brand img { height: 32px; }
     main {
       max-width: 720px;
       margin: 0 auto;
       padding: 16px;
+      padding-bottom: 100px;
     }
+    .stickyActions {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      max-width: 720px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 12px 16px;
+      padding-bottom: max(12px, env(safe-area-inset-bottom));
+      box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.08);
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+    }
+    .stickyActions .btn { width: 100%; }
+    .stickyActions.hidden { display: none; }
     .card {
       background: #fff;
       border: 1px solid #e5e7eb;
@@ -78,23 +79,141 @@
       width: 100%;
     }
     .btn.outline {
-      background: #fff;
-      color: #1f2937;
-      border-color: #e5e7eb;
+      background: transparent;
+      color: #B9C7E2;
+      border-color: #1E2B45;
+    }
+    .btn.torch.on {
+      background: #f59e0b;
+      border-color: #f59e0b;
+      color: #0b1220;
+    }
+    .onboardingCard .btn.outline {
+      background: #0B1220;
+      color: #B9C7E2;
+      border-color: #1E2B45;
     }
     .row { display: grid; gap: 10px; margin-top: 12px; }
     input[type="file"] { display: none; }
     .note { font-size: 13px; color: #475569; margin-top: 10px; }
     .hidden { display: none; }
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: #0B1220;
+      display: none;
+      flex-direction: column;
+      padding: 0;
+      z-index: 40;
+      overflow-y: auto;
+    }
+    .overlay.show { display: flex; }
+    .onboardingCard {
+      background: #0B1220;
+      min-height: 100vh;
+      min-height: 100dvh;
+      width: 100%;
+      padding: 24px 20px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      flex: 1;
+    }
+    .onboardingTitle {
+      font-size: 26px;
+      font-weight: 800;
+      color: #EAF0FF;
+      margin: 0;
+      line-height: 1.25;
+    }
+    .onboardingList {
+      margin: 0;
+      padding-left: 20px;
+      color: #B9C7E2;
+      font-size: 18px;
+      line-height: 1.65;
+      flex: 1;
+    }
+    .onboardingList li { color: #B9C7E2; margin-bottom: 10px; }
+    .onboardingCard .muted { color: #94a3b8; font-size: 18px; line-height: 1.45; margin: 0; }
+    .onboardingActions {
+      display: grid;
+      gap: 12px;
+      margin-top: auto;
+      padding-top: 16px;
+    }
+    .reviewList {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+      max-height: 45vh;
+      overflow: auto;
+      padding-right: 2px;
+    }
+    .reviewItem {
+      width: 100%;
+      text-align: left;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      color: #EAF0FF;
+      padding: 10px 12px 12px;
+      display: grid;
+      gap: 8px;
+      cursor: pointer;
+    }
+    .reviewItem .meta { color: #94a3b8; font-size: 12px; }
+    .reviewItem.done { border-color: #22C55E; }
+    .reviewItem.pending { border-color: #f59e0b; }
+    .reviewItem.rejected { border-color: #ef4444; }
+    .reviewThumb {
+      width: 100%;
+      height: 190px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 1px solid #334155;
+      background: #020617;
+      display: block;
+    }
+    .reviewThumbFallback {
+      width: 100%;
+      height: 190px;
+      border-radius: 10px;
+      border: 1px dashed #334155;
+      background: #0b1220;
+      color: #94a3b8;
+      display: grid;
+      place-items: center;
+      font-size: 13px;
+      font-weight: 600;
+      text-align: center;
+      padding: 0 12px;
+    }
     ul { margin: 8px 0 0 18px; padding: 0; }
     .cameraFrame {
       width: 100%;
       border-radius: 14px;
       overflow: hidden;
       background: #0f172a;
-      height: min(62vh, 520px);
-      min-height: 360px;
+      height: min(58vh, 560px);
+      min-height: 320px;
       position: relative;
+    }
+    @media (max-width: 720px) {
+      main { padding: 10px; padding-bottom: 110px; }
+      .card { padding: 12px; border-radius: 14px; }
+      .onboardingCard { padding: 18px 16px 22px; gap: 14px; }
+      .onboardingTitle { font-size: 28px; line-height: 1.2; }
+      .onboardingCard .muted { font-size: 18px; line-height: 1.35; }
+      .onboardingList { font-size: 18px; line-height: 1.45; }
+      .onboardingList li { margin-bottom: 8px; }
+      #onboardingPhotoCounter { font-size: 16px !important; }
+      .onboardingActions .btn { font-size: 17px; min-height: 48px; }
+      .cameraFrame {
+        height: 62dvh;
+        min-height: 360px;
+        max-height: 72dvh;
+      }
     }
     .actions {
       display: grid;
@@ -104,6 +223,59 @@
     .btn.secondary {
       background: #0f172a;
     }
+    .capturedState {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 0;
+    }
+    .capturedState.hidden { display: none; }
+    .capturedCheck {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: #22C55E;
+      color: #fff;
+      font-size: 28px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+    .capturedLabel {
+      font-size: 16px;
+      font-weight: 700;
+      color: #22C55E;
+    }
+    .btnEnviar {
+      background: #22C55E;
+      min-width: 200px;
+      border: 2px solid #16a34a;
+      box-shadow: 0 0 0 rgba(34, 197, 94, 0.45);
+      transition: transform .12s ease, box-shadow .18s ease, filter .18s ease;
+    }
+    .btnEnviar.ready {
+      animation: enviarPulse 1.2s ease-in-out infinite;
+    }
+    .btnEnviar:active {
+      transform: scale(0.98);
+    }
+    .btnEnviar.sending,
+    .btnEnviar:disabled {
+      background: #16a34a;
+      border-color: #15803d;
+      filter: saturate(0.9);
+      opacity: 0.95;
+      cursor: wait;
+      animation: none;
+    }
+    #pendingBanner {
+      border-color: #f59e0b;
+      background: #fffbeb;
+    }
+    #pendingBanner .title { color: #b45309; }
     video, img.preview {
       width: 100%;
       height: 100%;
@@ -154,6 +326,10 @@
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
+    @keyframes enviarPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.10); }
+      50% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0.28); }
+    }
     @keyframes splashFade {
       0% { opacity: 1; visibility: visible; }
       85% { opacity: 1; visibility: visible; }
@@ -170,89 +346,308 @@
     </div>
   </div>
 
-  <header>
+  <header class="site-header">
     <div class="nav">
       <a class="brand" href="/">
         <img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" />
       </a>
-      <div class="muted" id="progressText"></div>
+      <div class="topActions">
+        <div class="muted" id="progressText"></div>
+      </div>
     </div>
   </header>
 
   <main>
-    <div class="card" id="slotCard">
-      <div class="title" id="slotTitle">Cargando...</div>
-      <div class="muted" id="slotCode"></div>
-      <div class="progress"><div id="progressBar"></div></div>
-      <div class="note" id="slotInstructions"></div>
-
-      <div class="actions">
-        <button class="btn" id="startCameraBtn" type="button">Iniciar cámara</button>
+    <div class="card hidden" id="pendingBanner">
+      <div class="title">Fotos sin subir</div>
+      <div class="muted" id="pendingCountText">Tienes fotos guardadas localmente que no se subieron.</div>
+      <div class="row">
+        <button class="btn" id="continueUploadBtn" type="button">Continuar subiendo</button>
       </div>
+    </div>
 
+    <div class="card" id="slotCard">
+      <div class="muted" id="photoCounter" style="font-size:13px; font-weight:600; margin-bottom:4px;"></div>
+      <div class="title" id="slotTitle">Cargando...</div>
+      <div class="progress"><div id="progressBar"></div></div>
       <div class="row">
         <div class="cameraFrame">
           <video id="camera" autoplay playsinline muted></video>
           <img id="preview" class="preview hidden" alt="" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" />
         </div>
-        <button class="btn" id="captureBtn" type="button">Tomar foto</button>
-        <button class="btn hidden" id="uploadBtn" type="button">Subir foto</button>
-        <button class="btn outline hidden" id="retryBtn" type="button">Reintentar cámara</button>
         <input id="photoInput" type="file" accept="image/*" capture="environment" />
       </div>
       <div class="note" id="statusMsg"></div>
     </div>
 
     <div class="card hidden" id="doneCard">
-      <div class="title">Captura finalizada</div>
-      <div class="muted">Gracias, ya no quedan fotos pendientes.</div>
+      <div class="title" id="doneTitle">Ciclo de captura completo</div>
+      <div class="muted" id="doneText">No quedan fotos pendientes. Presiona Terminar para enviar a aprobación.</div>
       <div class="row">
-        <a class="btn outline" href="/executive">Volver al panel</a>
+        <button class="btn outline" id="reviewSlotsBtn" type="button">Revisar fotos y retomar una</button>
+        <button class="btn" id="finishBtn" type="button">Terminar inspección</button>
       </div>
+      <div class="reviewList hidden" id="reviewList"></div>
     </div>
   </main>
 
+  <div class="stickyActions hidden" id="stickyActions">
+    <button class="btn" id="startCameraBtn" type="button">Iniciar cámara</button>
+    <button class="btn outline hidden" id="torchBtn" type="button">Linterna: OFF</button>
+    <button class="btn hidden" id="captureBtn" type="button">Tomar foto</button>
+    <button class="btn outline hidden" id="omitBtn" type="button">Omitir foto</button>
+    <div class="capturedState hidden" id="capturedState">
+      <div class="capturedCheck" aria-hidden="true">✓</div>
+      <span class="capturedLabel">Foto capturada</span>
+      <button class="btn btnEnviar" id="uploadBtn" type="button">Enviar</button>
+    </div>
+    <button class="btn outline hidden" id="retryBtn" type="button">Reintentar cámara</button>
+  </div>
+
+  <!-- Onboarding inicial: primera vez, antes de cualquier foto -->
+  <div class="overlay" id="initialOnboardingOverlay" aria-hidden="true">
+    <div class="onboardingCard">
+      <div class="onboardingTitle">Proceso de captura de fotos</div>
+      <div class="muted" style="margin-bottom:16px;">Vas a iniciar una inspección técnica guiada. Sigue estas indicaciones para obtener mejores resultados.</div>
+      <ul class="onboardingList">
+        <li><strong>Captura los problemas:</strong> En cada foto que se solicite, enfócate en los defectos, daños o zonas a revisar. No fotografíes solo las partes en buen estado.</li>
+        <li><strong>Check y Enviar:</strong> Una vez tomada la foto verás un ✓ de confirmación y el botón <strong>Enviar</strong>. Presiona Enviar para continuar a la siguiente.</li>
+      </ul>
+      <div class="onboardingActions">
+        <button class="btn" id="initialOnboardingBtn" type="button">Entendido, empezar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Onboarding por slot: guía específica de cada foto -->
+  <div class="overlay" id="onboardingOverlay" aria-hidden="true">
+    <div class="onboardingCard">
+      <div class="muted" id="onboardingPhotoCounter" style="font-size:14px; font-weight:600; margin-bottom:8px;"></div>
+      <div class="onboardingTitle" id="onboardingTitle">Antes de capturar</div>
+      <div class="muted" id="onboardingSubtitle"></div>
+      <ul class="onboardingList" id="onboardingInstructions"></ul>
+      <div class="onboardingActions">
+        <button class="btn" id="onboardingStartBtn" type="button">Continuar</button>
+        <button class="btn outline" id="onboardingCloseBtn" type="button">Volver</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const token = (location.pathname.split("/capture/")[1] || "").trim();
+    const photoCounter = document.getElementById("photoCounter");
     const slotTitle = document.getElementById("slotTitle");
-    const slotCode = document.getElementById("slotCode");
-    const slotInstructions = document.getElementById("slotInstructions");
     const progressText = document.getElementById("progressText");
     const progressBar = document.getElementById("progressBar");
     const camera = document.getElementById("camera");
     const preview = document.getElementById("preview");
     const startCameraBtn = document.getElementById("startCameraBtn");
+    const torchBtn = document.getElementById("torchBtn");
     const captureBtn = document.getElementById("captureBtn");
+    const omitBtn = document.getElementById("omitBtn");
     const retryBtn = document.getElementById("retryBtn");
     const photoInput = document.getElementById("photoInput");
     const uploadBtn = document.getElementById("uploadBtn");
+    const capturedState = document.getElementById("capturedState");
     const statusMsg = document.getElementById("statusMsg");
     const slotCard = document.getElementById("slotCard");
     const doneCard = document.getElementById("doneCard");
+    const doneTitle = document.getElementById("doneTitle");
+    const doneText = document.getElementById("doneText");
+    const finishBtn = document.getElementById("finishBtn");
+    const reviewSlotsBtn = document.getElementById("reviewSlotsBtn");
+    const reviewList = document.getElementById("reviewList");
+    const stickyActions = document.getElementById("stickyActions");
     const splash = document.getElementById("splash");
+    const initialOnboardingOverlay = document.getElementById("initialOnboardingOverlay");
+    const initialOnboardingBtn = document.getElementById("initialOnboardingBtn");
+    const onboardingOverlay = document.getElementById("onboardingOverlay");
+    const onboardingPhotoCounter = document.getElementById("onboardingPhotoCounter");
+    const onboardingTitle = document.getElementById("onboardingTitle");
+    const onboardingSubtitle = document.getElementById("onboardingSubtitle");
+    const onboardingInstructions = document.getElementById("onboardingInstructions");
+    const onboardingStartBtn = document.getElementById("onboardingStartBtn");
+    const onboardingCloseBtn = document.getElementById("onboardingCloseBtn");
 
     const blankPreviewSrc = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
+    const IDB_NAME = "ainspecta_pending";
+    const IDB_STORE = "uploads";
     let currentSlotId = null;
     let capturedBlob = null;
     let cameraStream = null;
+    let pendingQueueCount = 0;
+    let torchSupported = false;
+    let torchEnabled = false;
+    let latestProgress = null;
+    const uploadBtnDefaultLabel = uploadBtn?.textContent || "Enviar";
 
-    function setProgress(progress) {
-      const pct = progress?.pct || 0;
-      progressBar.style.width = `${pct}%`;
-      progressText.textContent = `Avance ${pct}%`;
+    function setUploadButtonState(mode) {
+      if (!uploadBtn) return;
+      if (mode === "ready") {
+        uploadBtn.disabled = false;
+        uploadBtn.classList.remove("sending");
+        uploadBtn.classList.add("ready");
+        uploadBtn.textContent = uploadBtnDefaultLabel;
+        return;
+      }
+      if (mode === "sending") {
+        uploadBtn.disabled = true;
+        uploadBtn.classList.remove("ready");
+        uploadBtn.classList.add("sending");
+        uploadBtn.textContent = "Enviando...";
+        return;
+      }
+      uploadBtn.disabled = false;
+      uploadBtn.classList.remove("ready", "sending");
+      uploadBtn.textContent = uploadBtnDefaultLabel;
     }
 
-    function renderInstructions(text) {
-      if (!text) {
-        slotInstructions.textContent = "";
-        return;
-      }
+    function openIDB() {
+      return new Promise((resolve, reject) => {
+        const r = indexedDB.open(IDB_NAME, 1);
+        r.onerror = () => reject(r.error);
+        r.onsuccess = () => resolve(r.result);
+        r.onupgradeneeded = (e) => e.target.result.createObjectStore(IDB_STORE, { keyPath: "key" });
+      });
+    }
+
+    async function savePendingToIDB(slotId, blob) {
+      const db = await openIDB();
+      const buffer = await blob.arrayBuffer();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(IDB_STORE, "readwrite");
+        tx.oncomplete = () => { db.close(); pendingQueueCount++; resolve(); };
+        tx.onerror = () => { db.close(); reject(tx.error); };
+        tx.objectStore(IDB_STORE).put({ key: `${token}_${slotId}`, token, slotId, buffer });
+      });
+    }
+
+    async function removePendingFromIDB(slotId) {
+      const db = await openIDB();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(IDB_STORE, "readwrite");
+        tx.oncomplete = () => { db.close(); pendingQueueCount = Math.max(0, pendingQueueCount - 1); resolve(); };
+        tx.onerror = () => { db.close(); reject(tx.error); };
+        tx.objectStore(IDB_STORE).delete(`${token}_${slotId}`);
+      });
+    }
+
+    async function getPendingFromIDB() {
+      const db = await openIDB();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(IDB_STORE, "readonly");
+        const req = tx.objectStore(IDB_STORE).getAll();
+        tx.oncomplete = () => {
+          db.close();
+          const all = req.result || [];
+          const forToken = all.filter((r) => r.token === token);
+          resolve(forToken);
+        };
+        tx.onerror = () => { db.close(); reject(tx.error); };
+      });
+    }
+
+    async function clearPendingFromIDB(items) {
+      if (!items.length) return;
+      const db = await openIDB();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(IDB_STORE, "readwrite");
+        const store = tx.objectStore(IDB_STORE);
+        items.forEach((i) => store.delete(i.key));
+        tx.oncomplete = () => { db.close(); pendingQueueCount = Math.max(0, pendingQueueCount - items.length); resolve(); };
+        tx.onerror = () => { db.close(); reject(tx.error); };
+      });
+    }
+
+    function setProgress(progress) {
+      latestProgress = progress || latestProgress;
+      const pct = progress?.pct || 0;
+      progressBar.style.width = `${pct}%`;
+      const omitted = progress?.omitted || 0;
+      progressText.textContent = omitted > 0
+        ? `Avance ${pct}% · omitidas: ${omitted}`
+        : `Avance ${pct}%`;
+    }
+
+    function renderInstructionsTo(listEl, text) {
+      listEl.innerHTML = "";
+      if (!text) return;
       const lines = String(text).split("\n").map((l) => l.trim()).filter(Boolean);
-      if (lines.length <= 1) {
-        slotInstructions.textContent = text;
+      lines.forEach((line) => {
+        const li = document.createElement("li");
+        li.textContent = line;
+        listEl.appendChild(li);
+      });
+    }
+
+    function showInitialOnboarding() {
+      initialOnboardingOverlay.classList.add("show");
+      initialOnboardingOverlay.setAttribute("aria-hidden", "false");
+    }
+
+    function hideInitialOnboarding() {
+      initialOnboardingOverlay.classList.remove("show");
+      initialOnboardingOverlay.setAttribute("aria-hidden", "true");
+      try { sessionStorage.setItem("ainspecciona_capture_onboarding_seen", "1"); } catch (_) {}
+    }
+
+    function showOnboarding(slot, progress) {
+      const isFirstPhoto = (progress?.uploaded ?? 0) === 0;
+      const seenInitial = !!sessionStorage.getItem("ainspecciona_capture_onboarding_seen");
+      if (isFirstPhoto && !seenInitial) {
+        showInitialOnboarding();
         return;
       }
-      slotInstructions.innerHTML = `<ul>${lines.map((l) => `<li>${l}</li>`).join("")}</ul>`;
+      const currentNum = slot?.orderIndex ?? (progress?.uploaded ?? 0) + 1;
+      const total = progress?.total ?? 0;
+      onboardingPhotoCounter.textContent = total ? `Foto ${currentNum} de ${total}` : "";
+      onboardingTitle.textContent = slot?.title || "Antes de capturar";
+      onboardingSubtitle.textContent = "Revisa esta guía antes de tomar la foto.";
+      renderInstructionsTo(onboardingInstructions, slot?.instructions || "");
+      onboardingOverlay.classList.add("show");
+      onboardingOverlay.setAttribute("aria-hidden", "false");
+    }
+
+    function hideOnboarding() {
+      onboardingOverlay.classList.remove("show");
+      onboardingOverlay.setAttribute("aria-hidden", "true");
+    }
+
+    function getVideoTrack() {
+      return cameraStream?.getVideoTracks?.()[0] || null;
+    }
+
+    function updateTorchButton() {
+      if (!torchBtn) return;
+      if (!torchSupported) {
+        torchBtn.classList.add("hidden");
+        return;
+      }
+      torchBtn.classList.remove("hidden");
+      torchBtn.classList.toggle("torch", true);
+      torchBtn.classList.toggle("on", !!torchEnabled);
+      torchBtn.textContent = `Linterna: ${torchEnabled ? "ON" : "OFF"}`;
+    }
+
+    async function applyTorch(enabled) {
+      const track = getVideoTrack();
+      if (!track) return false;
+      const caps = track.getCapabilities ? track.getCapabilities() : {};
+      if (!caps || !("torch" in caps)) {
+        torchSupported = false;
+        torchEnabled = false;
+        updateTorchButton();
+        return false;
+      }
+      torchSupported = true;
+      try {
+        await track.applyConstraints({ advanced: [{ torch: !!enabled }] });
+        torchEnabled = !!enabled;
+      } catch (_) {
+        torchEnabled = false;
+      }
+      updateTorchButton();
+      return torchEnabled;
     }
 
     async function startCamera() {
@@ -271,19 +666,38 @@
         preview.classList.add("hidden");
         startCameraBtn.classList.add("hidden");
         captureBtn.classList.remove("hidden");
-        uploadBtn.classList.add("hidden");
+        omitBtn.classList.remove("hidden");
+        capturedState.classList.add("hidden");
+        setUploadButtonState("idle");
+        const track = getVideoTrack();
+        const caps = track?.getCapabilities ? track.getCapabilities() : {};
+        torchSupported = !!(caps && ("torch" in caps));
+        torchEnabled = false;
+        updateTorchButton();
+        if (torchSupported) await applyTorch(true);
       } catch {
         statusMsg.textContent = "No se pudo abrir la cámara. Usa el selector de archivo.";
+        captureBtn.classList.add("hidden");
         retryBtn.classList.remove("hidden");
         startCameraBtn.classList.remove("hidden");
+        omitBtn.classList.add("hidden");
+        torchSupported = false;
+        torchEnabled = false;
+        updateTorchButton();
+        capturedState.classList.add("hidden");
+        setUploadButtonState("idle");
       }
     }
 
     function stopCamera() {
+      if (torchSupported && torchEnabled) applyTorch(false).catch(() => {});
       if (cameraStream) {
         cameraStream.getTracks().forEach((t) => t.stop());
         cameraStream = null;
       }
+      torchSupported = false;
+      torchEnabled = false;
+      updateTorchButton();
     }
 
     async function loadNext() {
@@ -296,28 +710,131 @@
       const data = await res.json();
       setProgress(data.progress);
       if (!data.slot) {
+        currentSlotId = null;
         slotCard.classList.add("hidden");
         doneCard.classList.remove("hidden");
+        stickyActions.classList.add("hidden");
+        if (data.canFinish) {
+          doneTitle.textContent = "Ciclo de captura completo";
+          doneText.textContent = "No quedan fotos pendientes. Presiona Terminar para enviar la inspección a aprobación.";
+          finishBtn.classList.remove("hidden");
+        } else {
+          doneTitle.textContent = "Captura en proceso";
+          doneText.textContent = "Aún hay fotos pendientes o rechazadas. Vuelve a intentar desde esta misma pantalla.";
+          finishBtn.classList.add("hidden");
+        }
         return;
       }
+      doneCard.classList.add("hidden");
+      slotCard.classList.remove("hidden");
       currentSlotId = data.slot.id;
+      const currentNum = data.slot.orderIndex ?? (data.progress?.uploaded ?? 0) + 1;
+      const total = data.progress?.total ?? 0;
+      photoCounter.textContent = total ? `Foto ${currentNum} de ${total}` : "";
       slotTitle.textContent = data.slot.title || "Foto requerida";
-      slotCode.textContent = data.slot.slotCode || "";
-      renderInstructions(data.slot.instructions || "");
       statusMsg.textContent = "";
       capturedBlob = null;
       photoInput.value = "";
       preview.classList.add("hidden");
       preview.src = blankPreviewSrc;
       camera.classList.remove("hidden");
-      captureBtn.classList.remove("hidden");
-      uploadBtn.classList.add("hidden");
+      startCameraBtn.classList.remove("hidden");
+      captureBtn.classList.add("hidden");
+      omitBtn.classList.remove("hidden");
+      capturedState.classList.add("hidden");
+      setUploadButtonState("idle");
+      retryBtn.classList.add("hidden");
+      stickyActions.classList.remove("hidden");
       window.scrollTo({ top: 0, behavior: "smooth" });
+      window._pendingSlot = data.slot;
+      window._pendingProgress = data.progress;
+      showOnboarding(data.slot, data.progress);
+    }
+
+    function formatSlotStatus(status) {
+      const st = String(status || "").toUpperCase();
+      if (st === "ANALYZED") return { text: "Completada", cls: "done" };
+      if (st === "NOT_CAPTURABLE") return { text: "Omitida", cls: "done" };
+      if (st === "REJECTED") return { text: "Rechazada", cls: "rejected" };
+      return { text: "Pendiente", cls: "pending" };
+    }
+
+    async function loadSlotsForReview() {
+      const res = await fetch(`/api/capture/${token}/slots`);
+      if (!res.ok) throw new Error("No se pudo cargar listado de fotos.");
+      const data = await res.json().catch(() => ({}));
+      if (!data?.ok || !Array.isArray(data.slots)) throw new Error("Listado inválido.");
+      latestProgress = data.progress || latestProgress;
+      return data.slots;
+    }
+
+    function openSlotForRetake(slot) {
+      currentSlotId = slot.id;
+      const total = latestProgress?.total ?? 0;
+      const currentNum = slot.orderIndex ?? 0;
+      photoCounter.textContent = total ? `Foto ${currentNum} de ${total}` : "";
+      slotTitle.textContent = slot.title || "Foto requerida";
+      statusMsg.textContent = "Retoma esta foto y presiona Enviar para actualizarla.";
+      capturedBlob = null;
+      photoInput.value = "";
+      preview.classList.add("hidden");
+      preview.src = blankPreviewSrc;
+      camera.classList.remove("hidden");
+      startCameraBtn.classList.remove("hidden");
+      captureBtn.classList.add("hidden");
+      omitBtn.classList.remove("hidden");
+      capturedState.classList.add("hidden");
+      retryBtn.classList.add("hidden");
+      stickyActions.classList.remove("hidden");
+      doneCard.classList.add("hidden");
+      slotCard.classList.remove("hidden");
+      if (reviewList) reviewList.classList.add("hidden");
+      window._pendingSlot = slot;
+      window._pendingProgress = latestProgress || {};
+      showOnboarding(slot, latestProgress || {});
     }
 
     startCameraBtn.addEventListener("click", async () => {
-      statusMsg.textContent = "Abriendo cámara...";
+      enterFullscreen();
+      statusMsg.textContent = "";
       await startCamera();
+    });
+
+    function enterFullscreen() {
+      const el = document.documentElement;
+      if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
+      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen().catch(() => {});
+      else if (el.msRequestFullscreen) el.msRequestFullscreen().catch(() => {});
+    }
+
+    initialOnboardingBtn.addEventListener("click", () => {
+      hideInitialOnboarding();
+      const slot = window._pendingSlot;
+      const progress = window._pendingProgress || { uploaded: 0, total: 0 };
+      if (slot) {
+        const currentNum = slot.orderIndex ?? progress.uploaded + 1;
+        const total = progress.total ?? 0;
+        onboardingPhotoCounter.textContent = total ? `Foto ${currentNum} de ${total}` : "";
+        onboardingTitle.textContent = slot.title || "Antes de capturar";
+        onboardingSubtitle.textContent = "Revisa esta guía antes de tomar la foto.";
+        renderInstructionsTo(onboardingInstructions, slot.instructions || "");
+        onboardingOverlay.classList.add("show");
+        onboardingOverlay.setAttribute("aria-hidden", "false");
+      } else {
+        statusMsg.textContent = "";
+        startCamera();
+      }
+    });
+
+    onboardingStartBtn.addEventListener("click", async () => {
+      enterFullscreen();
+      hideOnboarding();
+      statusMsg.textContent = "";
+      await startCamera();
+    });
+
+    onboardingCloseBtn.addEventListener("click", () => {
+      hideOnboarding();
     });
 
 
@@ -343,13 +860,22 @@
       preview.classList.remove("hidden");
       camera.classList.add("hidden");
       captureBtn.classList.add("hidden");
-      uploadBtn.classList.remove("hidden");
-      statusMsg.textContent = "Foto capturada. Puedes subirla.";
+      omitBtn.classList.add("hidden");
+      capturedState.classList.remove("hidden");
+      setUploadButtonState("ready");
+      statusMsg.textContent = "";
     });
 
     retryBtn.addEventListener("click", async () => {
       await startCamera();
     });
+
+    if (torchBtn) {
+      torchBtn.addEventListener("click", async () => {
+        if (!torchSupported) return;
+        await applyTorch(!torchEnabled);
+      });
+    }
 
     photoInput.addEventListener("change", () => {
       const file = photoInput.files?.[0];
@@ -359,9 +885,179 @@
       preview.classList.remove("hidden");
       camera.classList.add("hidden");
       captureBtn.classList.add("hidden");
-      uploadBtn.classList.remove("hidden");
-      statusMsg.textContent = "Foto seleccionada. Puedes subirla.";
+      omitBtn.classList.add("hidden");
+      capturedState.classList.remove("hidden");
+      setUploadButtonState("ready");
+      statusMsg.textContent = "";
     });
+
+    async function compressForUpload(blob) {
+      const maxSize = 1280;
+      const quality = 0.85;
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          let w = img.width, h = img.height;
+          if (w > maxSize || h > maxSize) {
+            if (w > h) { h = Math.round(h * maxSize / w); w = maxSize; }
+            else { w = Math.round(w * maxSize / h); h = maxSize; }
+          }
+          const canvas = document.createElement("canvas");
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, w, h);
+          canvas.toBlob((b) => resolve(b || blob), "image/jpeg", quality);
+          URL.revokeObjectURL(img.src);
+        };
+        img.onerror = () => resolve(blob);
+        img.src = URL.createObjectURL(blob);
+      });
+    }
+
+    const CLIENT_QUALITY = {
+      blurMinVariance: 18,
+      blurMinVarianceSmoothSurface: 9,
+      minWidth: 640,
+      minHeight: 480,
+      brightnessMin: 18,
+      brightnessMax: 230,
+      minStdDev: 10
+    };
+
+    function isSmoothSlotContext() {
+      const slot = window._pendingSlot || {};
+      const code = String(slot.slotCode || "").toUpperCase();
+      const title = String(slot.title || "").toUpperCase();
+      return code.endsWith("_CEILING")
+        || title.includes(" CIELO")
+        || title.includes("TECHO")
+        || title.includes("CERAMIC");
+    }
+
+    async function checkPhotoQualityClient(blob) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          let w = img.width, h = img.height;
+          if (w < CLIENT_QUALITY.minWidth || h < CLIENT_QUALITY.minHeight) {
+            URL.revokeObjectURL(img.src);
+            resolve({ ok: false, message: "La imagen es demasiado pequeña. Haz una foto más cerca o en mayor resolución." });
+            return;
+          }
+          const max = 512;
+          if (w > max || h > max) {
+            if (w > h) { h = Math.round(h * max / w); w = max; }
+            else { w = Math.round(w * max / h); h = max; }
+          }
+          const canvas = document.createElement("canvas");
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, w, h);
+          URL.revokeObjectURL(img.src);
+          const id = ctx.getImageData(0, 0, w, h);
+          const d = id.data;
+          const gray = [];
+          for (let i = 0; i < d.length; i += 4) {
+            gray.push(0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2]);
+          }
+          let sum = 0, sumSq = 0;
+          const step = 2;
+          let lapMean = 0, lapM2 = 0, lapN = 0;
+          for (let y = 1; y < h - 1; y += step) {
+            for (let x = 1; x < w - 1; x += step) {
+              const idx = y * w + x;
+              const c = gray[idx];
+              const up = gray[idx - w];
+              const dn = gray[idx + w];
+              const lf = gray[idx - 1];
+              const rt = gray[idx + 1];
+              const lap = -4 * c + up + dn + lf + rt;
+              lapN++;
+              const d = lap - lapMean;
+              lapMean += d / lapN;
+              lapM2 += d * (lap - lapMean);
+              sum += c;
+              sumSq += c * c;
+            }
+          }
+          const n = gray.length;
+          const mean = sum / n;
+          const variance = n > 1 ? (sumSq / n) - (mean * mean) : 0;
+          const stdev = variance > 0 ? Math.sqrt(variance) : 0;
+          const lapVar = lapN > 1 ? lapM2 / (lapN - 1) : 0;
+          const smoothSlot = isSmoothSlotContext();
+          const blurThreshold = smoothSlot
+            ? CLIENT_QUALITY.blurMinVarianceSmoothSurface
+            : CLIENT_QUALITY.blurMinVariance;
+          // En superficies lisas (cielo/cerámicas) la varianza de bordes es naturalmente baja.
+          // Solo rechazamos borrosidad si también hay evidencia de imagen pobre en contraste.
+          const smoothLowTexture = stdev < CLIENT_QUALITY.minStdDev;
+          if (lapVar < blurThreshold && !smoothLowTexture) {
+            resolve({ ok: false, message: "La foto está borrosa. Acércate, enfoca bien y vuelve a capturar. Mantén el teléfono estable." });
+            return;
+          }
+          if (mean < CLIENT_QUALITY.brightnessMin) {
+            resolve({ ok: false, message: "La imagen está muy oscura. Enciende luces o usa flash. Asegura buena iluminación." });
+            return;
+          }
+          if (mean > CLIENT_QUALITY.brightnessMax) {
+            resolve({ ok: false, message: "La imagen está sobreexpuesta o muy clara. Evita luz directa fuerte y vuelve a capturar." });
+            return;
+          }
+          // Superficies lisas (tina, cerámicas, cielo) suelen tener bajo contraste real.
+          // No bloqueamos por "poco detalle" en cliente para evitar falsos rechazos.
+          resolve({ ok: true });
+        };
+        img.onerror = () => resolve({ ok: true });
+        img.src = URL.createObjectURL(blob);
+      });
+    }
+
+    function backToCameraForRecapture() {
+      capturedBlob = null;
+      photoInput.value = "";
+      preview.classList.add("hidden");
+      preview.src = blankPreviewSrc;
+      camera.classList.remove("hidden");
+      captureBtn.classList.remove("hidden");
+      omitBtn.classList.remove("hidden");
+      capturedState.classList.add("hidden");
+      setUploadButtonState("idle");
+    }
+
+    async function doUpload(slotId, compressed) {
+      const body = new FormData();
+      body.append("photo", compressed, "capture.jpg");
+      const res = await fetch(`/api/capture/${token}/slots/${slotId}/capture`, {
+        method: "POST",
+        body
+      });
+      const data = await res.json().catch(() => ({}));
+      return { ok: res.ok, data };
+    }
+
+    function captureProblemMessage(problem) {
+      const code = String(problem?.code || "").toUpperCase();
+      if (code === "SLOT_MISMATCH") {
+        const current = slotTitle?.textContent || "el área solicitada";
+        return `La foto no corresponde a "${current}". Toma nuevamente la evidencia enfocando solo ese componente.`;
+      }
+      return problem?.message || "La foto no cumple, intenta nuevamente.";
+    }
+
+    async function doOmit(slotId) {
+      const res = await fetch(`/api/capture/${token}/slots/${slotId}/omit`, { method: "POST" });
+      const data = await res.json().catch(() => ({}));
+      return { ok: res.ok, data };
+    }
+
+    async function doFinish() {
+      const res = await fetch(`/api/capture/${token}/finish`, { method: "POST" });
+      const data = await res.json().catch(() => ({}));
+      return { ok: res.ok, data };
+    }
 
     uploadBtn.addEventListener("click", async () => {
       if (!currentSlotId) return;
@@ -370,52 +1066,182 @@
         statusMsg.textContent = "Toma o selecciona una foto.";
         return;
       }
-      statusMsg.textContent = "Subiendo... avanzando al siguiente paso.";
-      const body = new FormData();
-      body.append("photo", file);
-      const res = await fetch(`/api/capture/${token}/slots/${currentSlotId}/capture`, {
-        method: "POST",
-        body
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        statusMsg.textContent = data?.error ? `Error: ${data.error}` : "No se pudo subir.";
+      statusMsg.textContent = "Comprimiendo...";
+      const compressed = await compressForUpload(file);
+      statusMsg.textContent = "Verificando calidad...";
+      const qualityCheck = await checkPhotoQualityClient(compressed);
+      if (!qualityCheck.ok) {
+        statusMsg.textContent = qualityCheck.message;
+        backToCameraForRecapture();
+        return;
+      }
+      try {
+        await savePendingToIDB(currentSlotId, compressed);
+      } catch (e) {
+        console.warn("No se pudo guardar en local:", e);
+      }
+      statusMsg.textContent = "Subiendo...";
+      setUploadButtonState("sending");
+      const { ok, data } = await doUpload(currentSlotId, compressed);
+      if (ok) {
+        try { await removePendingFromIDB(currentSlotId); } catch (_) {}
+      }
+      if (!ok) {
+        setUploadButtonState("ready");
+        statusMsg.textContent = data?.error ? `Error: ${data.error}` : "No se pudo subir. Reintenta.";
         return;
       }
       if (data.passed === false) {
-        statusMsg.textContent = data?.problem?.message || "La foto no cumple, intenta nuevamente.";
-        capturedBlob = null;
-        photoInput.value = "";
-        preview.classList.add("hidden");
-        preview.src = blankPreviewSrc;
-        camera.classList.remove("hidden");
-        captureBtn.classList.remove("hidden");
-        uploadBtn.classList.add("hidden");
+        setUploadButtonState("ready");
+        statusMsg.textContent = captureProblemMessage(data?.problem);
+        try { await removePendingFromIDB(currentSlotId); } catch (_) {}
+        backToCameraForRecapture();
         return;
       }
+      statusMsg.textContent = "Cargando siguiente instrucción...";
       capturedBlob = null;
       photoInput.value = "";
       preview.classList.add("hidden");
       preview.src = blankPreviewSrc;
-      camera.classList.remove("hidden");
-      captureBtn.classList.remove("hidden");
-      uploadBtn.classList.add("hidden");
+      camera.classList.add("hidden");
+      startCameraBtn.classList.add("hidden");
+      captureBtn.classList.add("hidden");
+      omitBtn.classList.add("hidden");
+      capturedState.classList.add("hidden");
+      setUploadButtonState("idle");
       await loadNext();
+    });
+
+    omitBtn.addEventListener("click", async () => {
+      if (!currentSlotId) return;
+      if (!confirm("¿Omitir esta foto? Podrás terminar la inspección con fotos omitidas.")) return;
+      statusMsg.textContent = "Omitiendo...";
+      const { ok, data } = await doOmit(currentSlotId);
+      if (!ok) {
+        statusMsg.textContent = data?.error ? `Error: ${data.error}` : "No se pudo omitir. Intenta de nuevo.";
+        return;
+      }
+      statusMsg.textContent = "Foto omitida.";
+      await loadNext();
+    });
+
+    finishBtn.addEventListener("click", async () => {
+      finishBtn.disabled = true;
+      finishBtn.textContent = "Enviando...";
+      const { ok, data } = await doFinish();
+      if (!ok) {
+        finishBtn.disabled = false;
+        finishBtn.textContent = "Terminar inspección";
+        statusMsg.textContent = data?.error === "CYCLE_NOT_COMPLETED"
+          ? "Aún hay fotos pendientes o rechazadas. Completa el ciclo antes de terminar."
+          : "No se pudo finalizar. Intenta nuevamente.";
+        await loadNext();
+        return;
+      }
+      doneTitle.textContent = "Inspección enviada a aprobación";
+      doneText.textContent = "Tu inspección quedó pendiente de revisión. Te avisaremos cuando esté aprobada.";
+      finishBtn.classList.add("hidden");
+      stickyActions.classList.add("hidden");
+      statusMsg.textContent = "";
+    });
+
+    reviewSlotsBtn.addEventListener("click", async () => {
+      reviewSlotsBtn.disabled = true;
+      reviewSlotsBtn.textContent = "Cargando...";
+      try {
+        const slots = await loadSlotsForReview();
+        reviewList.innerHTML = "";
+        slots.forEach((s) => {
+          const status = formatSlotStatus(s.status);
+          const thumb = s.photoUrl
+            ? `<img class="reviewThumb" src="${s.photoUrl}" alt="Foto ${s.orderIndex || "—"}" loading="lazy" />`
+            : `<div class="reviewThumbFallback">Sin miniatura disponible</div>`;
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = `reviewItem ${status.cls}`;
+          btn.innerHTML = `
+            ${thumb}
+            <div><strong>Foto ${s.orderIndex || "—"} · ${s.title || s.slotCode || "Slot"}</strong></div>
+            <div class="meta">Estado: ${status.text}</div>
+          `;
+          btn.addEventListener("click", () => openSlotForRetake(s));
+          reviewList.appendChild(btn);
+        });
+        reviewList.classList.remove("hidden");
+      } catch (err) {
+        statusMsg.textContent = err?.message || "No se pudo cargar la lista.";
+      } finally {
+        reviewSlotsBtn.disabled = false;
+        reviewSlotsBtn.textContent = "Revisar fotos y retomar una";
+      }
+    });
+
+    const pendingBanner = document.getElementById("pendingBanner");
+    const pendingCountText = document.getElementById("pendingCountText");
+    const continueUploadBtn = document.getElementById("continueUploadBtn");
+
+    function getPendingCount() {
+      return (capturedBlob ? 1 : 0) + pendingQueueCount;
+    }
+
+    window.addEventListener("beforeunload", (e) => {
+      stopCamera();
+      const n = getPendingCount();
+      if (n > 0) {
+        e.preventDefault();
+        e.returnValue = "Tienes " + n + " foto(s) sin subir. Si cierras ahora, tendrás que volver a subirlas. ¿Seguro?";
+        return e.returnValue;
+      }
+    });
+
+    async function processPendingQueue() {
+      const items = await getPendingFromIDB();
+      if (!items.length) {
+        pendingBanner.classList.add("hidden");
+        return;
+      }
+      pendingBanner.classList.add("hidden");
+      slotCard.classList.remove("hidden");
+      doneCard.classList.add("hidden");
+      statusMsg.textContent = "Subiendo " + items.length + " foto(s) pendiente(s)...";
+      for (const item of items) {
+        const blob = new Blob([item.buffer], { type: "image/jpeg" });
+        const compressed = await compressForUpload(blob);
+        const { ok, data } = await doUpload(item.slotId, compressed);
+        if (ok && data.passed !== false) {
+          try { await removePendingFromIDB(item.slotId); } catch (_) {}
+        } else {
+          statusMsg.textContent = captureProblemMessage(data?.problem) || "Error al subir. Reintenta más tarde.";
+          return;
+        }
+      }
+      statusMsg.textContent = "";
+      await loadNext();
+    }
+
+    continueUploadBtn.addEventListener("click", () => {
+      processPendingQueue().catch((e) => {
+        statusMsg.textContent = "Error: " + (e?.message || "No se pudo subir.");
+      });
     });
 
     if (!token) {
       statusMsg.textContent = "Token inválido.";
     } else {
+      getPendingFromIDB().then((items) => {
+        pendingQueueCount = items.length;
+        if (items.length > 0) {
+          pendingBanner.classList.remove("hidden");
+          stickyActions.classList.add("hidden");
+          pendingCountText.textContent = "Tienes " + items.length + " foto(s) guardada(s) localmente que no se subieron. Presiona para continuar.";
+        }
+      }).catch(() => {});
       loadNext().catch(() => {
         statusMsg.textContent = "No se pudo cargar.";
       });
     }
 
     // Splash fades out via CSS animation.
-
-    window.addEventListener("beforeunload", () => {
-      stopCamera();
-    });
   </script>
 </body>
 </html>

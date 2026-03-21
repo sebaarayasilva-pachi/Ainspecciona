@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pago exitoso · Ainspecciona</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Inter, sans-serif; background: #0B1220; color: #E5E7EB; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 20px; padding: 48px; max-width: 480px; text-align: center; }
+    .icon { font-size: 64px; margin-bottom: 24px; }
+    h1 { font-size: 24px; font-weight: 800; color: #F8FAFC; margin: 0 0 12px; }
+    p { color: #94a3b8; margin: 0 0 24px; line-height: 1.5; }
+    .btn { display: inline-block; padding: 14px 28px; border-radius: 14px; background: linear-gradient(135deg, #7C3AED 0%, #4F46E5 100%); color: #fff; text-decoration: none; font-weight: 800; border: none; cursor: pointer; font-size: 16px; }
+    .btn:hover { opacity: 0.95; }
+    .btn.outline { background: transparent; border: 2px solid #7C3AED; color: #A78BFA; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">✓</div>
+    <h1>¡Pago exitoso!</h1>
+    <p id="message">Tu pago se ha procesado correctamente.</p>
+    <div id="actions"></div>
+  </div>
+  <script>
+    (async function() {
+      const params = new URLSearchParams(window.location.search);
+      const plan = params.get('plan');
+      const paymentId = params.get('payment_id') || params.get('collection_id');
+      const actions = document.getElementById('actions');
+      const message = document.getElementById('message');
+
+      const creditPlans = ['credits-5', 'credits-10', 'credits-20', 'business'];
+      if (paymentId && creditPlans.includes(plan)) {
+        message.textContent = 'Verificando pago y acreditando créditos...';
+        try {
+          const vRes = await fetch('/api/mercadopago/verify-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ payment_id: paymentId })
+          });
+          const vData = await vRes.json().catch(() => ({}));
+          if (vData.ok && vData.credits > 0) {
+            if (vData.alreadyProcessed) {
+              message.textContent = `¡Pago exitoso! Tus ${vData.credits} créditos ya fueron acreditados.`;
+            } else {
+              message.textContent = `¡Pago exitoso! Se acreditaron ${vData.credits} créditos a tu cuenta.`;
+            }
+          } else if (vData.ok) {
+            message.textContent = '¡Pago exitoso! Tu pago se procesó correctamente.';
+          } else {
+            message.textContent = 'Pago recibido. Los créditos se acreditarán en breve.';
+          }
+        } catch (e) {
+          message.textContent = 'Pago recibido. Los créditos se acreditarán en unos minutos.';
+        }
+        actions.innerHTML = '<a href="/tenant" class="btn">Ir al Dashboard</a>';
+      } else if (plan === 'inspeccion-presencial') {
+        message.textContent = '¡Pago exitoso! Tu inspección técnica presencial ha sido reservada. Coordina la visita agendando una reunión con Paulo Yañez.';
+        let agendarUrl = 'https://meetings.hubspot.com/saraya-silva';
+        try {
+          const res = await fetch('/api/payment/config');
+          const cfg = await res.json();
+          if (cfg.agendarReunionUrl) agendarUrl = cfg.agendarReunionUrl;
+        } catch (_) {}
+        actions.innerHTML = '<a href="' + agendarUrl + '" class="btn" target="_blank" rel="noopener">Agendar reunión</a><a href="/tenant#inspections" class="btn outline" style="margin-left:12px;">Ir al Dashboard</a>';
+      } else if (plan === 'starter') {
+        function getCookie(name) {
+          const m = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+          return m ? decodeURIComponent(m[1]) : null;
+        }
+        function deleteCookie(name) { document.cookie = name + '=; path=/; max-age=0'; }
+
+        const pendingCookie = getCookie('pending_starter_case');
+        let pendingCaseId = null;
+        if (pendingCookie) {
+          try { pendingCaseId = JSON.parse(pendingCookie).caseId; } catch(e) {}
+        }
+
+        if (pendingCaseId) {
+          message.textContent = 'Pago procesado. Activando tu inspección...';
+          actions.innerHTML = '<div style="color:#94a3b8;font-size:14px;">Preparando enlace de captura...</div>';
+          try {
+            const res = await fetch('/api/starter/activate-case', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ caseId: pendingCaseId })
+            });
+            const data = await res.json().catch(() => ({}));
+            if (res.ok && data.ok) {
+              deleteCookie('pending_starter_case');
+              message.textContent = '¡Inspección lista! Te enviamos un correo con el enlace para realizar la inspección desde tu celular.';
+              const captureUrl = data.captureUrlFull || data.captureUrl || '#';
+              actions.innerHTML = '<a href="' + captureUrl + '" class="btn" target="_blank">Abrir enlace de inspección</a>';
+              if (data.emailSent === false) {
+                message.textContent += ' (No pudimos enviar el correo, usa el enlace de abajo.)';
+              }
+            } else {
+              message.textContent = 'Pago exitoso. ' + (data.error || 'Hubo un problema al activar la inspección.');
+              actions.innerHTML = '<a href="/" class="btn">Volver al inicio</a>';
+            }
+          } catch(e) {
+            message.textContent = 'Pago exitoso. Error de conexión al activar la inspección.';
+            actions.innerHTML = '<a href="/" class="btn">Volver al inicio</a>';
+          }
+        } else if (paymentId) {
+          const isDemo = String(paymentId).startsWith('demo_');
+          message.textContent = isDemo
+            ? 'Pago simulado correctamente. Completa los datos de la propiedad para crear tu inspección.'
+            : 'Tu pago se ha procesado correctamente. Completa los datos de la propiedad para crear tu inspección.';
+          actions.innerHTML = '<a href="/starter/crear-caso?payment_id=' + encodeURIComponent(paymentId) + '" class="btn">Crear inspección</a>';
+        } else {
+          message.textContent = 'Pago procesado correctamente.';
+          actions.innerHTML = '<a href="/" class="btn">Volver al inicio</a>';
+        }
+      } else if (plan === 'business' || params.get('plan') === 'business') {
+        const tenantIdParam = params.get('tenant');
+        const trialMode = params.get('trial') === '1';
+        if (tenantIdParam) {
+          message.textContent = trialMode ? 'Verificando activación de free trial...' : 'Verificando suscripción...';
+          try {
+            const vRes = await fetch('/api/business/verify-subscription', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ tenantId: tenantIdParam })
+            });
+            const vData = await vRes.json().catch(() => ({}));
+            if (vData.ok && vData.subscriptionActive) {
+              message.textContent = trialMode
+                ? '¡Free trial corporativo activado! Tienes 1 inspección real incluida y cobro automático al día 14 si no cancelas.'
+                : '¡Suscripción activada! Se acreditaron 2 créditos a tu cuenta. Te enviamos un email con un enlace para acceder a tu dashboard.';
+            } else if (vData.ok) {
+              message.textContent = trialMode
+                ? 'Free trial en proceso. Recibirás confirmación por email. Estado: ' + (vData.status || 'pendiente')
+                : 'Suscripción en proceso. Recibirás un email cuando se active. Estado: ' + (vData.status || 'pendiente');
+            } else {
+              message.textContent = trialMode
+                ? '¡Free trial registrado! Te enviaremos un email con acceso a tu dashboard cuando se confirme.'
+                : '¡Suscripción registrada! Te enviaremos un email con acceso a tu dashboard cuando se confirme el pago.';
+            }
+          } catch (e) {
+            message.textContent = trialMode
+              ? '¡Free trial registrado! Te enviaremos un email con acceso a tu dashboard.'
+              : '¡Suscripción registrada! Te enviaremos un email con acceso a tu dashboard.';
+          }
+        } else {
+          message.textContent = trialMode
+            ? '¡Free trial registrado! Revisa tu correo para acceder al dashboard y usar tu inspección real incluida.'
+            : '¡Pago exitoso! Te enviamos un email con un enlace para acceder a tu dashboard. Revisa tu bandeja (y spam) y haz clic en el enlace para crear tu contraseña.';
+        }
+        actions.innerHTML = '<a href="/" class="btn">Volver al inicio</a>';
+      } else if (paymentId) {
+        message.textContent = 'Tu pago se ha procesado correctamente. Recibirás un correo de confirmación con los detalles.';
+        actions.innerHTML = '<a href="/tenant" class="btn">Ir al Dashboard</a>';
+      } else {
+        message.textContent = 'Tu pago se ha procesado correctamente.';
+        actions.innerHTML = '<a href="/" class="btn">Volver al inicio</a>';
+      }
+    })();
+  </script>
+  <script src="/assets/tracker.js" defer></script>
+</body>
+</html>

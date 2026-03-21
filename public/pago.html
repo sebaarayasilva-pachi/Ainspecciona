@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pago · Ainspecciona</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/header.css" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0B1220;
+      color: #E5E7EB;
+    }
+    .page { max-width: 1000px; margin: 0 auto; padding: 48px 24px 80px; }
+    .label { font: 700 12px/1 Inter; letter-spacing: 0.1em; color: #6B7280; text-transform: uppercase; margin-bottom: 8px; }
+    .h1 { font-size: 32px; font-weight: 800; margin: 0 0 8px; color: #F8FAFC; }
+    .h2 { font-size: 20px; font-weight: 800; margin: 0 0 16px; color: #F8FAFC; }
+    .p { font-size: 16px; font-weight: 500; color: #94a3b8; margin: 0 0 8px; line-height: 1.5; }
+    .muted { font-size: 13px; font-weight: 600; color: #64748b; }
+
+    .checkoutGrid {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 48px;
+      align-items: start;
+      margin-top: 40px;
+    }
+    @media (max-width: 900px) {
+      .checkoutGrid { grid-template-columns: 1fr; }
+    }
+
+    .formSection {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 20px;
+      padding: 32px;
+      margin-bottom: 24px;
+    }
+    .formSection h2 { margin: 0 0 24px; font-size: 18px; font-weight: 800; color: #F8FAFC; }
+    .formGroup { margin-bottom: 20px; }
+    .formGroup label {
+      display: block;
+      font: 600 14px Inter;
+      color: #94a3b8;
+      margin-bottom: 8px;
+    }
+    .formGroup input,
+    .formGroup select {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1px solid #334155;
+      background: #0f172a;
+      color: #F8FAFC;
+      font-size: 16px;
+      font-family: inherit;
+    }
+    .formGroup input::placeholder { color: #475569; font-weight: 300; font-style: italic; font-size: 14px; }
+    .formGroup input:focus,
+    .formGroup select:focus {
+      outline: none;
+      border-color: #7C3AED;
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+    }
+    .formRow { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 500px) { .formRow { grid-template-columns: 1fr; } }
+
+    .orderSummary {
+      position: sticky;
+      top: 120px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 20px;
+      padding: 28px;
+    }
+    .orderSummary h2 { margin: 0 0 20px; font-size: 18px; font-weight: 800; color: #F8FAFC; }
+    .orderItem {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 0;
+      border-bottom: 1px solid #334155;
+    }
+    .orderItem:last-of-type { border-bottom: none; }
+    .orderItemName { font-weight: 700; color: #e5e7eb; }
+    .orderItemDesc { font-size: 13px; color: #64748b; margin-top: 2px; }
+    .orderItemPrice { font-weight: 800; font-size: 18px; color: #F8FAFC; }
+    .orderTotal {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 2px solid #334155;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .orderTotalLabel { font-weight: 800; font-size: 16px; color: #e5e7eb; }
+    .orderTotalPrice { font-weight: 900; font-size: 24px; color: #F8FAFC; }
+    .orderTotalPrice.highlight { color: #7C3AED; }
+
+    .subscriptionInfo {
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 12px;
+      background: rgba(124, 58, 237, 0.08);
+      border: 1px solid rgba(124, 58, 237, 0.25);
+      font-size: 13px;
+      line-height: 1.6;
+      color: #c4b5fd;
+    }
+    .subscriptionInfo .infoTitle {
+      font-weight: 700;
+      font-size: 13px;
+      color: #e5e7eb;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .subscriptionInfo ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .subscriptionInfo li {
+      padding: 3px 0;
+      padding-left: 18px;
+      position: relative;
+    }
+    .subscriptionInfo li::before {
+      content: "·";
+      position: absolute;
+      left: 4px;
+      font-weight: 800;
+      color: #7C3AED;
+    }
+
+    .paymentMethods {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .paymentMethod {
+      flex: 1;
+      padding: 16px;
+      border-radius: 12px;
+      border: 2px solid #334155;
+      background: #0f172a;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .paymentMethod:hover { border-color: #64748b; }
+    .paymentMethod.selected { border-color: #7C3AED; background: rgba(124, 58, 237, 0.1); }
+    .paymentMethod .icon { font-size: 28px; margin-bottom: 8px; }
+    .paymentMethod .name { font-weight: 700; font-size: 14px; color: #e5e7eb; }
+
+    .btnPay {
+      width: 100%;
+      padding: 18px;
+      border-radius: 14px;
+      border: none;
+      background: linear-gradient(135deg, #7C3AED 0%, #4F46E5 100%);
+      color: #fff;
+      font-weight: 800;
+      font-size: 16px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btnPay:hover { opacity: 0.95; }
+    .btnPay:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .backLink {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #94a3b8;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+    .backLink:hover { color: #e5e7eb; }
+    .secureNote { font-size: 12px; color: #64748b; margin-top: 16px; display: flex; align-items: center; gap: 8px; }
+    .secureNote::before { content: "🔒"; }
+    .formCheck { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; cursor: pointer; }
+    .formCheck input { width: auto; margin: 0; }
+    .formCheck span { font-weight: 600; color: #94a3b8; }
+    .facturacionToggle { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+    .facturacionToggle.visible { max-height: 600px; }
+    .formNote { font-size: 12px; color: #64748b; margin-top: 4px; }
+    .demoBanner {
+      background: rgba(124, 58, 237, 0.15);
+      border: 1px solid rgba(124, 58, 237, 0.4);
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      font-size: 14px;
+      color: #c4b5fd;
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="nav">
+      <a class="brand" href="/">
+        <img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" />
+      </a>
+      <div class="navLinks">
+        <a href="/como-funciona.html">Cómo funciona</a>
+        <a href="/precios">Precios</a>
+        <a href="/faq.html">FAQ</a>
+        <a href="/contacto.html">Contacto</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <a href="/precios" id="backLink" class="backLink">← Volver a precios</a>
+    <div id="demoBanner" class="demoBanner" style="display:none;"></div>
+    <h1 class="h1">Completar pago</h1>
+    <p class="p">Ingresa tus datos para procesar el pago de forma segura.</p>
+
+    <div class="checkoutGrid">
+      <div class="checkoutForm">
+        <form id="paymentForm">
+          <!-- Starter: contacto simple -->
+          <section class="formSection" id="sectionContacto">
+            <h2>Datos de contacto</h2>
+            <div class="formRow">
+              <div class="formGroup">
+                <label for="nombre">Nombre *</label>
+                <input type="text" id="nombre" name="nombre" placeholder="Nombre" required />
+              </div>
+              <div class="formGroup">
+                <label for="apellido">Apellido *</label>
+                <input type="text" id="apellido" name="apellido" placeholder="Apellido" required />
+              </div>
+            </div>
+            <div class="formGroup">
+              <label for="rut">RUT *</label>
+              <input type="text" id="rut" name="rut" placeholder="12.345.678-9" required />
+            </div>
+            <div class="formGroup">
+              <label for="email">Email *</label>
+              <input type="email" id="email" name="email" placeholder="tu@email.com" required />
+            </div>
+          </section>
+
+          <!-- Starter: facturación condicional -->
+          <section class="formSection" id="sectionFacturacion">
+            <label class="formCheck">
+              <input type="checkbox" id="necesitaFactura" name="necesitaFactura" />
+              <span>Necesito factura</span>
+            </label>
+            <div class="facturacionToggle" id="facturacionCampos">
+              <div class="formGroup">
+                <label for="factRazonSocial">Razón social *</label>
+                <input type="text" id="factRazonSocial" name="factRazonSocial" placeholder="Empresa S.A." />
+              </div>
+              <div class="formGroup">
+                <label for="factRut">RUT *</label>
+                <input type="text" id="factRut" name="factRut" placeholder="12.345.678-9" />
+              </div>
+              <div class="formGroup">
+                <label for="factDireccion">Dirección *</label>
+                <input type="text" id="factDireccion" name="factDireccion" placeholder="Calle y número" />
+              </div>
+              <div class="formRow">
+                <div class="formGroup">
+                  <label for="factComuna">Comuna *</label>
+                  <input type="text" id="factComuna" name="factComuna" placeholder="Ej: Providencia" />
+                </div>
+                <div class="formGroup">
+                  <label for="factCiudad">Ciudad *</label>
+                  <input type="text" id="factCiudad" name="factCiudad" placeholder="Ej: Santiago" />
+                </div>
+              </div>
+              <div class="formGroup">
+                <label for="factGiro">Giro *</label>
+                <input type="text" id="factGiro" name="factGiro" placeholder="Ej: Servicios inmobiliarios" />
+              </div>
+              <div class="formGroup">
+                <label for="factEmail">Email facturación</label>
+                <input type="email" id="factEmail" name="factEmail" placeholder="Mismo que contacto (opcional)" />
+                <div class="formNote">Si no ingresas, usaremos tu email de contacto.</div>
+              </div>
+            </div>
+          </section>
+
+          <section class="formSection">
+            <h2>Método de pago</h2>
+            <div class="paymentMethods">
+              <div class="paymentMethod selected" data-method="mercadopago">
+                <div class="icon">💳</div>
+                <div class="name">MercadoPago</div>
+                <div class="muted">Tarjeta · Débito · Transferencia</div>
+              </div>
+            </div>
+            <p class="muted">Serás redirigido al sitio seguro de MercadoPago para completar el pago.</p>
+            <button type="submit" class="btnPay" id="btnPay">Pagar ahora</button>
+            <p class="secureNote">Pago seguro con encriptación SSL. No almacenamos datos de tarjeta.</p>
+          </section>
+        </form>
+      </div>
+
+      <aside class="orderSummary">
+        <h2>Resumen del pedido</h2>
+        <div id="orderItems"></div>
+        <div class="orderTotal">
+          <span class="orderTotalLabel">Total</span>
+        <span class="orderTotalPrice" id="orderTotal">$0</span>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <script>
+    const PRECIO_M2_PRESENCIAL = 1700;
+    const PLANS = {
+      starter: { name: '1 crédito Starter', desc: 'Inspección puntual (sin dashboard)', price: 15000 },
+      business: { name: 'Plan Business mensual', desc: '$39.990 · 2 inspecciones incluidas · Dashboard', price: 39990 },
+      corporate: { name: '100 créditos Corporate', desc: 'Requiere Dashboard Corporate', price: 1300000 },
+      'credits-5': { name: 'Pack 5 créditos', desc: 'IVA incluido · $12.990 c/u', price: 64950 },
+      'credits-10': { name: 'Pack 10 créditos', desc: 'IVA incluido · $11.990 c/u', price: 119900 },
+      'credits-20': { name: 'Pack 20 créditos', desc: 'IVA incluido · $10.990 c/u', price: 219800 },
+      'dashboard-standard': { name: 'Dashboard Standard', desc: 'Suscripción mensual', price: 59000, monthly: true },
+      'dashboard-corporate': { name: 'Dashboard Corporate', desc: 'Suscripción mensual', price: 149000, monthly: true },
+      'inspeccion-presencial': { name: 'Inspección técnica presencial', desc: 'Evaluación en terreno por especialista', price: 0, dynamicPrice: true }
+    };
+
+    const ANNUAL_PRICES = {
+      'dashboard-standard': 590000,
+      'dashboard-corporate': 1490000
+    };
+
+    function getParams() {
+      const params = new URLSearchParams(location.search);
+      const surface = Math.max(45, parseInt(params.get('surface'), 10) || 45);
+      return {
+        plan: params.get('plan') || 'starter',
+        billing: params.get('billing') || 'monthly',
+        demo: params.get('demo') === '1',
+        caseId: params.get('caseId') || null,
+        surface,
+        address: params.get('address') || ''
+      };
+    }
+
+    // Prellenar datos de contacto si vienen del formulario Business y bloquear edición
+    (function prefillFromBusiness() {
+      const { plan } = getParams();
+      if (plan !== 'business') return;
+      try {
+        const raw = sessionStorage.getItem('business_contact');
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        const set = (id, val) => {
+          const el = document.getElementById(id);
+          if (el && val) { el.value = val; el.readOnly = true; el.style.opacity = '0.7'; }
+        };
+        set('email', data.email);
+        set('nombre', data.nombre);
+        set('apellido', data.apellido);
+        set('rut', data.rut);
+        const section = document.getElementById('sectionContacto');
+        if (section) {
+          const h2 = section.querySelector('h2');
+          if (h2) h2.textContent = 'Datos de contacto (registrados)';
+        }
+      } catch (_) {}
+    })();
+
+    // Prellenar desde tenant cuando es inspección presencial
+    (async function prefillFromTenant() {
+      const { plan } = getParams();
+      if (plan !== 'inspeccion-presencial') return;
+      try {
+        const token = localStorage.getItem('tenant_session');
+        if (!token) return;
+        const res = await fetch('/api/tenant/me', { credentials: 'include', headers: { Authorization: 'Bearer ' + token } });
+        if (!res.ok) return;
+        const data = await res.json();
+        const t = data.tenant || data;
+        const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+        set('email', t.email);
+        if (t.name) {
+          const parts = String(t.name).trim().split(/\s+/).filter(Boolean);
+          set('nombre', parts[0]);
+          set('apellido', parts.slice(1).join(' ') || '');
+        }
+        set('rut', t.rut);
+      } catch (_) {}
+    })();
+
+    function renderOrder() {
+      const { plan, billing, surface, address } = getParams();
+      const planData = PLANS[plan] || PLANS.starter;
+      let price = planData.price;
+      let desc = planData.desc;
+
+      if (plan === 'inspeccion-presencial') {
+        price = surface * PRECIO_M2_PRESENCIAL;
+        desc = `${surface} m² × $${PRECIO_M2_PRESENCIAL.toLocaleString('es-CL')}/m²` + (address ? ` · ${address}` : '');
+        document.getElementById('backLink').href = '/tenant#inspections';
+      } else {
+        document.getElementById('backLink').href = '/precios';
+      }
+
+      if (planData.monthly && billing === 'annual') {
+        price = ANNUAL_PRICES[plan] || planData.price;
+        desc = 'Suscripción anual (2 meses gratis)';
+      } else if (planData.monthly && plan !== 'inspeccion-presencial') {
+        desc = 'Suscripción mensual';
+      }
+
+      document.getElementById('orderItems').innerHTML = `
+        <div class="orderItem">
+          <div>
+            <div class="orderItemName">${planData.name}</div>
+            <div class="orderItemDesc">${desc}</div>
+          </div>
+          <div class="orderItemPrice">$${price.toLocaleString('es-CL')}</div>
+        </div>
+      `;
+      document.getElementById('orderTotal').textContent = `$${price.toLocaleString('es-CL')}`;
+
+      const existingInfo = document.getElementById('subscriptionInfoBlock');
+      if (existingInfo) existingInfo.remove();
+
+      if (plan === 'business') {
+        const summary = document.querySelector('.orderSummary');
+        if (summary) {
+          const infoBlock = document.createElement('div');
+          infoBlock.id = 'subscriptionInfoBlock';
+          infoBlock.className = 'subscriptionInfo';
+          infoBlock.innerHTML = `
+            <div class="infoTitle">Suscripcion mensual con cobro automatico</div>
+            <ul>
+              <li>Se cobrarán $${price.toLocaleString('es-CL')} el mismo día de cada mes</li>
+              <li>Incluye 2 creditos de inspeccion por mes</li>
+              <li>Podes cancelar en cualquier momento desde tu dashboard</li>
+              <li>Al cancelar, mantenes acceso hasta el fin del periodo pagado</li>
+            </ul>
+          `;
+          summary.appendChild(infoBlock);
+        }
+      }
+    }
+
+    document.querySelectorAll('.paymentMethod').forEach(el => {
+      el.addEventListener('click', () => {
+        document.querySelectorAll('.paymentMethod').forEach(m => m.classList.remove('selected'));
+        el.classList.add('selected');
+      });
+    });
+
+    // Toggle facturación
+    const necesitaFactura = document.getElementById('necesitaFactura');
+    const facturacionCampos = document.getElementById('facturacionCampos');
+    necesitaFactura.addEventListener('change', () => {
+      facturacionCampos.classList.toggle('visible', necesitaFactura.checked);
+      if (!necesitaFactura.checked) {
+        ['factRazonSocial', 'factRut', 'factDireccion', 'factComuna', 'factCiudad', 'factGiro', 'factEmail'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.value = '';
+        });
+      }
+    });
+
+    (async function loadPaymentConfig() {})();
+
+    document.getElementById('paymentForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btnPay');
+      const method = document.querySelector('.paymentMethod.selected')?.dataset?.method;
+      if (method !== 'mercadopago') {
+        alert('Por ahora solo MercadoPago está disponible.');
+        return;
+      }
+      const { plan, billing, caseId, surface, address } = getParams();
+      const body = {
+        plan,
+        billing: plan.includes('dashboard') ? billing : undefined,
+        email: document.getElementById('email').value.trim(),
+        nombre: document.getElementById('nombre').value.trim(),
+        apellido: document.getElementById('apellido').value.trim(),
+        rut: document.getElementById('rut').value.trim()
+      };
+      if (plan === 'inspeccion-presencial') {
+        body.caseId = caseId;
+        body.surface = surface;
+        body.address = address;
+      }
+      const necesitaFact = document.getElementById('necesitaFactura').checked;
+      if (necesitaFact) {
+        const factRazon = document.getElementById('factRazonSocial').value.trim();
+        const factRut = document.getElementById('factRut').value.trim();
+        const factDir = document.getElementById('factDireccion').value.trim();
+        const factComuna = document.getElementById('factComuna').value.trim();
+        const factCiudad = document.getElementById('factCiudad').value.trim();
+        const factGiro = document.getElementById('factGiro').value.trim();
+        if (!factRazon || !factRut || !factDir || !factComuna || !factCiudad || !factGiro) {
+          alert('Completa todos los campos de facturación.');
+          return;
+        }
+        const factEmail = document.getElementById('factEmail').value.trim();
+        body.necesitaFactura = true;
+        body.facturaRazonSocial = factRazon;
+        body.facturaRut = factRut;
+        body.facturaDireccion = factDir;
+        body.facturaComuna = factComuna;
+        body.facturaCiudad = factCiudad;
+        body.facturaGiro = factGiro;
+        body.facturaEmail = factEmail || body.email;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Redirigiendo a MercadoPago...';
+      try {
+        const headers = { 'Content-Type': 'application/json' };
+        const tenantToken = localStorage.getItem('tenant_session');
+        if (tenantToken) headers.Authorization = 'Bearer ' + tenantToken;
+        const tenantId = sessionStorage.getItem('tenant_id') || localStorage.getItem('tenant_id');
+        if (tenantId) body.tenantId = tenantId;
+        const res = await fetch('/api/mercadopago/preference', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(body),
+          credentials: 'include'
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Error al crear el pago');
+        }
+        if (data.init_point) {
+          window.location.href = data.init_point;
+          return;
+        }
+        throw new Error('No se recibió URL de pago');
+      } catch (err) {
+        alert(err.message || 'Error al procesar el pago.');
+      }
+      btn.disabled = false;
+      btn.textContent = 'Pagar ahora';
+    });
+
+    renderOrder();
+  </script>
+  <script src="/assets/tracker.js" defer></script>
+</body>
+</html>

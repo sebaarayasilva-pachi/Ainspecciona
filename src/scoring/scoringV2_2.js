@@ -56,249 +56,194 @@ export const DEFAULT_SCORE_CONFIG = {
     BEDROOM_3_CLOSET: "MOBILIARIO_FIJO",
     BEDROOM_3_WINDOWS: "VENTANAS_CERRAMIENTOS",
     LAUNDRY_WALLS_FLOOR: "HUMEDAD",
-    ELECTRICAL_PANEL: "ELECTRICIDAD"
+    ELECTRICAL_PANEL: "ELECTRICIDAD",
+    PUERTA_ENTRADA: "PUERTAS_HERRAJES",
+    ELEVATOR: "ELECTRICIDAD",
+    ESTACIONAMIENTO: "PISOS",
+    CERTIFICADO_VERDE: "ELECTRICIDAD"
   },
   aiPrompts: {
-    MOBILIARIO_FIJO: [
-      "Analiza la imagen correspondiente al slot {{SLOT_CODE}}",
-      "bajo el contexto técnico del KPI: MOBILIARIO FIJO.",
+    GENERAL: [
+      "Eres un inspector técnico profesional que realiza evaluaciones de inmuebles basadas exclusivamente en evidencia fotográfica.",
       "",
-      "Primero describe objetivamente lo que se ve en la imagen.",
-      "Luego realiza el análisis SOLO según este KPI.",
+      "Analiza la imagen correspondiente al área: {{AREA_DESCRIPTION}}, bajo el criterio: {{CRITERIA_DESCRIPTION}}.",
       "",
-      "Evalúa exclusivamente la presencia visible de las siguientes señales:",
+      "Reglas generales obligatorias:",
+      "- Analiza únicamente lo claramente visible en la imagen.",
+      "- No infieras causas, origen, antigüedad ni condiciones internas no observables.",
+      "- No evalúes elementos fuera del encuadre.",
+      "- No utilices códigos internos ni etiquetas técnicas del sistema.",
+      "- No entregues recomendaciones ni juicios legales o financieros.",
+      "- Evita frases vagas como 'no se observan problemas' sin justificar visualmente.",
       "",
-      "- rayones visibles",
-      "- golpes o daños superficiales",
-      "- hinchazón o deformación del material",
-      "- puertas desalineadas",
-      "- herrajes visibles dañados o sueltos",
-      "- cubiertas desteñidas o con pérdida visible de color",
+      "Estructura del análisis (obligatoria y detallada):",
+      "1) Descripción objetiva del encuadre: Describe ambiente, superficies visibles, materialidad aparente, encuentros (esquinas, uniones, bordes), condiciones de iluminación y cualquier elemento que influya en la lectura visual. Indica limitaciones si hay zonas fuera de foco, sombras u obstrucciones.",
+      "2) Análisis técnico respecto al criterio: Recorre visualmente el área en forma ordenada (ej: superior a inferior). Detalla de forma específica lo observado en relación al criterio. Si no existen señales visibles, explica qué evidencia visual permite descartarlas (uniformidad de superficie, continuidad, etc.).",
       "",
-      "Instrucciones estrictas:",
-      "- Analiza solo lo que sea visible en la imagen.",
-      "- No infieras causas ni funcionamiento.",
-      "- No evalúes calidad del material.",
-      "- No emitas juicios de severidad.",
-      "- No hagas recomendaciones.",
-      "",
-      "Entrega el resultado en formato estructurado.",
-      "",
-      "Si no se observa ninguna de las señales listadas,",
-      "indícalo explícitamente."
+      "Redacta en lenguaje técnico, claro, objetivo y profesional."
     ].join("\n"),
     MUROS_PINTURA: [
       "Analiza la imagen correspondiente al slot {{SLOT_CODE}}",
       "bajo el contexto técnico del KPI: MUROS Y PINTURA.",
       "",
-      "Primero describe objetivamente lo que se ve en la imagen.",
-      "Luego realiza el análisis SOLO según este KPI.",
+      "Paso 1 — Identificación de terminación:",
+      "Determina si la superficie visible corresponde a:",
+      "- Pintura",
+      "- Papel mural (wallpaper)",
       "",
-      "Evalúa exclusivamente la presencia visible de las siguientes señales:",
+      "Indícalo explícitamente al inicio del análisis.",
       "",
-      "- rayones visibles",
-      "- manchas visibles",
-      "- descascaramiento o desprendimiento de pintura",
-      "- grietas superficiales",
-      "- pintura dispareja o con diferencias evidentes de tono",
-      "- marcas visibles por humedad (solo si son evidentes en superficie)",
+      "Paso 2 — Descripción objetiva del encuadre:",
+      "Describe detalladamente lo visible (mínimo 4 líneas):",
+      "- Superficie observada",
+      "- Color y textura aparente",
+      "- Encuentros (esquinas, zócalos, cielo, marcos)",
+      "- Iluminación y condiciones que afecten la lectura visual",
       "",
-      "Instrucciones estrictas:",
-      "- Analiza únicamente lo que sea visible en la imagen.",
+      "Paso 3 — Evaluación técnica según tipo de terminación:",
+      "",
+      "Distinción obligatoria (PINTURA):",
+      "- Usa 'grieta' SOLO cuando haya una fisura o fractura clara en el material (línea oscura, profundidad aparente, quiebre del sustrato).",
+      "- Si ves una línea lineal o banda en la superficie que corresponde a unión de placas, junta de aplicación, diferencia de capa de pintura o irregularidad del acabado (sin aspecto de fractura), NO la llames grieta. Descríbela como: 'discontinuidad en la pintura', 'irregularidad en el acabado', 'unión o junta visible', 'diferencia de aplicación' o 'línea de terminación' según corresponda.",
+      "",
+      "Si es PINTURA, analiza explícitamente:",
+      "- Rayones o marcas lineales",
+      "- Manchas o variaciones de tono",
+      "- Descascaramiento o desprendimiento",
+      "- Grietas (solo si hay fisura/fractura visible; si es solo línea de acabado, usa 'discontinuidad' o 'irregularidad')",
+      "- Discontinuidades en la pintura, uniones visibles, diferencias de aplicación",
+      "- Marcas visibles asociadas a humedad superficial",
+      "",
+      "Si es PAPEL MURAL, analiza explícitamente:",
+      "- Rayones o manchas",
+      "- Despegamiento en bordes o uniones",
+      "- Burbujas o levantamientos",
+      "- Grietas o rasgaduras",
+      "- Desgaste o desteñido",
+      "- Marcas visibles asociadas a humedad superficial",
+      "",
+      "Recorre visualmente el área en forma ordenada (por ejemplo: izquierda a derecha y de arriba hacia abajo).",
+      "Para cada hallazgo detectado, especifica:",
+      "- Tipo de señal",
+      "- Ubicación aproximada (zona alta, baja, lateral, encuentro, etc.)",
+      "- Extensión aproximada (puntual, lineal, sectorizado, paño completo)",
+      "- Terminación afectada (pintura o papel mural)",
+      "",
+      "Si NO se observan señales visibles, debes indicarlo explícitamente describiendo qué evidencia visual permite descartarlas (uniformidad de superficie, continuidad, ausencia de cambios de tono, etc.).",
+      "",
+      "Reglas obligatorias:",
+      "- Analiza únicamente lo claramente visible.",
       "- No infieras causas ni condiciones internas.",
       "- No evalúes estructura ni humedad no visible.",
       "- No emitas juicios de severidad.",
-      "- No hagas recomendaciones.",
-      "",
-      "Entrega el resultado en formato estructurado.",
-      "",
-      "Si no se observa ninguna de las señales listadas,",
-      "indícalo explícitamente."
-    ].join("\n"),
-    PISOS: [
-      "Analiza la imagen correspondiente al slot {{SLOT_CODE}}",
-      "bajo el contexto técnico del KPI: PISOS.",
-      "",
-      "Primero describe objetivamente lo que se ve en la imagen.",
-      "Luego realiza el análisis SOLO según este KPI.",
-      "",
-      "Evalúa exclusivamente la presencia visible de las siguientes señales:",
-      "",
-      "- rayones visibles",
-      "- manchas visibles",
-      "- piezas sueltas o levantadas (si es visible)",
-      "- quiebres, trizaduras o piezas rotas",
-      "- desgaste evidente de la superficie",
-      "- diferencias visibles de color o tono entre piezas",
-      "",
-      "Instrucciones estrictas:",
-      "- Analiza únicamente lo que sea visible en la imagen.",
-      "- No infieras condiciones internas ni estructurales.",
-      "- No evalúes nivelación ni instalación.",
-      "- No emitas juicios de severidad.",
-      "- No hagas recomendaciones.",
-      "",
-      "Entrega el resultado en formato estructurado.",
-      "",
-      "Si no se observa ninguna de las señales listadas,",
-      "indícalo explícitamente."
+      "- No entregues recomendaciones.",
+      "- Evita frases vagas sin respaldo visual."
     ].join("\n"),
     HUMEDAD: [
-      "Analiza la imagen correspondiente al slot {{SLOT_CODE}}",
-      "bajo el contexto técnico del KPI: HUMEDAD VISIBLE.",
+      "Analiza la imagen correspondiente al slot {{SLOT_CODE}} bajo el contexto técnico del KPI: HUMEDAD VISIBLE.",
       "",
-      "Primero describe objetivamente lo que se ve en la imagen.",
-      "Luego realiza el análisis SOLO según este KPI.",
+      "Paso 1 — Descripción objetiva del encuadre:",
+      "Describe superficie observada (muro, cielo, encuentros), color, terminación y condiciones de iluminación que afecten la lectura.",
       "",
-      "Evalúa exclusivamente la presencia visible de las siguientes señales:",
+      "Paso 2 — Señales de humedad que DEBES buscar y reportar si están presentes:",
+      "- Pintura inflada, ampollada o con burbujas (levantamiento de la capa de pintura por humedad).",
+      "- Pintura resquebrajada, descascarada o con desprendimiento asociable a humedad.",
+      "- Pintura englobada (abultamiento o cambio de tono por absorción de humedad).",
+      "- Eflorescencias (sales blancas en superficie).",
+      "- Manchas de agua, aureolas o variaciones de tono en forma de mapa.",
+      "- Hongos o moho visible.",
+      "- Descascaramiento o desprendimiento en muros, cielos o alrededor de tuberías/duchas.",
       "",
-      "- manchas de humedad visibles",
-      "- moho visible",
-      "- salitre o eflorescencia visible",
-      "- pintura ampollada o levantada asociada a humedad",
-      "- oscurecimiento localizado compatible con humedad",
+      "Para cada señal detectada indica: ubicación aproximada en el encuadre, extensión (puntual, sectorizada, extendida) y si afecta pintura, revoque o encuentros.",
+      "Solo reporta un hallazgo de humedad cuando la señal sea CLARA y fácilmente identificable en la imagen (el lector debe poder 'ver' lo que describes). No reportes 'marca leve', 'leve indicio' o 'podría ser indicativa de humedad' cuando la superficie se ve mayormente uniforme, sin manchas definidas ni pintura inflada. En ese caso concluye que no se observan hallazgos relevantes de humedad.",
+      "Si NO observas ninguna de las señales listadas arriba, indícalo explícitamente describiendo qué evidencia visual permite descartarlas (superficie uniforme, sin abultamientos ni manchas, etc.).",
+      "NUNCA concluyas 'no hay hallazgos relevantes' si ves pintura inflada, ampollada, resquebrajada o manchas/aureolas claras compatibles con humedad.",
       "",
-      "Instrucciones estrictas:",
-      "- Analiza únicamente lo que sea claramente visible en la imagen.",
-      "- No infieras causas, origen ni profundidad de la humedad.",
-      "- No evalúes humedad interna ni condiciones no visibles.",
-      "- No emitas juicios de severidad.",
-      "- No hagas recomendaciones.",
-      "- Describe con detalle lo que se observa cuando haya señales visibles (ubicación y extensión).",
-      "",
-      "Entrega el resultado en formato estructurado.",
-      "",
-      "Si no se observa ninguna de las señales listadas,",
-      "indícalo explícitamente."
+      "Reglas: analiza solo lo visible; no asumas el origen de la fuga si no es evidente; no infieras humedad no visible."
+    ].join("\n"),
+    PISOS: [
+      "Eres un inspector técnico profesional evaluando el estado de los pisos y revestimientos.",
+      "Busca cerámicas quebradas, piso flotante levantado o separado, alfombras manchadas o gastadas, o guardapolvos desprendidos.",
+      "Evalúa la continuidad y nivelación general visible en la imagen."
     ].join("\n"),
     SANITARIOS: [
-      "Analiza la imagen correspondiente al slot {{SLOT_CODE}}",
-      "bajo el contexto técnico del KPI: SANITARIOS.",
-      "",
-      "Primero describe objetivamente lo que se ve en la imagen.",
-      "Luego realiza el análisis SOLO según este KPI.",
-      "",
-      "Evalúa exclusivamente la presencia visible de las siguientes señales:",
-      "",
-      "- grietas o trizaduras visibles en artefactos",
-      "- quiebres o piezas rotas",
-      "- manchas visibles persistentes",
-      "- desgaste evidente de superficies",
-      "- sellos visibles deteriorados",
-      "- corrosión u óxido visible en grifería",
-      "- desalineación visible de artefactos (si es evidente)",
-      "",
-      "Instrucciones estrictas:",
-      "- Analiza únicamente lo que sea visible en la imagen.",
-      "- No evalúes funcionamiento ni condiciones internas.",
-      "- No infieras fugas, presión de agua ni fallas ocultas.",
-      "- No emitas juicios de severidad.",
-      "- No hagas recomendaciones.",
-      "",
-      "Entrega el resultado en formato estructurado.",
-      "",
-      "Si no se observa ninguna de las señales listadas,",
-      "indícalo explícitamente."
+      "Eres un inspector técnico profesional revisando artefactos sanitarios.",
+      "Revisa la imagen en busca de tinas, WC, lavamanos o griferías con daños visibles como trizaduras, manchas de sarro extremo, falta de sellos (silicona) o piezas faltantes.",
+      "Evalúa el estado de las conexiones visibles a la pared o piso."
     ].join("\n"),
     ELECTRICIDAD: [
       "Analiza la imagen correspondiente al slot {{SLOT_CODE}}",
       "bajo el contexto técnico del KPI: ELECTRICIDAD VISIBLE.",
       "",
-      "Primero describe objetivamente lo que se ve en la imagen.",
-      "Luego realiza el análisis SOLO según este KPI.",
+      "Paso 1 — Descripción objetiva del encuadre:",
+      "Describe detalladamente lo visible (mínimo 4 líneas):",
+      "- Elementos eléctricos presentes (enchufes, interruptores, tablero, canalizaciones, cables, etc.)",
+      "- Ubicación relativa dentro del encuadre",
+      "- Condición general visible de las superficies circundantes",
+      "- Iluminación o encuadre que pueda afectar la lectura visual",
       "",
-      "Evalúa exclusivamente la condición visible de los elementos eléctricos accesibles.",
-      "No evalúes funcionamiento interno, normativa ni capacidad eléctrica.",
+      "Paso 2 — Evaluación específica del KPI:",
       "",
-      "Detecta únicamente la presencia visible de las siguientes señales:",
+      "Evalúa EXCLUSIVAMENTE la condición visible de los elementos eléctricos accesibles en la imagen.",
+      "",
+      "Detecta únicamente la presencia visible de:",
       "",
       "- enchufes o interruptores rotos o quebrados",
       "- tapas faltantes o sueltas en enchufes, interruptores o tablero",
       "- cables visibles expuestos",
-      "- signos visibles de sobrecalentamiento (quemaduras, derretimiento)",
-      "- fijación deficiente visible de enchufes o interruptores",
+      "- signos visibles de sobrecalentamiento (quemaduras, derretimiento, decoloración localizada)",
+      "- fijación deficiente visible de enchufes o interruptores (desplazamiento, separación del muro)",
       "- tablero eléctrico visible sin tapa o con elementos dañados",
-      "- presencia visible de interruptor diferencial",
-      "- ausencia visible de interruptor diferencial",
+      "- presencia visible de interruptor diferencial, solamente en el slot del tablero eléctrico",
+      "- ausencia visible de interruptor diferencial (solo si el tablero completo es visible y no se observa dicho elemento)",
       "",
-      "Instrucciones estrictas:",
-      "- Analiza únicamente lo que sea claramente visible en la imagen.",
-      "- No infieras funcionamiento, capacidad, suficiencia ni cumplimiento normativo.",
-      "- No evalúes seguridad eléctrica general.",
+      "Interruptor diferencial (solo en slot de tablero eléctrico):",
+      "El diferencial suele ser el primer breaker a la izquierda, de mayor tamaño (doble módulo o dos posiciones). Si ves un breaker ancho o doble al inicio de la fila, considéralo como posible diferencial y NO reportes 'ausencia de diferencial'. Solo reporta ausencia si el tablero se ve completo y no hay ningún elemento de ese tipo (breaker doble/general a la izquierda).",
+      "",
+      "Recorre visualmente los elementos eléctricos de forma ordenada y describe únicamente lo que sea claramente observable.",
+      "",
+      "Para cada señal detectada, especifica:",
+      "- Tipo de señal",
+      "- Elemento afectado",
+      "- Ubicación aproximada",
+      "- Condición observable",
+      "",
+      "Si NO se observan señales visibles, debes indicarlo explícitamente describiendo qué evidencia visual permite descartarlas (tapas íntegras, ausencia de cables expuestos, fijación alineada, etc.).",
+      "",
+      "Paso 3 — Limitaciones:",
+      "Indica si el encuadre es parcial, si el tablero no es completamente visible o si existen zonas fuera de foco que limiten la evaluación.",
+      "",
+      "Reglas estrictas:",
+      "- Analiza únicamente lo claramente visible.",
+      "- No infieras funcionamiento.",
+      "- No evalúes capacidad eléctrica.",
+      "- No evalúes cumplimiento normativo.",
+      "- No concluyas seguridad o inseguridad eléctrica.",
       "- No emitas juicios de severidad.",
-      "- No hagas recomendaciones.",
-      "- No utilices lenguaje interpretativo.",
-      "",
-      "Entrega el resultado en formato estructurado.",
-      "",
-      "Si no se observa ninguna de las señales listadas,",
-      "indícalo explícitamente."
+      "- No entregues recomendaciones.",
+      "- No utilices lenguaje interpretativo o alarmista."
     ].join("\n"),
     VENTANAS_CERRAMIENTOS: [
-      "Analiza la imagen correspondiente al slot {{SLOT_CODE}}",
-      "bajo el contexto técnico del KPI: VENTANAS Y CERRAMIENTOS.",
-      "",
-      "Primero describe objetivamente lo que se ve en la imagen.",
-      "Luego realiza el análisis SOLO según este KPI.",
-      "",
-      "Evalúa exclusivamente la condición visible de ventanas y cerramientos.",
-      "",
-      "Detecta únicamente la presencia visible de las siguientes señales:",
-      "",
-      "- vidrios trizados o quebrados",
-      "- rayones visibles en vidrios",
-      "- marcos dañados, deformados o golpeados",
-      "- sellos visibles deteriorados o faltantes",
-      "- fijación deficiente visible del marco",
-      "- corrosión visible en marcos o herrajes expuestos",
-      "- suciedad incrustada o manchas persistentes en vidrios (si es evidente)",
-      "",
-      "Instrucciones estrictas:",
-      "- Analiza únicamente lo que sea claramente visible en la imagen.",
-      "- No evalúes funcionamiento, apertura/cierre ni hermeticidad.",
-      "- No infieras filtraciones ni aislación.",
-      "- No emitas juicios de severidad.",
-      "- No hagas recomendaciones.",
-      "- No utilices lenguaje interpretativo.",
-      "",
-      "Entrega el resultado en formato estructurado.",
-      "",
-      "Si no se observa ninguna de las señales listadas,",
-      "indícalo explícitamente."
+      "Eres un inspector técnico profesional evaluando ventanas y cerramientos.",
+      "Revisa los vidrios buscando trizaduras o roturas. Revisa los marcos (aluminio, PVC, madera) buscando abolladuras, descuadres o falta de sellos visibles.",
+      "Si hay rieles, evalúa si se observan limpios y continuos."
     ].join("\n"),
     PUERTAS_HERRAJES: [
-      "Analiza la imagen correspondiente al slot {{SLOT_CODE}}",
-      "bajo el contexto técnico del KPI: PUERTAS Y HERRAJES.",
+      "Eres un inspector técnico profesional evaluando puertas y sus herrajes.",
+      "Busca puertas descuadradas, raspadas, perforadas o con marcos desprendidos. Revisa visualmente el estado de las manillas, cerraduras y bisagras (si están presentes y en buena posición)."
+    ].join("\n"),
+    MOBILIARIO_FIJO: [
+      "Analiza la imagen correspondiente al slot {{SLOT_CODE}} bajo el contexto técnico del KPI: MOBILIARIO FIJO (closets, muebles de cocina).",
       "",
-      "Primero describe objetivamente lo que se ve en la imagen.",
-      "Luego realiza el análisis SOLO según este KPI.",
+      "Paso 1 — Verificación de correspondencia al slot:",
+      "Si el slot es de COCINA (Cocina – Muebles), la imagen debe mostrar muebles de cocina (gabinetes, alacenas, puertas de cocina). Si en la imagen se ve claramente una puerta de habitación, puerta de baño u otro elemento que NO sea mueble de cocina, indícalo al inicio: 'El encuadre muestra [lo que se ve], no muebles de cocina.' Describe lo visible de forma objetiva y no inventes hallazgos de desalineación o daño en muebles si el elemento no corresponde al slot.",
+      "Si el slot es de DORMITORIO (Clóset), la imagen debe mostrar el clóset del dormitorio. Si se ve otro tipo de mueble o puerta de otra habitación, indícalo y no apliques criterios de mobiliario fijo de forma forzada.",
       "",
-      "Evalúa exclusivamente la condición visible de puertas y sus herrajes asociados.",
+      "Paso 2 — Evaluación solo cuando el contenido SÍ corresponde al slot:",
+      "Revisa únicamente lo que sea claramente visible: puertas de gabinetes caídas o descuadradas, repisas pandeadas, cubiertas manchadas, quemadas o trizadas, daños en tiradores o tapacantos.",
+      "Solo reporta desalineación, holgura o descuadre cuando sea CLARAMENTE OBSERVABLE en la imagen (por ejemplo: puerta que no cierra en el marco, hueco evidente, bisagra vista despegada). No reportes 'ligera desalineación' ni 'holgura moderada' si no hay evidencia visual clara; en ese caso indica que no se observan problemas relevantes en el mobiliario visible.",
       "",
-      "Detecta únicamente la presencia visible de las siguientes señales:",
-      "",
-      "- puertas rayadas o con daños visibles",
-      "- golpes o abolladuras visibles",
-      "- desprendimiento o desgaste evidente de pintura o terminación",
-      "- puertas visiblemente deformadas",
-      "- marcos dañados o golpeados",
-      "- bisagras visibles dañadas o faltantes",
-      "- manillas o cerraduras visibles dañadas",
-      "- fijación deficiente visible de herrajes",
-      "- holguras visibles evidentes entre puerta y marco",
-      "",
-      "Instrucciones estrictas:",
-      "- Analiza únicamente lo que sea claramente visible en la imagen.",
-      "- No evalúes funcionamiento, ajuste ni seguridad.",
-      "- No infieras fallas ocultas.",
-      "- No emitas juicios de severidad.",
-      "- No hagas recomendaciones.",
-      "- No utilices lenguaje interpretativo.",
-      "",
-      "Entrega el resultado en formato estructurado.",
-      "",
-      "Si no se observa ninguna de las señales listadas,",
-      "indícalo explícitamente."
+      "Reglas: analiza solo lo visible; no infieras desalineación por sombras o ángulo de la foto; si el elemento no corresponde al slot esperado, describe sin inventar hallazgos."
     ].join("\n")
   },
   messages: {
@@ -348,7 +293,17 @@ export const DEFAULT_SCORE_CONFIG = {
     YELLOW: "Se recomienda revisar y monitorear el estado observado.",
     RED: "Se recomienda una revisión técnica detallada del hallazgo."
   },
-  badge: { yellowFrom: 60, greenFrom: 85 }
+  badge: { yellowFrom: 60, greenFrom: 85 },
+  severityRules: {
+    enforceFavorableOk: true,
+    criticalKeywords: [
+      "filtracion", "filtración", "fuga", "activo", "expuesto", "sobrecalent", "quemadura",
+      "grieta estructural", "fractura", "desprendimiento", "moho extendido"
+    ],
+    mediumKeywords: [
+      "desgaste", "mancha", "rayon", "rayón", "fisura", "levantamiento", "desalineacion", "desalineación"
+    ]
+  }
 };
 
 export const PROBLEM_BASE_V22 = {
@@ -429,6 +384,17 @@ export function normalizeScoreConfig(input) {
     yellowFrom: Number.isFinite(Number(next.badge?.yellowFrom)) ? Number(next.badge.yellowFrom) : base.badge.yellowFrom,
     greenFrom: Number.isFinite(Number(next.badge?.greenFrom)) ? Number(next.badge.greenFrom) : base.badge.greenFrom
   };
+  next.severityRules = {
+    enforceFavorableOk: next.severityRules?.enforceFavorableOk !== undefined
+      ? !!next.severityRules.enforceFavorableOk
+      : base.severityRules.enforceFavorableOk,
+    criticalKeywords: Array.isArray(next.severityRules?.criticalKeywords)
+      ? next.severityRules.criticalKeywords.map((x) => String(x || "").trim()).filter(Boolean)
+      : base.severityRules.criticalKeywords,
+    mediumKeywords: Array.isArray(next.severityRules?.mediumKeywords)
+      ? next.severityRules.mediumKeywords.map((x) => String(x || "").trim()).filter(Boolean)
+      : base.severityRules.mediumKeywords
+  };
   next.slotKpiMap = {
     ...base.slotKpiMap,
     ...Object.fromEntries(
@@ -446,7 +412,13 @@ export function normalizeScoreConfig(input) {
 
 export function classifyKpiFromSlot(slot, slotKpiMap) {
   const rawCode = String(slot.slotCode || "");
-  const mapKey = String(slotKpiMap?.[rawCode] || "").toUpperCase();
+  let mapKey = String(slotKpiMap?.[rawCode] || "").toUpperCase();
+  if (!mapKey && slotKpiMap) {
+    const bathMatch = rawCode.match(/^bathroom_(\d+)_/);
+    if (bathMatch) mapKey = String(slotKpiMap[`BATHROOM_1_${rawCode.replace(/^bathroom_\d+_/, '')}`] || "").toUpperCase();
+    const bedMatch = rawCode.match(/^bedroom_(\d+)_/);
+    if (!mapKey && bedMatch) mapKey = String(slotKpiMap[`BEDROOM_1_${rawCode.replace(/^bedroom_\d+_/, '')}`] || "").toUpperCase();
+  }
   if (mapKey) return mapKey;
 
   const code = rawCode.toLowerCase();
@@ -482,31 +454,37 @@ function kpiTitleFromKey(key) {
 }
 
 function computeScoringByKpi(slots, scoreConfig) {
-  const cfg = normalizeScoreConfig(scoreConfig);
+  const cfg = normalizeScoreConfig(scoreConfig || {});
   const byGroup = new Map();
   let totalPenalty = 0;
 
   slots.forEach((s) => {
-    if (!s.severity) return;
     const key = classifyKpiFromSlot(s, cfg.slotKpiMap);
-    if (!key || !cfg.kpis[key]) return;
+    if (!key || !cfg.kpis?.[key]) return;
+    if (!byGroup.has(key)) {
+      byGroup.set(key, { groupKey: key, title: kpiTitleFromKey(key), impact: 0, slotsCount: 0 });
+    }
+    const group = byGroup.get(key);
+    group.slotsCount += 1;
+    if (!s.severity) return;
     const sev = String(s.severity || "").toLowerCase();
     const penalty = Number(cfg.kpis[key][sev] ?? 0);
     totalPenalty += penalty;
-
-    if (!byGroup.has(key)) byGroup.set(key, { groupKey: key, title: kpiTitleFromKey(key), impact: 0 });
-    byGroup.get(key).impact += penalty;
+    group.impact += penalty;
   });
-
-  let score = 100 - totalPenalty;
-  score = Math.max(0, Math.min(100, score));
-  const badge = badgeFromScore(score, cfg);
 
   const byGroupArr = Array.from(byGroup.values())
     .map(g => ({
       ...g,
       scoreIfOnlyGroup: Math.max(0, Math.min(100, 100 - g.impact)),
     }));
+
+  const scoredGroups = byGroupArr.filter(g => g.slotsCount > 0);
+  const avgScore = scoredGroups.length
+    ? scoredGroups.reduce((acc, g) => acc + g.scoreIfOnlyGroup, 0) / scoredGroups.length
+    : 0;
+  const score = Math.max(0, Math.min(100, Math.round(avgScore)));
+  const badge = badgeFromScore(score, cfg);
 
   return {
     scoreVersion: "SCORING_V2_2_KPI",

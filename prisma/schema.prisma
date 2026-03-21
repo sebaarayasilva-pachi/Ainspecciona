@@ -1,7 +1,6 @@
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
-  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 generator client {
@@ -56,6 +55,12 @@ enum UserStatus {
   DISABLED
 }
 
+enum CreditTransactionType {
+  PURCHASE
+  CONSUMPTION
+  ADJUSTMENT
+}
+
 model Tenant {
   id        String       @id @default(uuid())
   name      String
@@ -64,8 +69,28 @@ model Tenant {
   passwordHash String?
   email     String?
   phone     String?
+  facturacionJson Json?  // Razón social, RUT, dirección, comuna, ciudad, giro, email (para boleta/factura)
   status    TenantStatus @default(ACTIVE)
   createdAt DateTime     @default(now())
+
+  mpSubscriptionId    String?  @unique @db.VarChar(64)
+  subscriptionStatus  String?  @db.VarChar(32)  // pending | authorized | paused | cancelled
+  subscriptionExpiresAt DateTime?
+  trialSubscriptionId String?  @unique @db.VarChar(64)
+  trialStatus         String?  @db.VarChar(32) // active | converted | expired | blocked | cancelled
+  trialStartedAt      DateTime?
+  trialEndsAt         DateTime?
+  trialConvertedAt    DateTime?
+  trialCancelledAt    DateTime?
+  trialRealInspectionUsedAt DateTime?
+  trialBlockedReason  String?  @db.VarChar(255)
+  trialEligibilityKey String?  @db.VarChar(191) // rutNorm|emailDomain
+  trialAutoCharge     Boolean  @default(false)
+  trialSource         String?  @db.VarChar(64)
+  referralPartnerId   String?
+  referralPartner     ReferralPartner? @relation(fields: [referralPartnerId], references: [id], onDelete: SetNull)
+  referralCodeSnapshot String? @db.VarChar(64)
+  trialPartnerBenefitsAt DateTime?
 
   users        User[]
   cases        Case[]
@@ -74,8 +99,92 @@ model Tenant {
   slots        Slot[]
   photos       Photo[]
   captureTokens CaptureToken[]
+  creditAccount TenantCredit?
+  creditTransactions CreditTransaction[]
+  magicLinkTokens MagicLinkToken[]
+  partnerCommissionAccruals PartnerCommissionAccrual[]
 
   @@index([rut])
+  @@index([mpSubscriptionId])
+  @@index([trialSubscriptionId])
+  @@index([trialStatus])
+  @@index([trialEndsAt])
+  @@index([trialEligibilityKey])
+  @@index([referralPartnerId])
+}
+
+model ReferralPartner {
+  id               String   @id @default(uuid())
+  code             String   @unique @db.VarChar(32)
+  name             String
+  type             String   @db.VarChar(32)
+  contactEmail     String?  @db.VarChar(255)
+  payoutJson       Json?
+  commissionRate   Decimal  @default(0.15) @db.Decimal(6, 4)
+  active           Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  tenants          Tenant[]
+  commissionAccruals PartnerCommissionAccrual[]
+}
+
+model PartnerCommissionAccrual {
+  id                   String          @id @default(uuid())
+  referralPartnerId    String
+  referralPartner      ReferralPartner @relation(fields: [referralPartnerId], references: [id], onDelete: Cascade)
+  tenantId             String
+  tenant               Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  source               String          @db.VarChar(32)
+  mercadopagoPaymentId String          @unique @db.VarChar(64)
+  grossAmountClp       Int
+  commissionRate     Decimal         @db.Decimal(6, 4)
+  commissionAmountClp  Int
+  status               String          @default("ACCRUED") @db.VarChar(16)
+  createdAt            DateTime        @default(now())
+
+  @@index([referralPartnerId])
+  @@index([tenantId])
+  @@index([createdAt])
+}
+
+model MagicLinkToken {
+  id        String   @id @default(uuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([expiresAt])
+  @@index([token])
+}
+
+model TenantCredit {
+  id        String   @id @default(uuid())
+  tenantId  String   @unique
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  balance   Int      @default(0)
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  @@index([tenantId])
+}
+
+model CreditTransaction {
+  id          String              @id @default(uuid())
+  tenantId    String
+  tenant      Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  amount      Int                 // positivo = ingreso, negativo = consumo
+  type        CreditTransactionType
+  caseId      String?
+  description String?             @db.VarChar(500)
+  createdAt   DateTime            @default(now())
+
+  @@index([tenantId])
+  @@index([createdAt])
 }
 
 model User {
@@ -113,6 +222,7 @@ model ActivationToken {
 
 model Case {
   id           String       @id @default(uuid())
+  shortId      String?      @unique  // 8 caracteres para URLs (ej. informe, certificado)
   tenantId     String?
   tenant       Tenant?      @relation(fields: [tenantId], references: [id], onDelete: SetNull)
   assignedUserId String?
@@ -130,9 +240,23 @@ model Case {
   hasPatio     Boolean      @default(false)
   hasAttic     Boolean      @default(false)
   hasLaundry   Boolean      @default(false)
+  hasElevator  Boolean      @default(false)
+  hasParking   Boolean      @default(false)
+  hasGreenCertificate Boolean @default(false)
   planVersion  String       @default("v1")
   status       CaseStatus   @default(DRAFT)
   createdAt    DateTime     @default(now())
+  executiveSummary String?  @db.LongText
+  reviewStatus    String?  @db.VarChar(32)  // pending_review | approved (Beta: Paulo revisa antes de enviar)
+  reviewedAt      DateTime?
+  reviewerEmail   String?  @db.VarChar(255)
+
+  // Starter: contacto y vínculo con pago
+  contactEmail         String?  @db.VarChar(255)
+  contactName          String?  @db.VarChar(255)
+  contactRut           String?  @db.VarChar(32)
+  mercadopagoPaymentId String?  @unique @db.VarChar(64)
+  facturacionJson      Json?    // Razón social, RUT, dirección, comuna, ciudad, giro, email
 
   slots        Slot[]
   photos       Photo[]
@@ -252,4 +376,50 @@ model CaptureToken {
   @@index([caseId])
   @@index([expiresAt])
   @@index([tenantId])
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  type      String   // 'tenant' | 'exec'
+  tenantId  String?
+  userId    String?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([token])
+  @@index([expiresAt])
+}
+
+model PageView {
+  id        String   @id @default(uuid())
+  path      String   @db.VarChar(512)
+  referrer  String?  @db.VarChar(1024)
+  ua        String?  @db.VarChar(512)
+  ip        String?  @db.VarChar(64)
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([path])
+}
+
+// Starter: datos capturados antes del pago (contacto + facturación)
+model PendingStarterPayment {
+  id               String    @id @default(uuid())
+  contactNombre    String    @db.VarChar(120)
+  contactApellido  String    @db.VarChar(120)
+  contactRut       String    @db.VarChar(32)
+  contactEmail     String    @db.VarChar(255)
+  necesitaFactura  Boolean   @default(false)
+  facturaRazonSocial String? @db.VarChar(255)
+  facturaRut       String?   @db.VarChar(32)
+  facturaDireccion String?   @db.VarChar(255)
+  facturaComuna    String?   @db.VarChar(120)
+  facturaCiudad    String?   @db.VarChar(120)
+  facturaGiro      String?   @db.VarChar(120)
+  facturaEmail     String?   @db.VarChar(255)
+  usedAt           DateTime?
+  createdAt        DateTime  @default(now())
+
+  @@index([createdAt])
 }

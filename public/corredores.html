@@ -3,123 +3,191 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Corredores · Ainspecciona</title>
+  <title>Ainspecciona · Inspección técnica para corredores</title>
+  <meta name="description" content="Inspección técnica digital para corredores, oficinas inmobiliarias y administradores. Fotografías guiadas, informe técnico y certificado publicable en 24h." />
+  <link rel="canonical" href="https://ainspecciona.com/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://ainspecciona.com/" />
+  <meta property="og:title" content="Ainspecciona · Inspección técnica para corredores" />
+  <meta property="og:description" content="Inspección técnica digital para corredores, oficinas inmobiliarias y administradores. Fotografías guiadas, informe técnico y certificado publicable en 24h." />
+  <meta property="og:image" content="https://ainspecciona.com/assets/certificado-4O7KF9GX.jpg" />
+  <meta property="og:locale" content="es_CL" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Ainspecciona · Inspección técnica para corredores" />
+  <meta name="twitter:description" content="Inspección técnica digital para corredores, oficinas inmobiliarias y administradores. Fotografías guiadas, informe técnico y certificado publicable en 24h." />
+  <meta name="twitter:image" content="https://ainspecciona.com/assets/certificado-4O7KF9GX.jpg" />
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"Organization","name":"Ainspecciona","url":"https://ainspecciona.com","logo":"https://ainspecciona.com/assets/Logo%20Ainspecciona.png","description":"Sistema de inspección técnica digital para corredores, oficinas inmobiliarias, administradores y propietarios. Fotografías guiadas, informe técnico y certificado publicable en 24h."}
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/header.css" />
   <style>
     * { box-sizing: border-box; }
-    body {
+    html, body {
       margin: 0;
-      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+    body {
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
       background: #F6F7F9;
       color: #0f172a;
-    }
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 20;
-      background: #ffffff;
-      border-bottom: 1px solid #e5e7eb;
-    }
-    .nav {
-      max-width: none;
-      margin: 0;
-      padding: 20px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
-      color: inherit;
-      font-weight: 800;
-    }
-    .brand img { height: 70px; }
-    .primaryLinks {
-      display: flex;
-      gap: 16px;
-      align-items: center;
-      margin-right: auto;
-      padding-left: 8px;
-    }
-    .primaryLinks a {
-      text-decoration: none;
-      color: #1f2937;
-      font-weight: 700;
-      font-size: 14px;
-      padding-bottom: 4px;
-    }
-    .primaryLinks a.active {
-      color: #1d4ed8;
-      border-bottom: 2px solid #1d4ed8;
-    }
-    .links {
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    .links a {
-      text-decoration: none;
-      color: #1f2937;
-      font-weight: 600;
-      font-size: 14px;
-    }
-    .cta {
-      padding: 10px 14px;
-      border-radius: 999px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: #fff;
-      text-decoration: none;
-      font-weight: 800;
-      font-size: 14px;
     }
     .section {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 48px 20px;
+      padding: 48px 48px;
+      box-sizing: border-box;
+    }
+    /* Contenedor común: mismo ancho y márgenes (48px) en toda la página */
+    .page-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 48px;
+      box-sizing: border-box;
     }
     .hero {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 48px;
+      gap: 56px;
       align-items: center;
-      padding: 80px 20px;
-      max-width: 1200px;
+      padding: 100px 48px 96px;
+      box-sizing: border-box;
+      width: 100%;
+      max-width: 1700px;
       margin: 0 auto;
+      min-width: 0;
+    }
+    .hero > div:first-child {
+      margin-left: 0;
+      min-width: 0;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
     }
     .heroWrap {
-      background: radial-gradient(circle at 20% 20%, #1f2b3a 0%, #0b121b 65%, #070b12 100%);
+      width: 100%;
+      max-width: 100%;
+      background: linear-gradient(135deg, #070B16 0%, #0B1430 100%);
       color: #e5eef7;
     }
     .hero h1 {
-      font-size: 40px;
-      margin: 0 0 18px;
-      line-height: 1.2;
+      font-size: 52px;
+      margin: 0 0 24px;
+      line-height: 1.15;
       font-weight: 800;
+      letter-spacing: -0.04em;
     }
-    .hero p { font-size: 16px; color: #cbd5e1; margin: 0 0 18px; }
-    .hero ul { margin: 0 0 22px; padding-left: 18px; color: #e2e8f0; }
-    .hero li { margin-bottom: 8px; }
-    .hero img {
+    .hero p { font-size: 18px; color: #cbd5e1; margin: 0 0 20px; line-height: 1.55; }
+    .hero ul { margin: 0 0 28px; padding-left: 22px; color: #e2e8f0; font-size: 18px; line-height: 1.5; }
+    .hero li { margin-bottom: 10px; }
+    .hero img,
+    .hero .heroVideo {
       width: 100%;
+      max-width: 712px;
+      height: auto;
+      min-width: 0;
+      display: block;
+      margin-left: auto;
+      margin-right: 0;
       border-radius: 16px;
       box-shadow: 0 18px 40px rgba(3, 7, 18, 0.45);
+    }
+    .hero .heroVideo {
+      object-fit: cover;
+    }
+    .heroVideoWrap {
+      position: relative;
+      width: 100%;
+      max-width: 712px;
+      margin-left: auto;
+      margin-right: 0;
+      min-width: 0;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      border-radius: 16px;
+      box-shadow: 0 18px 40px rgba(3, 7, 18, 0.45);
+    }
+    .heroVideoPoster {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      border-radius: 16px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    .heroVideoPoster[aria-hidden="true"] {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .heroVideoPosterFrame {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      border-radius: 16px;
+      object-fit: cover;
+    }
+    .heroVideoPlayBtn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 0;
+      border: none;
+      background: none;
+      cursor: pointer;
+      color: #fff;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+    .heroVideoPlayBtn:hover {
+      transform: translate(-50%, -50%) scale(1.08);
+      opacity: 0.95;
+    }
+    .heroVideoPoster .heroVideoPlayBtn svg {
+      display: block;
+      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
+    }
+    .heroVideoWrap .heroVideo {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      max-width: 100%;
+      object-fit: cover;
     }
     .heroCta {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 12px 22px;
+      padding: 14px 26px;
       border-radius: 14px;
       background: linear-gradient(135deg, #4f46e5 0%, #2563eb 100%);
       color: #fff;
       text-decoration: none;
       font-weight: 800;
+      font-size: 16px;
     }
+    .heroCtaGhost {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 22px;
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: rgba(15, 23, 42, 0.4);
+      color: #e2e8f0;
+      text-decoration: none;
+      font-weight: 800;
+      font-size: 15px;
+      cursor: pointer;
+    }
+    .heroCtaGhost:hover { border-color: rgba(56, 189, 248, 0.8); color: #dbeafe; }
+    .heroCtaRow { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
     .pill {
       display: inline-flex;
       gap: 8px;
@@ -146,8 +214,9 @@
     .card h3 { margin: 0 0 10px; }
     .muted { color: #64748b; }
     .sectionTitle {
-      font-size: 22px;
+      font-size: 28px;
       margin: 0 0 18px;
+      font-weight: 800;
     }
     .ctaRow {
       display: flex;
@@ -164,15 +233,91 @@
       font-weight: 700;
       background: #fff;
     }
+    .trial-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 8, 23, 0.78);
+      backdrop-filter: blur(3px);
+      z-index: 120;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .trial-modal-overlay.open { display: flex; }
+    .trial-modal {
+      width: min(760px, 100%);
+      max-height: calc(100vh - 40px);
+      overflow: auto;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 24px 22px;
+      color: #e2e8f0;
+    }
+    .trial-modal h3 { margin: 0 0 8px; font-size: 22px; color: #f8fafc; }
+    .trial-modal .desc { margin: 0 0 16px; font-size: 14px; color: #94a3b8; line-height: 1.5; }
+    .trial-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .trial-grid .full { grid-column: 1 / -1; }
+    .trial-modal label { display: block; margin: 0 0 6px; font-size: 13px; color: #cbd5e1; font-weight: 700; }
+    .trial-modal input {
+      width: 100%;
+      padding: 11px 12px;
+      border-radius: 10px;
+      border: 1px solid #334155;
+      background: #020617;
+      color: #f8fafc;
+      font-size: 14px;
+      font-family: inherit;
+    }
+    .trial-modal input:focus {
+      outline: none;
+      border-color: #22d3ee;
+      box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.15);
+    }
+    .trial-note {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      background: rgba(14, 116, 144, 0.16);
+      color: #bae6fd;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .trial-btn-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+    .trial-btn-primary {
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #7c3aed 0%, #22d3ee 100%);
+      color: #020617;
+      font-weight: 900;
+      padding: 12px 16px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .trial-btn-secondary {
+      border: 1px solid #334155;
+      border-radius: 10px;
+      background: transparent;
+      color: #cbd5e1;
+      font-weight: 700;
+      padding: 12px 16px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .trial-error { margin-top: 10px; font-size: 13px; color: #f87171; min-height: 18px; }
     footer {
-      background: linear-gradient(135deg, #0b1220 0%, #0f172a 60%, #0b1220 100%);
+      background: linear-gradient(135deg, #070B16 0%, #0B1430 60%, #070B16 100%);
       color: #e5e7eb;
-      padding: 60px 20px 40px;
+      padding: 60px 0 40px;
       border-top: 1px solid rgba(148, 163, 184, 0.2);
     }
     footer .footerWrap {
       max-width: 1200px;
       margin: 0 auto;
+      padding: 0 48px;
+      box-sizing: border-box;
       display: grid;
       grid-template-columns: 1.2fr 1fr 1fr 1fr;
       gap: 24px;
@@ -183,7 +328,7 @@
       flex-direction: column;
       gap: 10px;
     }
-    .footerBrand img { height: 36px; width: auto; }
+    .footerBrand img { height: 36px; width: auto; object-fit: contain; }
     .footerTitle { font-weight: 800; font-size: 16px; }
     .footerDesc { color: #94a3b8; font-size: 14px; line-height: 1.5; }
     .footerCol h4 { margin: 0 0 10px; font-size: 14px; }
@@ -205,7 +350,8 @@
     .footerBottom {
       max-width: 1200px;
       margin: 28px auto 0;
-      padding-top: 18px;
+      padding: 18px 48px 0;
+      box-sizing: border-box;
       border-top: 1px solid rgba(148, 163, 184, 0.2);
       color: #94a3b8;
       font-size: 12px;
@@ -214,29 +360,343 @@
       flex-wrap: wrap;
       gap: 10px;
     }
+    /* Tablet */
+    @media (max-width: 1100px) {
+      .hero { grid-template-columns: 1fr; gap: 32px; }
+      .hero img, .hero .heroVideo, .hero .heroVideoWrap { margin-left: 0; margin-right: auto; }
+    }
     @media (max-width: 900px) {
-      .hero { grid-template-columns: 1fr; }
+      .page-content, section[id] .page-content { padding: 0 24px; }
+      section[id] { padding: 0; }
+      footer .footerWrap { padding: 0 24px; }
+      .footerBottom { padding: 18px 24px 0; }
+      .hero { padding: 60px 24px 56px; }
+      .hero img, .hero .heroVideo, .hero .heroVideoWrap { margin-left: 0; margin-right: auto; }
+      .hero h1 { font-size: 36px; }
+      .hero p, .hero ul { font-size: 16px; }
       .cards, footer .footerWrap { grid-template-columns: 1fr; }
+      .report-gallery-main { max-height: min(500px, 60vh); }
+    }
+    /* Móvil */
+    @media (max-width: 600px) {
+      .page-content, section[id] .page-content { padding: 0 16px; }
+      footer .footerWrap { padding: 0 16px; }
+      .footerBottom { padding: 18px 16px 0; }
+      .hero { padding: 40px 16px 48px; }
+      .hero h1 { font-size: 28px; letter-spacing: -0.02em; }
+      .hero p, .hero ul { font-size: 15px; }
+      .report-title { font-size: 22px; }
+      .report-desc { font-size: 17px; }
+      .report-gallery-main { max-height: min(400px, 55vh); }
+      .report-thumb { width: 56px; height: 56px; }
+    }
+    /* Móvil pequeño */
+    @media (max-width: 480px) {
+      .hero h1 { font-size: 24px; }
+      .heroCta { font-size: 14px; padding: 12px 20px; }
+      .footerBottom { flex-direction: column; align-items: flex-start; text-align: left; }
+    }
+    /* SVGs: asegurar escalado fluido en móvil */
+    section[id] .page-content svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-width: 100%;
+    }
+
+    /* Secciones con id: mismo contenedor que product (ancho completo + page-content 1700px) */
+    section[id] {
+      width: 100%;
+      max-width: 100vw;
+      margin-left: 0;
+      box-sizing: border-box;
+      padding: 0;
+      overflow-x: hidden;
+    }
+    section[id] .page-content {
+      max-width: 1700px;
+      margin: 0 auto;
+      padding: 0 48px;
+      box-sizing: border-box;
+    }
+    #product {
+      background: linear-gradient(180deg, #070D14 0%, #0B1622 50%, #070D14 100%);
+    }
+    .product-mobile { display: none; }
+    .product-desktop { display: block; }
+    @media (max-width: 900px) {
+      .product-mobile { display: block; }
+      .product-desktop { display: none; }
+    }
+    .product-mobile-title {
+      font-size: 24px; font-weight: 700; color: #EAF2FF; margin: 0 0 16px; line-height: 1.3;
+    }
+    .product-mobile-desc {
+      font-size: 16px; color: #A9B8CC; line-height: 1.5; margin: 0 0 20px;
+    }
+    .product-mobile-bullets {
+      list-style: none; padding: 0; margin: 0 0 20px;
+    }
+    .product-mobile-bullets li {
+      font-size: 15px; color: #CFE0F6; padding-left: 24px; position: relative; margin-bottom: 12px;
+    }
+    .product-mobile-bullets li::before {
+      content: ""; position: absolute; left: 0; top: 6px; width: 8px; height: 8px;
+      border-radius: 50%; background: #39C6FF;
+    }
+    .product-mobile-mono {
+      font-family: ui-monospace, monospace; font-size: 12px; color: #8EA2BA; margin: 0 0 24px;
+    }
+    .product-mobile-card {
+      background: linear-gradient(180deg, #0F1C28 0%, #0B1520 100%);
+      border: 1px solid #203142; border-radius: 16px; overflow: hidden;
+    }
+    .product-mobile-card-header {
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
+      padding: 16px 18px; border-bottom: 1px solid #203142;
+      font-size: 14px; font-weight: 600; color: #EAF2FF;
+    }
+    .product-mobile-badge {
+      background: linear-gradient(135deg, #FFD36A, #E8A93A); color: #07101A;
+      padding: 4px 12px; border-radius: 10px; font-size: 12px; font-weight: 700;
+    }
+    .product-mobile-card-body { padding: 12px 18px 18px; }
+    .product-mobile-slot {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 14px; background: #0F1C28; border: 1px solid #203142;
+      border-radius: 12px; margin-bottom: 10px; font-size: 14px;
+    }
+    .product-mobile-slot span:first-child { color: #CFE0F6; }
+    .product-mobile-slot .ok { background: linear-gradient(135deg, #27E38B, #1AAE69); color: #07101A; padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 12px; }
+    .product-mobile-slot .med { background: linear-gradient(135deg, #FFD36A, #E8A93A); color: #07101A; padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 12px; }
+    .product-mobile-slot .alto { background: linear-gradient(135deg, #FF6B6B, #E54242); color: #fff; padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 12px; }
+    #product .page-content { padding-top: 48px; padding-bottom: 48px; }
+    @media (max-width: 600px) {
+      .product-mobile-title { font-size: 20px; }
+      .product-mobile-desc { font-size: 15px; }
+      #product .page-content { padding-top: 32px; padding-bottom: 32px; }
+    }
+    #report {
+      background: linear-gradient(135deg, #070B16 0%, #0B1430 100%);
+    }
+    #report .page-content { padding-top: 48px; padding-bottom: 48px; }
+    @media (max-width: 600px) {
+      #report .page-content { padding-top: 32px; padding-bottom: 32px; }
+      .report-layout { gap: 32px; }
+    }
+    #modelo-analisis {
+      background: linear-gradient(180deg, #05090F 0%, #07101A 50%, #05080D 100%);
+    }
+    #cierre {
+      background: radial-gradient(ellipse 90% 70% at 35% 18%, #0B2236 0%, #071A2A 45%, #04121E 100%);
+    }
+    #demo {
+      background: linear-gradient(180deg, #04070B 0%, #07101A 50%, #03060A 100%);
+    }
+    #flujo {
+      background: linear-gradient(135deg, #070B16 0%, #0B1430 100%);
+    }
+    .report-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 56px;
+      align-items: center;
+      width: 100%;
+      max-width: 1700px;
+      margin: 0 auto;
+      padding: 80px 48px;
+      box-sizing: border-box;
+    }
+    .report-text {
+      color: #EAF2FF;
+    }
+    .report-title {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.4px;
+      margin: 0 0 24px;
+      color: #EAF2FF;
+    }
+    .report-desc {
+      font-size: 20px;
+      font-weight: 400;
+      color: #A9B8CC;
+      line-height: 1.5;
+      margin: 0 0 32px;
+    }
+    .report-bullets {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .report-bullets li {
+      font-size: 15px;
+      color: #EAF2FF;
+      padding-left: 26px;
+      position: relative;
+      margin-bottom: 16px;
+    }
+    .report-bullets li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 6px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #39C6FF;
+    }
+    .report-gallery {
+      min-width: 0;
+      max-width: 100%;
+      display: flex;
+      justify-content: flex-start;
+    }
+    .report-gallery-main {
+      border-radius: 18px;
+      overflow: auto;
+      background: #0B1520;
+      border: 1px solid #203142;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+      width: 100%;
+      max-width: 620px;
+      min-height: 220px;
+      max-height: min(560px, 65vh);
+      scrollbar-width: thin;
+      scrollbar-color: #475569 #1e293b;
+    }
+    .report-gallery-main::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+    .report-gallery-main::-webkit-scrollbar-track {
+      background: #1e293b;
+      border-radius: 5px;
+    }
+    .report-gallery-main::-webkit-scrollbar-thumb {
+      background: #475569;
+      border-radius: 5px;
+    }
+    .report-gallery-main::-webkit-scrollbar-thumb:hover {
+      background: #64748b;
+    }
+    .report-gallery-main img {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-width: 100%;
+      vertical-align: top;
+    }
+    .report-gallery-thumbs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+      justify-content: center;
+    }
+    .report-thumb {
+      width: 72px;
+      height: 72px;
+      padding: 0;
+      border: 2px solid transparent;
+      border-radius: 10px;
+      overflow: hidden;
+      cursor: pointer;
+      background: #0B1520;
+      transition: border-color 0.2s, transform 0.25s ease;
+    }
+    .report-thumb:hover {
+      border-color: #39C6FF;
+      transform: scale(1.12);
+    }
+    .report-thumb.active {
+      border-color: #39C6FF;
+      box-shadow: 0 0 0 1px #39C6FF;
+    }
+    .report-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    @media (max-width: 900px) {
+      .report-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Secciones SVG: mobile/desktop toggle */
+    .section-mobile { display: none; }
+    .section-desktop { display: block; }
+    @media (max-width: 900px) {
+      .section-mobile { display: block; }
+      .section-desktop { display: none; }
+    }
+    .section-kicker { font-size: 12px; font-weight: 700; letter-spacing: 0.6px; color: #8EA2BA; text-transform: uppercase; display: block; margin-bottom: 8px; }
+    .section-title { font-size: 24px; font-weight: 700; color: #EAF2FF; margin: 0 0 16px; line-height: 1.3; }
+    .section-desc { font-size: 16px; color: #A9B8CC; line-height: 1.5; margin: 0 0 24px; }
+    .section-foot { font-family: ui-monospace, monospace; font-size: 12px; color: #8EA2BA; margin: 24px 0 0; }
+
+    /* Modelo-analisis mobile */
+    .modelo-slots { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 24px; }
+    .slot-card { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; background: #0B1520; border: 1px solid #203142; border-radius: 12px; font-size: 14px; color: #D7E6FA; }
+    .slot-card .badge { padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 12px; }
+    .slot-card .badge.ok { background: linear-gradient(135deg, #27E38B, #1AAE69); color: #07101A; }
+    .slot-card .badge.med { background: linear-gradient(135deg, #FFD36A, #E8A93A); color: #07101A; }
+    .slot-card .badge.alto { background: linear-gradient(135deg, #FF6B6B, #E54242); color: #fff; }
+    .slot-diagnostico { background: #0B1520; border: 1px solid #203142; border-radius: 14px; padding: 18px; }
+    .slot-diagnostico h3 { font-size: 16px; color: #EAF2FF; margin: 0 0 12px; }
+    .slot-diagnostico .mono { font-family: ui-monospace, monospace; font-size: 12px; color: #8EA2BA; margin: 0 0 8px; }
+    .slot-diagnostico .msg { font-size: 14px; color: #D7E6FA; margin: 0; }
+    @media (max-width: 600px) { .modelo-slots { grid-template-columns: 1fr; } }
+
+    /* Flujo mobile */
+    .flujo-steps { display: flex; flex-direction: column; gap: 16px; }
+    .flujo-step { background: #071A2A; border: 1px solid #1F3447; border-radius: 16px; padding: 20px; }
+    .flujo-step .n { font-size: 12px; font-weight: 800; color: #38BDF8; display: block; margin-bottom: 8px; }
+    .flujo-step h3 { font-size: 16px; color: #E5E7EB; margin: 0 0 8px; }
+    .flujo-step p { font-size: 13px; color: #94A3B8; line-height: 1.4; margin: 0; }
+
+    /* Cierre mobile */
+    .cierre-cards { display: flex; flex-direction: column; gap: 16px; }
+    .cierre-card { background: #071A2A; border: 1px solid #1F3447; border-radius: 16px; padding: 20px; }
+    .cierre-card h3 { font-size: 18px; color: #E5E7EB; margin: 0 0 8px; }
+    .cierre-card p { font-size: 13px; color: #AAB6C6; margin: 0 0 12px; line-height: 1.4; }
+    .cierre-card .stars { color: #F59E0B; font-size: 18px; letter-spacing: 2px; }
+    .cierre-card .small { font-size: 12px; color: #CBD5E1; margin: 0 !important; }
+    .cierre-nota { background: #061826; border: 1px solid #1F3447; border-radius: 14px; padding: 16px; font-size: 13px; color: #94A3B8; margin-top: 24px; line-height: 1.5; }
+
+    /* Demo mobile */
+    .demo-bullets { list-style: none; padding: 0; margin: 0 0 24px; }
+    .demo-bullets li { font-size: 15px; color: #D7E6FA; padding-left: 24px; position: relative; margin-bottom: 10px; }
+    .demo-bullets li::before { content: ""; position: absolute; left: 0; top: 6px; width: 8px; height: 8px; border-radius: 50%; background: #39C6FF; }
+    .demo-cta { display: inline-block; padding: 14px 24px; border-radius: 12px; background: linear-gradient(135deg, #39C6FF, #2C7BFF); color: #07101A; font-weight: 700; font-size: 14px; text-decoration: none; }
+    .demo-cta:hover { opacity: 0.95; }
+    .demo-foot { font-family: ui-monospace, monospace; font-size: 11px; color: #8EA2BA; margin-top: 24px; }
+
+    /* Padding secciones mobile */
+    #modelo-analisis .page-content, #flujo .page-content, #cierre .page-content, #demo .page-content { padding-top: 48px; padding-bottom: 48px; }
+    @media (max-width: 600px) {
+      .section-title { font-size: 20px; }
+      .section-desc { font-size: 15px; }
+      #modelo-analisis .page-content, #flujo .page-content, #cierre .page-content, #demo .page-content { padding-top: 32px; padding-bottom: 32px; }
     }
   </style>
 </head>
 <body>
-  <header>
+  <header class="site-header">
     <div class="nav">
       <a class="brand" href="/">
         <img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" />
       </a>
-      <div class="primaryLinks">
-        <a href="/personas.html">Personas</a>
-        <a class="active" href="/corredores.html">Corredores</a>
-      </div>
-      <div class="links">
+      <div class="navLinks">
         <a href="/como-funciona.html">Cómo funciona</a>
-        <a href="/modelo.html">Modelo</a>
-        <a href="/integracion.html">Integración</a>
+        <a href="/precios">Precios</a>
         <a href="/faq.html">FAQ</a>
         <a href="/contacto.html">Contacto</a>
-        <a class="cta" href="/formulario">Generar inspección</a>
+      </div>
+      <div class="topActions">
+        <button class="btn outline" id="loginBtn" type="button">Acceso</button>
       </div>
     </div>
   </header>
@@ -245,1086 +705,512 @@
     <div class="hero">
       <div>
         <h1>
-          Tus avisos inmobiliarios<br />
-          pueden mostrar una evaluación<br />
-          técnica visible
+          Convierte tus avisos en<br />
+          propiedades inspeccionadas
         </h1>
         <p>
-          Ainspecciona genera automáticamente una evaluación técnica y un informe
-          de respaldo, visibles directamente en el aviso y en el motor de búsqueda.
+          Detecta hallazgos visibles y genera un informe del estado real antes de publicar la propiedad.
         </p>
         <ul>
-          <li>Evaluación técnica visible mediante estrellas</li>
-          <li>Informe técnico automático como respaldo</li>
-          <li>Integrable en portales inmobiliarios y sitios propios</li>
+          <li>Comparte un informe claro con tus clientes</li>
+          <li>Aumenta la confianza con el estado real de la propiedad</li>
+          <li>Acelera la decisión y cierra más rápido</li>
         </ul>
-        <a class="heroCta" href="/agendar.html">Agendar reunión</a>
+        <div class="heroCtaRow">
+          <a class="heroCta" href="/inspeccionar">Realizar una inspección</a>
+          <button class="heroCtaGhost" id="openTrialModalBtn" type="button">Probar Free Trial Business</button>
+        </div>
       </div>
-      <img src="/assets/Aviso-simulado.png" alt="Aviso inmobiliario" />
+      <div class="heroVideoWrap">
+        <div class="heroVideoPoster" id="heroVideoPoster">
+          <canvas class="heroVideoPosterFrame" id="heroVideoPosterFrame"></canvas>
+          <button type="button" class="heroVideoPlayBtn" id="heroVideoPlayBtn" aria-label="Reproducir video">
+            <svg width="80" height="80" viewBox="0 0 80 80" fill="none" aria-hidden="true">
+              <circle cx="40" cy="40" r="38" fill="rgba(0,0,0,0.5)" stroke="rgba(255,255,255,0.9)" stroke-width="3"/>
+              <path d="M32 26v28l22-14-22-14z" fill="#fff"/>
+            </svg>
+          </button>
+        </div>
+        <video
+          id="heroVideo"
+          class="heroVideo"
+          loop
+          playsinline
+          controls
+          preload="auto"
+        >
+          <source src="/assets/video-hero.mp4" type="video/mp4" />
+          Tu navegador no soporta la reproducción de video.
+        </video>
+      </div>
     </div>
   </section>
 
-  <section id="product">
-    <div style="width:100%; overflow:hidden;">
-      <svg xmlns="http://www.w3.org/2000/svg" width="1440" height="720" viewBox="0 0 1440 720" style="display:block; width:100%; height:auto;">
-        <defs>
-          <radialGradient id="bgGlow" cx="72%" cy="32%" r="70%">
-            <stop offset="0%" stop-color="#11314A" stop-opacity="0.65"/>
-            <stop offset="45%" stop-color="#0B1622" stop-opacity="0.75"/>
-            <stop offset="100%" stop-color="#070D14" stop-opacity="1"/>
-          </radialGradient>
-          <linearGradient id="ctaGrad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#39C6FF"/>
-            <stop offset="100%" stop-color="#2C7BFF"/>
-          </linearGradient>
-          <linearGradient id="cardGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#0F1C28"/>
-            <stop offset="100%" stop-color="#0B1520"/>
-          </linearGradient>
-          <style>
-            .h1 { font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; font-size: 46px; font-weight: 650; fill: #EAF2FF; }
-            .h2 { font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; font-size: 18px; font-weight: 450; fill: #A9B8CC; }
-            .b  { font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; font-size: 15px; font-weight: 500; fill: #CFE0F6; }
-            .muted { font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; font-size: 13px; font-weight: 500; fill: #8EA2BA; }
-            .btn { font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; font-size: 14px; font-weight: 600; fill: #07101A; }
-            .btn2 { font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; font-size: 14px; font-weight: 600; fill: #CFE0F6; }
-            .label { font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; font-size: 12px; font-weight: 650; letter-spacing: 0.2px; }
-            .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 11px; fill: #8EA2BA; }
-            .stroke { stroke: #203142; stroke-opacity: 0.9; }
-          </style>
-          <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
-            <feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#000000" flood-opacity="0.55"/>
-          </filter>
-          <filter id="cardShadow" x="-30%" y="-30%" width="160%" height="160%">
-            <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#000000" flood-opacity="0.45"/>
-          </filter>
-          <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse">
-            <path d="M36 0H0V36" fill="none" stroke="#142333" stroke-opacity="0.55" stroke-width="1"/>
-          </pattern>
-          <linearGradient id="gGreen" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#27E38B"/>
-            <stop offset="100%" stop-color="#1AAE69"/>
-          </linearGradient>
-          <linearGradient id="gYellow" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#FFD36A"/>
-            <stop offset="100%" stop-color="#E8A93A"/>
-          </linearGradient>
-          <linearGradient id="gRed" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#FF6B6B"/>
-            <stop offset="100%" stop-color="#E54242"/>
-          </linearGradient>
-        </defs>
-
-        <rect x="0" y="0" width="1440" height="720" fill="url(#bgGlow)"/>
-        <rect x="0" y="0" width="1440" height="720" fill="url(#grid)" opacity="0.45"/>
-
-        <g transform="translate(92,150)">
-          <text class="h1" x="0" y="0">
-            <tspan x="0" dy="0">Inspección inmobiliaria</tspan>
-            <tspan x="0" dy="54">automatizada con IA</tspan>
-          </text>
-
-          <text class="h2" x="0" y="124">
-            <tspan x="0" dy="0">Analizamos propiedades a partir de fotografías guiadas,</tspan>
-            <tspan x="0" dy="28">generando diagnósticos técnicos inmediatos, objetivos y escalables.</tspan>
-          </text>
-
-          <g transform="translate(0,190)">
-            <circle cx="6" cy="6" r="4" fill="#39C6FF"/>
-            <text class="b" x="22" y="11">Sin visitas presenciales iniciales</text>
-
-            <circle cx="6" cy="44" r="4" fill="#39C6FF"/>
-            <text class="b" x="22" y="49">Análisis por componente (slots técnicos)</text>
-
-            <circle cx="6" cy="82" r="4" fill="#39C6FF"/>
-            <text class="b" x="22" y="87">Resultado accionable: Verde · Amarillo · Rojo</text>
-          </g>
-
-          <g transform="translate(0,310)">
-            <rect x="0" y="0" width="190" height="46" rx="12" fill="url(#ctaGrad)"/>
-            <text x="22" y="29" class="btn">Ver cómo funciona</text>
-            <text x="156" y="29" class="btn" style="fill:#07101A; opacity:0.85;">→</text>
-
-            <rect x="206" y="0" width="220" height="46" rx="12" fill="#0B1520" class="stroke" stroke-width="1"/>
-            <text x="228" y="29" class="btn2">Integraciones y arquitectura</text>
-          </g>
-
-          <g transform="translate(0,392)" opacity="0.9">
-            <text class="mono" x="0" y="0">Output por slot:</text>
-            <text class="mono" x="114" y="0">analysis_code</text>
-            <text class="mono" x="220" y="0">· severity</text>
-            <text class="mono" x="292" y="0">· confidence</text>
-            <text class="mono" x="396" y="0">· message</text>
-          </g>
-        </g>
-
-        <g transform="translate(790,132)" filter="url(#softShadow)">
-          <rect x="0" y="0" width="558" height="456" rx="18" fill="url(#cardGrad)" class="stroke" stroke-width="1"/>
-          <g transform="translate(22,20)">
-            <text class="b" x="0" y="18" style="font-size:14px; font-weight:650; fill:#EAF2FF;">Informe — Caso #A-10492</text>
-            <text class="muted" x="0" y="40">Estado del inmueble basado en evidencia fotográfica</text>
-            <g transform="translate(360,6)">
-              <rect x="0" y="0" width="150" height="34" rx="12" fill="#0B1520" class="stroke" stroke-width="1"/>
-              <circle cx="18" cy="17" r="6" fill="url(#gYellow)"/>
-              <text class="label" x="32" y="21" fill="#EAF2FF">AMARILLO</text>
-              <text class="muted" x="106" y="21" style="font-size:12px;">/ 72</text>
-            </g>
-          </g>
-          <line x1="0" y1="78" x2="558" y2="78" stroke="#203142" stroke-opacity="0.75"/>
-
-          <g transform="translate(18,96)" filter="url(#cardShadow)">
-            <rect x="0" y="0" width="255" height="338" rx="14" fill="#0B1520" class="stroke" stroke-width="1"/>
-            <text class="muted" x="14" y="26">Slots técnicos</text>
-            <g transform="translate(12,42)">
-              <rect x="0" y="0" width="231" height="56" rx="12" fill="#0F1C28" class="stroke" stroke-width="1"/>
-              <text class="b" x="14" y="23" style="font-size:14px;">Baño</text>
-              <text class="muted" x="14" y="42">Humedad / sello ducha</text>
-              <rect x="168" y="14" width="52" height="26" rx="10" fill="url(#gYellow)"/>
-              <text class="label" x="182" y="32" fill="#07101A">MED</text>
-
-              <g transform="translate(0,68)">
-                <rect x="0" y="0" width="231" height="56" rx="12" fill="#0F1C28" class="stroke" stroke-width="1"/>
-                <text class="b" x="14" y="23" style="font-size:14px;">Cocina</text>
-                <text class="muted" x="14" y="42">Fugas / sifón</text>
-                <rect x="168" y="14" width="52" height="26" rx="10" fill="url(#gGreen)"/>
-                <text class="label" x="182" y="32" fill="#07101A">OK</text>
-              </g>
-
-              <g transform="translate(0,136)">
-                <rect x="0" y="0" width="231" height="56" rx="12" fill="#0F1C28" class="stroke" stroke-width="1"/>
-                <text class="b" x="14" y="23" style="font-size:14px;">Muros</text>
-                <text class="muted" x="14" y="42">Fisuras / pintura</text>
-                <rect x="168" y="14" width="52" height="26" rx="10" fill="url(#gYellow)"/>
-                <text class="label" x="182" y="32" fill="#07101A">MED</text>
-              </g>
-
-              <g transform="translate(0,204)">
-                <rect x="0" y="0" width="231" height="56" rx="12" fill="#0F1C28" class="stroke" stroke-width="1"/>
-                <text class="b" x="14" y="23" style="font-size:14px;">Instalaciones</text>
-                <text class="muted" x="14" y="42">Eléctrico / térmico</text>
-                <rect x="168" y="14" width="52" height="26" rx="10" fill="url(#gRed)"/>
-                <text class="label" x="182" y="32" fill="#07101A">ALTO</text>
-              </g>
-            </g>
-          </g>
-
-          <g transform="translate(288,96)" filter="url(#cardShadow)">
-            <rect x="0" y="0" width="252" height="338" rx="14" fill="#0B1520" class="stroke" stroke-width="1"/>
-            <text class="muted" x="14" y="26">Detalle de hallazgo</text>
-            <g transform="translate(14,44)">
-              <rect x="0" y="0" width="224" height="120" rx="14" fill="#0F1C28" class="stroke" stroke-width="1"/>
-              <text class="b" x="14" y="26" style="font-size:14px;">Instalaciones — Riesgo alto</text>
-              <text class="mono" x="14" y="48">analysis_code: ELEC_RISK_01</text>
-              <text class="mono" x="14" y="66">severity: 1.5</text>
-              <text class="mono" x="14" y="84">confidence: 0.82</text>
-              <rect x="14" y="92" width="86" height="24" rx="10" fill="url(#gRed)"/>
-              <text class="label" x="28" y="109" fill="#07101A">ROJO</text>
-            </g>
-            <g transform="translate(14,180)">
-              <rect x="0" y="0" width="224" height="120" rx="14" fill="#0F1C28" class="stroke" stroke-width="1"/>
-              <text class="muted" x="14" y="26">Mensaje</text>
-              <text class="b" x="14" y="52" style="font-size:14px; font-weight:520; fill:#D7E6FA;">
-                <tspan x="14" dy="0">Se observan señales compatibles</tspan>
-                <tspan x="14" dy="22">con instalación expuesta /</tspan>
-                <tspan x="14" dy="22">terminación deficiente.</tspan>
-              </text>
-            </g>
-          </g>
-
-          <g transform="translate(22,444)" opacity="0.85">
-            <text class="mono" x="0" y="0">Audit-ready · Evidencia por slot · Integración API / White-label</text>
-          </g>
-        </g>
-
-        <rect x="0" y="620" width="1440" height="100" fill="#070D14" opacity="0.85"/>
-      </svg>
+  <section class="ai-showcase" style="background:linear-gradient(135deg,#070B16,#0B1430);overflow:hidden;width:100%;">
+    <div class="ai-showcase-grid" style="max-width:1700px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;padding:80px 48px;box-sizing:border-box;position:relative;">
+      <div class="ai-showcase-copy" style="background:linear-gradient(180deg,rgba(15,23,54,0.9),rgba(11,18,43,0.9));border:1px solid #1E2A52;border-radius:24px;padding:40px 44px;">
+        <img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" style="height:50px;margin-bottom:28px;" />
+        <h2 style="font-size:40px;font-weight:700;color:#fff;margin:0 0 8px;line-height:1.2;letter-spacing:-0.02em;">Inspección inmobiliaria digital</h2>
+        <h2 style="font-size:40px;font-weight:700;color:#fff;margin:0 0 24px;line-height:1.2;letter-spacing:-0.02em;">con Inteligencia Artificial.</h2>
+        <p style="font-size:18px;color:#b8c4e6;margin:0 0 28px;line-height:1.55;">Ainspecciona analiza fotografías guiadas para evaluar el estado visible de una propiedad y genera un respaldo técnico estructurado.</p>
+        <div style="display:inline-flex;align-items:center;gap:12px;background:#0B1126;border:1px solid #22315F;border-radius:24px;padding:10px 20px;margin-bottom:32px;">
+          <svg width="24" height="14" viewBox="0 0 24 14" fill="none"><path d="M1.3 6.8L8.4 12.3L22 1.3" stroke="#33D17A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span style="font-size:12px;font-weight:700;color:#d8e2ff;">Proceso guiado + evidencia fotográfica por componente</span>
+        </div>
+        <div>
+          <a href="https://meetings.hubspot.com/saraya-silva" target="_blank" rel="noopener" style="display:inline-block;padding:14px 40px;border-radius:28px;background:linear-gradient(135deg,#1F6BFF,#2D7CFF);color:#fff;font-weight:700;font-size:16px;text-decoration:none;text-align:center;">Agenda una reunión</a>
+        </div>
+      </div>
+      <div class="ai-showcase-visual" style="position:relative;display:flex;justify-content:center;align-items:center;min-height:480px;">
+        <div class="ai-focus-mark" style="position:absolute;top:calc(50% - 60px);left:25%;transform:translate(-50%,-50%);z-index:3;pointer-events:none;">
+          <svg width="120" height="120" viewBox="0 0 120 120" fill="none" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);"><circle cx="60" cy="60" r="58" stroke="#1F6BFF" stroke-opacity="0.15" stroke-width="2"/></svg>
+          <svg width="70" height="70" viewBox="0 0 70 70" fill="none" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);"><circle cx="35" cy="35" r="33" stroke="#1F6BFF" stroke-opacity="0.4" stroke-width="2"/></svg>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);"><circle cx="12" cy="12" r="12" fill="#1F6BFF"/></svg>
+        </div>
+        <img class="ai-bg-photo" src="/assets/Foto_Landing_Mobile.png" alt="Inspección" style="width:280px;height:420px;object-fit:cover;border-radius:10px;position:absolute;left:5%;top:50%;transform:translateY(-50%);z-index:2;filter:brightness(0.7);" />
+        <svg class="ai-triangle" viewBox="0 0 600 480" fill="none" style="position:absolute;top:0;left:25%;width:65%;height:100%;z-index:2;pointer-events:none;">
+          <path d="M60 180L480 60V420L60 180Z" fill="url(#triG1s)"/>
+          <path d="M65 180L480 90V390L65 180Z" fill="url(#triG2s)"/>
+          <defs>
+            <linearGradient id="triG1s" x1="60" y1="240" x2="480" y2="240"><stop stop-color="#1F3FA0" stop-opacity="0.15"/><stop offset="1" stop-color="#3952E5" stop-opacity="0.7"/></linearGradient>
+            <linearGradient id="triG2s" x1="65" y1="240" x2="480" y2="240"><stop stop-color="#1F4FBB" stop-opacity="0.1"/><stop offset="1" stop-color="#4060FF" stop-opacity="0.6"/></linearGradient>
+          </defs>
+        </svg>
+        <img class="ai-phone" src="/assets/Photo-slot.jpeg" alt="Captura móvil" style="width:170px;height:auto;object-fit:contain;border-radius:16px;position:absolute;right:5%;top:50%;transform:translateY(-50%);z-index:3;box-shadow:0 8px 32px rgba(0,0,0,0.4);" />
+        <div class="ai-badge" style="position:absolute;top:20px;right:5%;z-index:4;display:inline-flex;align-items:center;gap:8px;background:#0F1736;border:1px solid #22315F;border-radius:20px;padding:8px 16px;">
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="none"><path d="M7.8 12C12.1 12 15.6 9.3 15.6 6C15.6 2.7 12.1 0 7.8 0C3.5 0 0 2.7 0 6C0 9.3 3.5 12 7.8 12Z" fill="#33D17A"/></svg>
+          <span style="font-size:12px;color:#eaf0ff;">IA analizando imagen</span>
+        </div>
+      </div>
     </div>
+    <style>
+      @media (max-width:900px) {
+        .ai-showcase-grid { grid-template-columns:1fr !important; padding:44px 18px !important; gap:22px !important; }
+        .ai-showcase-copy { padding:26px 20px !important; }
+        .ai-showcase-copy h2 { font-size:30px !important; }
+        .ai-showcase-copy p { font-size:16px !important; }
+        .ai-showcase-visual { min-height:360px !important; overflow:visible; border-radius:16px; padding-top:14px; }
+        .ai-bg-photo { width:190px !important; height:300px !important; left:2% !important; }
+        .ai-focus-mark { left:20% !important; top:50% !important; }
+        .ai-triangle { left:14% !important; width:76% !important; }
+        .ai-phone { width:145px !important; right:2% !important; }
+        .ai-badge { top:0 !important; right:2% !important; padding:6px 10px !important; }
+        .ai-badge span { font-size:11px !important; }
+      }
+      @media (max-width:480px) {
+        .ai-showcase-grid { padding:34px 12px !important; }
+        .ai-showcase-copy h2 { font-size:24px !important; }
+        .ai-showcase-copy p { font-size:15px !important; }
+        .ai-showcase-copy a { width:100%; text-align:center; padding:13px 16px !important; }
+        .ai-showcase-visual { min-height:320px !important; padding-top:12px; }
+        .ai-bg-photo { width:165px !important; height:270px !important; }
+        .ai-triangle { width:72% !important; }
+        .ai-phone { width:130px !important; }
+        .ai-badge { top:-2px !important; }
+      }
+    </style>
   </section>
 
   <section id="report">
-    <div style="width:100%; overflow:hidden;">
-      <svg xmlns="http://www.w3.org/2000/svg" width="1400" height="600" viewBox="0 0 1400 600" style="display:block; width:100%; height:auto;">
-        <defs>
-          <linearGradient id="bgLight" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#0B111A"/>
-            <stop offset="100%" stop-color="#070B12"/>
-          </linearGradient>
-
-          <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#000" flood-opacity="0.12"/>
-          </filter>
-
-          <style>
-            .wrap { fill:url(#bgLight); }
-            .h2 { font-family:Inter, system-ui; font-size:44px; font-weight:800; fill:#EAF2FF; letter-spacing:-0.4px; }
-            .p  { font-family:Inter, system-ui; font-size:18px; fill:#A9B8CC; }
-            .li { font-family:Inter, system-ui; font-size:18px; fill:#EAF2FF; }
-            .dot { fill:#39C6FF; }
-            .caption { font-family:Inter, system-ui; font-size:12px; fill:#8EA2BA; }
-            .imgFrame { fill:#0B1520; stroke:#203142; stroke-width:1.2; rx:18; }
-          </style>
-        </defs>
-
-        <rect class="wrap" x="0" y="0" width="1400" height="600"/>
-
-        <g transform="translate(92,140)">
-          <text class="h2" x="0" y="0">Informe técnico automatizado</text>
-
-          <text class="p" x="0" y="92">
-            <tspan x="0" dy="0">Cada evaluación visible en un aviso está respaldada por un informe</tspan>
-            <tspan x="0" dy="26">técnico automático, generado a partir de evidencia fotográfica y</tspan>
-            <tspan x="0" dy="26">análisis por componente.</tspan>
-          </text>
-
-          <g transform="translate(0,180)">
-            <circle class="dot" cx="8" cy="8" r="5"/>
-            <text class="li" x="26" y="14">Diagnóstico por área y componente (slots técnicos)</text>
-
-            <circle class="dot" cx="8" cy="52" r="5"/>
-            <text class="li" x="26" y="58">Evidencia fotográfica asociada a cada hallazgo</text>
-
-            <circle class="dot" cx="8" cy="96" r="5"/>
-            <text class="li" x="26" y="102">Evaluación clara: Favorable · Intermedio · Revisión sugerida</text>
-
-            <circle class="dot" cx="8" cy="140" r="5"/>
-            <text class="li" x="26" y="146">Trazabilidad del análisis y del resultado</text>
-          </g>
-        </g>
-
-        <g transform="translate(760,110)" filter="url(#softShadow)">
-          <rect class="imgFrame" x="0" y="0" width="548" height="380" rx="18"/>
-
-          <image
-            href="/assets/IT.png"
-            x="18" y="18"
-            width="512" height="344"
-            preserveAspectRatio="xMidYMid meet"
-            opacity="0.98"
-          />
-
-          <text class="caption" x="18" y="418">
-            Vista del informe técnico generado automáticamente
-          </text>
-        </g>
-      </svg>
+    <div class="page-content">
+      <div class="report-layout">
+        <div class="report-gallery">
+        <div class="report-gallery-main">
+          <img id="reportMainImg" src="/assets/web-report/web-report-header.png" alt="Informe técnico" />
+        </div>
+        </div>
+        <div class="report-text">
+          <h2 class="report-title">Informe técnico automatizado</h2>
+          <p class="report-desc">Cada evaluación visible en un aviso, está respaldada por un informe técnico automático, generado por AI, a partir de evidencia fotográfica y análisis por componente.</p>
+          <ul class="report-bullets">
+            <li>Diagnóstico por área y componente (slots técnicos)</li>
+            <li>Evidencia fotográfica asociada a cada hallazgo</li>
+            <li>Evaluación clara: Favorable · Intermedio · Revisión sugerida</li>
+            <li>Trazabilidad del análisis y del resultado</li>
+          </ul>
+        </div>
+      </div>
     </div>
   </section>
 
-  <section id="como-funciona">
-    <div style="width:100%; overflow:hidden;">
-      <svg xmlns="http://www.w3.org/2000/svg" width="1440" height="560" viewBox="0 0 1440 560" style="display:block; width:100%; height:auto;">
+  <section style="background:linear-gradient(135deg,#070B16,#0B1430);overflow:hidden;width:100%;">
+    <div style="max-width:1440px;margin:0 auto;padding:0;">
+    <svg width="1440" height="670" viewBox="0 0 1440 670" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:auto;">
+      <defs>
+        <linearGradient id="bgBeneficios" x1="0" y1="0" x2="1440" y2="640" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#070B16"/>
+          <stop offset="1" stop-color="#0B1430"/>
+        </linearGradient>
+        <radialGradient id="spotBeneficios" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(420 120) rotate(90) scale(360 520)">
+          <stop offset="0" stop-color="#1F6BFF" stop-opacity="0.16"/>
+          <stop offset="1" stop-color="#1F6BFF" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="glassBeneficios" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
+          <stop offset="0" stop-color="#0F1736" stop-opacity="0.86"/>
+          <stop offset="1" stop-color="#0B122B" stop-opacity="0.86"/>
+        </linearGradient>
+        <linearGradient id="borderBeneficios" x1="0" y1="0" x2="1" y2="1" gradientUnits="objectBoundingBox">
+          <stop offset="0" stop-color="#22315F" stop-opacity="0.7"/>
+          <stop offset="1" stop-color="#18244A" stop-opacity="0.7"/>
+        </linearGradient>
+        <linearGradient id="btnBeneficios" x1="0" y1="0" x2="1" y2="1" gradientUnits="objectBoundingBox">
+          <stop offset="0" stop-color="#1F6BFF"/>
+          <stop offset="1" stop-color="#2D7CFF"/>
+        </linearGradient>
+        <filter id="shadowBeneficios" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">
+          <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#000000" flood-opacity="0.55"/>
+          <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#000000" flood-opacity="0.35"/>
+        </filter>
+        <filter id="shadowBtnBeneficios" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">
+          <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#000000" flood-opacity="0.45"/>
+          <feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#000000" flood-opacity="0.35"/>
+        </filter>
+        <filter id="glowGreenBeneficios" x="-100%" y="-100%" width="300%" height="300%">
+          <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#33D17A" flood-opacity="0.25"/>
+        </filter>
+      </defs>
+
+      <rect width="1440" height="670" fill="url(#bgBeneficios)"/>
+      <rect width="1440" height="670" fill="url(#spotBeneficios)"/>
+
+      <text x="120" y="122" font-family="Inter, ui-sans-serif, system-ui" font-size="40" font-weight="800" fill="#F3F7FF" letter-spacing="-0.6">
+        Cuando publicas con evaluación técnica visible, cambia la dinámica.
+      </text>
+      <text x="120" y="168" font-family="Inter, ui-sans-serif, system-ui" font-size="18" font-weight="500" fill="#B8C4E6">
+        La transparencia técnica reduce fricción, mejora la confianza y acelera la decisión.
+      </text>
+
+      <g filter="url(#shadowBeneficios)">
+        <rect x="120" y="212" width="600" height="150" rx="22" fill="url(#glassBeneficios)"/>
+        <rect x="121" y="213" width="598" height="148" rx="21" stroke="url(#borderBeneficios)" stroke-width="1.6"/>
+      </g>
+      <g transform="translate(152 244)">
+        <circle cx="18" cy="18" r="10" fill="#33D17A" filter="url(#glowGreenBeneficios)"/>
+        <path d="M13.5 18.2L17 21.7L22.8 15.9" stroke="#07101F" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="44" y="18" font-family="Inter, ui-sans-serif, system-ui" font-size="18" font-weight="800" fill="#F3F7FF">Más confianza antes de la visita</text>
+        <text x="44" y="46" font-family="Inter, ui-sans-serif, system-ui" font-size="14" font-weight="500" fill="#C9D5F2">El interesado entiende el estado visible del inmueble antes de agendar.</text>
+        <text x="44" y="76" font-family="Inter, ui-sans-serif, system-ui" font-size="13" font-weight="600" fill="#9FB1DA">Resultado: visitas más informadas, menos dudas repetidas.</text>
+      </g>
+
+      <g filter="url(#shadowBeneficios)">
+        <rect x="760" y="212" width="560" height="150" rx="22" fill="url(#glassBeneficios)"/>
+        <rect x="761" y="213" width="558" height="148" rx="21" stroke="url(#borderBeneficios)" stroke-width="1.6"/>
+      </g>
+      <g transform="translate(792 244)">
+        <circle cx="18" cy="18" r="10" fill="#33D17A" filter="url(#glowGreenBeneficios)"/>
+        <path d="M13.5 18.2L17 21.7L22.8 15.9" stroke="#07101F" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="44" y="18" font-family="Inter, ui-sans-serif, system-ui" font-size="18" font-weight="800" fill="#F3F7FF">Diferenciación frente a otros avisos</text>
+        <text x="44" y="46" font-family="Inter, ui-sans-serif, system-ui" font-size="14" font-weight="500" fill="#C9D5F2">No compites solo por precio o fotos: publicas con respaldo visible.</text>
+        <text x="44" y="76" font-family="Inter, ui-sans-serif, system-ui" font-size="13" font-weight="600" fill="#9FB1DA">Resultado: mayor percepción de profesionalismo.</text>
+      </g>
+
+      <g filter="url(#shadowBeneficios)">
+        <rect x="120" y="388" width="600" height="150" rx="22" fill="url(#glassBeneficios)"/>
+        <rect x="121" y="389" width="598" height="148" rx="21" stroke="url(#borderBeneficios)" stroke-width="1.6"/>
+      </g>
+      <g transform="translate(152 420)">
+        <circle cx="18" cy="18" r="10" fill="#33D17A" filter="url(#glowGreenBeneficios)"/>
+        <path d="M13.5 18.2L17 21.7L22.8 15.9" stroke="#07101F" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="44" y="18" font-family="Inter, ui-sans-serif, system-ui" font-size="18" font-weight="800" fill="#F3F7FF">Mejor filtrado de interesados</text>
+        <text x="44" y="46" font-family="Inter, ui-sans-serif, system-ui" font-size="14" font-weight="500" fill="#C9D5F2">Quien agenda visita ya revisó la evaluación y la evidencia asociada.</text>
+        <text x="44" y="76" font-family="Inter, ui-sans-serif, system-ui" font-size="13" font-weight="600" fill="#9FB1DA">Resultado: menos pérdida de tiempo.</text>
+      </g>
+
+      <g filter="url(#shadowBeneficios)">
+        <rect x="760" y="388" width="560" height="150" rx="22" fill="url(#glassBeneficios)"/>
+        <rect x="761" y="389" width="558" height="148" rx="21" stroke="url(#borderBeneficios)" stroke-width="1.6"/>
+      </g>
+      <g transform="translate(792 420)">
+        <circle cx="18" cy="18" r="10" fill="#33D17A" filter="url(#glowGreenBeneficios)"/>
+        <path d="M13.5 18.2L17 21.7L22.8 15.9" stroke="#07101F" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="44" y="18" font-family="Inter, ui-sans-serif, system-ui" font-size="18" font-weight="800" fill="#F3F7FF">Respaldo ante objeciones</text>
+        <text x="44" y="46" font-family="Inter, ui-sans-serif, system-ui" font-size="14" font-weight="500" fill="#C9D5F2">Cada observación queda vinculada a fotografías y contexto por componente.</text>
+        <text x="44" y="76" font-family="Inter, ui-sans-serif, system-ui" font-size="13" font-weight="600" fill="#9FB1DA">Resultado: conversaciones más objetivas.</text>
+      </g>
+
+      <g filter="url(#shadowBeneficios)">
+        <rect x="120" y="550" width="1200" height="90" rx="22" fill="#0B1126" stroke="#22315F"/>
+      </g>
+      <text x="152" y="586" font-family="Inter, ui-sans-serif, system-ui" font-size="18" font-weight="700" fill="#EAF0FF">Empieza con tu próxima propiedad.</text>
+      <text x="152" y="614" font-family="Inter, ui-sans-serif, system-ui" font-size="14" font-weight="500" fill="#9FB1DA">Crea una inspección y genera la evaluación visible e informe de respaldo.</text>
+
+      <a href="/inspeccionar">
+        <g transform="translate(1024 566)" filter="url(#shadowBtnBeneficios)">
+          <rect x="0" y="0" width="280" height="52" rx="14" fill="url(#btnBeneficios)"/>
+          <text x="28" y="33" font-family="Inter, ui-sans-serif, system-ui" font-size="16" font-weight="800" fill="#FFFFFF">Crear una inspección</text>
+          <path d="M222 26H252" stroke="#FFFFFF" stroke-width="2.3" stroke-linecap="round"/>
+          <path d="M246 20L252 26L246 32" stroke="#FFFFFF" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
+      </a>
+    </svg>
+    </div>
+  </section>
+
+  <section id="flujo">
+    <div class="page-content">
+      <div class="section-mobile flujo-mobile">
+        <h2 class="section-title">Un flujo técnico, auditable y con salida visible</h2>
+        <p class="section-desc">Ainspecciona convierte captura fotográfica guiada en un diagnóstico estructurado. Cada paso genera datos trazables, listos para decisión o integración.</p>
+        <div class="flujo-steps">
+          <div class="flujo-step"><span class="n">01</span><h3>Captura guiada</h3><p>El usuario toma fotografías siguiendo instrucciones por componente (slot). Asegura evidencia consistente.</p></div>
+          <div class="flujo-step"><span class="n">02</span><h3>Análisis técnico</h3><p>Modelos especializados analizan cada imagen según el tipo de slot. Salida estructurada y trazable.</p></div>
+          <div class="flujo-step"><span class="n">03</span><h3>Tech-Report</h3><p>Diagnóstico detallado por componente, con evidencia fotográfica y trazabilidad. Badges técnicos por hallazgo.</p></div>
+          <div class="flujo-step"><span class="n">04</span><h3>Señal visible</h3><p>Traducción automática del diagnóstico a una señal simple para publicación (estrellas).</p></div>
+        </div>
+        <p class="section-foot">Pipeline determinístico · Evidencia por slot · Listo para integración API</p>
+      </div>
+      <div class="section-desktop">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 680" style="display:block; width:100%; height:auto; max-width:100%;">
         <defs>
-          <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#060B12"/>
-            <stop offset="60%" stop-color="#07101A"/>
-            <stop offset="100%" stop-color="#05090F"/>
-          </linearGradient>
-          <radialGradient id="glow" cx="70%" cy="30%" r="85%">
-            <stop offset="0%" stop-color="#0F2C45" stop-opacity="0.45"/>
-            <stop offset="55%" stop-color="#07101A" stop-opacity="0.55"/>
-            <stop offset="100%" stop-color="#05090F" stop-opacity="1"/>
+          <radialGradient id="bgGlowFlujo" cx="35%" cy="20%" r="90%">
+            <stop offset="0%" stop-color="#0B1430"/>
+            <stop offset="45%" stop-color="#091025"/>
+            <stop offset="100%" stop-color="#070B16"/>
           </radialGradient>
-          <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#0F1C28"/>
-            <stop offset="100%" stop-color="#0B1520"/>
-          </linearGradient>
-          <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stop-color="#39C6FF"/>
-            <stop offset="100%" stop-color="#2C7BFF"/>
-          </linearGradient>
-          <linearGradient id="gGreen" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#27E38B"/>
-            <stop offset="100%" stop-color="#1AAE69"/>
-          </linearGradient>
-          <linearGradient id="gYellow" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#FFD36A"/>
-            <stop offset="100%" stop-color="#E8A93A"/>
-          </linearGradient>
-          <linearGradient id="gRed" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#FF6B6B"/>
-            <stop offset="100%" stop-color="#E54242"/>
-          </linearGradient>
-          <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse">
-            <path d="M36 0H0V36" fill="none" stroke="#142333" stroke-opacity="0.5" stroke-width="1"/>
-          </pattern>
-          <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
-            <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000" flood-opacity="0.45"/>
-          </filter>
-          <style>
-            .kicker { font-family: Inter, ui-sans-serif, system-ui; font-size:12px; font-weight:700; letter-spacing:.6px; fill:#8EA2BA; text-transform:uppercase; }
-            .h2 { font-family: Inter, ui-sans-serif, system-ui; font-size:30px; font-weight:650; fill:#EAF2FF; }
-            .p { font-family: Inter, ui-sans-serif, system-ui; font-size:16px; font-weight:450; fill:#A9B8CC; }
-            .b { font-family: Inter, ui-sans-serif, system-ui; font-size:15px; font-weight:560; fill:#D7E6FA; }
-            .muted { font-family: Inter, ui-sans-serif, system-ui; font-size:13px; font-weight:500; fill:#8EA2BA; }
-            .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas; font-size:11px; fill:#8EA2BA; }
-            .label { font-family: Inter, ui-sans-serif, system-ui; font-size:12px; font-weight:700; }
-            .stroke { stroke:#203142; stroke-opacity:.9; }
-          </style>
-        </defs>
-
-        <rect x="0" y="0" width="1440" height="560" fill="url(#bg)"/>
-        <rect x="0" y="0" width="1440" height="560" fill="url(#glow)"/>
-        <rect x="0" y="0" width="1440" height="560" fill="url(#grid)" opacity="0.35"/>
-
-        <g transform="translate(92,90)">
-          <text class="kicker">Cómo funciona</text>
-          <text class="h2" x="0" y="44">Un flujo simple, técnico y auditable</text>
-          <text class="p" x="0" y="78">
-            <tspan x="0" dy="0">Ainspecciona convierte fotografías guiadas en un diagnóstico estructurado.</tspan>
-            <tspan x="0" dy="26">Cada paso genera datos trazables, listos para decisión o integración.</tspan>
-          </text>
-        </g>
-
-        <g transform="translate(92,210)">
-          <g filter="url(#shadow)">
-            <rect x="0" y="0" width="300" height="260" rx="18" fill="url(#card)" class="stroke"/>
-            <g transform="translate(22,22)">
-              <text class="label" x="0" y="0" fill="#39C6FF">01</text>
-              <text class="b" x="0" y="26" style="font-size:16px;">Captura guiada</text>
-              <text class="muted" x="0" y="50">
-                <tspan x="0" dy="0">El usuario toma fotografías</tspan>
-                <tspan x="0" dy="22">siguiendo instrucciones</tspan>
-                <tspan x="0" dy="22">por slot técnico.</tspan>
-              </text>
-              <g transform="translate(0,120)">
-                <rect x="0" y="0" width="256" height="90" rx="14" fill="#0B1520" class="stroke"/>
-                <text class="mono" x="14" y="28">slot: baño</text>
-                <text class="mono" x="14" y="48">foto: ducha / sellos</text>
-                <text class="mono" x="14" y="68">validación: OK</text>
-              </g>
-            </g>
-          </g>
-
-          <g transform="translate(320,120)">
-            <line x1="0" y1="0" x2="60" y2="0" stroke="url(#accent)" stroke-width="2"/>
-            <polygon points="60,-6 72,0 60,6" fill="#2C7BFF"/>
-          </g>
-
-          <g transform="translate(400,0)" filter="url(#shadow)">
-            <rect x="0" y="0" width="300" height="260" rx="18" fill="url(#card)" class="stroke"/>
-            <g transform="translate(22,22)">
-              <text class="label" x="0" y="0" fill="#39C6FF">02</text>
-              <text class="b" x="0" y="26" style="font-size:16px;">Análisis por IA</text>
-              <text class="muted" x="0" y="50">
-                <tspan x="0" dy="0">Modelos especializados</tspan>
-                <tspan x="0" dy="22">analizan cada imagen</tspan>
-                <tspan x="0" dy="22">según tipo de slot.</tspan>
-              </text>
-              <g transform="translate(0,120)">
-                <rect x="0" y="0" width="256" height="90" rx="14" fill="#0B1520" class="stroke"/>
-                <text class="mono" x="14" y="28">analysis_code</text>
-                <text class="mono" x="14" y="48">severity: 1.3</text>
-                <text class="mono" x="14" y="68">confidence: 0.86</text>
-              </g>
-            </g>
-          </g>
-
-          <g transform="translate(720,120)">
-            <line x1="0" y1="0" x2="60" y2="0" stroke="url(#accent)" stroke-width="2"/>
-            <polygon points="60,-6 72,0 60,6" fill="#2C7BFF"/>
-          </g>
-
-          <g transform="translate(800,0)" filter="url(#shadow)">
-            <rect x="0" y="0" width="300" height="260" rx="18" fill="url(#card)" class="stroke"/>
-            <g transform="translate(22,22)">
-              <text class="label" x="0" y="0" fill="#39C6FF">03</text>
-              <text class="b" x="0" y="26" style="font-size:16px;">Resultado accionable</text>
-              <text class="muted" x="0" y="50">
-                <tspan x="0" dy="0">Se consolida el estado</tspan>
-                <tspan x="0" dy="22">del inmueble en un</tspan>
-                <tspan x="0" dy="22">badge claro y trazable.</tspan>
-              </text>
-              <g transform="translate(0,120)">
-                <rect x="0" y="0" width="256" height="90" rx="14" fill="#0B1520" class="stroke"/>
-                <rect x="14" y="18" width="86" height="26" rx="10" fill="url(#gGreen)"/>
-                <text class="label" x="28" y="36" fill="#07101A">VERDE</text>
-                <rect x="108" y="18" width="102" height="26" rx="10" fill="url(#gYellow)"/>
-                <text class="label" x="124" y="36" fill="#07101A">AMARILLO</text>
-                <rect x="14" y="52" width="86" height="26" rx="10" fill="url(#gRed)"/>
-                <text class="label" x="30" y="70" fill="#07101A">ROJO</text>
-              </g>
-            </g>
-          </g>
-        </g>
-
-        <g transform="translate(92,500)" opacity="0.9">
-          <text class="mono">Pipeline determinístico · Evidencia por slot · Listo para integración API</text>
-        </g>
-      </svg>
-    </div>
-  </section>
-
-  <section id="modelo-analisis">
-    <div style="width:100%; overflow:hidden;">
-      <svg xmlns="http://www.w3.org/2000/svg" width="1440" height="560" viewBox="0 0 1440 560" style="display:block; width:100%; height:auto;">
-        <defs>
-          <linearGradient id="bg2" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#05090F"/>
-            <stop offset="55%" stop-color="#07101A"/>
-            <stop offset="100%" stop-color="#05080D"/>
-          </linearGradient>
-          <radialGradient id="glow2" cx="28%" cy="28%" r="85%">
-            <stop offset="0%" stop-color="#0E2B44" stop-opacity="0.42"/>
-            <stop offset="55%" stop-color="#07101A" stop-opacity="0.55"/>
-            <stop offset="100%" stop-color="#05080D" stop-opacity="1"/>
-          </radialGradient>
-          <pattern id="grid2" width="36" height="36" patternUnits="userSpaceOnUse">
-            <path d="M36 0H0V36" fill="none" stroke="#142333" stroke-opacity="0.5" stroke-width="1"/>
-          </pattern>
-          <linearGradient id="card2" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#0F1C28"/>
-            <stop offset="100%" stop-color="#0B1520"/>
-          </linearGradient>
-          <linearGradient id="accent2" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stop-color="#39C6FF"/>
-            <stop offset="100%" stop-color="#2C7BFF"/>
-          </linearGradient>
-          <linearGradient id="gGreen2" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#27E38B"/>
-            <stop offset="100%" stop-color="#1AAE69"/>
-          </linearGradient>
-          <linearGradient id="gYellow2" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#FFD36A"/>
-            <stop offset="100%" stop-color="#E8A93A"/>
-          </linearGradient>
-          <linearGradient id="gRed2" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#FF6B6B"/>
-            <stop offset="100%" stop-color="#E54242"/>
-          </linearGradient>
-          <filter id="shadow2" x="-30%" y="-30%" width="160%" height="160%">
-            <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000" flood-opacity="0.45"/>
-          </filter>
-          <filter id="shadowLite2" x="-30%" y="-30%" width="160%" height="160%">
-            <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#000" flood-opacity="0.35"/>
-          </filter>
-          <style>
-            .kicker2 { font-family: Inter, ui-sans-serif, system-ui; font-size:12px; font-weight:700; letter-spacing:.6px; fill:#8EA2BA; text-transform:uppercase; }
-            .h2_2 { font-family: Inter, ui-sans-serif, system-ui; font-size:30px; font-weight:650; fill:#EAF2FF; }
-            .p2 { font-family: Inter, ui-sans-serif, system-ui; font-size:16px; font-weight:450; fill:#A9B8CC; }
-            .b2 { font-family: Inter, ui-sans-serif, system-ui; font-size:15px; font-weight:560; fill:#D7E6FA; }
-            .muted2 { font-family: Inter, ui-sans-serif, system-ui; font-size:13px; font-weight:500; fill:#8EA2BA; }
-            .mono2 { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas; font-size:11px; fill:#8EA2BA; }
-            .label2 { font-family: Inter, ui-sans-serif, system-ui; font-size:12px; font-weight:700; letter-spacing:.2px; }
-            .stroke2 { stroke:#203142; stroke-opacity:.9; }
-          </style>
-        </defs>
-
-        <rect x="0" y="0" width="1440" height="560" fill="url(#bg2)"/>
-        <rect x="0" y="0" width="1440" height="560" fill="url(#glow2)"/>
-        <rect x="0" y="0" width="1440" height="560" fill="url(#grid2)" opacity="0.33"/>
-
-        <g transform="translate(92,90)">
-          <text class="kicker2">Modelo de análisis</text>
-          <text class="h2_2" x="0" y="44">Análisis por slot, no por propiedad genérica</text>
-          <text class="p2" x="0" y="78">
-            <tspan x="0" dy="0">Cada inmueble se descompone en componentes técnicos (slots). Cada slot genera hallazgos con</tspan>
-            <tspan x="0" dy="26">severidad, confianza y evidencia visual. Esto habilita trazabilidad, auditoría y mejora continua.</tspan>
-          </text>
-        </g>
-
-        <g transform="translate(92,210)">
-          <g filter="url(#shadow2)">
-            <rect x="0" y="0" width="708" height="300" rx="18" fill="url(#card2)" class="stroke2"/>
-            <g transform="translate(22,22)">
-              <text class="b2" x="0" y="18" style="font-size:16px; font-weight:700;">Slots técnicos (ejemplo)</text>
-              <text class="muted2" x="0" y="42">Selecciona un slot para ver su diagnóstico</text>
-
-              <g transform="translate(0,66)">
-                <g>
-                  <rect x="0" y="0" width="214" height="74" rx="14" fill="#0B1520" class="stroke2"/>
-                  <text class="b2" x="16" y="30">Baño</text>
-                  <text class="muted2" x="16" y="54">ducha / sellos</text>
-                  <rect x="146" y="18" width="52" height="26" rx="10" fill="url(#gYellow2)"/>
-                  <text class="label2" x="160" y="36" fill="#07101A">MED</text>
-                </g>
-
-                <g transform="translate(232,0)">
-                  <rect x="0" y="0" width="214" height="74" rx="14" fill="#0B1520" class="stroke2"/>
-                  <text class="b2" x="16" y="30">Cocina</text>
-                  <text class="muted2" x="16" y="54">fugas / sifón</text>
-                  <rect x="146" y="18" width="52" height="26" rx="10" fill="url(#gGreen2)"/>
-                  <text class="label2" x="162" y="36" fill="#07101A">OK</text>
-                </g>
-
-                <g transform="translate(464,0)">
-                  <rect x="0" y="0" width="214" height="74" rx="14" fill="#0B1520" class="stroke2"/>
-                  <text class="b2" x="16" y="30">Muros</text>
-                  <text class="muted2" x="16" y="54">fisuras / pintura</text>
-                  <rect x="146" y="18" width="52" height="26" rx="10" fill="url(#gYellow2)"/>
-                  <text class="label2" x="160" y="36" fill="#07101A">MED</text>
-                </g>
-
-                <g transform="translate(0,92)">
-                  <rect x="0" y="0" width="214" height="74" rx="14" fill="#0B1520" class="stroke2"/>
-                  <text class="b2" x="16" y="30">Instalaciones</text>
-                  <text class="muted2" x="16" y="54">eléctrico / gas</text>
-                  <rect x="146" y="18" width="52" height="26" rx="10" fill="url(#gRed2)"/>
-                  <text class="label2" x="158" y="36" fill="#07101A">ALTO</text>
-                </g>
-
-                <g transform="translate(232,92)">
-                  <rect x="0" y="0" width="214" height="74" rx="14" fill="#0B1520" class="stroke2"/>
-                  <text class="b2" x="16" y="30">Cielos</text>
-                  <text class="muted2" x="16" y="54">manchas / nivel</text>
-                  <rect x="146" y="18" width="52" height="26" rx="10" fill="url(#gYellow2)"/>
-                  <text class="label2" x="160" y="36" fill="#07101A">MED</text>
-                </g>
-
-                <g transform="translate(464,92)">
-                  <rect x="0" y="0" width="214" height="74" rx="14" fill="#0B1520" class="stroke2"/>
-                  <text class="b2" x="16" y="30">Exterior</text>
-                  <text class="muted2" x="16" y="54">fachada / agua</text>
-                  <rect x="146" y="18" width="52" height="26" rx="10" fill="url(#gGreen2)"/>
-                  <text class="label2" x="162" y="36" fill="#07101A">OK</text>
-                </g>
-              </g>
-
-              <g transform="translate(0,262)" opacity="0.9">
-                <text class="mono2">Cada slot mantiene su evidencia (photo_id) y su último análisis (analysis_code, severity, confidence, message).</text>
-              </g>
-            </g>
-          </g>
-
-          <g transform="translate(732,0)" filter="url(#shadow2)">
-            <rect x="0" y="0" width="524" height="300" rx="18" fill="url(#card2)" class="stroke2"/>
-            <g transform="translate(22,22)">
-              <text class="b2" x="0" y="18" style="font-size:16px; font-weight:700;">Diagnóstico del slot</text>
-              <text class="muted2" x="0" y="42">Detalle estructurado y auditable</text>
-
-              <g transform="translate(0,66)" filter="url(#shadowLite2)">
-                <rect x="0" y="0" width="480" height="110" rx="16" fill="#0B1520" class="stroke2"/>
-                <text class="b2" x="16" y="30">Instalaciones</text>
-                <rect x="380" y="18" width="84" height="26" rx="10" fill="url(#gRed2)"/>
-                <text class="label2" x="404" y="36" fill="#07101A">ROJO</text>
-                <text class="mono2" x="16" y="56">analysis_code: ELEC_RISK_01</text>
-                <text class="mono2" x="16" y="74">severity: 1.5   ·   confidence: 0.82</text>
-                <text class="mono2" x="16" y="92">analyzed_at: 2026-01-25T11:14:32-03:00</text>
-              </g>
-
-              <g transform="translate(0,190)" filter="url(#shadowLite2)">
-                <rect x="0" y="0" width="480" height="88" rx="16" fill="#0B1520" class="stroke2"/>
-                <text class="muted2" x="16" y="26">Mensaje</text>
-                <text class="b2" x="16" y="52" style="font-size:14px; font-weight:520; fill:#D7E6FA;">
-                  <tspan x="16" dy="0">Se observan señales compatibles con</tspan>
-                  <tspan x="16" dy="20">instalación expuesta / terminación deficiente.</tspan>
-                </text>
-              </g>
-            </g>
-          </g>
-        </g>
-      </svg>
-    </div>
-  </section>
-
-  <section id="score-output">
-    <div style="width:100%; overflow:hidden;">
-      <svg xmlns="http://www.w3.org/2000/svg" width="1400" height="640" viewBox="0 0 1400 640" style="display:block; width:100%; height:auto;">
-        <defs>
-          <linearGradient id="bgLight5" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#F8FAFC"/>
-            <stop offset="100%" stop-color="#EEF2F7"/>
-          </linearGradient>
-
-          <filter id="softShadow5" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="10" stdDeviation="18" flood-color="#000" flood-opacity="0.12"/>
-          </filter>
-
-          <style>
-            .wrap { fill:url(#bgLight5); }
-            .h2 { font-family:Inter, system-ui; font-size:42px; font-weight:800; fill:#0F172A; letter-spacing:-0.4px; }
-            .p  { font-family:Inter, system-ui; font-size:16px; fill:#334155; }
-            .muted { font-family:Inter, system-ui; font-size:12px; fill:#64748B; }
-            .card { fill:#FFFFFF; stroke:#E5E7EB; stroke-width:1.2; rx:18; }
-            .title { font-family:Inter, system-ui; font-size:14px; font-weight:800; fill:#0F172A; }
-            .pill { stroke:#E5E7EB; stroke-width:1; rx:999; }
-            .pillTxt { font-family:Inter, system-ui; font-size:11px; font-weight:800; letter-spacing:.2px; }
-            .okBG { fill:#ECFDF5; } .okTxt { fill:#065F46; }
-            .obsBG { fill:#FFFBEB; } .obsTxt { fill:#92400E; }
-            .revBG { fill:#FFF7ED; } .revTxt { fill:#9A3412; }
-
-            .midBox { fill:#F9FAFB; stroke:#E5E7EB; stroke-width:1; rx:18; }
-            .midH { font-family:Inter, system-ui; font-size:14px; font-weight:800; fill:#0F172A; }
-            .midP { font-family:Inter, system-ui; font-size:12px; fill:#475569; }
-
-            .arrow { stroke:#94A3B8; stroke-width:2.5; fill:none; }
-            .arrowHead { fill:#94A3B8; }
-
-            .star { fill:#94A3B8; }
-            .starsLabel { font-family:Inter, system-ui; font-size:12px; fill:#0F172A; font-weight:700; }
-            .caption { font-family:Inter, system-ui; font-size:12px; fill:#64748B; }
-            .imgFrame { fill:#FFFFFF; stroke:#E5E7EB; stroke-width:1.2; rx:16; }
-          </style>
-        </defs>
-
-        <rect class="wrap" x="0" y="0" width="1400" height="640"/>
-
-        <g transform="translate(92,92)">
-          <text class="h2" x="0" y="0">De diagnóstico técnico a señal visible</text>
-          <text class="p" x="0" y="44">
-            Un mismo análisis genera dos salidas: un <tspan font-weight="800">Tech-Report</tspan> detallado y una señal visual simple (estrellas) para la publicación.
-          </text>
-        </g>
-
-        <g transform="translate(92,170)">
-          <g filter="url(#softShadow5)">
-            <rect class="card" x="0" y="0" width="410" height="390" rx="18"/>
-            <text class="title" x="22" y="34">Tech-Report</text>
-            <text class="caption" x="22" y="56">Diagnóstico técnico por componente, con evidencia y trazabilidad.</text>
-
-            <rect class="imgFrame" x="22" y="80" width="366" height="200" rx="14"/>
-            <text class="muted" x="36" y="112">Caso AI-CASE-10492</text>
-            <text class="muted" x="36" y="134">Slots (ejemplo)</text>
-
-            <g transform="translate(36,150)">
-              <rect x="0" y="0" width="330" height="44" rx="12" fill="#F9FAFB" stroke="#E5E7EB"/>
-              <text class="muted" x="14" y="28">Humedad · Baño</text>
-              <rect class="pill obsBG" x="220" y="10" width="96" height="24"/>
-              <text class="pillTxt obsTxt" x="268" y="27" text-anchor="middle">OBS</text>
-
-              <rect x="0" y="56" width="330" height="44" rx="12" fill="#F9FAFB" stroke="#E5E7EB"/>
-              <text class="muted" x="14" y="84">Electricidad · Tablero</text>
-              <rect class="pill revBG" x="220" y="66" width="96" height="24"/>
-              <text class="pillTxt revTxt" x="268" y="83" text-anchor="middle">REV</text>
-
-              <rect x="0" y="112" width="330" height="44" rx="12" fill="#F9FAFB" stroke="#E5E7EB"/>
-              <text class="muted" x="14" y="140">Pisos · Living</text>
-              <rect class="pill okBG" x="220" y="122" width="96" height="24"/>
-              <text class="pillTxt okTxt" x="268" y="139" text-anchor="middle">OK</text>
-            </g>
-
-            <text class="caption" x="22" y="344">Rol: respaldo técnico, compliance y detalle.</text>
-          </g>
-
-          <g transform="translate(468,0)" filter="url(#softShadow5)">
-            <rect class="midBox" x="0" y="0" width="340" height="390" rx="18"/>
-            <text class="midH" x="26" y="48">Traducción automática</text>
-            <text class="midP" x="26" y="74">Del diagnóstico detallado a una señal visual estandarizada.</text>
-
-            <g transform="translate(26,110)">
-              <rect x="0" y="0" width="288" height="62" rx="14" fill="#FFFFFF" stroke="#E5E7EB"/>
-              <text class="title" x="16" y="26">1) Normalización</text>
-              <text class="muted" x="16" y="46">Unifica criterios por componente (slot).</text>
-
-              <rect x="0" y="78" width="288" height="62" rx="14" fill="#FFFFFF" stroke="#E5E7EB"/>
-              <text class="title" x="16" y="104">2) Agregación</text>
-              <text class="muted" x="16" y="124">Pondera severidad y ajusta por confianza.</text>
-
-              <rect x="0" y="156" width="288" height="62" rx="14" fill="#FFFFFF" stroke="#E5E7EB"/>
-              <text class="title" x="16" y="182">3) Síntesis</text>
-              <text class="muted" x="16" y="202">Genera STI y rangos interpretativos.</text>
-            </g>
-
-            <g transform="translate(170,322)">
-              <path class="arrow" d="M-140 0 C-60 0, -60 0, 0 0"/>
-              <path class="arrowHead" d="M0 0 L-10 -6 L-10 6 Z"/>
-              <path class="arrow" d="M0 0 C60 0, 60 0, 140 0"/>
-              <path class="arrowHead" d="M140 0 L130 -6 L130 6 Z"/>
-            </g>
-
-            <text class="caption" x="26" y="362">Un análisis, dos niveles de visibilidad.</text>
-          </g>
-
-          <g transform="translate(840,0)" filter="url(#softShadow5)">
-            <rect class="card" x="0" y="0" width="410" height="390" rx="18"/>
-            <text class="title" x="22" y="34">Señal visible en el aviso</text>
-            <text class="caption" x="22" y="56">Una señal simple para priorizar, filtrar y comparar inmuebles.</text>
-
-            <rect class="imgFrame" x="22" y="80" width="366" height="200" rx="14"/>
-
-            <g transform="translate(40,104)">
-              <text class="starsLabel" x="0" y="0">Evaluación técnica</text>
-              <g transform="translate(0,12)">
-                <path class="star" d="M10,0 L12.8,6.2 L19.6,6.7 L14.3,11.1 L15.9,18 L10,14.6 L4.1,18 L5.7,11.1 L0.4,6.7 L7.2,6.2 Z" opacity="0.95"/>
-                <g transform="translate(24,0)">
-                  <path class="star" d="M10,0 L12.8,6.2 L19.6,6.7 L14.3,11.1 L15.9,18 L10,14.6 L4.1,18 L5.7,11.1 L0.4,6.7 L7.2,6.2 Z" opacity="0.95"/>
-                </g>
-                <g transform="translate(48,0)">
-                  <path class="star" d="M10,0 L12.8,6.2 L19.6,6.7 L14.3,11.1 L15.9,18 L10,14.6 L4.1,18 L5.7,11.1 L0.4,6.7 L7.2,6.2 Z" opacity="0.95"/>
-                </g>
-                <g transform="translate(72,0)">
-                  <path class="star" d="M10,0 L12.8,6.2 L19.6,6.7 L14.3,11.1 L15.9,18 L10,14.6 L4.1,18 L5.7,11.1 L0.4,6.7 L7.2,6.2 Z" opacity="0.65"/>
-                </g>
-                <g transform="translate(96,0)">
-                  <path class="star" d="M10,0 L12.8,6.2 L19.6,6.7 L14.3,11.1 L15.9,18 L10,14.6 L4.1,18 L5.7,11.1 L0.4,6.7 L7.2,6.2 Z" opacity="0.35"/>
-                </g>
-              </g>
-            </g>
-
-            <g transform="translate(40,160)">
-              <text class="muted" x="0" y="0">Depto 2D/2B · 70 m²</text>
-              <text class="title" x="0" y="28">Providencia · Metro cercano</text>
-              <text class="muted" x="0" y="56">$ 590.000 · gastos comunes incl.</text>
-              <text class="muted" x="0" y="82">Corredora: Andes Propiedades</text>
-            </g>
-
-            <text class="caption" x="22" y="344">Rol: confianza, conversión y decisión rápida.</text>
-          </g>
-        </g>
-      </svg>
-    </div>
-  </section>
-
-  <section id="cierre">
-    <div style="width:100%; overflow:hidden;">
-      <svg xmlns="http://www.w3.org/2000/svg" width="1400" height="620" viewBox="0 0 1400 620" style="display:block; width:100%; height:auto;">
-        <defs>
-          <radialGradient id="bgGlow6" cx="35%" cy="18%" r="90%">
-            <stop offset="0%" stop-color="#0B2236"/>
-            <stop offset="45%" stop-color="#071A2A"/>
-            <stop offset="100%" stop-color="#04121E"/>
-          </radialGradient>
-
-          <linearGradient id="cardStroke6" x1="0" y1="0" x2="1" y2="1">
+          <linearGradient id="cardStrokeFlujo" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0%" stop-color="#244257" stop-opacity="0.70"/>
             <stop offset="100%" stop-color="#0B2236" stop-opacity="0.35"/>
           </linearGradient>
-
-          <linearGradient id="btnGrad6" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#3B82F6"/>
-            <stop offset="100%" stop-color="#2563EB"/>
-          </linearGradient>
-
-          <filter id="softShadow6" x="-20%" y="-20%" width="140%" height="140%">
+          <filter id="softShadowFlujo" x="-20%" y="-20%" width="140%" height="140%">
             <feDropShadow dx="0" dy="10" stdDeviation="18" flood-color="#000000" flood-opacity="0.35"/>
           </filter>
-
           <style>
-            .wrap { fill:url(#bgGlow6); }
-            .kicker { font-family:Inter, system-ui; font-size:12px; font-weight:800; fill:#93C5FD; letter-spacing:1.2px; }
-            .h2 { font-family:Inter, system-ui; font-size:40px; font-weight:850; fill:#F8FAFC; letter-spacing:-0.4px; }
-            .p  { font-family:Inter, system-ui; font-size:16px; fill:#C7D2FE; opacity:0.95; }
-            .muted { font-family:Inter, system-ui; font-size:12px; fill:#94A3B8; }
-
-            .card { fill:#071A2A; stroke:url(#cardStroke6); stroke-width:1.2; rx:18; }
-            .cardTitle { font-family:Inter, system-ui; font-size:13px; font-weight:800; fill:#E5E7EB; }
-            .cardSub { font-family:Inter, system-ui; font-size:12px; fill:#94A3B8; }
-
-            .row { fill:#0A1F32; stroke:#1F3447; stroke-width:1; rx:14; }
-            .rowNum { font-family:Inter, system-ui; font-size:12px; font-weight:850; fill:#E5E7EB; }
-            .rowText { font-family:Inter, system-ui; font-size:13px; font-weight:750; fill:#E5E7EB; }
-            .rowMeta { font-family:ui-monospace, SFMono-Regular, Menlo, Monaco; font-size:11px; fill:#94A3B8; }
-
-            .btn { fill:url(#btnGrad6); rx:14; }
-            .btnTxt { font-family:Inter, system-ui; font-size:13px; font-weight:850; fill:#04121E; }
-            .btnTxt2 { font-family:Inter, system-ui; font-size:13px; font-weight:850; fill:#E5E7EB; }
-            .btnGhost { fill:#0A1F32; stroke:#1F3447; stroke-width:1.2; rx:14; }
-
-            .field { fill:#071A2A; stroke:#1F3447; stroke-width:1; rx:12; }
-            .fieldLbl { font-family:Inter, system-ui; font-size:10px; fill:#94A3B8; }
-            .fieldVal { font-family:Inter, system-ui; font-size:12px; fill:#E5E7EB; }
-
-            .star { fill:#F59E0B; }
-            .starOff { fill:#334155; }
+            .wrapFlujo { fill:url(#bgGlowFlujo); }
+            .kickerFlujo { font-family:Inter, system-ui; font-size:12px; font-weight:850; fill:#93C5FD; letter-spacing:1.2px; }
+            .h2Flujo { font-family:Inter, system-ui; font-size:28px; font-weight:850; fill:#F8FAFC; letter-spacing:-0.4px; }
+            .pFlujo { font-family:Inter, system-ui; font-size:20px; font-weight:400; fill:#C7D2FE; opacity:0.95; }
+            .cardFlujo { fill:#071A2A; stroke:url(#cardStrokeFlujo); stroke-width:1.2; rx:18; }
+            .nFlujo { font-family:Inter, system-ui; font-size:12px; font-weight:850; fill:#38BDF8; }
+            .ctFlujo { font-family:Inter, system-ui; font-size:16px; font-weight:850; fill:#E5E7EB; }
+            .cpFlujo { font-family:Inter, system-ui; font-size:13px; fill:#94A3B8; line-height:1.35; }
+            .monoFlujo { font-family:ui-monospace, SFMono-Regular, Menlo, Monaco; font-size:12px; fill:#94A3B8; }
+            .arrowFlujo { fill:#3B82F6; opacity:0.9; }
+            .footFlujo { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size:11px; fill:#8EA2BA; }
+            .pillFlujo { rx:11; ry:11; }
+            .okFlujo { fill:#22C55E; }
+            .obsFlujo { fill:#F59E0B; }
+            .revFlujo { fill:#EF4444; }
+            .pillTxtFlujo { font-family:Inter, system-ui; font-size:12px; font-weight:850; fill:#04121E; }
+            .starFlujo { fill:#F59E0B; }
+            .starOffFlujo { fill:#334155; }
           </style>
         </defs>
-
-        <rect class="wrap" x="0" y="0" width="1400" height="620"/>
-
-        <g transform="translate(110,120)">
-          <text class="kicker" x="0" y="0">CIERRE</text>
-          <text class="h2" x="0" y="48">Listo para evaluación técnica visible e informe de respaldo</text>
-          <text class="p" x="0" y="82">
-            <tspan x="0" dy="0">Un mismo análisis genera dos salidas: estrellas visibles en el aviso y un Tech-Report auditable</tspan>
-            <tspan x="0" dy="22">por componente, listo para integración en portales y sitios propios.</tspan>
+        <rect class="wrapFlujo" x="0" y="0" width="1400" height="680"/>
+        <g transform="translate(55,110)">
+          <text class="h2Flujo" x="0" y="0">Un flujo técnico, auditable y con salida visible</text>
+          <text class="pFlujo" x="0" y="38">
+            <tspan x="0" dy="0">Ainspecciona convierte captura fotográfica guiada en un diagnóstico estructurado.</tspan>
+            <tspan x="0" dy="26">Cada paso genera datos trazables, listos para decisión o integración.</tspan>
           </text>
         </g>
-
-        <g transform="translate(110,220)" filter="url(#softShadow6)">
-          <rect class="card" x="0" y="0" width="660" height="300" rx="18"/>
-          <text class="cardTitle" x="24" y="40">Resumen en 4 puntos</text>
-          <text class="cardSub" x="24" y="62">Lo esencial del producto</text>
-
-          <g transform="translate(24,86)">
-            <rect class="row" x="0" y="0" width="612" height="52" rx="14"/>
-            <text class="rowNum" x="18" y="32">1)</text>
-            <text class="rowText" x="48" y="32">Captura guiada por slot</text>
-            <text class="rowMeta" x="420" y="32">evidencia consistente</text>
-          </g>
-
-          <g transform="translate(24,148)">
-            <rect class="row" x="0" y="0" width="612" height="52" rx="14"/>
-            <text class="rowNum" x="18" y="32">2)</text>
-            <text class="rowText" x="48" y="32">Tech-Report automático (badges + evidencia)</text>
-            <text class="rowMeta" x="420" y="32">slot · hallazgo · foto</text>
-          </g>
-
-          <g transform="translate(24,210)">
-            <rect class="row" x="0" y="0" width="612" height="52" rx="14"/>
-            <text class="rowNum" x="18" y="32">3)</text>
-            <text class="rowText" x="48" y="32">Señal visible en el aviso (estrellas)</text>
-
-            <g transform="translate(430,18)">
-              <g transform="scale(0.7)">
-                <path class="star" d="M10,0 L12.8,6.2 L19.6,6.7 L14.3,11.1 L15.9,18 L10,14.6 L4.1,18 L5.7,11.1 L0.4,6.7 L7.2,6.2 Z"/>
-                <g transform="translate(22,0)"><path class="star" d="M10,0 L12.8,6.2 L19.6,6.7 L14.3,11.1 L15.9,18 L10,14.6 L4.1,18 L5.7,11.1 L0.4,6.7 L7.2,6.2 Z"/></g>
-                <g transform="translate(44,0)"><path class="star" d="M10,0 L12.8,6.2 L19.6,6.7 L14.3,11.1 L15.9,18 L10,14.6 L4.1,18 L5.7,11.1 L0.4,6.7 L7.2,6.2 Z"/></g>
-                <g transform="translate(66,0)"><path class="star" d="M10,0 L12.8,6.2 L19.6,6.7 L14.3,11.1 L15.9,18 L10,14.6 L4.1,18 L5.7,11.1 L0.4,6.7 L7.2,6.2 Z"/></g>
-                <g transform="translate(88,0)"><path class="starOff" d="M10,0 L12.8,6.2 L19.6,6.7 L14.3,11.1 L15.9,18 L10,14.6 L4.1,18 L5.7,11.1 L0.4,6.7 L7.2,6.2 Z"/></g>
-              </g>
-            </g>
-          </g>
-
-          <g transform="translate(24,272)">
-            <rect class="row" x="0" y="0" width="612" height="52" rx="14"/>
-            <text class="rowNum" x="18" y="32">4)</text>
-            <text class="rowText" x="48" y="32">Integración enterprise</text>
-            <text class="rowMeta" x="420" y="32">API-first · white-label</text>
-          </g>
-        </g>
-
-        <g transform="translate(810,220)" filter="url(#softShadow6)">
-          <rect class="card" x="0" y="0" width="480" height="300" rx="18"/>
-          <text class="cardTitle" x="24" y="40">Solicita una demo</text>
-          <text class="cardSub" x="24" y="62">Te mostramos flujo completo y opciones de integración.</text>
-
-          <rect class="btn" x="24" y="92" width="250" height="46" rx="14"/>
-          <text class="btnTxt" x="44" y="121">Agendar reunión técnica</text>
-          <text class="btnTxt" x="256" y="121">→</text>
-
-          <rect class="btnGhost" x="286" y="92" width="170" height="46" rx="14"/>
-          <text class="btnTxt2" x="310" y="121">Ver Tech-Report</text>
-
-          <g transform="translate(24,154)">
-            <rect class="field" x="0" y="0" width="432" height="44" rx="12"/>
-            <text class="fieldLbl" x="14" y="16">Nombre</text>
-            <text class="fieldVal" x="14" y="33">—</text>
-
-            <rect class="field" x="0" y="56" width="432" height="44" rx="12"/>
-            <text class="fieldLbl" x="14" y="72">Empresa</text>
-            <text class="fieldVal" x="14" y="89">—</text>
-
-            <rect class="field" x="0" y="112" width="432" height="44" rx="12"/>
-            <text class="fieldLbl" x="14" y="128">Caso de uso</text>
-            <text class="fieldVal" x="14" y="145">Portal / Corredora / Inmobiliaria</text>
-          </g>
-
-          <text class="muted" x="24" y="286">* La demo usa un caso ilustrativo y muestra la señal visible (estrellas) + Tech-Report.</text>
-        </g>
-      </svg>
-    </div>
-  </section>
-
-  <section id="demo">
-    <div style="width:100%; overflow:hidden;">
-      <svg xmlns="http://www.w3.org/2000/svg" width="1440" height="460" viewBox="0 0 1440 460" style="display:block; width:100%; height:auto;">
-        <defs>
-          <linearGradient id="bg3" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#04070B"/>
-            <stop offset="55%" stop-color="#07101A"/>
-            <stop offset="100%" stop-color="#03060A"/>
-          </linearGradient>
-          <radialGradient id="glow3" cx="50%" cy="35%" r="95%">
-            <stop offset="0%" stop-color="#0F2C45" stop-opacity="0.42"/>
-            <stop offset="55%" stop-color="#07101A" stop-opacity="0.55"/>
-            <stop offset="100%" stop-color="#03060A" stop-opacity="1"/>
-          </radialGradient>
-          <pattern id="grid3" width="36" height="36" patternUnits="userSpaceOnUse">
-            <path d="M36 0H0V36" fill="none" stroke="#142333" stroke-opacity="0.42" stroke-width="1"/>
-          </pattern>
-          <linearGradient id="card3" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#0F1C28"/>
-            <stop offset="100%" stop-color="#0B1520"/>
-          </linearGradient>
-          <linearGradient id="ctaGrad3" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#39C6FF"/>
-            <stop offset="100%" stop-color="#2C7BFF"/>
-          </linearGradient>
-          <filter id="shadow3" x="-30%" y="-30%" width="160%" height="160%">
-            <feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#000" flood-opacity="0.50"/>
-          </filter>
-          <style>
-            .kicker3 { font-family: Inter, ui-sans-serif, system-ui; font-size:12px; font-weight:700; letter-spacing:.6px; fill:#8EA2BA; text-transform:uppercase; }
-            .h2_3 { font-family: Inter, ui-sans-serif, system-ui; font-size:30px; font-weight:650; fill:#EAF2FF; }
-            .p3 { font-family: Inter, ui-sans-serif, system-ui; font-size:16px; font-weight:450; fill:#A9B8CC; }
-            .b3 { font-family: Inter, ui-sans-serif, system-ui; font-size:15px; font-weight:560; fill:#D7E6FA; }
-            .mono3 { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas; font-size:11px; fill:#8EA2BA; }
-            .btn3 { font-family: Inter, ui-sans-serif, system-ui; font-size:14px; font-weight:650; fill:#07101A; }
-            .btn3b { font-family: Inter, ui-sans-serif, system-ui; font-size:14px; font-weight:650; fill:#CFE0F6; }
-            .stroke3 { stroke:#203142; stroke-opacity:.9; }
-          </style>
-        </defs>
-
-        <rect x="0" y="0" width="1440" height="460" fill="url(#bg3)"/>
-        <rect x="0" y="0" width="1440" height="460" fill="url(#glow3)"/>
-        <rect x="0" y="0" width="1440" height="460" fill="url(#grid3)" opacity="0.33"/>
-
-        <g transform="translate(92,110)" filter="url(#shadow3)">
-          <rect x="0" y="0" width="1256" height="240" rx="22" fill="url(#card3)" class="stroke3"/>
-
-          <g transform="translate(48,48)">
-            <text class="kicker3">Demo</text>
-            <text class="h2_3" x="0" y="44">¿Quieres ver Ainspecciona funcionando sobre un caso real?</text>
-            <text class="p3" x="0" y="82">
-              <tspan x="0" dy="0">Te mostramos el flujo completo: captura guiada, análisis por slot, y reporte con badge final.</tspan>
-              <tspan x="0" dy="26">Enfocado en integración y criterios de auditoría.</tspan>
+        <g transform="translate(55,200)" filter="url(#softShadowFlujo)">
+          <g transform="translate(0,0)">
+            <rect class="cardFlujo" x="0" y="0" width="300" height="340" rx="18"/>
+            <text class="nFlujo" x="24" y="36">01</text>
+            <text class="ctFlujo" x="150" y="64" text-anchor="middle">Captura guiada</text>
+            <text class="cpFlujo" x="150" y="94" text-anchor="middle">
+              <tspan x="150" dy="0">El usuario toma fotografías siguiendo</tspan>
+              <tspan x="150" dy="20">instrucciones por componente (slot).</tspan>
+              <tspan x="150" dy="20">Asegura evidencia consistente.</tspan>
             </text>
-
-            <g transform="translate(0,130)">
-              <circle cx="6" cy="6" r="4" fill="#39C6FF"/>
-              <text class="b3" x="22" y="11">Sin promesas: evidencia + severidad + confianza</text>
-
-              <g transform="translate(0,34)">
-                <circle cx="6" cy="6" r="4" fill="#39C6FF"/>
-                <text class="b3" x="22" y="11">Lista para integrarse vía API / webhooks</text>
-              </g>
+            <rect x="24" y="180" width="252" height="120" rx="14" fill="#0A1F32" stroke="#1F3447" stroke-width="1"/>
+            <text class="monoFlujo" x="150" y="214" text-anchor="middle">slot: baño</text>
+            <text class="monoFlujo" x="150" y="238" text-anchor="middle">foto: ducha / sellos</text>
+            <text class="monoFlujo" x="150" y="262" text-anchor="middle">validación: OK</text>
+          </g>
+          <g transform="translate(308,160)">
+            <path class="arrowFlujo" d="M22 0 L0 -12 L0 12 Z"/>
+          </g>
+          <g transform="translate(330,0)">
+            <rect class="cardFlujo" x="0" y="0" width="300" height="340" rx="18"/>
+            <text class="nFlujo" x="24" y="36">02</text>
+            <text class="ctFlujo" x="150" y="64" text-anchor="middle">Análisis técnico</text>
+            <text class="cpFlujo" x="150" y="94" text-anchor="middle">
+              <tspan x="150" dy="0">Modelos especializados analizan cada</tspan>
+              <tspan x="150" dy="20">imagen según el tipo de slot.</tspan>
+              <tspan x="150" dy="20">Salida estructurada y trazable.</tspan>
+            </text>
+            <rect x="24" y="180" width="252" height="120" rx="14" fill="#0A1F32" stroke="#1F3447" stroke-width="1"/>
+            <text class="monoFlujo" x="150" y="214" text-anchor="middle">analysis_code: ELEC_RISK_01</text>
+            <text class="monoFlujo" x="150" y="238" text-anchor="middle">severity: 1.3</text>
+            <text class="monoFlujo" x="150" y="262" text-anchor="middle">confidence: 0.86</text>
+          </g>
+          <g transform="translate(632,160)">
+            <path class="arrowFlujo" d="M22 0 L0 -12 L0 12 Z"/>
+          </g>
+          <g transform="translate(660,0)">
+            <rect class="cardFlujo" x="0" y="0" width="300" height="340" rx="18"/>
+            <text class="nFlujo" x="24" y="36">03</text>
+            <text class="ctFlujo" x="150" y="64" text-anchor="middle">Tech-Report</text>
+            <text class="cpFlujo" x="150" y="94" text-anchor="middle">
+              <tspan x="150" dy="0">Diagnóstico detallado por componente,</tspan>
+              <tspan x="150" dy="20">con evidencia fotográfica y trazabilidad.</tspan>
+              <tspan x="150" dy="20">Badges técnicos por hallazgo.</tspan>
+            </text>
+            <rect x="24" y="180" width="252" height="120" rx="14" fill="#0A1F32" stroke="#1F3447" stroke-width="1"/>
+            <g transform="translate(57,198)">
+              <text class="monoFlujo" x="0" y="18">Humedad · Baño</text>
+              <rect class="pillFlujo obsFlujo" x="130" y="2" width="56" height="22" rx="11" ry="11"/>
+              <text class="pillTxtFlujo" x="158" y="18" text-anchor="middle">OBS</text>
+              <text class="monoFlujo" x="0" y="56">Electricidad · Tablero</text>
+              <rect class="pillFlujo revFlujo" x="130" y="40" width="56" height="22" rx="11" ry="11"/>
+              <text class="pillTxtFlujo" x="158" y="56" text-anchor="middle">REV</text>
+              <text class="monoFlujo" x="0" y="94">Pisos · Living</text>
+              <rect class="pillFlujo okFlujo" x="130" y="78" width="56" height="22" rx="11" ry="11"/>
+              <text class="pillTxtFlujo" x="158" y="94" text-anchor="middle">OK</text>
             </g>
           </g>
-
-          <g transform="translate(980,70)">
-            <rect x="0" y="0" width="228" height="46" rx="12" fill="url(#ctaGrad3)"/>
-            <text class="btn3" x="22" y="29">Solicitar demo técnica</text>
-            <text class="btn3" x="196" y="29" style="opacity:0.85;">→</text>
-
-            <rect x="0" y="60" width="228" height="46" rx="12" fill="#0B1520" class="stroke3"/>
-            <text class="btn3b" x="22" y="89">Ver arquitectura</text>
-
-            <text class="mono3" x="0" y="140">Respuesta en &lt; 24h hábiles</text>
-            <text class="mono3" x="0" y="158">Formato: llamada + demo</text>
+          <g transform="translate(962,160)">
+            <path class="arrowFlujo" d="M22 0 L0 -12 L0 12 Z"/>
           </g>
-
-          <line x1="48" y1="210" x2="1208" y2="210" stroke="#203142" stroke-opacity="0.6"/>
-          <g transform="translate(48,228)" opacity="0.9">
-            <text class="mono3">Ainspecciona · Audit-ready outputs · White-label disponible</text>
+          <g transform="translate(990,0)">
+            <rect class="cardFlujo" x="0" y="0" width="300" height="340" rx="18"/>
+            <text class="nFlujo" x="24" y="36">04</text>
+            <text class="ctFlujo" x="150" y="64" text-anchor="middle">Señal visible</text>
+            <text class="cpFlujo" x="150" y="94" text-anchor="middle">
+              <tspan x="150" dy="0">Traducción automática del diagnóstico</tspan>
+              <tspan x="150" dy="20">a una señal simple para publicación</tspan>
+              <tspan x="150" dy="20">(estrellas).</tspan>
+            </text>
+            <rect x="24" y="180" width="252" height="120" rx="14" fill="#0A1F32" stroke="#1F3447" stroke-width="1"/>
+            <g transform="translate(100,206)">
+              <text class="monoFlujo" x="50" y="0" text-anchor="middle">Evaluación técnica</text>
+              <g transform="translate(2,12) scale(0.9)">
+                <path class="starFlujo" d="M10,0 L12.8,6.2 L19.6,6.7 L14.3,11.1 L15.9,18 L10,14.6 L4.1,18 L5.7,11.1 L0.4,6.7 L7.2,6.2 Z"/>
+                <g transform="translate(22,0)"><path class="starFlujo" d="M10,0 L12.8,6.2 L19.6,6.7 L14.3,11.1 L15.9,18 L10,14.6 L4.1,18 L5.7,11.1 L0.4,6.7 L7.2,6.2 Z"/></g>
+                <g transform="translate(44,0)"><path class="starFlujo" d="M10,0 L12.8,6.2 L19.6,6.7 L14.3,11.1 L15.9,18 L10,14.6 L4.1,18 L5.7,11.1 L0.4,6.7 L7.2,6.2 Z"/></g>
+                <g transform="translate(66,0)"><path class="starFlujo" d="M10,0 L12.8,6.2 L19.6,6.7 L14.3,11.1 L15.9,18 L10,14.6 L4.1,18 L5.7,11.1 L0.4,6.7 L7.2,6.2 Z"/></g>
+                <g transform="translate(88,0)"><path class="starOffFlujo" d="M10,0 L12.8,6.2 L19.6,6.7 L14.3,11.1 L15.9,18 L10,14.6 L4.1,18 L5.7,11.1 L0.4,6.7 L7.2,6.2 Z"/></g>
+              </g>
+              <text class="monoFlujo" x="50" y="58" text-anchor="middle">visible en aviso + motor</text>
+            </g>
           </g>
         </g>
-
-        <rect x="0" y="400" width="1440" height="60" fill="#03060A" opacity="0.9"/>
+        <text class="footFlujo" x="55" y="610">Pipeline determinístico · Evidencia por slot · Listo para integración API</text>
       </svg>
+      </div>
     </div>
   </section>
 
-  <section id="interpretacion">
-    <div style="width:100%; overflow:hidden;">
-      <svg xmlns="http://www.w3.org/2000/svg" width="1440" height="520" viewBox="0 0 1440 520" style="display:block; width:100%; height:auto;">
-        <defs>
-          <linearGradient id="bg4" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#020306"/>
-            <stop offset="55%" stop-color="#060B12"/>
-            <stop offset="100%" stop-color="#010204"/>
-          </linearGradient>
-          <radialGradient id="glow4" cx="30%" cy="40%" r="100%">
-            <stop offset="0%" stop-color="#0B2740" stop-opacity="0.34"/>
-            <stop offset="55%" stop-color="#060B12" stop-opacity="0.55"/>
-            <stop offset="100%" stop-color="#010204" stop-opacity="1"/>
-          </radialGradient>
-          <pattern id="grid4" width="36" height="36" patternUnits="userSpaceOnUse">
-            <path d="M36 0H0V36" fill="none" stroke="#142333" stroke-opacity="0.36" stroke-width="1"/>
-          </pattern>
-          <linearGradient id="card4" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#0E1A26"/>
-            <stop offset="100%" stop-color="#0A131D"/>
-          </linearGradient>
-          <linearGradient id="accent4" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stop-color="#39C6FF"/>
-            <stop offset="100%" stop-color="#2C7BFF"/>
-          </linearGradient>
-          <linearGradient id="gGreen4" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#27E38B"/>
-            <stop offset="100%" stop-color="#1AAE69"/>
-          </linearGradient>
-          <linearGradient id="gYellow4" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#FFD36A"/>
-            <stop offset="100%" stop-color="#E8A93A"/>
-          </linearGradient>
-          <linearGradient id="gRed4" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#FF6B6B"/>
-            <stop offset="100%" stop-color="#E54242"/>
-          </linearGradient>
-          <filter id="shadow4" x="-30%" y="-30%" width="160%" height="160%">
-            <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000" flood-opacity="0.45"/>
-          </filter>
-          <style>
-            .kicker4 { font-family: Inter, ui-sans-serif, system-ui; font-size:12px; font-weight:700; letter-spacing:.6px; fill:#8EA2BA; text-transform:uppercase; }
-            .h2_4 { font-family: Inter, ui-sans-serif, system-ui; font-size:28px; font-weight:650; fill:#EAF2FF; }
-            .p4 { font-family: Inter, ui-sans-serif, system-ui; font-size:15px; font-weight:450; fill:#A9B8CC; }
-            .b4 { font-family: Inter, ui-sans-serif, system-ui; font-size:15px; font-weight:600; fill:#D7E6FA; }
-            .muted4 { font-family: Inter, ui-sans-serif, system-ui; font-size:13px; font-weight:500; fill:#8EA2BA; }
-            .mono4 { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas; font-size:11px; fill:#8EA2BA; }
-            .label4 { font-family: Inter, ui-sans-serif, system-ui; font-size:12px; font-weight:700; letter-spacing:.2px; }
-            .stroke4 { stroke:#203142; stroke-opacity:.9; }
-          </style>
-        </defs>
+  <section class="alianzasWrap" style="background: linear-gradient(135deg,#070B16,#0B1430); overflow: hidden; display: none; justify-content: center; width: 100%;">
+    <svg width="1440" height="340" viewBox="0 0 1440 340" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block; width:100%; height:auto; max-width:1440px;">
+      <defs>
+        <linearGradient id="bg_alianzas" x1="0" y1="0" x2="1440" y2="340">
+          <stop stop-color="#070B16"/>
+          <stop offset="1" stop-color="#0B1430"/>
+        </linearGradient>
+        <radialGradient id="glow1_alianzas" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(420 40) rotate(25) scale(400 200)">
+          <stop stop-color="#7C3AED" stop-opacity="0.35"/>
+          <stop offset="1" stop-color="#7C3AED" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="glow2_alianzas" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1100 60) rotate(-15) scale(400 200)">
+          <stop stop-color="#22D3EE" stop-opacity="0.25"/>
+          <stop offset="1" stop-color="#22D3EE" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="cardFill_alianzas" x1="120" y1="60" x2="1320" y2="280">
+          <stop stop-color="rgba(255,255,255,0.06)"/>
+          <stop offset="1" stop-color="rgba(255,255,255,0.03)"/>
+        </linearGradient>
+        <filter id="monoWhite_alianzas">
+          <feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0"/>
+        </filter>
+        <filter id="softShadow_alianzas" x="-20%" y="-40%" width="140%" height="200%">
+          <feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#000000" flood-opacity="0.45"/>
+        </filter>
+      </defs>
+      <rect width="1440" height="340" fill="url(#bg_alianzas)"/>
+      <rect width="1440" height="340" fill="url(#glow1_alianzas)"/>
+      <rect width="1440" height="340" fill="url(#glow2_alianzas)"/>
+      <g filter="url(#softShadow_alianzas)">
+        <rect x="120" y="60" width="1200" height="220" rx="28" fill="url(#cardFill_alianzas)" stroke="rgba(255,255,255,0.10)"/>
+      </g>
+      <text x="160" y="110" fill="rgba(255,255,255,0.92)" font-family="Inter, sans-serif" font-size="22" font-weight="700">
+        Alianzas estratégicas
+      </text>
+      <text x="160" y="135" fill="rgba(255,255,255,0.6)" font-family="Inter, sans-serif" font-size="14">
+        Empresas del ecosistema inmobiliario que colaboran con Ainspecciona.
+      </text>
+      <rect x="160" y="170" width="220" height="70" rx="18" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.08)"/>
+      <image href="/assets/LOGO_COMUNIDADFELIZ.png" x="185" y="185" width="170" height="40" filter="url(#monoWhite_alianzas)" opacity="0.75"/>
+      <rect x="410" y="170" width="220" height="70" rx="18" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.08)"/>
+      <image href="/assets/LOGO_PROPITEQ.png" x="435" y="185" width="170" height="40" filter="url(#monoWhite_alianzas)" opacity="0.75"/>
+      <rect x="660" y="170" width="220" height="70" rx="18" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.08)"/>
+      <image href="/assets/LOGO_HOUSEPRICING.png" x="685" y="185" width="170" height="40" filter="url(#monoWhite_alianzas)" opacity="0.75"/>
+      <rect x="910" y="170" width="220" height="70" rx="18" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.08)"/>
+      <image href="/assets/LOGO_ACODEF.png" x="935" y="180" width="170" height="45" filter="url(#monoWhite_alianzas)" opacity="0.75"/>
+      <text x="160" y="265" fill="rgba(255,255,255,0.4)" font-family="Inter, sans-serif" font-size="12">
+        Acuerdos de colaboración tecnológica y comercial.
+      </text>
+    </svg>
+  </section>
 
-        <rect x="0" y="0" width="1440" height="520" fill="url(#bg4)"/>
-        <rect x="0" y="0" width="1440" height="520" fill="url(#glow4)"/>
-        <rect x="0" y="0" width="1440" height="520" fill="url(#grid4)" opacity="0.30"/>
+  <section style="background:linear-gradient(135deg,#070B16,#0B1430);overflow:hidden;width:100%;">
+    <div style="max-width:1440px;margin:0 auto;padding:0;">
+    <svg width="1440" height="560" viewBox="0 0 1440 560" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:auto;">
+      <defs>
+        <linearGradient id="bgCta" x1="0" y1="0" x2="1440" y2="560" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#070B16"/>
+          <stop offset="1" stop-color="#0B1430"/>
+        </linearGradient>
+        <radialGradient id="spotCta" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(760 220) rotate(90) scale(260 520)">
+          <stop offset="0" stop-color="#1F6BFF" stop-opacity="0.18"/>
+          <stop offset="1" stop-color="#1F6BFF" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="spotGCta" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(920 330) rotate(90) scale(220 520)">
+          <stop offset="0" stop-color="#33D17A" stop-opacity="0.10"/>
+          <stop offset="1" stop-color="#33D17A" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="btnCta" x1="0" y1="0" x2="1" y2="1" gradientUnits="objectBoundingBox">
+          <stop offset="0" stop-color="#1F6BFF"/>
+          <stop offset="1" stop-color="#2D7CFF"/>
+        </linearGradient>
+        <filter id="shadowBtnCta" x="-40%" y="-80%" width="180%" height="260%" color-interpolation-filters="sRGB">
+          <feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#000000" flood-opacity="0.55"/>
+          <feDropShadow dx="0" dy="5" stdDeviation="9" flood-color="#000000" flood-opacity="0.40"/>
+        </filter>
+        <filter id="textGlowCta" x="-50%" y="-50%" width="200%" height="200%">
+          <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#1F6BFF" flood-opacity="0.12"/>
+        </filter>
+        <linearGradient id="lineCta" x1="0" y1="0" x2="1" y2="0" gradientUnits="objectBoundingBox">
+          <stop offset="0" stop-color="#22315F" stop-opacity="0"/>
+          <stop offset="0.5" stop-color="#22315F" stop-opacity="0.8"/>
+          <stop offset="1" stop-color="#22315F" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
 
-        <g transform="translate(92,86)">
-          <text class="kicker4">Interpretación</text>
-          <text class="h2_4" x="0" y="44">Badges que permiten decisiones inmediatas</text>
-          <text class="p4" x="0" y="76">
-            <tspan x="0" dy="0">Los resultados técnicos se traducen en un lenguaje simple. El badge es estable, explicable</tspan>
-            <tspan x="0" dy="24">y trazable: se puede auditar desde los slots hacia el estado final.</tspan>
-          </text>
+      <rect width="1440" height="560" fill="url(#bgCta)"/>
+      <rect width="1440" height="560" fill="url(#spotCta)"/>
+      <rect width="1440" height="560" fill="url(#spotGCta)"/>
+
+      <rect x="200" y="70" width="1040" height="1.5" fill="url(#lineCta)"/>
+
+      <text x="720" y="190" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui" font-size="44" font-weight="800" fill="#F3F7FF" letter-spacing="-0.8">
+        La próxima propiedad que publiques puede verse igual que todas…
+      </text>
+
+      <text x="720" y="252" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui" font-size="52" font-weight="900" fill="#FFFFFF" letter-spacing="-1.1" filter="url(#textGlowCta)">
+        …o puede tener evaluación técnica visible.
+      </text>
+
+      <text x="720" y="312" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui" font-size="16" font-weight="600" fill="#B8C4E6">
+        La diferencia no está en las fotos. Está en la evidencia estructurada.
+      </text>
+
+      <a href="/inspeccionar">
+        <g transform="translate(548 360)" filter="url(#shadowBtnCta)">
+          <rect x="0" y="0" width="344" height="58" rx="16" fill="url(#btnCta)"/>
+          <text x="34" y="37" font-family="Inter, ui-sans-serif, system-ui" font-size="16" font-weight="800" fill="#FFFFFF">Crear una inspección</text>
+          <path d="M276 29H310" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M302 21L310 29L302 37" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
         </g>
+      </a>
 
-        <g transform="translate(92,178)">
-          <g filter="url(#shadow4)">
-            <rect x="0" y="0" width="560" height="290" rx="18" fill="url(#card4)" class="stroke4"/>
-            <g transform="translate(22,22)">
-              <text class="b4" x="0" y="18" style="font-size:16px; font-weight:700;">Regla de consolidación (ejemplo)</text>
-              <text class="muted4" x="0" y="42">De hallazgos por slot → badge del inmueble</text>
+      <text x="720" y="450" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui" font-size="13" font-weight="500" fill="#8EA0C8">
+        Empieza con una propiedad. Genera su evaluación en minutos.
+      </text>
 
-              <g transform="translate(0,70)">
-                <rect x="0" y="0" width="516" height="64" rx="16" fill="#0B1520" class="stroke4"/>
-                <rect x="14" y="18" width="92" height="28" rx="12" fill="url(#gGreen4)"/>
-                <text class="label4" x="36" y="38" fill="#07101A">VERDE</text>
-                <text class="b4" x="120" y="30">Publicable</text>
-                <text class="muted4" x="120" y="52">Sin hallazgos críticos / severidad controlada</text>
-
-                <g transform="translate(0,82)">
-                  <rect x="0" y="0" width="516" height="64" rx="16" fill="#0B1520" class="stroke4"/>
-                  <rect x="14" y="18" width="116" height="28" rx="12" fill="url(#gYellow4)"/>
-                  <text class="label4" x="30" y="38" fill="#07101A">AMARILLO</text>
-                  <text class="b4" x="140" y="30">Publicable con observaciones</text>
-                  <text class="muted4" x="140" y="52">Hallazgos medios con explicación y evidencia</text>
-                </g>
-
-                <g transform="translate(0,164)">
-                  <rect x="0" y="0" width="516" height="64" rx="16" fill="#0B1520" class="stroke4"/>
-                  <rect x="14" y="18" width="92" height="28" rx="12" fill="url(#gRed4)"/>
-                  <text class="label4" x="44" y="38" fill="#07101A">ROJO</text>
-                  <text class="b4" x="120" y="30">Revisión humana recomendada</text>
-                  <text class="muted4" x="120" y="52">Hallazgos críticos o baja certeza en puntos clave</text>
-                </g>
-              </g>
-
-              <g transform="translate(0,260)" opacity="0.9">
-                <text class="mono4">Las reglas (thresholds) pueden ajustarse por partner, manteniendo trazabilidad.</text>
-              </g>
-            </g>
-          </g>
-
-          <g transform="translate(588,0)" filter="url(#shadow4)">
-            <rect x="0" y="0" width="668" height="290" rx="18" fill="url(#card4)" class="stroke4"/>
-            <g transform="translate(22,22)">
-              <text class="b4" x="0" y="18" style="font-size:16px; font-weight:700;">Trazabilidad</text>
-              <text class="muted4" x="0" y="42">Explicación desde el badge hacia los slots</text>
-
-              <g transform="translate(0,70)">
-                <rect x="0" y="0" width="624" height="64" rx="16" fill="#0B1520" class="stroke4"/>
-                <text class="muted4" x="16" y="26">Badge final</text>
-                <rect x="16" y="30" width="124" height="26" rx="12" fill="url(#gYellow4)"/>
-                <text class="label4" x="34" y="48" fill="#07101A">AMARILLO</text>
-                <text class="b4" x="156" y="44">Se detectaron 3 hallazgos medios y 0 críticos</text>
-              </g>
-
-              <g transform="translate(0,150)">
-                <rect x="0" y="0" width="624" height="104" rx="16" fill="#0B1520" class="stroke4"/>
-                <text class="b4" x="16" y="34">Baño</text>
-                <text class="mono4" x="210" y="34">analysis_code: HUM_SEAL_02</text>
-                <rect x="520" y="18" width="88" height="26" rx="10" fill="url(#gYellow4)"/>
-                <text class="label4" x="548" y="36" fill="#07101A">MED</text>
-                <line x1="16" y1="52" x2="608" y2="52" stroke="#203142" stroke-opacity="0.6"/>
-                <text class="b4" x="16" y="82">Muros</text>
-                <text class="mono4" x="210" y="82">analysis_code: CRACK_PAINT_01</text>
-                <rect x="520" y="66" width="88" height="26" rx="10" fill="url(#gYellow4)"/>
-                <text class="label4" x="548" y="84" fill="#07101A">MED</text>
-              </g>
-            </g>
-          </g>
-        </g>
-      </svg>
+      <rect x="200" y="500" width="1040" height="1.5" fill="url(#lineCta)"/>
+    </svg>
     </div>
   </section>
 
@@ -1334,31 +1220,534 @@
         <img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" />
         <div class="footerTitle">Ainspecciona</div>
         <div class="footerDesc">Inspección técnica automatizada con evidencia por slot y trazabilidad completa.</div>
-        <a class="footerCta" href="/formulario">Generar inspección</a>
       </div>
       <div class="footerCol">
-        <h4>Producto</h4>
-        <a href="/como-funciona.html">Cómo funciona</a>
-        <a href="/modelo.html">Modelo</a>
-        <a href="/integracion.html">Integración</a>
-        <a href="/faq.html">FAQ</a>
+        <h4>Legal</h4>
+        <a href="/terminos">Términos y Condiciones</a>
+        <a href="/privacidad">Política de Privacidad</a>
       </div>
       <div class="footerCol">
-        <h4>Empresa</h4>
+        <h4>Contacto</h4>
         <a href="/contacto.html">Contacto</a>
-        <a href="/agendar.html">Agendar reunión</a>
-        <a href="/dashboard">Dashboard</a>
-      </div>
-      <div class="footerCol">
-        <h4>Recursos</h4>
-        <a href="/formulario">Crear caso</a>
-        <a href="/cases">Casos</a>
+        <a href="/precios">Precios</a>
       </div>
     </div>
     <div class="footerBottom">
       <div>© 2026 Ainspecciona. Todos los derechos reservados.</div>
-      <div>Audit-ready · Evidencia por slot · White-label</div>
     </div>
   </footer>
+
+  <div class="trial-modal-overlay" id="trialModal" aria-hidden="true">
+    <div class="trial-modal" role="dialog" aria-labelledby="trialModalTitle">
+      <h3 id="trialModalTitle">Iniciar Free Trial Business (14 días)</h3>
+      <p class="desc">Completa tus datos para validar elegibilidad. Luego podrás registrar tarjeta en MercadoPago sin cobro inmediato.</p>
+      <form id="trialForm">
+        <div class="trial-grid">
+          <div class="full">
+            <label for="trialRazonSocial">Razón social / Nombre *</label>
+            <input id="trialRazonSocial" type="text" placeholder="Ej: Corredora Inmobiliaria SpA" required />
+          </div>
+          <div>
+            <label for="trialRut">RUT *</label>
+            <input id="trialRut" type="text" placeholder="12.345.678-9" required />
+          </div>
+          <div>
+            <label for="trialTelefono">Teléfono</label>
+            <input id="trialTelefono" type="tel" placeholder="+56 9 1234 5678" />
+          </div>
+          <div>
+            <label for="trialNombre">Nombre contacto *</label>
+            <input id="trialNombre" type="text" placeholder="Nombre" required />
+          </div>
+          <div>
+            <label for="trialApellido">Apellido contacto *</label>
+            <input id="trialApellido" type="text" placeholder="Apellido" required />
+          </div>
+          <div class="full">
+            <label for="trialEmail">Email corporativo *</label>
+            <input id="trialEmail" type="email" placeholder="contacto@tuempresa.cl" required />
+          </div>
+          <div class="full">
+            <label for="trialPartnerCode">Código de referido (opcional)</label>
+            <input id="trialPartnerCode" type="text" placeholder="Ej: si un influencer o alianza te compartió un código" autocomplete="off" />
+            <span class="fieldHint" style="font-size:12px;color:#64748b;">Con código válido: 30 días de prueba y 1 inspección extra.</span>
+          </div>
+        </div>
+        <p class="trial-note">No se efectuará cobro hoy. El cobro automático de $39.990 se ejecuta al finalizar el período de prueba si no cancelas antes (14 días por defecto; 30 días con código partner).</p>
+        <div class="trial-btn-row">
+          <button class="trial-btn-primary" id="trialSubmitBtn" type="submit">Continuar con Free Trial</button>
+          <button class="trial-btn-secondary" id="closeTrialModalBtn" type="button">Cancelar</button>
+        </div>
+        <div class="trial-error" id="trialError"></div>
+      </form>
+    </div>
+  </div>
+
+  <div class="login-modal-overlay" id="forgotModal" aria-hidden="true">
+    <div class="login-modal" role="dialog" aria-labelledby="forgotModalTitle">
+      <h3 id="forgotModalTitle">Recuperar cuenta</h3>
+      <form id="forgotForm">
+        <p style="font-size:14px; color:#94a3b8; margin-bottom:16px;">Ingresa el correo asociado a tu cuenta. Te enviaremos una contraseña temporal para que puedas ingresar.</p>
+        <div class="formGroup">
+          <label for="forgotEmail">Email</label>
+          <input id="forgotEmail" type="email" placeholder="tu@correo.cl" required autocomplete="email" />
+        </div>
+        <div class="note" id="forgotNote"></div>
+        <div class="btnRow">
+          <button type="submit">Enviar correo</button>
+          <button type="button" id="forgotModalClose">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="login-modal-overlay" id="loginModal" aria-hidden="true">
+    <div class="login-modal" role="dialog" aria-labelledby="loginModalTitle">
+      <h3 id="loginModalTitle">Ingreso corredores</h3>
+      <form id="tenantLoginForm">
+        <div class="formGroup">
+          <label for="tenantEmail">Email o RUT</label>
+          <input id="tenantEmail" type="text" placeholder="tu@corredora.cl o RUT (ej. 12.345.678-9)" required autocomplete="username" />
+        </div>
+        <div class="formGroup">
+          <label for="tenantPass">Clave</label>
+          <input id="tenantPass" type="password" placeholder="Tu clave" required />
+        </div>
+        <div class="note" id="loginNote"></div>
+        <p class="muted" style="font-size:12px; margin-top:8px;">¿Primera vez? Crea tu cuenta <a href="#" id="openRegisterModal" style="color:#35D07F;">acá</a>.</p>
+        <p class="muted" style="font-size:12px; margin-top:4px;">¿Olvidaste tu clave? <a href="#" id="openForgotModal" style="color:#35D07F;">Recuperar cuenta</a></p>
+        <div class="btnRow">
+          <button type="submit">Entrar</button>
+          <button type="button" id="loginModalClose">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="login-modal-overlay" id="registerModal" aria-hidden="true">
+    <div class="login-modal" role="dialog" aria-labelledby="registerModalTitle">
+      <h3 id="registerModalTitle">Crear cuenta</h3>
+      <button type="button" class="btnGoogle" id="registerGoogleBtn" disabled title="Próximamente">Continuar con Google</button>
+      <p class="formDivider">o</p>
+      <form id="tenantRegisterForm">
+        <div class="formGroup">
+          <label for="regEmail">Email</label>
+          <input id="regEmail" type="email" placeholder="contacto@corredora.cl" required autocomplete="email" />
+          <span class="fieldHint" id="regEmailHint"></span>
+        </div>
+        <div class="formGroup">
+          <label for="regPass">Clave (8 caracteres, 1 mayúscula, 1 número)</label>
+          <input id="regPass" type="password" placeholder="Tu clave" required minlength="8" autocomplete="new-password" />
+          <span class="fieldHint" id="regPassHint"></span>
+        </div>
+        <div class="formGroup">
+          <label for="regPassRepeat">Repetir clave</label>
+          <input id="regPassRepeat" type="password" placeholder="Repite tu clave" required minlength="8" autocomplete="new-password" />
+          <span class="fieldHint" id="regPassRepeatHint"></span>
+        </div>
+        <div class="note" id="registerNote"></div>
+        <div class="btnRow">
+          <button type="submit">Crear cuenta</button>
+          <button type="button" id="registerModalClose">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const loginForm = document.getElementById("tenantLoginForm");
+    const loginEmail = document.getElementById("tenantEmail");
+    const loginPass = document.getElementById("tenantPass");
+    const loginModal = document.getElementById("loginModal");
+    const loginBtn = document.getElementById("loginBtn");
+    const loginModalClose = document.getElementById("loginModalClose");
+    const loginNote = document.getElementById("loginNote");
+    const trialModal = document.getElementById("trialModal");
+    const openTrialModalBtn = document.getElementById("openTrialModalBtn");
+    const closeTrialModalBtn = document.getElementById("closeTrialModalBtn");
+    const trialForm = document.getElementById("trialForm");
+    const trialSubmitBtn = document.getElementById("trialSubmitBtn");
+    const trialError = document.getElementById("trialError");
+
+    function openTrialModal() {
+      if (!trialModal) return;
+      trialModal.classList.add("open");
+      trialModal.setAttribute("aria-hidden", "false");
+      if (trialError) trialError.textContent = "";
+    }
+    function closeTrialModal() {
+      if (!trialModal) return;
+      trialModal.classList.remove("open");
+      trialModal.setAttribute("aria-hidden", "true");
+      if (trialError) trialError.textContent = "";
+    }
+    if (openTrialModalBtn) openTrialModalBtn.addEventListener("click", openTrialModal);
+    if (closeTrialModalBtn) closeTrialModalBtn.addEventListener("click", closeTrialModal);
+    if (trialModal) {
+      trialModal.addEventListener("click", (e) => {
+        if (e.target === trialModal) closeTrialModal();
+      });
+    }
+    if (trialForm) {
+      trialForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (trialError) trialError.textContent = "";
+        if (trialSubmitBtn) {
+          trialSubmitBtn.disabled = true;
+          trialSubmitBtn.textContent = "Validando elegibilidad...";
+        }
+        try {
+          const body = {
+            razonSocial: document.getElementById("trialRazonSocial").value.trim(),
+            rut: document.getElementById("trialRut").value.trim(),
+            email: document.getElementById("trialEmail").value.trim().toLowerCase(),
+            telefono: document.getElementById("trialTelefono").value.trim() || null,
+            contactNombre: document.getElementById("trialNombre").value.trim(),
+            contactApellido: document.getElementById("trialApellido").value.trim(),
+            startTrial: true
+          };
+          const res = await fetch("/api/business/activate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+            credentials: "include"
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            if (res.status === 409 && data?.error === "TRIAL_NOT_ELIGIBLE") {
+              const reasonMap = {
+                STARTER_HISTORY_BLOCK: "Trial bloqueado: existe historial Starter para esta empresa.",
+                CORPORATE_EMAIL_REQUIRED: "Trial bloqueado: usa un correo corporativo (no personal).",
+                TRIAL_KEY_ALREADY_USED: "Trial bloqueado: la combinación RUT + dominio ya usó un trial."
+              };
+              throw new Error(reasonMap[data?.reason] || data?.message || "El free trial no está disponible para esta cuenta.");
+            }
+            throw new Error(data?.message || data?.error || "No fue posible iniciar el free trial.");
+          }
+          if (!data?.trialSetup || !data?.tenantId) {
+            throw new Error("No fue posible preparar el free trial. Intenta nuevamente.");
+          }
+          sessionStorage.setItem("trial_checkout_tenant_id", data.tenantId);
+          sessionStorage.setItem("trial_checkout_payer_email", body.email);
+          const partnerCode = (document.getElementById("trialPartnerCode")?.value || "").trim();
+          sessionStorage.setItem("trial_checkout_context", JSON.stringify({
+            durationDays: data?.trial?.durationDays || 14,
+            includedInspections: data?.trial?.realInspectionsIncluded ?? 1,
+            partnerCode: partnerCode || undefined
+          }));
+          window.location.href = "/business/trial/pago";
+        } catch (err) {
+          if (trialError) trialError.textContent = err?.message || "Error al iniciar el trial.";
+        } finally {
+          if (trialSubmitBtn) {
+            trialSubmitBtn.disabled = false;
+            trialSubmitBtn.textContent = "Continuar con Free Trial";
+          }
+        }
+      });
+    }
+
+    const forgotModal = document.getElementById("forgotModal");
+    const forgotModalClose = document.getElementById("forgotModalClose");
+    const openForgotModal = document.getElementById("openForgotModal");
+    const forgotForm = document.getElementById("forgotForm");
+    const forgotNote = document.getElementById("forgotNote");
+    const forgotEmail = document.getElementById("forgotEmail");
+
+    if (openForgotModal && forgotModal) {
+      openForgotModal.addEventListener("click", (e) => {
+        e.preventDefault();
+        if (loginModal) {
+          loginModal.classList.remove("open");
+          loginModal.setAttribute("aria-hidden", "true");
+        }
+        forgotModal.classList.add("open");
+        forgotModal.setAttribute("aria-hidden", "false");
+      });
+    }
+    if (forgotModalClose && forgotModal) {
+      forgotModalClose.addEventListener("click", () => {
+        forgotModal.classList.remove("open");
+        forgotModal.setAttribute("aria-hidden", "true");
+        if (forgotNote) forgotNote.textContent = "";
+      });
+    }
+    if (forgotForm) {
+      forgotForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (forgotNote) {
+          forgotNote.textContent = "Procesando...";
+          forgotNote.style.color = "#8EA2BA";
+        }
+        const email = forgotEmail.value.trim().toLowerCase();
+        if (!email) return;
+
+        try {
+          const res = await fetch("/api/tenant/forgot-password", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email })
+          });
+          const data = await res.json();
+          if (forgotNote) {
+            if (data.emailSent === false) {
+              forgotNote.textContent = "Clave restablecida pero no pudimos enviarte el correo (SMTP no configurado o fallo). Un administrador puede asignarte una clave desde Admin → Corredoras → Editar.";
+              forgotNote.style.color = "#EAB308";
+            } else if (data.emailSent === true) {
+              forgotNote.textContent = "Revisa tu correo (y carpeta de spam). Te enviamos una clave temporal.";
+              forgotNote.style.color = "#35D07F";
+            } else {
+              forgotNote.textContent = "Si el correo está registrado, te hemos enviado una clave temporal. Revisa tu bandeja y spam.";
+              forgotNote.style.color = "#35D07F";
+            }
+          }
+        } catch (err) {
+          if (forgotNote) {
+            forgotNote.textContent = "Error de conexión. Intenta de nuevo más tarde.";
+            forgotNote.style.color = "#EF4444";
+          }
+        }
+      });
+    }
+
+    if (loginBtn && loginModal) {
+      loginBtn.addEventListener("click", () => {
+        loginModal.classList.add("open");
+        loginModal.setAttribute("aria-hidden", "false");
+      });
+    }
+    if (loginModalClose && loginModal) {
+      loginModalClose.addEventListener("click", () => {
+        loginModal.classList.remove("open");
+        loginModal.setAttribute("aria-hidden", "true");
+      });
+    }
+    const openRegisterModal = document.getElementById("openRegisterModal");
+    const registerModal = document.getElementById("registerModal");
+    const registerModalClose = document.getElementById("registerModalClose");
+    const registerForm = document.getElementById("tenantRegisterForm");
+    const registerNote = document.getElementById("registerNote");
+    if (openRegisterModal && registerModal) {
+      openRegisterModal.addEventListener("click", (e) => {
+        e.preventDefault();
+        if (loginModal) {
+          loginModal.classList.remove("open");
+          loginModal.setAttribute("aria-hidden", "true");
+        }
+        registerModal.classList.add("open");
+        registerModal.setAttribute("aria-hidden", "false");
+      });
+    }
+    if (registerModalClose && registerModal) {
+      registerModalClose.addEventListener("click", () => {
+        registerModal.classList.remove("open");
+        registerModal.setAttribute("aria-hidden", "true");
+      });
+    }
+    // El modal de registro no se cierra al tocar afuera; solo con Cancelar o al crear cuenta
+    function validateEmailFormat(email) {
+      if (!email) return { ok: false, msg: "Ingresa tu email" };
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!re.test(email)) return { ok: false, msg: "Email inválido" };
+      return { ok: true };
+    }
+    function validatePasswordFormat(pwd) {
+      if (!pwd) return { ok: false, msg: "Ingresa una clave" };
+      if (pwd.length < 8) return { ok: false, msg: "Mínimo 8 caracteres" };
+      if (!/[A-Z]/.test(pwd)) return { ok: false, msg: "Debe tener al menos 1 mayúscula" };
+      if (!/[0-9]/.test(pwd)) return { ok: false, msg: "Debe tener al menos 1 número" };
+      return { ok: true };
+    }
+    const regEmailEl = document.getElementById("regEmail");
+    const regEmailHint = document.getElementById("regEmailHint");
+    const regPassEl = document.getElementById("regPass");
+    const regPassRepeatEl = document.getElementById("regPassRepeat");
+    const regPassHint = document.getElementById("regPassHint");
+    const regPassRepeatHint = document.getElementById("regPassRepeatHint");
+    if (regEmailEl && regEmailHint) {
+      regEmailEl.addEventListener("input", () => {
+        const v = validateEmailFormat(regEmailEl.value.trim());
+        regEmailHint.textContent = regEmailEl.value ? (v.ok ? "✓ Email válido" : v.msg) : "";
+        regEmailHint.className = "fieldHint " + (v.ok ? "valid" : "invalid");
+      });
+      regEmailEl.addEventListener("blur", () => { if (!regEmailEl.value) regEmailHint.textContent = ""; });
+    }
+    if (regPassEl && regPassHint) {
+      regPassEl.addEventListener("input", () => {
+        const v = validatePasswordFormat(regPassEl.value);
+        regPassHint.textContent = regPassEl.value ? (v.ok ? "✓ Formato correcto" : v.msg) : "";
+        regPassHint.className = "fieldHint " + (v.ok ? "valid" : "invalid");
+      });
+      regPassEl.addEventListener("blur", () => { if (!regPassEl.value) regPassHint.textContent = ""; });
+    }
+    if (regPassRepeatEl && regPassRepeatHint) {
+      regPassRepeatEl.addEventListener("input", () => {
+        const match = regPassEl && regPassEl.value === regPassRepeatEl.value;
+        regPassRepeatHint.textContent = regPassRepeatEl.value ? (match ? "✓ Las claves coinciden" : "Las claves no coinciden") : "";
+        regPassRepeatHint.className = "fieldHint " + (match ? "valid" : "invalid");
+      });
+      regPassRepeatEl.addEventListener("blur", () => { if (!regPassRepeatEl.value) regPassRepeatHint.textContent = ""; });
+    }
+    if (registerForm) {
+      registerForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (registerNote) registerNote.textContent = "";
+        const email = document.getElementById("regEmail").value.trim().toLowerCase();
+        const password = document.getElementById("regPass").value;
+        const passwordRepeat = document.getElementById("regPassRepeat").value;
+        const emailCheck = validateEmailFormat(email);
+        if (!emailCheck.ok) {
+          if (registerNote) registerNote.textContent = emailCheck.msg;
+          return;
+        }
+        const pwdCheck = validatePasswordFormat(password);
+        if (!pwdCheck.ok) {
+          if (registerNote) registerNote.textContent = "Clave: " + pwdCheck.msg;
+          return;
+        }
+        if (password !== passwordRepeat) {
+          if (registerNote) registerNote.textContent = "Las claves no coinciden.";
+          return;
+        }
+        try {
+          const res = await fetch("/api/tenant/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password }),
+            credentials: "include"
+          });
+          const data = await res.json().catch(() => ({}));
+          if (res.ok) {
+            registerModal.classList.remove("open");
+            registerModal.setAttribute("aria-hidden", "true");
+            const token = data.token;
+            if (token) {
+              localStorage.setItem("tenant_session", token);
+              window.location.replace("/tenant?t=" + encodeURIComponent(token) + "#cuenta");
+            } else {
+              window.location.replace("/tenant#cuenta");
+            }
+            return;
+          }
+          let msg = "Error al crear cuenta. Intenta más tarde.";
+          if (data?.error === "EMAIL_ALREADY_EXISTS") msg = "Ya existe una cuenta con ese email.";
+          else if (data?.error === "PASSWORD_INVALID") msg = "Clave: " + (data.message || "8 caracteres, 1 mayúscula, 1 número.");
+          if (registerNote) registerNote.textContent = msg;
+        } catch (err) {
+          if (registerNote) registerNote.textContent = "Error de conexión. Intenta más tarde.";
+        }
+      });
+    }
+    // El modal no se cierra al tocar afuera; solo con Cancelar o al entrar correctamente
+
+    if (loginForm) {
+      loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (loginNote) loginNote.textContent = "";
+        const identifier = loginEmail.value.trim();
+        const password = loginPass.value;
+        if (!identifier || !password) {
+          if (loginNote) loginNote.textContent = "Completa email/RUT y clave.";
+          return;
+        }
+        
+        if (identifier.toLowerCase() === "admin" && password === "admin123") {
+          localStorage.setItem("ainspectaAdminUser", identifier.toLowerCase());
+          localStorage.setItem("ainspectaAdminPass", password);
+          window.location.replace("/admin");
+          return;
+        }
+
+        try {
+          const debug = new URLSearchParams(window.location.search).get("debug") === "1";
+          const headers = { "Content-Type": "application/json" };
+          if (debug) headers["X-Debug"] = "1";
+          const res = await fetch("/api/tenant/login", {
+            method: "POST",
+            headers,
+            body: JSON.stringify({ email: identifier, rut: identifier, password }),
+            credentials: "include"
+          });
+          if (res.ok) {
+            const data = await res.json();
+            const token = data.token;
+            loginModal.classList.remove("open");
+            if (token) {
+              localStorage.setItem("tenant_session", token);
+              window.location.replace("/tenant?t=" + encodeURIComponent(token));
+            } else {
+              window.location.replace("/tenant");
+            }
+            return;
+          }
+          let msg = "Email/RUT o clave incorrectos. Si no recuerdas la clave, usa «Recuperar cuenta».";
+          try {
+            const data = await res.json();
+            if (data?.error === "PASSWORD_NOT_SET") {
+              msg = "Clave no configurada para esta corredora. Un administrador debe definir la clave en el panel Admin.";
+            } else if (data?.error === "EMAIL_AND_PASSWORD_REQUIRED") {
+              msg = "Completa email y clave.";
+            } else if (data?.error === "DATABASE_UNAVAILABLE") {
+              msg = data?.hint ? "Servicio no disponible: " + data.hint : "Servicio temporalmente no disponible. Intenta más tarde.";
+            } else if (data?.error === "LOGIN_FAILED" || res.status >= 500) {
+              msg = data?.message || "Error del servidor. Intenta más tarde.";
+            }
+          } catch {}
+          if (loginNote) loginNote.textContent = msg;
+        } catch (err) {
+          if (loginNote) loginNote.textContent = "Error de conexión. ¿El servidor está corriendo? (npm run dev en local)";
+        }
+      });
+    }
+
+    document.querySelectorAll(".report-thumb").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        var src = this.getAttribute("data-src");
+        var mainImg = document.getElementById("reportMainImg");
+        if (mainImg && src) {
+          mainImg.src = src;
+          document.querySelectorAll(".report-thumb").forEach(function(b) { b.classList.remove("active"); });
+          this.classList.add("active");
+        }
+      });
+    });
+  </script>
+  <script>
+    (function() {
+      var v = document.getElementById('heroVideo');
+      var poster = document.getElementById('heroVideoPoster');
+      var playBtn = document.getElementById('heroVideoPlayBtn');
+      var canvas = document.getElementById('heroVideoPosterFrame');
+      var wrap = poster && poster.parentElement;
+      if (!v || !poster) return;
+      function drawFirstFrame() {
+        if (!canvas || !wrap || !v.videoWidth) return;
+        var cw = wrap.offsetWidth, ch = wrap.offsetHeight;
+        canvas.width = cw;
+        canvas.height = ch;
+        var ctx = canvas.getContext('2d');
+        var vw = v.videoWidth, vh = v.videoHeight;
+        var scale = Math.max(cw / vw, ch / vh);
+        var dw = vw * scale, dh = vh * scale;
+        ctx.drawImage(v, 0, 0, vw, vh, (cw - dw) / 2, (ch - dh) / 2, dw, dh);
+      }
+      v.addEventListener('loadeddata', function() {
+        v.currentTime = 0;
+      });
+      v.addEventListener('seeked', function() {
+        drawFirstFrame();
+      }, { once: true });
+      v.addEventListener('canplay', function() {
+        if (v.currentTime === 0) drawFirstFrame();
+      }, { once: true });
+      function hidePosterAndPlay() {
+        poster.setAttribute('aria-hidden', 'true');
+        v.play().catch(function() {});
+      }
+      if (playBtn) playBtn.addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); hidePosterAndPlay(); });
+      poster.addEventListener('click', function(e) { if (e.target === playBtn || (playBtn && playBtn.contains(e.target))) return; hidePosterAndPlay(); });
+    })();
+  </script>
+  <script src="/assets/tracker.js" defer></script>
 </body>
 </html>

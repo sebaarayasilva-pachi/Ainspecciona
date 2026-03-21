@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ainspecciona – Certificado</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #E5E7EB;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: #111827;
+    }
+    .toolbar {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 16px 24px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: flex-end;
+    }
+    .toolbtn {
+      padding: 10px 18px;
+      border-radius: 10px;
+      border: 1px solid #0f172a;
+      background: #0f172a;
+      color: #fff;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .certificate-wrap {
+      max-width: 1080px;
+      margin: 0 auto 40px;
+      padding: 0;
+    }
+    .certificate-wrap svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+    @media print {
+      body { background: #fff; margin: 0; }
+      .toolbar { display: none !important; }
+      .certificate-wrap { max-width: none; margin: 0; padding: 0; }
+      .certificate-wrap svg { max-height: 100vh; width: auto; height: auto; object-fit: contain; }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div class="toolbar">
+    <a id="reportLink" class="toolbtn" href="#" target="_blank" rel="noreferrer" style="text-decoration:none;display:inline-flex;align-items:center;">Ver informe</a>
+    <button id="printBtn" class="toolbtn" type="button" disabled>Descargar</button>
+  </div>
+  <div class="certificate-wrap" id="certificateWrap">
+    <svg id="certSvg" xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#F5F6F8"/>
+          <stop offset="1" stop-color="#ECEEF2"/>
+        </linearGradient>
+        <linearGradient id="greenBanner" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#1F7A4A"/>
+          <stop offset="1" stop-color="#2DAA63"/>
+        </linearGradient>
+        <linearGradient id="yellowBanner" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#B8860B"/>
+          <stop offset="1" stop-color="#D4A017"/>
+        </linearGradient>
+        <linearGradient id="redBanner" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#B91C1C"/>
+          <stop offset="1" stop-color="#DC2626"/>
+        </linearGradient>
+        <path id="starPath" d="M20 0 L26 14 L41 15 L29 24 L33 39 L20 31 L7 39 L11 24 L-1 15 L14 14 Z" fill="#F6C343"/>
+        <style>
+          .h1 { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; font-size: 44px; font-weight: 800; fill: #1C2B39; letter-spacing: -0.5px; }
+          .brand { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; font-size: 74px; font-weight: 900; fill: #123A63; letter-spacing: -0.6px; }
+          .sub { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; font-size: 30px; font-weight: 500; fill: #4A5A6A; }
+          .section { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; font-size: 38px; font-weight: 800; fill: #1C2B39; }
+          .kpi { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; font-size: 22px; font-weight: 600; fill: #223241; }
+          .small { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; font-size: 18px; font-weight: 500; fill: #56697A; }
+          .url { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; font-size: 20px; font-weight: 700; fill: #1C2B39; letter-spacing: -0.2px; }
+          .footer { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; font-size: 26px; font-weight: 600; fill: #5A6C7D; }
+        </style>
+      </defs>
+      <rect width="1080" height="1080" fill="white"/>
+      <rect x="70" y="70" rx="40" ry="40" width="940" height="940" fill="url(#bg)"/>
+      <!-- Sello: círculo verde + check tipo verificado -->
+      <g transform="translate(140 145)">
+        <circle cx="70" cy="58" r="56" fill="#1F8B52"/>
+        <circle cx="70" cy="58" r="46" fill="#F5FFF9"/>
+        <path d="M54 58 L66 70 L88 46" fill="none" stroke="#1F8B52" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+      <!-- Título (a la derecha del sello para evitar superposición) -->
+      <text x="300" y="170" text-anchor="start" class="h1" fill="#1C2B39">Propiedad Inspeccionada con</text>
+      <!-- Marca Ainspecciona + tagline -->
+      <g transform="translate(300 195)">
+        <image id="logoHeader" href="/assets/Logo%202%20ainspecciona.png" x="0" y="0" width="420" height="100" preserveAspectRatio="xMidYMid meet"/>
+        <text x="210" y="115" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="18" font-weight="500" fill="#123A63">Sistema de Inspección Inmobiliaria con IA</text>
+      </g>
+      <!-- Estado general: contenedor gris con título dentro + estrellas centradas -->
+      <g transform="translate(150 365)">
+        <rect id="bannerRect" x="0" y="0" rx="18" ry="18" width="780" height="130" fill="#E5E7EB"/>
+        <text x="390" y="32" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="22" font-weight="400" fill="#56697A">Estado general del inmueble</text>
+        <g transform="translate(195 48) scale(1.5)">
+          <use id="star1" href="#starPath" x="0" y="0" fill="#F6C343"/>
+          <use id="star2" href="#starPath" x="52" y="0" fill="#F6C343"/>
+          <use id="star3" href="#starPath" x="104" y="0" fill="#F6C343"/>
+          <use id="star4" href="#starPath" x="156" y="0" fill="#F6C343"/>
+          <use id="star5" href="#starPath" x="208" y="0" fill="#F6C343"/>
+        </g>
+      </g>
+      <line x1="120" y1="520" x2="960" y2="520" stroke="#C9D2DD" stroke-width="2"/>
+      <text x="150" y="590" class="section" fill="#1C2B39">Áreas inspeccionadas</text>
+      <g transform="translate(150 630)">
+        <defs>
+          <g id="kpiCheck">
+            <circle cx="15" cy="15" r="15" fill="#E8F5E9"/>
+            <path d="M8 15 L12 19 L22 9" fill="none" stroke="#1F8B52" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+        </defs>
+        <g transform="translate(0 0)">
+          <use href="#kpiCheck" x="0" y="0"/><text x="45" y="22" class="kpi">Muros y pintura</text>
+          <use href="#kpiCheck" x="0" y="44"/><text x="45" y="66" class="kpi">Pisos</text>
+          <use href="#kpiCheck" x="0" y="88"/><text x="45" y="110" class="kpi">Electricidad visible</text>
+          <use href="#kpiCheck" x="0" y="132"/><text x="45" y="154" class="kpi">Ventanas y cerramientos</text>
+        </g>
+        <line x1="455" y1="8" x2="455" y2="170" stroke="#D3DBE6" stroke-width="2"/>
+        <g transform="translate(490 0)">
+          <use href="#kpiCheck" x="0" y="0"/><text x="45" y="22" class="kpi">Puertas y herrajes</text>
+          <use href="#kpiCheck" x="0" y="44"/><text x="45" y="66" class="kpi">Sanitarios</text>
+          <use href="#kpiCheck" x="0" y="88"/><text x="45" y="110" class="kpi">Mobiliario fijo</text>
+          <use href="#kpiCheck" x="0" y="132"/><text x="45" y="154" class="kpi">Humedad visible</text>
+        </g>
+      </g>
+      <line x1="120" y1="805" x2="960" y2="805" stroke="#C9D2DD" stroke-width="2"/>
+      <text x="150" y="840" class="small"><tspan x="150" dy="0">La inspección revisa estos elementos.</tspan><tspan x="150" dy="26">El informe completo se puede descargar acá.</tspan></text>
+      <text id="certUrl" x="150" y="895" class="url">—</text>
+      <g transform="translate(760 815)">
+        <rect x="0" y="0" width="180" height="180" rx="10" ry="10" fill="#FFFFFF" stroke="#1C2B39" stroke-width="3"/>
+        <image id="qrImage" x="10" y="10" width="160" height="160" preserveAspectRatio="xMidYMid meet"/>
+      </g>
+      <g transform="translate(150 940)">
+        <image id="logoFooter" href="/assets/Logo%202%20ainspecciona.png" x="0" y="0" width="280" height="70" preserveAspectRatio="xMidYMid meet"/>
+      </g>
+    </svg>
+  </div>
+
+  <script>
+    function getCaseIdFromPath() {
+      const parts = window.location.pathname.split("/").filter(Boolean);
+      const idx = parts.indexOf("cases");
+      if (idx >= 0 && parts[idx + 1]) return parts[idx + 1];
+      return null;
+    }
+
+    function starsFromScore(score) {
+      const s = Math.max(0, Math.min(100, Number(score) || 0));
+      if (s <= 0) return 1;
+      return Math.min(5, Math.max(1, Math.ceil(s / 20)));
+    }
+
+    function badgeLabel(badge) {
+      const b = String(badge || "").toUpperCase();
+      if (b === "GREEN") return "Favorable";
+      if (b === "YELLOW") return "Regular";
+      if (b === "RED") return "Desfavorable";
+      return "Favorable";
+    }
+
+    function badgeBannerGradient(badge) {
+      const b = String(badge || "").toUpperCase();
+      if (b === "GREEN") return "url(#greenBanner)";
+      if (b === "YELLOW") return "url(#yellowBanner)";
+      if (b === "RED") return "url(#redBanner)";
+      return "url(#greenBanner)";
+    }
+
+    function embedLogoAsDataUrl(imgEl, logoPath) {
+      if (!imgEl) return;
+      fetch(logoPath).then(function(r) { return r.blob(); }).then(function(blob) {
+        var reader = new FileReader();
+        reader.onload = function() { imgEl.setAttribute("href", reader.result); };
+        reader.readAsDataURL(blob);
+      }).catch(function() {});
+    }
+
+    async function load() {
+      var logoPath = "/assets/Logo%202%20ainspecciona.png";
+      embedLogoAsDataUrl(document.getElementById("logoHeader"), logoPath);
+      embedLogoAsDataUrl(document.getElementById("logoFooter"), logoPath);
+
+      const caseId = getCaseIdFromPath();
+      const svg = document.getElementById("certSvg");
+      const certUrlEl = document.getElementById("certUrl");
+
+      if (!caseId) {
+        if (certUrlEl) certUrlEl.textContent = "Caso no especificado.";
+        document.getElementById("printBtn").disabled = false;
+        var rl = document.getElementById("reportLink");
+        if (rl) rl.style.display = "none";
+        return;
+      }
+
+      const res = await fetch("/api/cases/" + encodeURIComponent(caseId) + "/summary");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) {
+        if (certUrlEl) certUrlEl.textContent = "No se pudo cargar el resumen.";
+        document.getElementById("printBtn").disabled = false;
+        var rl = document.getElementById("reportLink");
+        if (rl) rl.style.display = "none";
+        return;
+      }
+
+      if (data.case?.shortId && caseId.length > 8) {
+        const newPath = "/cases/" + data.case.shortId + "/certificate";
+        if (window.location.pathname !== newPath) history.replaceState(null, "", newPath);
+      }
+      const score = Math.max(0, Math.min(100, Number(data.score) || 0));
+      const badge = data.badge || "GREEN";
+      const stars = starsFromScore(score);
+
+      for (let i = 1; i <= 5; i++) {
+        const starEl = document.getElementById("star" + i);
+        if (starEl) starEl.setAttribute("fill", i <= stars ? "#F6C343" : "#D1D5DB");
+      }
+
+      var host = window.location.host || "ainspecciona.com";
+      var idForUrl = data.case?.shortId || caseId;
+      var urlText = host + "/cases/" + idForUrl + "/report";
+      if (certUrlEl) {
+        certUrlEl.textContent = urlText;
+        certUrlEl.setAttribute("font-size", urlText.length > 40 ? "16" : "20");
+      }
+      var reportUrl = window.location.origin + "/cases/" + encodeURIComponent(idForUrl) + "/report";
+      var reportLink = document.getElementById("reportLink");
+      if (reportLink) reportLink.href = reportUrl;
+      var qrImg = document.getElementById("qrImage");
+      var printBtn = document.getElementById("printBtn");
+      if (qrImg) {
+        var qrApiUrl = "/api/qr?data=" + encodeURIComponent(reportUrl);
+        fetch(qrApiUrl).then(function(r) { return r.blob(); }).then(function(blob) {
+          var reader = new FileReader();
+          reader.onload = function() {
+            qrImg.setAttribute("href", reader.result);
+            if (printBtn) printBtn.disabled = false;
+          };
+          reader.readAsDataURL(blob);
+        }).catch(function() { if (printBtn) printBtn.disabled = false; });
+      } else if (printBtn) { printBtn.disabled = false; }
+    }
+
+    document.getElementById("printBtn").addEventListener("click", function () {
+      var btn = this;
+      var wrap = document.getElementById("certificateWrap");
+      if (!wrap) return;
+      btn.disabled = true;
+      btn.textContent = "Generando…";
+      html2canvas(wrap, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: "#F6F7F9",
+        width: 1080,
+        height: 1080,
+        windowWidth: 1080,
+        windowHeight: 1080
+      }).then(function (canvas) {
+        canvas.toBlob(function (blob) {
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement("a");
+          a.href = url;
+          a.download = "certificado-" + (getCaseIdFromPath() || "inspeccion") + ".jpg";
+          a.click();
+          URL.revokeObjectURL(url);
+          btn.disabled = false;
+          btn.textContent = "Descargar";
+        }, "image/jpeg", 0.92);
+      }).catch(function () {
+        btn.disabled = false;
+        btn.textContent = "Descargar";
+      });
+    });
+
+    load();
+  </script>
+</body>
+</html>

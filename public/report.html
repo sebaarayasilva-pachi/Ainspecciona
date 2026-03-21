@@ -4,30 +4,37 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Ainspecciona – Informe</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <style>
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      background: #F6F7F9;
+      background: #0B1220;
       font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
-      color: #111827;
+      color: #F8FAFC;
     }
     .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
       max-width: 1143px;
       margin: 0 auto;
-      padding: 16px 24px 0;
+      padding: 16px 24px;
       display: flex;
       gap: 12px;
       align-items: center;
       justify-content: flex-end;
       flex-wrap: wrap;
+      background: #0B1220;
+      border-bottom: 1px solid #1e293b;
     }
     .toolbtn {
       padding: 10px 14px;
       border-radius: 10px;
-      border: 1px solid #0f172a;
-      background: #0f172a;
-      color: #fff;
+      border: 1px solid #334155;
+      background: #1e293b;
+      color: #F8FAFC;
       font-weight: 700;
       font-size: 13px;
       cursor: pointer;
@@ -38,7 +45,7 @@
     }
     .toolnote {
       font-size: 12px;
-      color: #64748b;
+      color: #94a3b8;
     }
     .canvas {
       width: 100%;
@@ -48,95 +55,135 @@
     svg {
       display: block;
       margin: 0 auto;
-      background: #F6F7F9;
+      background: #0B1220;
     }
   </style>
 </head>
 <body>
   <div class="toolbar">
     <button id="reanalyzeBtn" class="toolbtn" type="button">Reanalizar con IA</button>
+    <button id="generateSummaryBtn" class="toolbtn" type="button">Generar resumen ejecutivo</button>
     <button id="downloadPdfBtn" class="toolbtn" type="button">Descargar PDF</button>
+    <button id="approveBtn" class="toolbtn" type="button" style="display:none;background:linear-gradient(135deg,#059669,#10b981);border-color:#059669;">Aprobar informe</button>
+    <div id="reviewBadge" class="toolnote" style="display:none;"></div>
     <div id="reanalyzeNote" class="toolnote"></div>
+    <div id="loadError" class="toolnote" style="color:#dc2626;font-weight:600;display:none;"></div>
   </div>
   <div class="canvas">
     <svg id="reportSvg" width="1143" height="2780" viewBox="0 0 1143 2780" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#0F172A" flood-opacity="0.10"/>
+          <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#000" flood-opacity="0.4"/>
         </filter>
         <filter id="shadowSmall" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="5" stdDeviation="10" flood-color="#0F172A" flood-opacity="0.10"/>
+          <feDropShadow dx="0" dy="5" stdDeviation="10" flood-color="#000" flood-opacity="0.3"/>
+        </filter>
+        <filter id="slotShadow" x="-10" y="-10" width="120%" height="120%">
+          <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#000" flood-opacity="0.25"/>
+          <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#7C3AED" flood-opacity="0.08"/>
+        </filter>
+        <clipPath id="headerClip">
+          <rect x="0" y="0" width="1143" height="140"/>
+        </clipPath>
+        <linearGradient id="headerGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#0B1220"/>
+          <stop offset="0.5" stop-color="#0f172a"/>
+          <stop offset="1" stop-color="#1e293b"/>
+        </linearGradient>
+        <linearGradient id="headerAccent" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#7C3AED"/>
+          <stop offset="0.5" stop-color="#0EA5E9"/>
+          <stop offset="1" stop-color="#22c55e"/>
+        </linearGradient>
+        <filter id="headerGlow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
         </filter>
       </defs>
 
-      <rect id="bgRect" width="1143" height="2780" fill="#F6F7F9"/>
+      <rect id="bgRect" width="1143" height="2780" fill="#0B1220"/>
 
-      <rect x="0" y="0" width="1143" height="92" fill="#7A7471"/>
-      <rect x="32" y="22" width="46" height="46" rx="10" fill="#E5E7EB" opacity="0.35"/>
-      <text x="90" y="40" font-size="28" fill="#FFFFFF" font-weight="700">Ainspecciona</text>
-      <text x="571" y="38" font-size="22" fill="#FFFFFF" font-weight="700" text-anchor="middle">Informe Técnico del Inmueble</text>
-      <text x="571" y="62" font-size="13" fill="#E5E7EB" text-anchor="middle">Evaluación automatizada basada en evidencia fotográfica</text>
-      <text x="1080" y="34" font-size="12" fill="#E5E7EB" text-anchor="end">STI · v1.0</text>
-      <text id="headerDate" x="1080" y="58" font-size="12" fill="#E5E7EB" text-anchor="end">—</text>
+      <g clip-path="url(#headerClip)">
+        <rect x="28" y="0" width="1087" height="140" fill="url(#headerGrad)"/>
+        <rect x="28" y="0" width="1087" height="4" fill="url(#headerAccent)" opacity="0.9"/>
+        <rect x="28" y="136" width="1087" height="4" fill="url(#headerAccent)" opacity="0.15"/>
+        <image href="/assets/Logo 2 ainspecciona.png" x="28" y="-16" width="238" height="172" preserveAspectRatio="xMidYMid meet"/>
+        <text x="571" y="58" font-size="24" fill="#F8FAFC" font-weight="800" text-anchor="middle" font-family="Inter,sans-serif">Informe Técnico del Inmueble</text>
+        <text x="571" y="82" font-size="13" fill="#94a3b8" text-anchor="middle" font-family="Inter,sans-serif">Evaluación automatizada basada en evidencia fotográfica</text>
+        <rect x="980" y="36" width="120" height="32" rx="16" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.2)"/>
+        <text x="1040" y="57" font-size="11" fill="#94a3b8" font-weight="700" text-anchor="middle">STI v3.0</text>
+        <text id="headerDate" x="1040" y="95" font-size="11" fill="#64748b" text-anchor="middle">—</text>
+      </g>
 
-      <rect id="pageCard" x="28" y="112" width="1087" height="2640" rx="18" fill="#FFFFFF" filter="url(#shadow)"/>
+      <rect id="pageCard" x="28" y="140" width="1087" height="2612" fill="#1e293b" filter="url(#shadow)"/>
 
-      <rect x="52" y="136" width="1040" height="260" rx="14" fill="#FFFFFF" filter="url(#shadowSmall)"/>
+      <rect x="52" y="164" width="1040" height="276" rx="14" fill="#334155" filter="url(#shadowSmall)"/>
 
-      <text x="80" y="185" font-size="13" fill="#111827">Nombre Propietario</text>
-      <text id="ownerName" x="230" y="185" font-size="13" fill="#111827" font-weight="700">—</text>
+      <text x="80" y="213" font-size="13" fill="#94a3b8">Dirección:</text>
+      <text id="propertyAddress" x="230" y="213" font-size="13" fill="#F8FAFC" font-weight="700">—</text>
 
-      <text x="80" y="210" font-size="13" fill="#111827">RUT:</text>
-      <text id="ownerRut" x="230" y="210" font-size="13" fill="#111827" font-weight="700">—</text>
+      <text x="80" y="238" font-size="13" fill="#94a3b8">ROL:</text>
+      <text id="propertyRol" x="230" y="238" font-size="13" fill="#F8FAFC" font-weight="700">—</text>
 
-      <text x="80" y="235" font-size="13" fill="#111827">ROL:</text>
-      <text id="propertyRol" x="230" y="235" font-size="13" fill="#111827" font-weight="700">—</text>
+      <text x="80" y="263" font-size="13" fill="#94a3b8">Tipo Operación</text>
+      <text id="propertyOperation" x="230" y="263" font-size="13" fill="#F8FAFC">—</text>
 
-      <text x="80" y="260" font-size="13" fill="#111827">Dirección:</text>
-      <text id="propertyAddress" x="230" y="260" font-size="13" fill="#111827" font-weight="700">—</text>
+      <text x="80" y="288" font-size="13" fill="#94a3b8">Superficie</text>
+      <text id="propertySurface" x="230" y="288" font-size="13" fill="#F8FAFC">—</text>
 
-      <text x="80" y="285" font-size="13" fill="#111827">Tipo Operación</text>
-      <text id="propertyOperation" x="230" y="285" font-size="13" fill="#111827">—</text>
+      <text x="80" y="313" font-size="13" fill="#94a3b8">N° de caso</text>
+      <text id="caseNumber" x="230" y="313" font-size="13" fill="#F8FAFC" font-weight="700">—</text>
 
-      <text x="80" y="310" font-size="13" fill="#111827">Superficie</text>
-      <text id="propertySurface" x="230" y="310" font-size="13" fill="#111827">—</text>
+      <text x="80" y="338" font-size="13" fill="#94a3b8">Fecha de análisis</text>
+      <text id="analysisDate" x="230" y="338" font-size="13" fill="#F8FAFC">—</text>
 
-      <text x="80" y="350" font-size="12" fill="#6B7280">Basado exclusivamente en evidencia fotográfica disponible.</text>
+      <text x="80" y="368" font-size="12" fill="#64748b">Basado exclusivamente en evidencia fotográfica disponible.</text>
 
-      <text x="490" y="185" font-size="13" fill="#111827">N° de caso</text>
-      <text id="caseNumber" x="610" y="185" font-size="13" fill="#111827" font-weight="700">—</text>
+      <rect x="640" y="174" width="372" height="220" rx="14" fill="#334155" stroke="#475569"/>
+      <text x="826" y="208" font-size="18" fill="#F8FAFC" font-weight="700" text-anchor="middle">Score Técnico del Inmueble (STI)</text>
+      <path id="stiBaseArc" d="M756 318 A70 70 0 0 1 896 318" stroke="#475569" stroke-width="14" fill="none" stroke-linecap="round"/>
+      <path id="stiArc" d="M756 318 A70 70 0 0 1 896 318" stroke="#E0B300" stroke-width="14" fill="none" stroke-linecap="round"/>
+      <text id="stiScore" x="826" y="322" font-size="18" fill="#F8FAFC" font-weight="700" text-anchor="middle">—</text>
+      <rect x="756" y="338" width="140" height="36" rx="8" fill="#1e293b" stroke="#475569"/>
+      <text id="stiLabel" x="826" y="362" font-size="14" fill="#F8FAFC" font-weight="700" text-anchor="middle">—</text>
 
-      <text x="490" y="210" font-size="13" fill="#111827">Fecha de análisis</text>
-      <text id="analysisDate" x="610" y="210" font-size="13" fill="#111827">—</text>
-
-      <line x1="740" y1="156" x2="740" y2="372" stroke="#E5E7EB"/>
-
-      <text x="920" y="185" font-size="16" fill="#111827" font-weight="700" text-anchor="middle">Score Técnico del Inmueble</text>
-      <text x="920" y="205" font-size="12" fill="#111827" text-anchor="middle">STI</text>
-
-      <path id="stiBaseArc" d="M850 315 A70 70 0 0 1 990 315" stroke="#E5E7EB" stroke-width="14" fill="none" stroke-linecap="round"/>
-      <path id="stiArc" d="M850 315 A70 70 0 0 1 850 315" stroke="#E0B300" stroke-width="14" fill="none" stroke-linecap="round"/>
-      <text id="stiScore" x="920" y="304" font-size="16" fill="#111827" font-weight="700" text-anchor="middle">—</text>
-
-      <rect x="855" y="340" width="130" height="30" rx="6" fill="#F3F4F6" stroke="#E5E7EB"/>
-      <text id="stiLabel" x="920" y="360" font-size="12" fill="#111827" font-weight="600" text-anchor="middle">—</text>
-
-      <text x="80" y="440" font-size="14" fill="#111827" font-weight="700">KPIs técnicos clave (resumen)</text>
-
-      <rect x="52" y="462" width="1040" height="210" rx="14" fill="#FFFFFF" filter="url(#shadowSmall)"/>
+      <rect x="52" y="452" width="1040" height="250" rx="14" fill="#334155" filter="url(#shadowSmall)"/>
+      <text x="80" y="478" font-size="14" fill="#F8FAFC" font-weight="700">KPIs técnicos clave (resumen)</text>
       <g id="kpiSummary"></g>
 
-      <text x="80" y="720" font-size="14" fill="#111827" font-weight="700">Detalle por KPI (slots)</text>
+      <text x="80" y="722" font-size="14" fill="#F8FAFC" font-weight="700">Resumen ejecutivo</text>
+      <g id="executiveSummarySection">
+        <rect id="execSummaryCard" x="52" y="744" width="1040" height="200" rx="14" fill="#334155" filter="url(#shadowSmall)"/>
+        <foreignObject id="execSummaryContent" x="80" y="764" width="984" height="150">
+          <div xmlns="http://www.w3.org/1999/xhtml" id="execSummaryWrap" style="display:flex;flex-direction:column;min-height:120px;width:100%;">
+            <div id="execSummaryText" style="font-size:12px;color:#94a3b8;line-height:1.6;font-family:Inter,sans-serif;white-space:normal;flex:1 1 auto;">
+              <span id="execSummaryPlaceholder" style="color:#64748b;">Cargando…</span>
+            </div>
+          </div>
+        </foreignObject>
+        <text id="execSummaryFooter" x="80" y="936" font-size="10" fill="#64748b" font-style="italic">Desarrollado por OpenAI</text>
+      </g>
+
+      <text id="kpiDetailTitle" x="80" y="972" font-size="14" fill="#F8FAFC" font-weight="700">Detalle por KPI (slots)</text>
       <g id="kpiSections"></g>
 
       <g id="techDoc">
-        <text id="techDocTitle" x="80" y="2685" font-size="14" fill="#111827" font-weight="700">Documentación técnica del análisis automatizado</text>
-        <text id="techDocLine1" x="80" y="2715" font-size="12" fill="#111827">
-          Análisis ejecutado por un worker en Google Cloud, utilizando modelos de análisis de imágenes provistos por OpenAI (versión vigente al momento del análisis).
-        </text>
-        <text id="techDocLine2" x="80" y="2738" font-size="12" fill="#111827">
-          El proceso considera análisis de píxel, histogramas, detección de bordes/formas y relaciones espaciales para identificar indicios compatibles con condiciones técnicas relevantes.
-        </text>
+        <text id="techDocTitle" x="80" y="2685" font-size="14" fill="#F8FAFC" font-weight="700">Documentación técnica del análisis automatizado</text>
+        <foreignObject id="techDocBody" x="80" y="2715" width="984" height="420">
+          <div xmlns="http://www.w3.org/1999/xhtml" style="font-size:11px;color:#94a3b8;line-height:1.4;font-family:Inter,sans-serif;white-space:normal;">
+            El presente informe fue generado mediante un proceso automatizado ejecutado en infraestructura serverless de Google Cloud Platform (GCP), utilizando modelos avanzados de visión computacional provistos por OpenAI, en su versión vigente al momento del análisis.<br/><br/>
+            Las imágenes capturadas durante el proceso guiado son sometidas a un pipeline de procesamiento estructurado que contempla:<br/><br/>
+            • Normalización y preprocesamiento de imagen (formato, orientación, escala y control básico de ruido).<br/>
+            • Análisis de píxel y distribución cromática, incluyendo evaluación de variaciones de intensidad, contraste y discontinuidades de color.<br/>
+            • Construcción y evaluación de histogramas y segmentación regional para identificar patrones atípicos o zonas no homogéneas.<br/>
+            • Detección de bordes, contornos y geometrías mediante algoritmos de edge detection para identificar indicios compatibles con fisuras, desalineaciones, golpes o deformaciones visibles.<br/>
+            • Evaluación de relaciones espaciales y coherencia estructural entre elementos constructivos.<br/>
+            • Clasificación semántica contextual en función del KPI técnico asignado a cada slot evaluado.<br/><br/>
+            Los hallazgos detectados corresponden a indicios compatibles con condiciones técnicas observables en las imágenes, y son consolidados mediante un modelo de agregación multicriterio que pondera cantidad, distribución y severidad relativa para generar el score general del inmueble.<br/><br/>
+            El análisis se basa exclusivamente en información visual capturada y no contempla mediciones físicas, pruebas destructivas ni diagnósticos estructurales invasivos. No sustituye inspecciones presenciales cuando estas sean requeridas por normativa, tasación o peritaje especializado.<br/><br/>
+            Cada informe queda asociado a identificador único de caso, timestamp de ejecución y versión de modelo utilizada, permitiendo trazabilidad técnica bajo las mismas condiciones operativas.
+          </div>
+        </foreignObject>
       </g>
     </svg>
   </div>
@@ -204,9 +251,41 @@
 
     function severityLabel(sev) {
       const s = String(sev || "").toLowerCase();
-      if (s === "high") return { text: "HIGH", fill: "#9A3412", bg: "#FFF7ED" };
-      if (s === "medium") return { text: "MEDIUM", fill: "#9A3412", bg: "#FFF7ED" };
-      return { text: "LOW", fill: "#166534", bg: "#ECFDF5" };
+      if (s === "high") return { text: "HIGH", fill: "#FED7AA", bg: "#7C2D12", stroke: "#9A3412" };
+      if (s === "medium") return { text: "MEDIUM", fill: "#FED7AA", bg: "#7C2D12", stroke: "#9A3412" };
+      if (s === "low") return { text: "LOW", fill: "#86EFAC", bg: "#14532D", stroke: "#166534" };
+      return { text: "OK", fill: "#86EFAC", bg: "#14532D", stroke: "#166534" };
+    }
+
+    function starsFromScore(score) {
+      const n = clampScore(score);
+      if (n >= 90) return 5;
+      if (n >= 75) return 4;
+      if (n >= 60) return 3;
+      if (n >= 40) return 2;
+      return 1;
+    }
+
+    const STAR_PATH = "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z";
+    function renderStarIcons(parent, score, cx, starY) {
+      const filled = starsFromScore(score);
+      const starSize = 14;
+      const gap = 4;
+      const totalW = 5 * starSize + 4 * gap;
+      const startX = cx - totalW / 2;
+      for (let i = 0; i < 5; i++) {
+        const g = createSvg("g", { transform: `translate(${startX + i * (starSize + gap)},${starY}) scale(${starSize / 24})` });
+        const p = createSvg("path", { d: STAR_PATH, fill: i < filled ? "#F59E0B" : "#475569" });
+        g.appendChild(p);
+        parent.appendChild(g);
+      }
+    }
+
+    function impactLabel(sev) {
+      const s = String(sev || "").toLowerCase();
+      if (s === "high") return "Alto";
+      if (s === "medium") return "Medio";
+      return "Bajo";
     }
 
     function arcPath(cx, cy, r, startAngle, endAngle) {
@@ -251,17 +330,62 @@
       return null;
     }
 
+    function escapeHtml(s) {
+      if (!s) return "";
+      const div = document.createElement("div");
+      div.textContent = s;
+      return div.innerHTML;
+    }
+
+    function formatExecSummary(text) {
+      if (!text || typeof text !== "string") return "";
+      const escaped = escapeHtml(text);
+      const blocks = escaped.split(/\n\n+/).filter(Boolean);
+      return blocks.map((block) => {
+        const lines = block.split(/\n/).filter(Boolean);
+        const bulletLines = lines.filter((l) => /^[\-\•]\s/.test(l) || /^\d+\.\s/.test(l));
+        const allBullets = bulletLines.length === lines.length && lines.length > 0;
+        if (allBullets && lines.length >= 1) {
+          const items = lines.map((l) => l.replace(/^[\-\•]\s?/, "").replace(/^\d+\.\s?/, ""));
+          return '<ul style="margin:0.4em 0;padding-left:1.2em;">' + items.map((i) => "<li>" + i + "</li>").join("") + "</ul>";
+        }
+        return '<p style="margin:0.4em 0;">' + lines.join("<br/>") + "</p>";
+      }).join("");
+    }
+
     function createSvg(tag, attrs = {}) {
       const el = document.createElementNS(svgNS, tag);
       Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
       return el;
     }
 
+    function adjustExecutiveSummaryLayout() {
+      const card = document.getElementById("execSummaryCard");
+      const content = document.getElementById("execSummaryContent");
+      const text = document.getElementById("execSummaryText");
+      const footer = document.getElementById("execSummaryFooter");
+      const detailTitle = document.getElementById("kpiDetailTitle");
+      if (!card || !content || !text || !detailTitle) return;
+
+      const contentY = Number(content.getAttribute("y") || 764);
+      const cardY = Number(card.getAttribute("y") || 744);
+
+      content.setAttribute("height", "1200");
+      const measuredText = Math.ceil(text.scrollHeight || 150);
+      const contentHeight = Math.max(150, measuredText + 24);
+      const cardHeight = contentHeight + 48;
+
+      content.setAttribute("height", String(contentHeight));
+      card.setAttribute("height", String(cardHeight));
+      if (footer) footer.setAttribute("y", String(contentY + contentHeight + 22));
+      detailTitle.setAttribute("y", String(cardY + cardHeight + 28));
+    }
+
     function renderKpiSummary(kpis) {
       const group = document.getElementById("kpiSummary");
       group.innerHTML = "";
       const rowXs = [140, 400, 660, 920];
-      const rowYs = [510, 610];
+      const rowYs = [525, 625];
       kpis.slice(0, 8).forEach((kpi, idx) => {
         const row = idx < 4 ? 0 : 1;
         const x = rowXs[idx % 4] ?? rowXs[rowXs.length - 1];
@@ -274,7 +398,7 @@
         const radius = 24;
         const circumference = 2 * Math.PI * radius;
         const pct = kpi.score == null ? 0 : clampScore(kpi.score) / 100;
-        ringGroup.appendChild(createSvg("circle", { cx: x, cy: y, r: radius, stroke: "#E5E7EB", "stroke-width": 8, fill: "none" }));
+        ringGroup.appendChild(createSvg("circle", { cx: x, cy: y, r: radius, stroke: "#475569", "stroke-width": 8, fill: "none" }));
         const progress = createSvg("circle", {
           cx: x, cy: y, r: radius, stroke: color, "stroke-width": 8, fill: "none",
           "stroke-linecap": "round",
@@ -283,8 +407,8 @@
         });
         ringGroup.appendChild(progress);
         group.appendChild(ringGroup);
-        group.appendChild(createSvg("text", { x, y: y + 4, "font-size": 12, fill: "#111827", "font-weight": 700, "text-anchor": "middle" })).textContent = score;
-        group.appendChild(createSvg("text", { x, y: y + 38, "font-size": 12, fill: "#111827", "font-weight": 700, "text-anchor": "middle" })).textContent = kpi.title;
+        group.appendChild(createSvg("text", { x, y: y + 4, "font-size": 12, fill: "#F8FAFC", "font-weight": 700, "text-anchor": "middle" })).textContent = score;
+        group.appendChild(createSvg("text", { x, y: y + 38, "font-size": 12, fill: "#F8FAFC", "font-weight": 700, "text-anchor": "middle" })).textContent = kpi.title;
         group.appendChild(createSvg("text", { x, y: y + 56, "font-size": 11, fill: color, "font-weight": 700, "text-anchor": "middle" })).textContent = label;
       });
     }
@@ -293,152 +417,360 @@
       const container = document.getElementById("kpiSections");
       const defs = document.querySelector("#reportSvg defs");
       container.innerHTML = "";
-      let currentY = 750;
+      const detailTitle = document.getElementById("kpiDetailTitle");
+      const detailTitleY = Number(detailTitle?.getAttribute("y") || 972);
+      let currentY = detailTitleY + 12;
       const cardX = 52;
       const cardW = 1040;
       const headerOffset = 55;
       const slotStartOffset = 110;
-      const slotH = 130;
-      const slotGap = 8;
+      const slotMinH = 520;
+      const slotGap = 6;
 
       kpiGroups.forEach((g) => {
         const list = g.items || [];
         const hasSlots = list.length > 0;
-        const slotsHeight = hasSlots ? (list.length * slotH + (list.length - 1) * slotGap) : 46;
-        const sectionHeight = slotStartOffset + slotsHeight;
+        const sectionMinHeight = slotStartOffset + (hasSlots ? slotMinH : 46);
         const color = badgeColor(g.badge);
         const label = badgeLabel(g.badge);
         const score = Math.round(Number(g.scoreIfOnlyGroup ?? 0));
 
-        container.appendChild(createSvg("rect", {
-          x: cardX, y: currentY, width: cardW, height: sectionHeight, rx: 14, fill: "#FFFFFF", filter: "url(#shadowSmall)"
-        }));
+        const sectionCard = createSvg("rect", {
+          x: cardX, y: currentY, width: cardW, height: sectionMinHeight, rx: 14, fill: "#334155", filter: "url(#shadowSmall)"
+        });
+        const sectionAccent = createSvg("rect", {
+          x: cardX, y: currentY, width: 4, height: sectionMinHeight, fill: color
+        });
+        container.appendChild(sectionCard);
+        container.appendChild(sectionAccent);
 
         const headerCx = 105;
         const headerCy = currentY + headerOffset;
         const headerRadius = 22;
         const headerCirc = 2 * Math.PI * headerRadius;
         const headerPct = g.scoreIfOnlyGroup == null ? 0 : clampScore(g.scoreIfOnlyGroup) / 100;
-        container.appendChild(createSvg("circle", { cx: headerCx, cy: headerCy, r: headerRadius, stroke: "#E5E7EB", "stroke-width": 8, fill: "none" }));
+        container.appendChild(createSvg("circle", { cx: headerCx, cy: headerCy, r: headerRadius, stroke: "#475569", "stroke-width": 8, fill: "none" }));
         container.appendChild(createSvg("circle", {
           cx: headerCx, cy: headerCy, r: headerRadius, stroke: color, "stroke-width": 8, fill: "none",
           "stroke-linecap": "round",
           "stroke-dasharray": `${headerCirc * headerPct} ${headerCirc}`,
           transform: `rotate(-90 ${headerCx} ${headerCy})`
         }));
-        container.appendChild(createSvg("text", { x: 105, y: currentY + headerOffset + 4, "font-size": 11, fill: "#111827", "font-weight": 700, "text-anchor": "middle" })).textContent = score;
-        container.appendChild(createSvg("text", { x: 150, y: currentY + headerOffset - 5, "font-size": 13, fill: "#111827", "font-weight": 700 })).textContent = g.title || g.key;
+        container.appendChild(createSvg("text", { x: 105, y: currentY + headerOffset + 4, "font-size": 11, fill: "#F8FAFC", "font-weight": 700, "text-anchor": "middle" })).textContent = score;
+        container.appendChild(createSvg("text", { x: 150, y: currentY + headerOffset - 5, "font-size": 13, fill: "#F8FAFC", "font-weight": 700 })).textContent = g.title || g.key;
         container.appendChild(createSvg("text", { x: 150, y: currentY + headerOffset + 17, "font-size": 12, fill: color, "font-weight": 700 })).textContent = label;
-        container.appendChild(createSvg("text", { x: 250, y: currentY + headerOffset + 5, "font-size": 12, fill: "#111827" })).textContent = `· ${list.length} slots`;
+        container.appendChild(createSvg("text", { x: 320, y: currentY + headerOffset + 5, "font-size": 12, fill: "#F8FAFC" })).textContent = `· ${list.length} slots`;
 
         if (!hasSlots) {
-          container.appendChild(createSvg("text", { x: 150, y: currentY + slotStartOffset + 22, "font-size": 12, fill: "#6B7280" }))
+          container.appendChild(createSvg("text", { x: 150, y: currentY + slotStartOffset + 22, "font-size": 12, fill: "#64748b" }))
             .textContent = "Sin evidencia disponible en este KPI.";
         }
 
+        let slotCursorY = currentY + slotStartOffset;
         list.forEach((s, idx) => {
-          const slotY = currentY + slotStartOffset + idx * (slotH + slotGap);
-          const sev = severityLabel(s.severity);
+          const slotY = slotCursorY;
+          const isOmitted = !!s.omitted || String(s.status || "").toUpperCase() === "NOT_CAPTURABLE";
+          const sev = isOmitted
+            ? { text: "OMITIDA", fill: "#FDE68A", bg: "#78350F", stroke: "#92400E" }
+            : severityLabel(s.severity);
           const kpiCfg = scoreConfig?.kpis?.[g.key] || DEFAULT_SCORE_CONFIG.kpis[g.key] || {};
           const sevKey = String(s.severity || "").toLowerCase();
-          const slotPenalty = (sevKey === "high")
-            ? Number(kpiCfg.high ?? 0)
-            : (sevKey === "medium")
-              ? Number(kpiCfg.medium ?? 0)
-              : (sevKey === "low")
-                ? Number(kpiCfg.low ?? 0)
-                : 0;
-          const slotScore = Math.max(0, 100 - slotPenalty);
+          const slotPenalty = Number(
+            s?.scorePenaltyApplied
+            ?? ((sevKey === "high")
+              ? Number(kpiCfg.high ?? 0)
+              : (sevKey === "medium")
+                ? Number(kpiCfg.medium ?? 0)
+                : (sevKey === "low")
+                  ? Number(kpiCfg.low ?? 0)
+                  : 0)
+          );
+          const slotScore = isOmitted ? null : Math.max(0, 100 - slotPenalty);
           const sourceLabel = String(s.source || "").toUpperCase() === "OPENAI" ? "OpenAI" : "V1";
-          const analyzedAt = s.analyzedAt ? formatDate(s.analyzedAt) : "—";
           const code = s.findingCode || s.slotCode || "";
-          const evidenceUrl = s.photoUrl || null;
+          let evidenceUrl = s.photoId ? `/api/photos/${s.photoId}` : (s.photoUrl || null);
+          if (evidenceUrl && !evidenceUrl.startsWith('/') && evidenceUrl.startsWith('https://storage.googleapis.com/')) {
+            evidenceUrl = '/api/photo-proxy?url=' + encodeURIComponent(evidenceUrl);
+          }
           const hasIssue = Boolean(s.severity) && String(s.findingCode || "").toUpperCase() !== "OK";
-          const baseMsg = hasIssue ? baseMessageFor(s, scoreConfig) : "";
-          const aiCtx = aiContextFrom(s);
-          const recMsg = hasIssue ? recommendationFor(g.badge, scoreConfig) : "";
-          const baseLine = hasIssue ? `${baseMsg} · Recomendación: ${recMsg}` : "";
-          const aiLine = aiCtx
-            ? `En la imagen se observa: ${aiCtx}`
-            : "En la imagen se observa: Sin observaciones.";
+          const sanitize = (t) => t && typeof t === "string" ? t.replace(/\bLIVING_CEILING\b/gi, "el techo del living").replace(/\bLIVING_WALLS\b/gi, "los muros").replace(/\bBATHROOM_\d+_\w+/g, (m) => m.replace(/_/g, " ").toLowerCase()).replace(/\bKITCHEN_\w+/g, (m) => m.replace(/_/g, " ").toLowerCase()) : t;
+          const normalizeContextTerms = (t) => {
+            let out = String(t || "");
+            const context = `${String(s.groupTitle || "").toLowerCase()} ${String(s.title || "").toLowerCase()} ${String(g.title || "").toLowerCase()}`;
+            const isBathroom = /(baño|bano|lavamanos|wc|ducha|tina|sanitario)/i.test(context);
+            const isKitchen = /(cocina|lavaplatos|meson|mesón)/i.test(context);
+            if (isBathroom) {
+              out = out.replace(/\bencimera\b/gi, "superficie del lavamanos");
+              out = out.replace(/\bmes[óo]n\b/gi, "superficie del lavamanos");
+            } else if (!isKitchen) {
+              out = out.replace(/\bencimera\b/gi, "superficie");
+            }
+            return out.replace(/\s+/g, " ").trim();
+          };
+          const softenUnsupportedLocationClaims = (text, visualDesc) => {
+            let out = String(text || "");
+            const desc = String(visualDesc || "").toLowerCase();
+            const hasLowerEvidence = /(inferior|abajo|base|zócalo|zocalo|piso|suelo)/i.test(desc);
+            const hasUpperEvidence = /(superior|arriba|techo|cielo|alto)/i.test(desc);
+            if (!hasLowerEvidence) {
+              out = out
+                .replace(/\s+en\s+la\s+parte\s+inferior\b/gi, "")
+                .replace(/\s+en\s+el\s+sector\s+inferior\b/gi, "")
+                .replace(/\s+en\s+la\s+zona\s+inferior\b/gi, "");
+            }
+            if (!hasUpperEvidence) {
+              out = out
+                .replace(/\s+en\s+la\s+parte\s+superior\b/gi, "")
+                .replace(/\s+en\s+el\s+sector\s+superior\b/gi, "")
+                .replace(/\s+en\s+la\s+zona\s+superior\b/gi, "");
+            }
+            return out.replace(/\s{2,}/g, " ").trim();
+          };
+          const removeRetakePhrases = (txt) => {
+            let out = String(txt || "").replace(/\s*[•\-]?\s*No\s+se\s+puede\s+evaluar\s+por\s+falta\s+de\s+claridad\.?\s*/gi, " ").replace(/\s*Se\s+recomienda\s+retomar\s+(la\s+)?fotograf[ií]a\.?\s*/gi, " ").replace(/\s*Se\s+sugiere\s+retomar\s+(la\s+)?foto\.?\s*/gi, " ").replace(/\s*Retomar\s+(la\s+)?fotograf[ií]a\s+recomendado\.?\s*/gi, " ").replace(/\s*,\s*lo\s+que\s+dificulta\s+(la\s+)?visibilidad\.?\s*/gi, ". ").replace(/\s{2,}/g, " ").trim();
+            return out || "Las superficies se ven uniformes y sin evidencias claras de deterioro.";
+          };
+          const desc = normalizeContextTerms(removeRetakePhrases(sanitize(s?.analysisDebug?.openai?.parsed?.description || "")));
+          const kpiAnalysis = softenUnsupportedLocationClaims(
+            normalizeContextTerms(removeRetakePhrases(sanitize(s?.analysisDebug?.openai?.parsed?.kpi_analysis || ""))),
+            desc
+          );
+          const rawSignals = (s?.analysisDebug?.openai?.parsed?.signals_detected || []).map((x) => normalizeContextTerms(sanitize(x)));
+          const qualityIssueRe = /image_quality_issue|imagequalityissue|calidad\s*(de\s*)?(imagen|foto)|retomar\s*(la\s+)?foto|falta\s*de\s*claridad|imagen\s*borrosa|poca\s*iluminación/i;
+          const isQualityIssueCode = (c) => !!(c && (qualityIssueRe.test(String(c)) || String(c).toLowerCase().includes('image_quality')));
+          const signals = rawSignals.filter((sig) => !qualityIssueRe.test(String(sig || "")) && !String(sig || "").toLowerCase().includes('image_quality'));
+          const clampLen = (text, max = 280) => {
+            const str = String(text || "").trim();
+            return str.length > max ? str.slice(0, max) + "…" : str;
+          };
+          const wrapLines = (text, maxLen = 90, maxLines = 10) => {
+            const s = String(text || "").trim();
+            if (!s) return [];
+            if (s.length <= maxLen) return [s];
+            const lines = [];
+            let rest = s;
+            while (rest.length > 0 && lines.length < maxLines) {
+              if (rest.length <= maxLen) { lines.push(rest); break; }
+              const chunk = rest.slice(0, maxLen);
+              const lastSpace = chunk.lastIndexOf(" ");
+              const breakAt = lastSpace > maxLen * 0.4 ? lastSpace : maxLen;
+              lines.push(rest.slice(0, breakAt).trim());
+              rest = rest.slice(breakAt).trim();
+            }
+            return lines;
+          };
+          const hasOpenAiDescription = Boolean(String(s?.analysisDebug?.openai?.parsed?.description || "").trim());
+          const toNeutralVisualDescription = (text, areaLabel) => {
+            const base = String(text || "").trim();
+            if (!base) return `Registro visual del área inspeccionada: ${areaLabel || "sector evaluado"}.`;
+            const pieces = base
+              .split(/(?<=[\.\!\?])\s+/)
+              .map((p) => p.trim())
+              .filter(Boolean);
+            const nonDiagnostic = pieces.filter((p) => {
+              const t = p.toLowerCase();
+              if (!t) return false;
+              // Mantener "Descripción" neutral: solo lo visible, sin conclusión/diagnóstico.
+              if (/(conclusi[oó]n|hallazgo|diagn[oó]stic|severidad|criticidad|riesgo|impacto|puntaje|score|kpi|recomendaci[oó]n)/i.test(t)) return false;
+              if (/(filtraci[oó]n|fuga|humedad|moho|grieta|fisura|corrosi[oó]n|da[ñn]o|deterioro|anomal[ií]a|desprendimiento)/i.test(t)) return false;
+              if (/(requiere|debe|sugiere|se recomienda|se concluye|evidencia|compatible con)/i.test(t)) return false;
+              return true;
+            });
+            const merged = nonDiagnostic.join(" ").replace(/\s{2,}/g, " ").trim();
+            return merged || `Registro visual del área inspeccionada: ${areaLabel || "sector evaluado"}.`;
+          };
+          const neutralDescription = isOmitted ? "" : toNeutralVisualDescription(desc, s.title || s.slotCode || "sector evaluado");
+          const descLines = wrapLines(neutralDescription, 110, 8);
+          const kpiTitle = g.title || kpiLabel(g.key);
+          const headerText = `${s.groupTitle || "Área"} · ${s.title || s.slotCode || ""}`;
+          const subHeaderText = isOmitted
+            ? `${kpiTitle} · FOTO_OMITIDA`
+            : (code && String(code).toUpperCase() !== 'OK' && !isQualityIssueCode(code) ? `${kpiTitle} · ${code}` : kpiTitle);
+          const rightRailX = 72 + 1000 - 100;
+          const rightRailCx = rightRailX + 42;
 
-          container.appendChild(createSvg("rect", { x: 72, y: slotY, width: 1000, height: slotH, rx: 12, fill: "#FFFFFF", stroke: "#E5E7EB" }));
-          container.appendChild(createSvg("rect", { x: 88, y: slotY + 12, width: 64, height: 54, rx: 10, fill: "#E5E7EB" }));
+          // Card contenedor (slot - más oscuro y sutil que la card KPI)
+          const slotCard = createSvg("rect", { x: 72, y: slotY, width: 1000, height: slotMinH, rx: 12, fill: "#0f172a", filter: "url(#slotShadow)" });
+          const slotBorder = createSvg("rect", { x: 72, y: slotY, width: 1000, height: slotMinH, rx: 12, fill: "none", stroke: "#334155" });
+          container.appendChild(slotCard);
+          container.appendChild(slotBorder);
+
+          // Thumbnail
+          container.appendChild(createSvg("rect", { x: 92, y: slotY + 28, width: 80, height: 80, rx: 12, fill: "#475569", stroke: "#64748b" }));
           if (evidenceUrl) {
             const clipId = `thumbClip-${slugifyId(g.key || "kpi")}-${idx}`;
             const clip = createSvg("clipPath", { id: clipId });
-            clip.appendChild(createSvg("rect", { x: 88, y: slotY + 12, width: 64, height: 54, rx: 10 }));
+            clip.appendChild(createSvg("rect", { x: 92, y: slotY + 28, width: 80, height: 80, rx: 12 }));
             if (defs) defs.appendChild(clip);
             const img = createSvg("image", {
               href: evidenceUrl,
-              x: 88,
-              y: slotY + 12,
-              width: 64,
-              height: 54,
+              x: 92, y: slotY + 28, width: 80, height: 80,
               preserveAspectRatio: "xMidYMid slice",
               "clip-path": `url(#${clipId})`
             });
             container.appendChild(img);
           }
 
-          container.appendChild(createSvg("rect", { x: 170, y: slotY + 12, width: 72, height: 22, rx: 11, fill: sev.bg, stroke: "#E5E7EB" }));
-          container.appendChild(createSvg("text", { x: 206, y: slotY + 28, "font-size": 11, fill: sev.fill, "font-weight": 700, "text-anchor": "middle" })).textContent = sev.text;
-
-          container.appendChild(createSvg("text", { x: 260, y: slotY + 28, "font-size": 12, fill: "#111827", "font-weight": 700 })).textContent = code;
-
-          container.appendChild(createSvg("rect", { x: 520, y: slotY + 14, width: 26, height: 18, rx: 9, fill: "#EEF2FF", stroke: "#E5E7EB" }));
-          container.appendChild(createSvg("text", { x: 533, y: slotY + 27, "font-size": 10, fill: "#111827", "font-weight": 700, "text-anchor": "middle" })).textContent = sourceLabel;
-
-          container.appendChild(createSvg("text", { x: 170, y: slotY + 52, "font-size": 12, fill: "#111827", "font-weight": 700 })).textContent =
-            `Ambiente: ${s.groupTitle || ""} · Slot: ${s.title || ""} · Puntaje: ${slotScore} · Fuente: ${sourceLabel} · Fecha: ${analyzedAt}`;
-          if (baseLine) {
-            container.appendChild(createSvg("text", { x: 170, y: slotY + 72, "font-size": 11, fill: "#6B7280" })).textContent =
-              baseLine;
-          }
-
-          const desc = s?.analysisDebug?.openai?.parsed?.description || "";
-          const kpiAnalysis = s?.analysisDebug?.openai?.parsed?.kpi_analysis || "";
-          const hasStructured = desc || kpiAnalysis;
-          const clampText = (text, max = 170) => {
-            const str = String(text || "");
-            return str.length > max ? `${str.slice(0, max - 1)}…` : str;
-          };
-
-          if (hasStructured) {
-            const descText = desc ? desc : "";
-            const analysisText = kpiAnalysis ? kpiAnalysis : "";
-            const combined = `Analisis de Imagen: ${[descText, analysisText].filter(Boolean).join(". ")}`.trim();
-            container.appendChild(createSvg("text", { x: 170, y: slotY + 88, "font-size": 11, fill: "#6B7280" })).textContent =
-              clampText(combined || "Analisis de Imagen: Sin observaciones.");
-          } else {
-            const fallbackText = `Analisis de Imagen: ${aiCtx || "Sin observaciones."}`;
-            container.appendChild(createSvg("text", { x: 170, y: slotY + 88, "font-size": 11, fill: "#6B7280" })).textContent =
-              clampText(fallbackText);
-          }
-
+          // Ver evidencia
           if (evidenceUrl) {
             const link = createSvg("a", { href: evidenceUrl, target: "_blank" });
-            const txt = createSvg("text", { x: 965, y: slotY + 100, "font-size": 12, fill: "#2563EB", "text-anchor": "end" });
+            const txt = createSvg("text", { x: 132, y: slotY + 128, "text-anchor": "middle", fill: "#60A5FA", "font-size": 12, "font-weight": 600 });
             txt.textContent = "Ver evidencia";
             link.appendChild(txt);
             container.appendChild(link);
-            container.appendChild(createSvg("line", { x1: 890, y1: slotY + 104, x2: 965, y2: slotY + 104, stroke: "#2563EB", "stroke-width": 1 }));
           }
+
+          // Header y subheader
+          container.appendChild(createSvg("text", { x: 196, y: slotY + 50, fill: "#F8FAFC", "font-size": 18, "font-weight": 700 })).textContent = headerText;
+          container.appendChild(createSvg("text", { x: 196, y: slotY + 72, fill: "#94a3b8", "font-size": 13, "font-weight": 600 })).textContent = subHeaderText;
+          container.appendChild(createSvg("line", { x1: 196, y1: slotY + 86, x2: rightRailX - 24, y2: slotY + 86, stroke: "#475569" }));
+
+          // Impacto en score (siempre coherente con el puntaje del slot: 95 = 100 - 5 → impacto −5)
+          const impactStr = slotPenalty > 0 ? `−${slotPenalty} puntos` : "0 puntos";
+          const impactSuffix = isOmitted ? " (Omitida)" : (slotPenalty > 0 ? ` (${impactLabel(s.severity)})` : "");
+          container.appendChild(createSvg("text", { x: 196, y: slotY + 108, fill: "#F8FAFC", "font-size": 12, "font-weight": 700 })).textContent = "Impacto en score: ";
+          container.appendChild(createSvg("text", { x: 318, y: slotY + 108, fill: "#F8FAFC", "font-size": 12, "font-weight": 800 })).textContent = impactStr;
+          container.appendChild(createSvg("text", { x: 400, y: slotY + 108, fill: "#94a3b8", "font-size": 12 })).textContent = impactSuffix;
+
+          // Descripción (varias líneas) - omitidos sin texto
+          let contentY = slotY + 132;
+          if (!isOmitted) {
+            container.appendChild(createSvg("text", { x: 196, y: contentY, fill: "#F8FAFC", "font-size": 12, "font-weight": 700 })).textContent = "Descripción";
+            contentY += 20;
+            descLines.forEach((line, li) => {
+              container.appendChild(createSvg("text", { x: 196, y: contentY + li * 16, fill: "#94a3b8", "font-size": 12 })).textContent = clampLen(line, 115);
+            });
+            contentY += descLines.length * 16;
+            if (!hasOpenAiDescription) {
+              container.appendChild(createSvg("text", { x: 196, y: contentY + 4, fill: "#64748b", "font-size": 11, "font-style": "italic" })).textContent = "Análisis por IA no disponible para este slot. Use «Reanalizar con IA» para generar descripción.";
+              contentY += 18;
+            }
+            contentY += 12;
+          } else {
+            container.appendChild(createSvg("text", { x: 196, y: contentY, fill: "#F8FAFC", "font-size": 12, "font-weight": 700 })).textContent = "Descripción";
+            contentY += 20;
+            container.appendChild(createSvg("text", { x: 196, y: contentY, fill: "#94a3b8", "font-size": 12 })).textContent = "Foto omitida por el usuario.";
+            contentY += 22;
+          }
+
+          // Hallazgos: omitidos sin texto
+          if (!isOmitted) {
+            container.appendChild(createSvg("text", { x: 196, y: contentY, fill: "#F8FAFC", "font-size": 12, "font-weight": 700 })).textContent = "Hallazgos";
+            contentY += 18;
+          }
+          const cleanConclusionStyle = (t) => {
+            let out = String(t || "");
+            out = out
+              .replace(/\blocalizad[oa]s?\b/gi, "puntual")
+              .replace(/\bafectaci[oó]n\b/gi, "condición")
+              .replace(/\bconclusi[oó]n\s*t[eé]cnica\b/gi, "Conclusión")
+              .replace(/\bse\s+clasifica\s+como\s+['"]?puntual['"]?\s+en\s+t[eé]rminos\s+de\s+mantenimiento/gi, "presenta una condición puntual de mantenimiento")
+              .replace(/\s{2,}/g, " ")
+              .trim();
+            return out;
+          };
+          const isOkState = isOmitted || String(s.findingCode || "").toUpperCase() === "OK" || !s.severity;
+          const hallazgoMain = isOkState
+            ? "Conclusión: no se observan hallazgos relevantes en esta evidencia."
+            : cleanConclusionStyle(removeRetakePhrases(kpiAnalysis || s.message || desc || "Sin observaciones."));
+          const rawFindings = Array.isArray(signals) && signals.length > 0
+            ? signals.slice(0, 5).map((sig) => String(sig).trim()).filter(Boolean)
+            : [];
+          const stripTechnicalNames = (t) => {
+            let out = String(t || "").trim();
+            out = out
+              .replace(/\bpalmeta_o_ceramica_quebrada\b/gi, "palmeta o cerámica quebrada")
+              .replace(/\bintervencion_no_estandar_enchufe\b/gi, "intervención no estándar en enchufe/placa")
+              .replace(/\bintervencion_no_estandar_cañeria\b/gi, "intervención no estándar en cañería o llave de paso")
+              .replace(/\bfiltracion_activa_base_llave\b/gi, "filtración activa en base de la llave")
+              .replace(/\bdescuadre_de_puerta\b/gi, "descuadre de puerta")
+              .replace(/\bsello_silicona_deteriorado\b/gi, "sello de silicona deteriorado");
+            out = out.replace(/^[A-Z][A-Z0-9_]*\s*[-–:]\s*/, "").trim();
+            out = out.replace(/\s+[A-Z][A-Z0-9_]*\s*[-–:]\s*/g, " ");
+            out = out.replace(/\b(?:COSMETIC_WEAR|POSSIBLE_HUMIDITY_STAIN|ACTIVE_LEAK_SUSPECTED|SEAL_FAILURE|HUMIDITY_SIGNS|WATER_STAIN_PATTERN|POSSIBLE_PIPE_LEAK|PIPE_CORROSION|ELECTRICAL_EXPOSED_WIRING|ELECTRICAL_OVERHEAT_MARKS|ELECTRICAL_PANEL_RISK|STRUCTURAL_CRACK_SUSPECTED|MATERIAL_DETACHMENT|MOLD_SUSPECTED|MOLD_POSSIBLE|LIVING_WALLS|LIVING_CEILING|LIVING_FLOOR|BEDROOM_\d+_\w+|BATHROOM_\d+_\w+|KITCHEN_\w+)\b/gi, "");
+            out = out.replace(/\bde\s+en\b/gi, "en").replace(/\bde\s+la\b/gi, "la").replace(/\s+/g, " ").trim();
+            return out || "Sin observaciones.";
+          };
+          const findingsWithTech = rawFindings
+            .map(stripTechnicalNames)
+            .filter((f) => !/hallazgo_visible/i.test(String(f || "")));
+          const hallazgoLongLines = isOmitted ? [] : wrapLines(stripTechnicalNames(hallazgoMain), 110, 10);
+          hallazgoLongLines.forEach((line, li) => {
+            container.appendChild(createSvg("text", { x: 196, y: contentY + li * 15 + 4, fill: "#94a3b8", "font-size": 12 })).textContent = clampLen(line, 380);
+          });
+          contentY += hallazgoLongLines.length * 15 + 8;
+
+          let fiLine = 0;
+          let maxFindingLines = 8;
+          (isOmitted ? [] : findingsWithTech).forEach((f) => {
+            if (maxFindingLines <= 0) return;
+            const lines = wrapLines(f, 105, 3);
+            const linesToShow = lines.slice(0, maxFindingLines);
+            linesToShow.forEach((line, li) => {
+              const isFirst = li === 0;
+              const lineY = contentY + fiLine * 15;
+              if (isFirst) {
+                container.appendChild(createSvg("circle", { cx: 204, cy: lineY + 4, r: 2.5, fill: "#64748b" }));
+              }
+              const textX = isFirst ? 214 : 196;
+              container.appendChild(createSvg("text", { x: textX, y: lineY + 4, fill: "#94a3b8", "font-size": 12 })).textContent = clampLen(line, 340);
+              fiLine += 1;
+              maxFindingLines -= 1;
+            });
+          });
+          contentY += fiLine * 15 + 14;
+
+          // Criterios evaluados (tags - pills con texto completo). Excluir IMAGE_QUALITY_ISSUE.
+          const tags = [kpiTitle, code && String(code).toUpperCase() !== "OK" && !isQualityIssueCode(code) ? code : ""].filter(Boolean).slice(0, 3);
+          container.appendChild(createSvg("text", { x: 196, y: contentY + 10, fill: "#F8FAFC", "font-size": 12, "font-weight": 700 })).textContent = "Criterios";
+          const tagGap = 10;
+          let tagOffsetX = 272;
+          tags.forEach((tag) => {
+            const tagText = String(tag || "").trim();
+            const tagW = Math.max(100, Math.min(320, tagText.length * 8 + 32));
+            const tagH = 28;
+            container.appendChild(createSvg("rect", { x: tagOffsetX, y: contentY, width: tagW, height: tagH, rx: 14, fill: "rgba(96,165,250,0.2)", stroke: "#60A5FA" }));
+            container.appendChild(createSvg("text", { x: tagOffsetX + tagW / 2, y: contentY + tagH / 2 + 4, "text-anchor": "middle", fill: "#93C5FD", "font-size": 12, "font-weight": 700 })).textContent = tagText;
+            tagOffsetX += tagW + tagGap;
+          });
+
+          // Right rail: severidad, score, estrellas
+          container.appendChild(createSvg("rect", { x: rightRailX, y: slotY + 28, width: 84, height: 26, rx: 13, fill: sev.bg, stroke: sev.stroke || "#166534" }));
+          container.appendChild(createSvg("text", { x: rightRailCx, y: slotY + 46, "text-anchor": "middle", fill: sev.fill, "font-size": isOmitted ? 10 : 12, "font-weight": 800 })).textContent = isOmitted ? "OMITIDA" : sev.text;
+          container.appendChild(createSvg("text", { x: rightRailCx, y: slotY + 88, "text-anchor": "middle", fill: "#F8FAFC", "font-size": isOmitted ? 16 : 24, "font-weight": 800 })).textContent = isOmitted ? "Foto omitida" : (slotScore == null ? "—" : `${slotScore}/100`);
+          if (slotScore == null) {
+            container.appendChild(createSvg("text", { x: rightRailCx, y: slotY + 108, "text-anchor": "middle", fill: "#94a3b8", "font-size": 12, "font-weight": 700 })).textContent = isOmitted ? "Sin descuento" : "Sin puntaje";
+          } else {
+            renderStarIcons(container, slotScore, rightRailCx, slotY + 100);
+          }
+          container.appendChild(createSvg("text", { x: rightRailCx, y: slotY + 128, "text-anchor": "middle", fill: "#94a3b8", "font-size": 11, "font-weight": 600 })).textContent = "Estado";
+
+          // Altura dinámica del slot según contenido real.
+          const contentBottomY = contentY + 42;
+          const rightRailBottomY = slotY + 140;
+          const dynamicSlotH = Math.max(slotMinH, contentBottomY - slotY, rightRailBottomY - slotY);
+          slotCard.setAttribute("height", String(dynamicSlotH));
+          slotBorder.setAttribute("height", String(dynamicSlotH));
+          slotCursorY = slotY + dynamicSlotH + slotGap;
         });
 
-        currentY += sectionHeight + 30;
+        const sectionHeight = hasSlots
+          ? Math.max(sectionMinHeight, (slotCursorY - currentY - slotGap))
+          : sectionMinHeight;
+        sectionCard.setAttribute("height", String(sectionHeight));
+        sectionAccent.setAttribute("height", String(sectionHeight));
+
+        currentY += sectionHeight + 14;
       });
 
       const techTitle = document.getElementById("techDocTitle");
-      const techLine1 = document.getElementById("techDocLine1");
-      const techLine2 = document.getElementById("techDocLine2");
-      if (techTitle && techLine1 && techLine2) {
+      const techDocBody = document.getElementById("techDocBody");
+      if (techTitle && techDocBody) {
         techTitle.setAttribute("y", String(currentY + 20));
-        techLine1.setAttribute("y", String(currentY + 50));
-        techLine2.setAttribute("y", String(currentY + 73));
+        techDocBody.setAttribute("y", String(currentY + 50));
       }
 
-      const newHeight = currentY + 110;
+      const newHeight = currentY + 490;
       const svg = document.getElementById("reportSvg");
       svg.setAttribute("height", String(newHeight));
       svg.setAttribute("viewBox", `0 0 1143 ${newHeight}`);
@@ -496,7 +828,11 @@
         BEDROOM_3_CLOSET: "MOBILIARIO_FIJO",
         BEDROOM_3_WINDOWS: "VENTANAS_CERRAMIENTOS",
         LAUNDRY_WALLS_FLOOR: "HUMEDAD",
-        ELECTRICAL_PANEL: "ELECTRICIDAD"
+        ELECTRICAL_PANEL: "ELECTRICIDAD",
+        PUERTA_ENTRADA: "PUERTAS_HERRAJES",
+        ELEVATOR: "ELECTRICIDAD",
+        ESTACIONAMIENTO: "PISOS",
+        CERTIFICADO_VERDE: "ELECTRICIDAD"
       },
       messages: {
         MUROS_PINTURA: {
@@ -570,17 +906,19 @@
     }
 
     function aiContextFrom(slot) {
+      const desc = String(slot?.analysisDebug?.openai?.parsed?.description || "").trim();
       const msg = String(slot.message || "").trim();
-      if (!msg) return "";
-      if (msg.length > 240) return "";
+      const candidate = desc || msg;
+      if (!candidate) return "";
+      if (candidate.length > 240) return "";
       const banned = [
         "filtración", "capilaridad", "estructura", "peligroso", "urgente",
         "costo", "presupuesto", "reparación inmediata", "reparacion inmediata",
         "reparar", "debe repararse"
       ];
-      const lower = msg.toLowerCase();
+      const lower = candidate.toLowerCase();
       if (banned.some((w) => lower.includes(w))) return "";
-      return msg;
+      return candidate;
     }
 
     function classifyKpi(slot, cfg) {
@@ -665,25 +1003,70 @@
       });
     }
 
+    function getTenantIdFromQuery() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("tenantId") || null;
+    }
+
+    function showLoadError(msg, execMsg) {
+      const errEl = document.getElementById("loadError");
+      if (errEl) {
+        errEl.textContent = msg;
+        errEl.style.display = "block";
+      }
+      const execSummaryText = document.getElementById("execSummaryText");
+      const execSummaryPlaceholder = document.getElementById("execSummaryPlaceholder");
+      const execSummaryFooter = document.getElementById("execSummaryFooter");
+      if (execSummaryText) {
+        if (execSummaryPlaceholder) execSummaryPlaceholder.remove();
+        execSummaryText.innerHTML = execMsg || msg;
+        execSummaryText.style.color = "#DC2626";
+      }
+      if (execSummaryFooter) execSummaryFooter.style.display = "none";
+    }
+
     async function load() {
       const caseId = getCaseIdFromPath();
-      if (!caseId) return;
+      const errEl = document.getElementById("loadError");
+      if (errEl) errEl.style.display = "none";
+      if (!caseId) {
+        showLoadError("URL inválida: falta el número de caso. Accede desde el dashboard o ingresa una URL como /cases/XXX/report.", "No se pudo cargar el informe. La URL debe incluir el número de caso (ej: /cases/HV8BLF2U/report).");
+        return;
+      }
 
-      const summaryRes = await fetch(`/api/cases/${encodeURIComponent(caseId)}/summary`);
+      const tenantId = getTenantIdFromQuery();
+      const url = `/api/cases/${encodeURIComponent(caseId)}/summary${tenantId ? "?tenantId=" + encodeURIComponent(tenantId) : ""}`;
+      let summaryRes;
+      try {
+        summaryRes = await fetch(url);
+      } catch (err) {
+        showLoadError("Error de conexión. Verifica que el servidor esté corriendo.", "No se pudo conectar al servidor. Asegúrate de que el servidor esté levantado (npm run dev) y que la URL sea correcta.");
+        console.error("Report fetch error:", err);
+        return;
+      }
       const summary = await summaryRes.json().catch(() => ({}));
-      if (!summaryRes.ok || !summary.ok) return;
+      if (!summaryRes.ok || !summary.ok) {
+        const msg = summary?.error === "CASE_NOT_FOUND" ? "Caso no encontrado." : "Error al cargar el informe. Intenta recargar.";
+        const detail = summaryRes.status === 500 && summary?.message ? " " + String(summary.message).slice(0, 120) : "";
+        showLoadError(msg + detail, (summary?.error === "CASE_NOT_FOUND" ? "El caso no existe o el ID es incorrecto. " : "") + "Intenta recargar o verifica el número de caso.");
+        console.error("Report load error:", summaryRes.status, summary);
+        return;
+      }
 
       const c = summary.case || {};
+      if (c.shortId && caseId.length > 8) {
+        const newPath = `/cases/${c.shortId}/report`;
+        if (window.location.pathname !== newPath) history.replaceState(null, '', newPath);
+      }
       const property = c.property || {};
       const owner = property.owner || {};
 
-      setText("ownerName", owner.fullName);
-      setText("ownerRut", owner.rut);
-      setText("propertyRol", property.rol);
       setText("propertyAddress", property.address);
-      setText("propertyOperation", property.operationType);
+      setText("propertyRol", property.rol);
+      const op = String(property.operationType || "").toUpperCase() === "ARRENDO" ? "ARRIENDO" : property.operationType;
+      setText("propertyOperation", op);
       setText("propertySurface", property.surface);
-      setText("caseNumber", caseId);
+      setText("caseNumber", c.shortId || caseId);
       setText("analysisDate", formatDate(c.createdAt));
       setText("headerDate", formatDate(c.createdAt));
 
@@ -691,16 +1074,18 @@
       const score = clampScore(summary.score);
       setText("stiScore", `${Math.round(score)} / 100`);
       setText("stiLabel", badgeLabel(summary.badge));
-      document.getElementById("stiArc").setAttribute("stroke", badgeColor(summary.badge));
-      const fullArc = arcPath(920, 315, 70, 180, 0);
+      const stiArcEl = document.getElementById("stiArc");
+      const stiLabelEl = document.getElementById("stiLabel");
+      if (stiArcEl) stiArcEl.setAttribute("stroke", badgeColor(summary.badge));
+      if (stiLabelEl) stiLabelEl.setAttribute("fill", badgeColor(summary.badge));
+      const fullArc = arcPath(826, 318, 70, 180, 0);
+      const stiBaseArc = document.getElementById("stiBaseArc");
       const stiArc = document.getElementById("stiArc");
-      stiArc.setAttribute("d", fullArc);
+      if (stiBaseArc) stiBaseArc.setAttribute("d", fullArc);
+      if (stiArc) stiArc.setAttribute("d", fullArc);
       applyArcProgress(stiArc, score);
 
       const slots = summary.slots || [];
-      const kpis = buildKpis(slots, scoreConfig);
-      renderKpiSummary(kpis);
-
       const kpiOrder = [
         "MUROS_PINTURA",
         "HUMEDAD",
@@ -711,6 +1096,43 @@
         "PUERTAS_HERRAJES",
         "MOBILIARIO_FIJO"
       ];
+      const fallbackKpis = buildKpis(slots, scoreConfig);
+      const backendByGroup = Array.isArray(summary.byGroup) ? summary.byGroup : [];
+      const backendMap = new Map(backendByGroup.map((g) => [String(g.groupKey || "").toUpperCase(), g]));
+      const kpis = kpiOrder.map((key) => {
+        const b = backendMap.get(key);
+        if (b && b.scoreIfOnlyGroup != null) {
+          const scoreValue = Number(b.scoreIfOnlyGroup);
+          return { key, title: kpiLabel(key), score: scoreValue, badge: kpiBadgeFromScore(scoreValue, scoreConfig) };
+        }
+        return fallbackKpis.find((x) => x.key === key) || { key, title: kpiLabel(key), score: null, badge: "GRAY" };
+      });
+      renderKpiSummary(kpis);
+
+      const execSummary = summary.case?.executiveSummary;
+      const execSummaryText = document.getElementById("execSummaryText");
+      const execSummaryPlaceholder = document.getElementById("execSummaryPlaceholder");
+      const execSummaryFooter = document.getElementById("execSummaryFooter");
+      const genBtn = document.getElementById("generateSummaryBtn");
+      if (execSummaryText) {
+        if (execSummaryPlaceholder) execSummaryPlaceholder.remove();
+        if (execSummary) {
+          execSummaryText.innerHTML = formatExecSummary(execSummary);
+          execSummaryText.style.color = "#94a3b8";
+          if (genBtn) genBtn.textContent = "Regenerar resumen ejecutivo";
+          if (execSummaryFooter) execSummaryFooter.style.display = "";
+        } else {
+          execSummaryText.innerHTML = "No hay resumen ejecutivo. Generando automáticamente...";
+          execSummaryText.style.color = "#64748b";
+          if (genBtn) genBtn.textContent = "Generar resumen ejecutivo";
+          if (execSummaryFooter) execSummaryFooter.style.display = "none";
+          if (!executiveSummaryAutoTriggered) {
+            executiveSummaryAutoTriggered = true;
+            generateExecutiveSummary({ auto: true }).catch(() => {});
+          }
+        }
+      }
+
       const kpiGroups = kpiOrder.map((key) => {
         const items = slots.filter((s) => classifyKpi(s, scoreConfig) === key);
         const scoreValue = kpis.find((k) => k.key === key)?.score ?? null;
@@ -723,7 +1145,10 @@
           items
         };
       });
+      lastKpiGroups = kpiGroups;
+      lastScoreConfig = scoreConfig;
 
+      adjustExecutiveSummaryLayout();
       renderKpiSections(kpiGroups, scoreConfig);
     }
 
@@ -736,19 +1161,104 @@
         btn.disabled = true;
         btn.textContent = "Reanalizando...";
       }
-      if (note) note.textContent = "Procesando en segundo plano...";
+      if (note) note.textContent = "Iniciando reanálisis...";
 
       const res = await fetch(`/api/cases/${encodeURIComponent(caseId)}/reanalyze?force=1`, { method: "POST" });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data?.ok) {
         if (note) note.textContent = data?.error ? `Error: ${data.error}` : "No se pudo iniciar el reanálisis.";
-      } else {
-        if (note) note.textContent = `Reanálisis iniciado (${data.queued || 0} fotos). Refresca en unos segundos.`;
-        setTimeout(() => load().catch(() => {}), 8000);
+        if (btn) { btn.disabled = false; btn.textContent = "Reanalizar con IA"; }
+        return;
       }
-      if (btn) {
-        btn.disabled = false;
-        btn.textContent = "Reanalizar con IA";
+
+      const total = data.queued || 0;
+      if (total === 0) {
+        if (note) note.textContent = "No hay fotos para reanalizar.";
+        if (btn) { btn.disabled = false; btn.textContent = "Reanalizar con IA"; }
+        return;
+      }
+
+      if (note) note.textContent = `Analizando foto 0 de ${total}...`;
+      pollReanalyzeStatus(caseId, total, btn, note);
+    }
+
+    function pollReanalyzeStatus(caseId, total, btn, note) {
+      const interval = setInterval(async () => {
+        try {
+          const res = await fetch(`/api/cases/${encodeURIComponent(caseId)}/reanalyze-status`);
+          const st = await res.json().catch(() => ({}));
+          if (!st.active) {
+            clearInterval(interval);
+            if (note) { note.style.color = "#22c55e"; note.textContent = `✓ Reanálisis completo (${total} fotos). Recargando...`; }
+            if (btn) { btn.disabled = false; btn.textContent = "Reanalizar con IA"; }
+            setTimeout(() => location.reload(), 1500);
+            return;
+          }
+          const completed = st.completed || 0;
+          const errCount = st.errors || 0;
+          if (st.done) {
+            clearInterval(interval);
+            const errMsg = errCount > 0 ? ` (${errCount} con error)` : "";
+            if (note) { note.style.color = "#22c55e"; note.textContent = `✓ Listo — ${completed} de ${st.total} fotos analizadas${errMsg}. Recargando...`; }
+            if (btn) { btn.disabled = false; btn.textContent = "Reanalizar con IA"; }
+            setTimeout(() => location.reload(), 1500);
+          } else {
+            if (note) note.textContent = `Analizando foto ${completed + 1} de ${st.total}...`;
+          }
+        } catch (e) {}
+      }, 2000);
+    }
+
+    let executiveSummaryAutoTriggered = false;
+    let lastKpiGroups = [];
+    let lastScoreConfig = null;
+
+    async function generateExecutiveSummary({ auto = false } = {}) {
+      const caseId = getCaseIdFromPath();
+      if (!caseId) return;
+      const btn = document.getElementById("generateSummaryBtn");
+      const execSummaryText = document.getElementById("execSummaryText");
+      if (btn && !auto) {
+        btn.disabled = true;
+        btn.textContent = "Generando…";
+      }
+      if (auto && execSummaryText) {
+        execSummaryText.style.color = "#64748b";
+        execSummaryText.innerHTML = "Generando resumen ejecutivo automáticamente...";
+      }
+      const tenantId = getTenantIdFromQuery();
+      const url = `/api/cases/${encodeURIComponent(caseId)}/executive-summary${tenantId ? "?tenantId=" + encodeURIComponent(tenantId) : ""}`;
+      try {
+        const res = await fetch(url, { method: "POST" });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data?.ok && data?.executiveSummary) {
+          const execSummaryFooter = document.getElementById("execSummaryFooter");
+          if (execSummaryText) {
+            execSummaryText.innerHTML = formatExecSummary(data.executiveSummary);
+            execSummaryText.style.color = "#94a3b8";
+          }
+          if (execSummaryFooter) execSummaryFooter.style.display = "";
+          if (btn) btn.textContent = "Regenerar resumen ejecutivo";
+          adjustExecutiveSummaryLayout();
+          if (lastKpiGroups.length && lastScoreConfig) renderKpiSections(lastKpiGroups, lastScoreConfig);
+        } else {
+          if (auto && execSummaryText) {
+            execSummaryText.innerHTML = "No fue posible generar automáticamente el resumen ejecutivo.";
+            execSummaryText.style.color = "#64748b";
+          }
+          if (btn) btn.textContent = data?.error === "OPENAI_NOT_CONFIGURED" ? "IA no configurada" : "Error. Reintentar";
+        }
+      } catch (err) {
+        if (auto && execSummaryText) {
+          execSummaryText.innerHTML = "No fue posible generar automáticamente el resumen ejecutivo.";
+          execSummaryText.style.color = "#64748b";
+        }
+        if (btn) btn.textContent = "Error. Reintentar";
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          if (btn.textContent.includes("Generando")) btn.textContent = document.getElementById("execSummaryText")?.innerHTML?.includes("No hay resumen") ? "Generar resumen ejecutivo" : "Regenerar resumen ejecutivo";
+        }
       }
     }
 
@@ -757,12 +1267,99 @@
     const reBtn = document.getElementById("reanalyzeBtn");
     if (reBtn) reBtn.addEventListener("click", () => reanalyzeCase().catch(() => {}));
 
+    const genSummaryBtn = document.getElementById("generateSummaryBtn");
+    if (genSummaryBtn) genSummaryBtn.addEventListener("click", () => generateExecutiveSummary().catch(() => {}));
+
     const pdfBtn = document.getElementById("downloadPdfBtn");
     if (pdfBtn) {
-      pdfBtn.addEventListener("click", () => {
-        window.print();
+      pdfBtn.addEventListener("click", async () => {
+        const caseId = getCaseIdFromPath();
+        if (!caseId) return;
+        pdfBtn.disabled = true;
+        pdfBtn.textContent = "Generando PDF...";
+        try {
+          const res = await fetch(`/api/cases/${encodeURIComponent(caseId)}/report.pdf`);
+          if (!res.ok) throw new Error("Error al generar el PDF");
+          const blob = await res.blob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `Informe-${caseId}.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        } catch (err) {
+          console.error(err);
+          if (pdfBtn) pdfBtn.textContent = "Error. Reintentar";
+        } finally {
+          pdfBtn.disabled = false;
+          pdfBtn.textContent = "Descargar PDF";
+        }
       });
     }
+
+    // --- Review / Approval flow ---
+    const isReviewer = new URLSearchParams(window.location.search).get("reviewer") === "1";
+    const approveBtn = document.getElementById("approveBtn");
+    const reviewBadge = document.getElementById("reviewBadge");
+
+    async function checkReviewStatus() {
+      const caseId = getCaseIdFromPath();
+      if (!caseId) return;
+      try {
+        const res = await fetch(`/api/cases/${encodeURIComponent(caseId)}/review-status`);
+        const data = await res.json().catch(() => ({}));
+        if (!data.ok) return;
+        if (data.reviewStatus === "approved") {
+          if (reviewBadge) {
+            reviewBadge.style.display = "";
+            reviewBadge.style.color = "#22c55e";
+            reviewBadge.innerHTML = `&#10003; Informe aprobado`;
+          }
+          if (approveBtn) approveBtn.style.display = "none";
+        } else if (data.reviewStatus === "pending_review" && isReviewer) {
+          if (approveBtn) approveBtn.style.display = "";
+          if (reviewBadge) {
+            reviewBadge.style.display = "";
+            reviewBadge.style.color = "#f59e0b";
+            reviewBadge.textContent = "Pendiente de aprobación";
+          }
+        } else if (isReviewer && !data.reviewStatus) {
+          if (approveBtn) approveBtn.style.display = "";
+        }
+      } catch (e) {}
+    }
+
+    async function approveCase() {
+      const caseId = getCaseIdFromPath();
+      if (!caseId) return;
+      if (!confirm("¿Aprobar este informe y enviarlo al cliente por email?")) return;
+      if (approveBtn) { approveBtn.disabled = true; approveBtn.textContent = "Aprobando..."; }
+      try {
+        const res = await fetch(`/api/cases/${encodeURIComponent(caseId)}/approve`, { method: "POST" });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data?.ok) {
+          if (approveBtn) approveBtn.style.display = "none";
+          if (reviewBadge) {
+            reviewBadge.style.display = "";
+            reviewBadge.style.color = "#22c55e";
+            reviewBadge.innerHTML = data.emailSent
+              ? "&#10003; Informe aprobado y enviado al cliente"
+              : "&#10003; Informe aprobado (email no configurado)";
+          }
+        } else {
+          if (approveBtn) approveBtn.textContent = "Error. Reintentar";
+        }
+      } catch (e) {
+        if (approveBtn) approveBtn.textContent = "Error. Reintentar";
+      } finally {
+        if (approveBtn) approveBtn.disabled = false;
+      }
+    }
+
+    if (approveBtn) approveBtn.addEventListener("click", () => approveCase().catch(() => {}));
+    checkReviewStatus().catch(() => {});
   </script>
 </body>
 </html>

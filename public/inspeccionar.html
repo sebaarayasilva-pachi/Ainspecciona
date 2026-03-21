@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Realizar inspección · Ainspecciona</title>
+  <link rel="stylesheet" href="/assets/header.css" />
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Inter, sans-serif; background: #0B1220; color: #E5E7EB; min-height: 100vh; }
+    .page { max-width: 700px; margin: 0 auto; padding: 48px 24px 80px; }
+    .h1 { font-size: 28px; font-weight: 800; color: #F8FAFC; margin: 0 0 8px; }
+    .muted { font-size: 14px; color: #94a3b8; margin-bottom: 24px; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 28px; margin-bottom: 24px; }
+    .card h2 { font-size: 16px; font-weight: 800; color: #F8FAFC; margin: 0 0 20px; }
+    .formGroup { margin-bottom: 18px; }
+    .formGroup label { display: block; font-weight: 600; font-size: 14px; color: #94a3b8; margin-bottom: 8px; }
+    .formGroup input, .formGroup select {
+      width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid #334155;
+      background: #0f172a; color: #F8FAFC; font-size: 15px; font-family: inherit;
+    }
+    .formGroup input::placeholder { color: #475569; font-weight: 300; font-style: italic; font-size: 14px; }
+    .formGroup input:focus, .formGroup select:focus { outline: none; border-color: #7C3AED; }
+    .formRow { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 600px) { .formRow { grid-template-columns: 1fr; } }
+    .checks { display: flex; flex-wrap: wrap; gap: 16px; margin: 16px 0; }
+    .checks label { display: flex; align-items: center; gap: 8px; font-weight: 600; color: #94a3b8; cursor: pointer; }
+    .btn {
+      display: inline-block; padding: 16px 32px; border-radius: 12px; border: none;
+      background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: #fff; font-weight: 800; font-size: 16px;
+      cursor: pointer; transition: opacity 0.2s; width: 100%;
+    }
+    .btn:hover { opacity: 0.95; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .note { font-size: 14px; margin-top: 16px; min-height: 20px; }
+    .note.err { color: #f87171; }
+    .note.ok { color: #35D07F; }
+    .steps { display: flex; gap: 0; margin-bottom: 32px; }
+    .step { flex: 1; text-align: center; padding: 12px 8px; font-size: 13px; font-weight: 700; color: #64748b; border-bottom: 3px solid #1e293b; }
+    .step.active { color: #10b981; border-color: #10b981; }
+    .step.done { color: #059669; border-color: #059669; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="nav">
+      <a class="brand" href="/"><img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" /></a>
+      <div class="navLinks">
+        <a href="/precios">Precios</a>
+        <a href="/contacto.html">Contacto</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="steps">
+      <div class="step active" id="step1Label">1. Datos del inmueble</div>
+      <div class="step" id="step2Label">2. Photo Plan</div>
+      <div class="step" id="step3Label">3. Inspección</div>
+    </div>
+
+    <div id="formSection">
+      <h1 class="h1">Datos de la inspección</h1>
+      <p class="muted">Completa los datos del inmueble y tus datos de contacto para generar tu Photo Plan personalizado.</p>
+
+      <form id="caseForm">
+        <div class="card">
+          <h2>Tus datos</h2>
+          <div class="formRow">
+            <div class="formGroup">
+              <label for="contactName">Nombre completo *</label>
+              <input id="contactName" required placeholder="Ej: Juan Pérez" />
+            </div>
+            <div class="formGroup">
+              <label for="contactEmail">Email *</label>
+              <input type="email" id="contactEmail" required placeholder="tu@email.com" />
+            </div>
+          </div>
+          <div class="formGroup">
+            <label for="contactRut">RUT *</label>
+            <input id="contactRut" required placeholder="Ej: 12.345.678-9" />
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Ubicación del inmueble</h2>
+          <div class="formRow">
+            <div class="formGroup">
+              <label for="propertyStreet">Calle</label>
+              <input id="propertyStreet" placeholder="Ej: Av. Providencia" />
+            </div>
+            <div class="formGroup">
+              <label for="propertyNumber">Número</label>
+              <input id="propertyNumber" placeholder="Ej: 1234" />
+            </div>
+          </div>
+          <div class="formRow">
+            <div class="formGroup">
+              <label for="propertyDept">Depto / Interior</label>
+              <input id="propertyDept" placeholder="Opcional" />
+            </div>
+            <div class="formGroup">
+              <label for="propertyComuna">Comuna</label>
+              <input id="propertyComuna" placeholder="Ej: Providencia" />
+            </div>
+          </div>
+          <div class="formGroup">
+            <label for="propertyRol">ROL</label>
+            <input id="propertyRol" placeholder="Opcional" />
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Características</h2>
+          <div class="formRow">
+            <div class="formGroup">
+              <label for="propertyType">Tipo de propiedad</label>
+              <select id="propertyType">
+                <option value="DEPARTMENT">Departamento</option>
+                <option value="HOUSE">Casa</option>
+              </select>
+            </div>
+            <div class="formGroup">
+              <label for="propertyOperationType">Tipo operación</label>
+              <select id="propertyOperationType">
+                <option value="">—</option>
+                <option value="VENTA">Venta</option>
+                <option value="ARRENDO">Arriendo</option>
+              </select>
+            </div>
+          </div>
+          <div class="formRow">
+            <div class="formGroup">
+              <label for="bathroomsCount">Baños</label>
+              <input type="number" id="bathroomsCount" min="1" value="1" />
+            </div>
+            <div class="formGroup">
+              <label for="bedroomsCount">Dormitorios</label>
+              <input type="number" id="bedroomsCount" min="0" value="1" />
+            </div>
+          </div>
+          <div class="formGroup">
+            <label for="propertySurface">Superficie (m²)</label>
+            <input id="propertySurface" placeholder="Ej: 45" />
+          </div>
+          <div class="checks">
+            <label><input type="checkbox" id="hasPatio" /> Tiene patio</label>
+            <label><input type="checkbox" id="hasAttic" /> Tiene entretecho</label>
+            <label><input type="checkbox" id="hasLaundry" /> Tiene loggia</label>
+            <label><input type="checkbox" id="hasElevator" /> Tiene ascensor</label>
+            <label><input type="checkbox" id="hasParking" /> Tiene estacionamiento</label>
+            <label><input type="checkbox" id="hasGreenCertificate" /> Certificado verde</label>
+          </div>
+        </div>
+
+        <button type="submit" class="btn" id="submitBtn">Generar Photo Plan</button>
+        <div class="note" id="note"></div>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    (function() {
+      const form = document.getElementById('caseForm');
+      const note = document.getElementById('note');
+      const submitBtn = document.getElementById('submitBtn');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        note.textContent = '';
+        note.className = 'note';
+
+        const contactName = document.getElementById('contactName').value.trim();
+        const contactEmail = document.getElementById('contactEmail').value.trim();
+        const contactRut = document.getElementById('contactRut').value.trim();
+
+        if (!contactName || !contactEmail || !contactRut) {
+          note.textContent = 'Completa nombre, email y RUT.';
+          note.className = 'note err';
+          return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Generando Photo Plan...';
+
+        const comuna = document.getElementById('propertyComuna').value.trim();
+        const street = document.getElementById('propertyStreet').value.trim();
+        const number = document.getElementById('propertyNumber').value.trim();
+        const dept = document.getElementById('propertyDept').value.trim();
+        const addressParts = [
+          [street, number].filter(Boolean).join(' '),
+          dept ? 'Depto ' + dept : '',
+          comuna
+        ].filter(Boolean);
+
+        const payload = {
+          contactName,
+          contactEmail,
+          contactRut,
+          propertyAddress: addressParts.length ? addressParts.join(', ') : null,
+          propertyRol: document.getElementById('propertyRol').value.trim() || null,
+          propertyOperationType: document.getElementById('propertyOperationType').value || null,
+          propertySurface: document.getElementById('propertySurface').value.trim() || null,
+          propertyType: document.getElementById('propertyType').value,
+          bathroomsCount: Number(document.getElementById('bathroomsCount').value || 1),
+          bedroomsCount: Number(document.getElementById('bedroomsCount').value || 1),
+          hasPatio: document.getElementById('hasPatio').checked,
+          hasAttic: document.getElementById('hasAttic').checked,
+          hasLaundry: document.getElementById('hasLaundry').checked,
+          hasElevator: document.getElementById('hasElevator').checked,
+          hasParking: document.getElementById('hasParking').checked,
+          hasGreenCertificate: document.getElementById('hasGreenCertificate').checked
+        };
+
+        try {
+          const res = await fetch('/api/starter/create-draft', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json().catch(() => ({}));
+          if (res.ok && data.ok && data.caseId) {
+            window.location.href = '/photoplan?case=' + encodeURIComponent(data.caseId);
+          } else {
+            note.textContent = data.message || data.error || 'Error al crear la inspección.';
+            note.className = 'note err';
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Generar Photo Plan';
+          }
+        } catch (err) {
+          note.textContent = 'Error de conexión. Intenta de nuevo.';
+          note.className = 'note err';
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Generar Photo Plan';
+        }
+      });
+    })();
+  </script>
+  <script src="/assets/tracker.js" defer></script>
+</body>
+</html>

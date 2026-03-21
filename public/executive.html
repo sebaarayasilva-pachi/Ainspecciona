@@ -4,55 +4,29 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>App Ejecutivo · Ainspecciona</title>
+  <link rel="stylesheet" href="/assets/header.css" />
   <style>
     * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #F6F7F9;
-      color: #0f172a;
+      background: radial-gradient(circle at 20% 20%, #1f2b3a 0%, #0b121b 65%, #070b12 100%);
+      color: #e5eef7;
+      min-height: 100vh;
     }
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 20;
-      background: #ffffff;
-      border-bottom: 1px solid #e5e7eb;
-    }
-    .nav {
-      padding: 16px 18px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      text-decoration: none;
-      color: inherit;
-      font-weight: 800;
-    }
-    .brand img { height: 36px; }
     .btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       padding: 10px 14px;
-      border-radius: 12px;
+      border-radius: 10px;
       font-weight: 700;
-      border: 1px solid transparent;
-      background: #2563eb;
-      color: #fff;
+      border: none;
+      background: linear-gradient(135deg, #35D07F 0%, #1AAE69 100%);
+      color: #0B1220;
       cursor: pointer;
       font-size: 13px;
       text-decoration: none;
-    }
-    .btn.outline {
-      background: #fff;
-      color: #1f2937;
-      border-color: #e5e7eb;
     }
     main {
       max-width: 720px;
@@ -60,11 +34,10 @@
       padding: 20px;
     }
     .card {
-      background: #fff;
-      border: 1px solid #e5e7eb;
+      background: #0F1A2E;
+      border: 1px solid #1E2B45;
       border-radius: 16px;
       padding: 18px;
-      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
       margin-bottom: 16px;
     }
     .muted { color: #64748b; font-size: 13px; }
@@ -77,15 +50,18 @@
       width: 100%;
       padding: 10px 12px;
       border-radius: 10px;
-      border: 1px solid #e5e7eb;
+      border: 1px solid #1E2B45;
+      background: #0B1220;
+      color: #EAF0FF;
       font-size: 14px;
     }
     .caseCard {
-      border: 1px solid #e5e7eb;
+      border: 1px solid #1E2B45;
       border-radius: 14px;
       padding: 14px;
       display: grid;
       gap: 8px;
+      background: #0F1A2E;
     }
     .progress {
       height: 8px;
@@ -95,19 +71,21 @@
     }
     .progress > div {
       height: 100%;
-      background: #2563eb;
+      background: #35D07F;
       width: 0%;
     }
     .hidden { display: none; }
   </style>
 </head>
 <body>
-  <header>
+  <header class="site-header">
     <div class="nav">
       <a class="brand" href="/">
         <img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" />
       </a>
-      <button class="btn outline hidden" id="logoutBtn" type="button">Salir</button>
+      <div class="topActions">
+        <button class="btn outline hidden" id="logoutBtn" type="button">Salir</button>
+      </div>
     </div>
   </header>
 
@@ -135,15 +113,32 @@
   </main>
 
   <script>
+    function getExecToken() {
+      return localStorage.getItem("exec_session_token") || "";
+    }
+
+    function authHeaders(extra = {}) {
+      const headers = { ...extra };
+      const token = getExecToken();
+      if (token) headers["x-session-token"] = token;
+      return headers;
+    }
+
     async function getMe() {
-      const res = await fetch("/api/executive/me");
+      const res = await fetch("/api/executive/me", {
+        headers: authHeaders(),
+        credentials: "include"
+      });
       if (!res.ok) return null;
       const data = await res.json();
       return data?.user || null;
     }
 
     async function getCases() {
-      const res = await fetch("/api/executive/cases");
+      const res = await fetch("/api/executive/cases", {
+        headers: authHeaders(),
+        credentials: "include"
+      });
       if (!res.ok) return [];
       const data = await res.json();
       return data?.cases || [];
@@ -180,7 +175,9 @@
         action.textContent = "Iniciar Inspección";
         action.href = c.captureUrl || "#";
         action.target = "_blank";
-        if (!c.captureUrl) {
+        if (Number(c.progress?.pct || 0) >= 100) {
+          action.classList.add("hidden");
+        } else if (!c.captureUrl) {
           action.classList.add("outline");
           action.textContent = "Sin link de captura";
           action.href = "#";
@@ -204,16 +201,25 @@
         note.textContent = "Ingresa email y clave.";
         return;
       }
-      const res = await fetch("/api/executive/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password })
-      });
-      if (!res.ok) {
-        note.textContent = "Credenciales inválidas.";
-        return;
+      try {
+        const res = await fetch("/api/executive/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+          credentials: "include"
+        });
+        if (!res.ok) {
+          note.textContent = "Credenciales inválidas.";
+          return;
+        }
+        const data = await res.json().catch(() => ({}));
+        if (data?.token) {
+          localStorage.setItem("exec_session_token", data.token);
+        }
+        await loadApp();
+      } catch (error) {
+        note.textContent = "Error de conexión. Intenta nuevamente.";
       }
-      await loadApp();
     }
 
     async function loadApp() {
@@ -237,7 +243,12 @@
 
     document.getElementById("loginBtn").addEventListener("click", handleLogin);
     document.getElementById("logoutBtn").addEventListener("click", async () => {
-      await fetch("/api/executive/logout", { method: "POST" });
+      await fetch("/api/executive/logout", {
+        method: "POST",
+        headers: authHeaders(),
+        credentials: "include"
+      });
+      localStorage.removeItem("exec_session_token");
       await loadApp();
     });
 

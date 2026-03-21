@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Crear inspección · Ainspecciona</title>
+  <link rel="stylesheet" href="/assets/header.css" />
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Inter, sans-serif; background: #0B1220; color: #E5E7EB; min-height: 100vh; }
+    .page { max-width: 700px; margin: 0 auto; padding: 48px 24px 80px; }
+    .h1 { font-size: 28px; font-weight: 800; color: #F8FAFC; margin: 0 0 8px; }
+    .muted { font-size: 14px; color: #94a3b8; margin-bottom: 24px; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 28px; margin-bottom: 24px; }
+    .card h2 { font-size: 16px; font-weight: 800; color: #F8FAFC; margin: 0 0 20px; }
+    .formGroup { margin-bottom: 18px; }
+    .formGroup label { display: block; font-weight: 600; font-size: 14px; color: #94a3b8; margin-bottom: 8px; }
+    .formGroup input, .formGroup select {
+      width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid #334155;
+      background: #0f172a; color: #F8FAFC; font-size: 15px; font-family: inherit;
+    }
+    .formGroup input::placeholder { color: #475569; font-weight: 300; font-style: italic; font-size: 14px; }
+    .formGroup input:focus, .formGroup select:focus { outline: none; border-color: #7C3AED; }
+    .formRow { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 600px) { .formRow { grid-template-columns: 1fr; } }
+    .checks { display: flex; flex-wrap: wrap; gap: 16px; margin: 16px 0; }
+    .checks label { display: flex; align-items: center; gap: 8px; font-weight: 600; color: #94a3b8; cursor: pointer; }
+    .btn {
+      display: inline-block; padding: 16px 32px; border-radius: 12px; border: none;
+      background: linear-gradient(135deg, #7C3AED 0%, #4F46E5 100%); color: #fff; font-weight: 800; font-size: 16px;
+      cursor: pointer; transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.95; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .note { font-size: 14px; margin-top: 16px; min-height: 20px; }
+    .note.err { color: #f87171; }
+    .note.ok { color: #35D07F; }
+    .successCard { text-align: center; padding: 40px; }
+    .successCard .icon { font-size: 64px; margin-bottom: 16px; }
+    .successCard a { display: inline-block; margin-top: 20px; text-decoration: none; color: #7C3AED; font-weight: 700; }
+    .successCard a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="nav">
+      <a class="brand" href="/"><img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" /></a>
+      <div class="navLinks">
+        <a href="/precios">Precios</a>
+        <a href="/contacto.html">Contacto</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <div id="formSection">
+      <h1 class="h1">Completar datos de la propiedad</h1>
+      <p class="muted">Ingresa los datos de la propiedad a inspeccionar. Luego recibirás un enlace para realizar la inspección desde tu celular.</p>
+
+      <form id="caseForm">
+        <div class="card">
+          <h2>Ubicación</h2>
+          <div class="formRow">
+            <div class="formGroup">
+              <label for="propertyStreet">Calle</label>
+              <input id="propertyStreet" placeholder="Ej: Av. Providencia" />
+            </div>
+            <div class="formGroup">
+              <label for="propertyNumber">Número</label>
+              <input id="propertyNumber" placeholder="Ej: 1234" />
+            </div>
+          </div>
+          <div class="formRow">
+            <div class="formGroup">
+              <label for="propertyDept">Depto / Interior</label>
+              <input id="propertyDept" placeholder="Opcional" />
+            </div>
+            <div class="formGroup">
+              <label for="propertyComuna">Comuna</label>
+              <input id="propertyComuna" placeholder="Ej: Providencia" />
+            </div>
+          </div>
+          <div class="formGroup">
+            <label for="propertyRol">ROL</label>
+            <input id="propertyRol" placeholder="Opcional" />
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Características</h2>
+          <div class="formRow">
+            <div class="formGroup">
+              <label for="propertyType">Tipo de propiedad</label>
+              <select id="propertyType">
+                <option value="DEPARTMENT">Departamento</option>
+                <option value="HOUSE">Casa</option>
+              </select>
+            </div>
+            <div class="formGroup">
+              <label for="propertyOperationType">Tipo operación</label>
+              <select id="propertyOperationType">
+                <option value="">—</option>
+                <option value="VENTA">Venta</option>
+                <option value="ARRENDO">Arriendo</option>
+              </select>
+            </div>
+          </div>
+          <div class="formRow">
+            <div class="formGroup">
+              <label for="bathroomsCount">Baños</label>
+              <input type="number" id="bathroomsCount" min="1" value="1" />
+            </div>
+            <div class="formGroup">
+              <label for="bedroomsCount">Dormitorios</label>
+              <input type="number" id="bedroomsCount" min="0" value="1" />
+            </div>
+          </div>
+          <div class="formGroup">
+            <label for="propertySurface">Superficie (m²)</label>
+            <input id="propertySurface" placeholder="Ej: 45" />
+          </div>
+          <div class="checks">
+            <label><input type="checkbox" id="hasPatio" /> Tiene patio</label>
+            <label><input type="checkbox" id="hasAttic" /> Tiene entretecho</label>
+            <label><input type="checkbox" id="hasLaundry" /> Tiene loggia</label>
+            <label><input type="checkbox" id="hasElevator" /> Tiene ascensor</label>
+            <label><input type="checkbox" id="hasParking" /> Tiene estacionamiento</label>
+            <label><input type="checkbox" id="hasGreenCertificate" /> Certificado verde</label>
+          </div>
+        </div>
+
+        <button type="submit" class="btn" id="submitBtn">Crear inspección</button>
+        <div class="note" id="note"></div>
+      </form>
+    </div>
+
+    <div id="successSection" class="card successCard" style="display:none;">
+      <div class="icon">✓</div>
+      <h2>¡Inspección creada!</h2>
+      <p class="muted" id="emailMsg">Te enviamos un correo con el enlace para realizar la inspección desde tu celular.</p>
+      <p class="muted">También puedes acceder directamente:</p>
+      <a id="captureLink" href="#" target="_blank">Abrir enlace de inspección</a>
+    </div>
+  </main>
+
+  <script>
+    (function() {
+      const params = new URLSearchParams(window.location.search);
+      const paymentId = params.get('payment_id') || params.get('collection_id');
+      const formSection = document.getElementById('formSection');
+      const successSection = document.getElementById('successSection');
+      const form = document.getElementById('caseForm');
+      const note = document.getElementById('note');
+      const submitBtn = document.getElementById('submitBtn');
+      const captureLink = document.getElementById('captureLink');
+
+      if (!paymentId) {
+        note.textContent = 'Falta el identificador de pago. Vuelve desde la página de pago exitoso.';
+        note.className = 'note err';
+        return;
+      }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        note.textContent = '';
+        note.className = 'note';
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Creando...';
+
+        const comuna = document.getElementById('propertyComuna').value?.trim();
+        const street = document.getElementById('propertyStreet').value?.trim();
+        const number = document.getElementById('propertyNumber').value?.trim();
+        const dept = document.getElementById('propertyDept').value?.trim();
+        const addressParts = [
+          [street, number].filter(Boolean).join(' '),
+          dept ? 'Depto ' + dept : '',
+          comuna
+        ].filter(Boolean);
+        const address = addressParts.length ? addressParts.join(', ') : null;
+
+        const payload = {
+          paymentId,
+          propertyAddress: address,
+          propertyRol: document.getElementById('propertyRol').value?.trim() || null,
+          propertyOperationType: document.getElementById('propertyOperationType').value || null,
+          propertySurface: document.getElementById('propertySurface').value?.trim() || null,
+          propertyType: document.getElementById('propertyType').value,
+          bathroomsCount: Number(document.getElementById('bathroomsCount').value || 1),
+          bedroomsCount: Number(document.getElementById('bedroomsCount').value || 1),
+          hasPatio: document.getElementById('hasPatio').checked,
+          hasAttic: document.getElementById('hasAttic').checked,
+          hasLaundry: document.getElementById('hasLaundry').checked,
+          hasElevator: document.getElementById('hasElevator').checked,
+          hasParking: document.getElementById('hasParking').checked,
+          hasGreenCertificate: document.getElementById('hasGreenCertificate').checked
+        };
+
+        try {
+          const res = await fetch('/api/starter/cases', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json().catch(() => ({}));
+          if (res.ok) {
+            formSection.style.display = 'none';
+            successSection.style.display = 'block';
+            captureLink.href = data.captureUrlFull || data.captureUrl || '#';
+            captureLink.textContent = 'Abrir enlace de inspección (celular)';
+            const emailMsg = document.getElementById('emailMsg');
+            if (emailMsg && data.emailSent === false) {
+              emailMsg.textContent = 'No pudimos enviar el correo (revisa la configuración SMTP). Usa el enlace de abajo para acceder.';
+              emailMsg.style.color = '#fbbf24';
+            }
+          } else {
+            note.textContent = data.message || data.error || 'Error al crear la inspección.';
+            note.className = 'note err';
+          }
+        } catch (err) {
+          note.textContent = 'Error de conexión. Intenta de nuevo.';
+          note.className = 'note err';
+        }
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Crear inspección';
+      });
+    })();
+  </script>
+  <script src="/assets/tracker.js" defer></script>
+</body>
+</html>

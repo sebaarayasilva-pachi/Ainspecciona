@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Comprar créditos · Ainspecciona</title>
+  <link rel="stylesheet" href="/assets/header.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #070812;
+      color: #ECF2FF;
+      min-height: 100vh;
+    }
+    .page { max-width: 1200px; margin: 0 auto; padding: 0 48px 80px; }
+    .hero {
+      padding: 40px 0 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 420px;
+      background: radial-gradient(ellipse 85% 85% at 55% 8%, rgba(34,211,238,0.08) 0%, rgba(124,58,237,0.12) 38%, transparent 100%);
+      pointer-events: none;
+    }
+    .backLink { color: #9FB0DB; text-decoration: none; font-size: 14px; font-weight: 600; margin-bottom: 16px; display: inline-block; }
+    .backLink:hover { color: #CFE4FF; }
+    .h1 { font: 800 44px/1.12 Inter, system-ui; color: #ECF2FF; letter-spacing: -0.5px; margin: 0 0 8px; }
+    .sub { font: 500 16px/1.6 Inter, system-ui; color: #A9B6DD; margin: 0; }
+    .sub2 { font: 500 16px/1.6 Inter, system-ui; color: #9FB0DB; margin: 8px 0 0; }
+
+    .cardsWrap {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 25px;
+      margin-top: 48px;
+      filter: drop-shadow(0 18px 18px rgba(0,0,0,0.55));
+      align-items: end;
+    }
+    @media (max-width: 1000px) {
+      .cardsWrap { grid-template-columns: 1fr; align-items: stretch; }
+      .card.featured { margin-top: 0 !important; }
+    }
+
+    .card {
+      border-radius: 22px;
+      padding: 26px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .card.normal {
+      background: linear-gradient(180deg, #0E1632 0%, #0A1022 100%);
+      border: 1.2px solid #1E2A52;
+      height: 270px;
+    }
+    .card.normal:hover { border-color: #2B375F; }
+    .card.featured {
+      background: linear-gradient(180deg, #0F1B3D 0%, #0A1022 100%);
+      border: 2.2px solid rgba(124,58,237,0.6);
+      height: 290px;
+      margin-top: -10px;
+      box-shadow: 0 0 40px rgba(124,58,237,0.22);
+    }
+    .card.featured::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, #7C3AED, #22D3EE);
+      border-radius: 22px 22px 0 0;
+    }
+    .card.selected.normal { border-color: #39E6B6; box-shadow: 0 0 0 2px rgba(57,230,182,0.3); }
+    .card.selected.featured { box-shadow: 0 0 40px rgba(124,58,237,0.35), 0 0 0 2px rgba(57,230,182,0.3); }
+
+    .pill {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font: 800 12px/1 Inter, system-ui;
+      color: #CFE4FF;
+      letter-spacing: 1.2px;
+      margin-bottom: 16px;
+      width: fit-content;
+    }
+    .card.normal .pill {
+      background: #0B1226;
+      border: 1px solid #223057;
+    }
+    .card.featured .pill {
+      background: linear-gradient(135deg, #7C3AED, #22D3EE);
+      color: #0A1022;
+      letter-spacing: 0.8px;
+    }
+
+    .credits { font: 900 52px/1 Inter, system-ui; color: #39E6B6; letter-spacing: -0.8px; }
+    .card.featured .credits { font-size: 56px; letter-spacing: -1px; }
+    .label { font: 700 14px/1 Inter, system-ui; color: #A9B6DD; margin: 0 0 16px; }
+    .price { font: 900 34px/1 Inter, system-ui; color: #ECF2FF; letter-spacing: -0.4px; margin: 0; }
+    .unit { font: 600 13px/1 Inter, system-ui; color: #8FA0CB; margin: 4px 0 0; }
+    .cardSep {
+      height: 1px;
+      background: #1B2649;
+      margin: 16px 0;
+    }
+    .card.featured .cardSep { background: #143347; }
+    .hint { font: 600 13px/1.4 Inter, system-ui; color: #B8C6EE; margin: 0; }
+
+    .ctaBar {
+      margin-top: 50px;
+      padding: 12px 26px;
+      border-radius: 16px;
+      background: #0B1226;
+      border: 1.2px solid #1E2A52;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .ctaBar .sub { margin: 0; }
+    .btnComprar {
+      padding: 12px 24px;
+      border-radius: 14px;
+      border: none;
+      background: linear-gradient(135deg, #7C3AED 0%, #22D3EE 100%);
+      color: #0A1022;
+      font: 800 14px/1 Inter, system-ui;
+      letter-spacing: 0.3px;
+      cursor: pointer;
+      min-width: 280px;
+      height: 50px;
+      transition: opacity 0.2s;
+    }
+    .btnComprar:hover { opacity: 0.95; }
+    .btnComprar:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .billingBox {
+      margin-top: 40px;
+      padding: 22px 26px;
+      border-radius: 16px;
+      background: #0B1226;
+      border: 1.2px solid #1E2A52;
+    }
+    .billingBox h3 {
+      font: 700 14px/1 Inter, system-ui;
+      color: #A9B6DD;
+      margin: 0 0 14px;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+    }
+    .billingRow {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      font: 500 14px/1.5 Inter, system-ui;
+    }
+    .billingRow .lbl { color: #8FA0CB; }
+    .billingRow .val { color: #ECF2FF; font-weight: 600; }
+    .billingEdit {
+      margin-top: 12px;
+      font: 600 12px/1 Inter, system-ui;
+      color: #7C3AED;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .billingEdit:hover { color: #22D3EE; }
+
+    .footerNote {
+      margin-top: 36px;
+      font: 600 13px/1.4 Inter, system-ui;
+      color: #8FA0CB;
+    }
+    .note { font-size: 14px; margin-top: 12px; min-height: 20px; }
+    .note.err { color: #ef4444; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="nav">
+      <a class="brand" href="/"><img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" /></a>
+      <div class="navLinks">
+        <a href="/tenant">Dashboard</a>
+        <a href="/precios">Precios</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="hero">
+      <a href="/tenant" class="backLink">← Volver al dashboard</a>
+      <h1 class="h1">Comprar créditos</h1>
+      <p class="sub">Elige la cantidad de créditos que necesitas. Cada crédito equivale a una inspección.</p>
+      <p class="sub2">Créditos válidos por 6 meses. Precios con IVA incluido.</p>
+    </section>
+
+    <div class="cardsWrap">
+      <div class="card normal" data-plan="credits-5" data-credits="5" data-price="64950">
+        <span class="pill">PACK</span>
+        <span class="credits">5</span>
+        <span class="label">créditos</span>
+        <span class="price">$64.950</span>
+        <span class="unit">$12.990 c/u</span>
+        <div class="cardSep"></div>
+        <span class="hint">Volumen puntual</span>
+      </div>
+      <div class="card featured" data-plan="credits-10" data-credits="10" data-price="119900">
+        <span class="pill">OPTIMIZA TU OPERACIÓN</span>
+        <span class="credits">10</span>
+        <span class="label">créditos</span>
+        <span class="price">$119.900</span>
+        <span class="unit">$11.990 c/u</span>
+        <div class="cardSep"></div>
+        <span class="hint">Equilibra eficiencia y flexibilidad</span>
+      </div>
+      <div class="card normal" data-plan="credits-20" data-credits="20" data-price="219800">
+        <span class="pill">PACK</span>
+        <span class="credits">20</span>
+        <span class="label">créditos</span>
+        <span class="price">$219.800</span>
+        <span class="unit">$10.990 c/u</span>
+        <div class="cardSep"></div>
+        <span class="hint">Para oficinas activas</span>
+      </div>
+    </div>
+
+    <div class="billingBox" id="billingBox" style="display:none;">
+      <h3>Facturar a</h3>
+      <div class="billingRow"><span class="lbl">Razón social</span><span class="val" id="billName">—</span></div>
+      <div class="billingRow"><span class="lbl">RUT</span><span class="val" id="billRut">—</span></div>
+      <div class="billingRow"><span class="lbl">Email</span><span class="val" id="billEmail">—</span></div>
+      <a href="/tenant#cuenta" class="billingEdit">Editar datos de facturación →</a>
+    </div>
+
+    <div class="ctaBar">
+      <span class="sub" id="ctaLabel">Selecciona un pack para continuar</span>
+      <button type="button" class="btnComprar" id="btnComprar" disabled>CONTINUAR</button>
+    </div>
+    <div class="note" id="note"></div>
+    <p class="footerNote">Los packs están disponibles solo con Business activo.</p>
+  </main>
+
+  <script>
+    let tenant = null;
+    let selectedPlan = null;
+
+    function authHeaders(extra = {}) {
+      const token = localStorage.getItem('tenant_session');
+      const h = { ...extra };
+      if (token) h.Authorization = 'Bearer ' + token;
+      return h;
+    }
+
+    (async function init() {
+      const token = localStorage.getItem('tenant_session');
+      const headers = { 'Content-Type': 'application/json', ...authHeaders() };
+      const res = await fetch('/api/tenant/me', { credentials: 'include', headers });
+      if (!res.ok) {
+        if (token) {
+          await new Promise(r => setTimeout(r, 300));
+          const retry = await fetch('/api/tenant/me', { credentials: 'include', headers });
+          if (retry.ok) {
+            const data = await retry.json();
+            tenant = data.tenant;
+            renderBilling();
+            return;
+          }
+        }
+        window.location.href = '/tenant';
+        return;
+      }
+      const data = await res.json();
+      tenant = data.tenant;
+      renderBilling();
+    })();
+
+    function renderBilling() {
+      if (!tenant) return;
+      const box = document.getElementById('billingBox');
+      document.getElementById('billName').textContent = tenant.legalName || tenant.name || '—';
+      document.getElementById('billRut').textContent = tenant.rut || 'No registrado';
+      document.getElementById('billEmail').textContent = tenant.email || '—';
+      box.style.display = 'block';
+    }
+
+    document.querySelectorAll('.card').forEach(card => {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        selectedPlan = card.dataset.plan;
+        const credits = card.dataset.credits;
+        const price = Number(card.dataset.price).toLocaleString('es-CL');
+        document.getElementById('btnComprar').disabled = false;
+        document.getElementById('btnComprar').textContent = `CONTINUAR CON ${credits} CRÉDITOS`;
+        document.getElementById('ctaLabel').textContent = `${credits} créditos · $${price}`;
+      });
+    });
+
+    document.getElementById('btnComprar').addEventListener('click', async () => {
+      if (!selectedPlan || !tenant) return;
+      const btn = document.getElementById('btnComprar');
+      const note = document.getElementById('note');
+      note.textContent = '';
+      note.className = 'note';
+
+      const nameParts = (tenant.name || '').trim().split(/\s+/).filter(Boolean);
+      const nombre = nameParts[0] || tenant.email?.split('@')[0] || 'Usuario';
+      const apellido = nameParts.slice(1).join(' ') || 'Contacto';
+
+      btn.disabled = true;
+      btn.textContent = 'Redirigiendo a MercadoPago...';
+
+      try {
+        const res = await fetch('/api/mercadopago/preference', {
+          method: 'POST',
+          headers: authHeaders({ 'Content-Type': 'application/json' }),
+          credentials: 'include',
+          body: JSON.stringify({
+            plan: selectedPlan,
+            tenantId: tenant.id,
+            email: tenant.email || '',
+            nombre,
+            apellido,
+            rut: tenant.rut || ''
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || data.message || 'Error al crear el pago');
+        }
+        if (data.init_point) {
+          window.location.href = data.init_point;
+          return;
+        }
+        throw new Error('No se recibió URL de pago');
+      } catch (err) {
+        note.textContent = err.message || 'Error. Intenta de nuevo.';
+        note.className = 'note err';
+        btn.disabled = false;
+        const card = document.querySelector('.card.selected');
+        btn.textContent = card ? `CONTINUAR CON ${card.dataset.credits} CRÉDITOS` : 'CONTINUAR';
+      }
+    });
+  </script>
+</body>
+</html>

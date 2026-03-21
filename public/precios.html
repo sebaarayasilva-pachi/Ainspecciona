@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Precios · Ainspecciona</title>
+  <meta name="description" content="Planes de inspección técnica inmobiliaria. Créditos individuales y bolsa para corredores, oficinas y administradores. Informe en 24 horas." />
+  <link rel="canonical" href="https://ainspecciona.com/precios" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://ainspecciona.com/precios" />
+  <meta property="og:title" content="Precios · Ainspecciona" />
+  <meta property="og:description" content="Planes de inspección técnica inmobiliaria. Créditos individuales y bolsa para corredores, oficinas y administradores." />
+  <meta property="og:image" content="https://ainspecciona.com/assets/certificado-4O7KF9GX.jpg" />
+  <meta property="og:locale" content="es_CL" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Precios · Ainspecciona" />
+  <meta name="twitter:description" content="Planes de inspección técnica inmobiliaria. Créditos individuales y bolsa." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/header.css" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #070812;
+      color: #ECF2FF;
+      min-height: 100vh;
+    }
+    .page { max-width: 1400px; margin: 0 auto; padding: 0 48px 80px; }
+    .hero {
+      padding: 40px 0 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 320px;
+      background: radial-gradient(ellipse 70% 70% at 50% 10%, rgba(124,58,237,0.15) 0%, rgba(34,211,238,0.08) 50%, transparent 100%);
+      pointer-events: none;
+    }
+    .hero .h1 { font: 800 36px/1.2 Inter, system-ui; color: #ECF2FF; margin: 0 0 8px; }
+    .hero .sub { font: 400 16px/1.5 Inter, system-ui; color: #A9B6DD; margin: 0; }
+
+    .cardsWrap {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 40px;
+      margin-top: 32px;
+      filter: drop-shadow(0 18px 18px rgba(0,0,0,0.55));
+    }
+    @media (max-width: 1100px) {
+      .cardsWrap { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      border-radius: 20px;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .card.starter {
+      background: linear-gradient(180deg, #0E1632 0%, #0A1022 100%);
+      border: 1px solid #1E2A52;
+    }
+    .card.business {
+      background: linear-gradient(180deg, #0B1B2E 0%, #081223 100%);
+      border: 1px solid #214B5F;
+    }
+    .card.business::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, #7C3AED, #22D3EE);
+      border-radius: 20px 20px 0 0;
+    }
+    .pill {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font: 800 12px/1 Inter, system-ui;
+      color: #CFE4FF;
+      letter-spacing: 1.2px;
+      margin-bottom: 16px;
+    }
+    .card.starter .pill {
+      background: #0B1226;
+      border: 1px solid #223057;
+    }
+    .card.business .pill {
+      background: #071827;
+      border: 1px solid #1E4C5E;
+    }
+
+    .plan { font: 800 22px Inter, system-ui; color: #ECF2FF; margin: 0 0 8px; }
+    .price { font: 900 38px Inter, system-ui; color: #ECF2FF; margin: 0; }
+    .muted { font: 500 14px Inter, system-ui; color: #9AA7CF; margin: 0 0 16px; }
+    .cardSep {
+      height: 1px;
+      background: #1B2649;
+      margin: 20px 0;
+    }
+    .card.business .cardSep { background: #143347; }
+
+    .features { list-style: none; padding: 0; margin: 0 0 24px; }
+    .features li {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font: 600 15px Inter, system-ui; color: #D7E0FF;
+      margin-bottom: 16px;
+    }
+    .features li:last-child { margin-bottom: 0; }
+    .checkIcon {
+      flex-shrink: 0;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card.starter .checkIcon {
+      background: #0B2030;
+    }
+    .card.starter .checkIcon svg { stroke: #22D3EE; }
+    .card.business .checkIcon {
+      background: #140D2A;
+    }
+    .card.business .checkIcon svg { stroke: #7C3AED; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 28px;
+      border-radius: 12px;
+      font: 800 13px Inter, system-ui;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      width: 240px;
+      height: 50px;
+      margin-top: auto;
+    }
+    .btnOutline {
+      background: transparent;
+      color: #ECF2FF;
+      border: 1px solid #2B375F;
+    }
+    .btnOutline:hover { border-color: #3B476F; }
+    .btnAccent {
+      background: linear-gradient(135deg, #7C3AED 0%, #22D3EE 100%);
+      color: #0A1022;
+    }
+    .btnAccent:hover { opacity: 0.95; }
+
+    .footer {
+      margin-top: 80px;
+      padding-top: 32px;
+      border-top: 1px solid #1E2A52;
+    }
+    .footer .muted {
+      font-size: 12px;
+      color: #9AA7CF;
+    }
+    .footer a {
+      color: #9AA7CF;
+      text-decoration: none;
+      margin-right: 16px;
+    }
+    .footer a:hover { color: #CFE4FF; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="nav">
+      <a class="brand" href="/">
+        <img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" />
+      </a>
+      <div class="navLinks">
+        <a href="/como-funciona.html">Cómo funciona</a>
+        <a href="/precios">Precios</a>
+        <a href="/faq.html">FAQ</a>
+        <a href="/contacto.html">Contacto</a>
+      </div>
+      <div class="topActions">
+        <a class="btn outline" href="/">Acceso</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="hero">
+      <h1 class="h1">Precios</h1>
+      <p class="sub">Inspección individual o gestión profesional.</p>
+    </section>
+
+    <div class="cardsWrap">
+      <!-- STARTER -->
+      <div class="card starter">
+        <span class="pill">STARTER</span>
+        <h2 class="plan">Inspección individual</h2>
+        <p class="price">$15.000</p>
+        <p class="muted">por inspección</p>
+        <div class="cardSep"></div>
+        <ul class="features">
+          <li>
+            <span class="checkIcon"><svg width="12" height="10" viewBox="0 0 12 10" fill="none" stroke-width="2"><path d="M1 5 L4 8 L11 1"/></svg></span>
+            Inspección con IA
+          </li>
+          <li>
+            <span class="checkIcon"><svg width="12" height="10" viewBox="0 0 12 10" fill="none" stroke-width="2"><path d="M1 5 L4 8 L11 1"/></svg></span>
+            Informe descargable
+          </li>
+          <li>
+            <span class="checkIcon"><svg width="12" height="10" viewBox="0 0 12 10" fill="none" stroke-width="2"><path d="M1 5 L4 8 L11 1"/></svg></span>
+            Certificado QR público
+          </li>
+          <li>
+            <span class="checkIcon"><svg width="12" height="10" viewBox="0 0 12 10" fill="none" stroke-width="2"><path d="M1 5 L4 8 L11 1"/></svg></span>
+            Formulario inteligente por tipo de inmueble
+          </li>
+          <li>
+            <span class="checkIcon"><svg width="12" height="10" viewBox="0 0 12 10" fill="none" stroke-width="2"><path d="M1 5 L4 8 L11 1"/></svg></span>
+            Enlace compartible
+          </li>
+          <li>
+            <span class="checkIcon"><svg width="12" height="10" viewBox="0 0 12 10" fill="none" stroke-width="2"><path d="M1 5 L4 8 L11 1"/></svg></span>
+            Soporte estándar
+          </li>
+        </ul>
+        <a href="/pago?plan=starter" class="btn btnOutline">COMPRAR</a>
+      </div>
+
+      <!-- BUSINESS -->
+      <div class="card business">
+        <span class="pill">BUSINESS</span>
+        <h2 class="plan">Gestión profesional</h2>
+        <p class="price">$39.990</p>
+        <p class="muted">mensual</p>
+        <p class="muted" style="margin-top: -8px;">Incluye 2 inspecciones</p>
+        <div class="cardSep"></div>
+        <ul class="features">
+          <li>
+            <span class="checkIcon"><svg width="12" height="10" viewBox="0 0 12 10" fill="none" stroke-width="2"><path d="M1 5 L4 8 L11 1"/></svg></span>
+            Inspección con IA
+          </li>
+          <li>
+            <span class="checkIcon"><svg width="12" height="10" viewBox="0 0 12 10" fill="none" stroke-width="2"><path d="M1 5 L4 8 L11 1"/></svg></span>
+            Informe descargable
+          </li>
+          <li>
+            <span class="checkIcon"><svg width="12" height="10" viewBox="0 0 12 10" fill="none" stroke-width="2"><path d="M1 5 L4 8 L11 1"/></svg></span>
+            Certificado QR público
+          </li>
+          <li>
+            <span class="checkIcon"><svg width="12" height="10" viewBox="0 0 12 10" fill="none" stroke-width="2"><path d="M1 5 L4 8 L11 1"/></svg></span>
+            Dashboard de gestión
+          </li>
+          <li>
+            <span class="checkIcon"><svg width="12" height="10" viewBox="0 0 12 10" fill="none" stroke-width="2"><path d="M1 5 L4 8 L11 1"/></svg></span>
+            Multiusuario
+          </li>
+          <li>
+            <span class="checkIcon"><svg width="12" height="10" viewBox="0 0 12 10" fill="none" stroke-width="2"><path d="M1 5 L4 8 L11 1"/></svg></span>
+            Gestión por sucursal
+          </li>
+          <li>
+            <span class="checkIcon"><svg width="12" height="10" viewBox="0 0 12 10" fill="none" stroke-width="2"><path d="M1 5 L4 8 L11 1"/></svg></span>
+            Control de consumo por equipo
+          </li>
+          <li>
+            <span class="checkIcon"><svg width="12" height="10" viewBox="0 0 12 10" fill="none" stroke-width="2"><path d="M1 5 L4 8 L11 1"/></svg></span>
+            Cuenta corriente avanzada
+          </li>
+          <li>
+            <span class="checkIcon"><svg width="12" height="10" viewBox="0 0 12 10" fill="none" stroke-width="2"><path d="M1 5 L4 8 L11 1"/></svg></span>
+            Acceso preferencial a inspección presencial
+          </li>
+          <li>
+            <span class="checkIcon"><svg width="12" height="10" viewBox="0 0 12 10" fill="none" stroke-width="2"><path d="M1 5 L4 8 L11 1"/></svg></span>
+            Precios preferenciales en créditos
+          </li>
+          <li>
+            <span class="checkIcon"><svg width="12" height="10" viewBox="0 0 12 10" fill="none" stroke-width="2"><path d="M1 5 L4 8 L11 1"/></svg></span>
+            Cancelación inmediata on request
+          </li>
+        </ul>
+        <a href="/business/activar?mode=direct" class="btn btnAccent">CONTRATAR AHORA</a>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <p class="muted">
+        <a href="/terminos">Términos y Condiciones</a>
+        <a href="/privacidad">Política de Privacidad</a>
+        <a href="/contacto.html">Contacto</a>
+      </p>
+      <p class="muted">© 2026 Ainspecciona. Todos los derechos reservados.</p>
+    </footer>
+  </main>
+  <script src="/assets/tracker.js" defer></script>
+</body>
+</html>

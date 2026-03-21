@@ -1,0 +1,140 @@
+{
+  "kpis": {
+    "MUROS_PINTURA": {
+      "low": 5,
+      "medium": 15,
+      "high": 30
+    },
+    "HUMEDAD": {
+      "low": 5,
+      "medium": 15,
+      "high": 30
+    },
+    "PISOS": {
+      "low": 5,
+      "medium": 15,
+      "high": 30
+    },
+    "SANITARIOS": {
+      "low": 5,
+      "medium": 15,
+      "high": 30
+    },
+    "ELECTRICIDAD": {
+      "low": 5,
+      "medium": 15,
+      "high": 30
+    },
+    "VENTANAS_CERRAMIENTOS": {
+      "low": 5,
+      "medium": 15,
+      "high": 30
+    },
+    "PUERTAS_HERRAJES": {
+      "low": 5,
+      "medium": 15,
+      "high": 30
+    },
+    "MOBILIARIO_FIJO": {
+      "low": 5,
+      "medium": 15,
+      "high": 30
+    }
+  },
+  "slotKpiMap": {
+    "BATHROOM_1_SHOWER": "SANITARIOS",
+    "BATHROOM_1_SINK": "SANITARIOS",
+    "BATHROOM_1_SINK_PIPES": "SANITARIOS",
+    "BATHROOM_1_WC": "SANITARIOS",
+    "BATHROOM_1_WC_PIPES": "SANITARIOS",
+    "BATHROOM_1_CEILING": "HUMEDAD",
+    "BATHROOM_1_OUTLETS": "ELECTRICIDAD",
+    "BATHROOM_2_SHOWER": "SANITARIOS",
+    "BATHROOM_2_SINK": "SANITARIOS",
+    "BATHROOM_2_SINK_PIPES": "SANITARIOS",
+    "BATHROOM_2_WC": "SANITARIOS",
+    "BATHROOM_2_WC_PIPES": "SANITARIOS",
+    "BATHROOM_2_CEILING": "HUMEDAD",
+    "BATHROOM_2_OUTLETS": "ELECTRICIDAD",
+    "KITCHEN_UNDER_SINK": "HUMEDAD",
+    "KITCHEN_SINK_WALL": "HUMEDAD",
+    "KITCHEN_COUNTERTOP": "MOBILIARIO_FIJO",
+    "KITCHEN_CABINETS": "MOBILIARIO_FIJO",
+    "KITCHEN_OUTLETS": "ELECTRICIDAD",
+    "KITCHEN_WINDOW": "VENTANAS_CERRAMIENTOS",
+    "LIVING_WALLS": "MUROS_PINTURA",
+    "LIVING_CEILING": "MUROS_PINTURA",
+    "LIVING_FLOOR": "PISOS",
+    "LIVING_WINDOWS": "VENTANAS_CERRAMIENTOS",
+    "LIVING_SWITCHES": "ELECTRICIDAD",
+    "BEDROOM_1_WALLS": "MUROS_PINTURA",
+    "BEDROOM_1_FLOOR": "PISOS",
+    "BEDROOM_1_CLOSET": "MOBILIARIO_FIJO",
+    "BEDROOM_1_WINDOWS": "VENTANAS_CERRAMIENTOS",
+    "BEDROOM_2_WALLS": "MUROS_PINTURA",
+    "BEDROOM_2_FLOOR": "PISOS",
+    "BEDROOM_2_CLOSET": "MOBILIARIO_FIJO",
+    "BEDROOM_2_WINDOWS": "VENTANAS_CERRAMIENTOS",
+    "BEDROOM_3_WALLS": "MUROS_PINTURA",
+    "BEDROOM_3_FLOOR": "PISOS",
+    "BEDROOM_3_CLOSET": "MOBILIARIO_FIJO",
+    "BEDROOM_3_WINDOWS": "VENTANAS_CERRAMIENTOS",
+    "LAUNDRY_WALLS_FLOOR": "HUMEDAD",
+    "ELECTRICAL_PANEL": "ELECTRICIDAD",
+    "PUERTA_ENTRADA": "PUERTAS_HERRAJES",
+    "ELEVATOR": "ELECTRICIDAD",
+    "ESTACIONAMIENTO": "PISOS",
+    "CERTIFICADO_VERDE": "ELECTRICIDAD"
+  },
+  "messages": {
+    "MUROS_PINTURA": {
+      "low": "Se observan imperfecciones menores en muros o pintura del área inspeccionada.",
+      "medium": "Se observan deterioros visibles en muros o pintura del área inspeccionada.",
+      "high": "Se observan deterioros relevantes en muros o pintura del área inspeccionada."
+    },
+    "HUMEDAD": {
+      "low": "Se observan indicios leves de humedad superficial en el área inspeccionada.",
+      "medium": "Se observan señales visibles de humedad en el área inspeccionada.",
+      "high": "Se observan evidencias visibles de humedad extendida en el área inspeccionada."
+    },
+    "PISOS": {
+      "low": "Se observan marcas o desgaste leve en el piso del área inspeccionada.",
+      "medium": "Se observan desgaste o daños visibles en el piso del área inspeccionada.",
+      "high": "Se observan daños visibles relevantes en el piso del área inspeccionada."
+    },
+    "SANITARIOS": {
+      "low": "Se observan condiciones visibles menores en artefactos sanitarios del área inspeccionada.",
+      "medium": "Se observan condiciones visibles en artefactos sanitarios del área inspeccionada.",
+      "high": "Se observan condiciones visibles relevantes en artefactos sanitarios del área inspeccionada."
+    },
+    "ELECTRICIDAD": {
+      "low": "Se observan condiciones visibles menores en elementos eléctricos del área inspeccionada.",
+      "medium": "Se observan condiciones visibles en elementos eléctricos del área inspeccionada.",
+      "high": "Se observan condiciones visibles relevantes en elementos eléctricos del área inspeccionada."
+    },
+    "VENTANAS_CERRAMIENTOS": {
+      "low": "Se observan condiciones visibles menores en ventanas o cerramientos del área inspeccionada.",
+      "medium": "Se observan condiciones visibles en ventanas o cerramientos del área inspeccionada.",
+      "high": "Se observan condiciones visibles relevantes en ventanas o cerramientos del área inspeccionada."
+    },
+    "PUERTAS_HERRAJES": {
+      "low": "Se observan condiciones visibles menores en puertas o herrajes del área inspeccionada.",
+      "medium": "Se observan condiciones visibles en puertas o herrajes del área inspeccionada.",
+      "high": "Se observan condiciones visibles relevantes en puertas o herrajes del área inspeccionada."
+    },
+    "MOBILIARIO_FIJO": {
+      "low": "Se observan condiciones visibles menores en mobiliario fijo del área inspeccionada.",
+      "medium": "Se observan condiciones visibles en mobiliario fijo del área inspeccionada.",
+      "high": "Se observan condiciones visibles relevantes en mobiliario fijo del área inspeccionada."
+    }
+  },
+  "recommendations": {
+    "GREEN": "Se recomienda mantener seguimiento y control preventivo.",
+    "YELLOW": "Se recomienda revisar y monitorear el estado observado.",
+    "RED": "Se recomienda una revisión técnica detallada del hallazgo."
+  },
+  "badge": {
+    "yellowFrom": 60,
+    "greenFrom": 85
+  }
+}

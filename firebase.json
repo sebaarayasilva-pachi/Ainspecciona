@@ -3,18 +3,9 @@
     "public": "public",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [
-      { "source": "/como-funciona", "destination": "/como-funciona.html" },
-      { "source": "/modelo", "destination": "/modelo.html" },
-      { "source": "/integracion", "destination": "/integracion.html" },
-      { "source": "/faq", "destination": "/faq.html" },
-      { "source": "/contacto", "destination": "/contacto.html" },
-      { "source": "/agendar", "destination": "/agendar.html" },
-      { "source": "/formulario", "destination": "/formulario.html" },
-      { "source": "/dashboard", "destination": "/dashboard.html" },
-      { "source": "/cases/**/report", "destination": "/report.html" },
-      { "source": "/capture/**", "destination": "/capture.html" },
-      { "source": "/**", "destination": "/index.html" }
+      {"source": "/", "destination": "/corredores.html"},
+      {"source": "/precios", "destination": "/precios.html"},
+      {"source": "**", "run": {"serviceId": "ainspecciona-api", "region": "southamerica-west1"}}
     ]
   }
 }
-

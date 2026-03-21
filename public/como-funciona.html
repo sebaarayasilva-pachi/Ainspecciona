@@ -4,78 +4,63 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Cómo funciona · Ainspecciona</title>
+  <meta name="description" content="Cómo funciona la inspección técnica digital: captura guiada por slot, análisis con IA, informe técnico y certificado publicable para inmuebles." />
+  <link rel="canonical" href="https://ainspecciona.com/como-funciona.html" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://ainspecciona.com/como-funciona.html" />
+  <meta property="og:title" content="Cómo funciona · Ainspecciona" />
+  <meta property="og:description" content="Captura guiada por slot, análisis con IA, informe técnico y certificado publicable para inmuebles." />
+  <meta property="og:image" content="https://ainspecciona.com/assets/certificado-4O7KF9GX.jpg" />
+  <meta property="og:locale" content="es_CL" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Cómo funciona · Ainspecciona" />
+  <meta name="twitter:description" content="Captura guiada, análisis con IA, informe técnico y certificado publicable." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/header.css" />
   <style>
     * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      max-width: 100%;
+      overflow-x: hidden;
+    }
     body {
-      margin: 0;
       font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #F6F7F9;
-      color: #0f172a;
+      background: #070D14;
+      color: #e5eef7;
     }
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 20;
-      background: #ffffff;
-      border-bottom: 1px solid #e5e7eb;
+    /* Igual que home: secciones a ancho completo */
+    section[id] {
+      width: 100vw;
+      max-width: 100%;
+      margin-left: calc(50% - 50vw);
+      box-sizing: border-box;
+      padding: 0;
     }
-    .nav {
-      max-width: none;
-      margin: 0;
-      padding: 20px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
-      color: inherit;
-      font-weight: 800;
-    }
-    .brand img { height: 70px; }
-    .primaryLinks {
-      display: flex;
-      gap: 16px;
-      align-items: center;
-      margin-right: auto;
-      padding-left: 8px;
-    }
-    .primaryLinks a {
-      text-decoration: none;
-      color: #1f2937;
-      font-weight: 700;
-      font-size: 14px;
-    }
-    .links {
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    .links a {
-      text-decoration: none;
-      color: #1f2937;
-      font-weight: 600;
-      font-size: 14px;
-    }
-    .cta {
-      padding: 10px 14px;
-      border-radius: 999px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: #fff;
-      text-decoration: none;
-      font-weight: 800;
-      font-size: 14px;
-    }
-    .section {
-      max-width: 1200px;
+    section[id] .page-content {
+      max-width: 1700px;
       margin: 0 auto;
-      padding: 48px 20px;
+      padding: 0 48px;
+      box-sizing: border-box;
+    }
+    /* Mismos fondos que home (product, report, modelo-analisis, etc.) */
+    #cf-1 { background: linear-gradient(180deg, #070D14 0%, #0B1622 50%, #070D14 100%); }
+    #cf-2 { background: linear-gradient(180deg, #05090F 0%, #07101A 50%, #05080D 100%); }
+    #cf-4 { background: linear-gradient(180deg, #05090F 0%, #07101A 50%, #05080D 100%); }
+    #cf-5 { background: linear-gradient(180deg, #0B111A 0%, #070B12 100%); }
+    #cf-6 { background: radial-gradient(ellipse 90% 70% at 35% 20%, #0B2236 0%, #071A2A 45%, #04121E 100%); }
+    .cf-card {
+      padding: 48px 0;
+    }
+    .cf-card .page-content {
+      padding: 48px 48px;
+    }
+    .comoFuncionaSvg svg {
+      width: 100%;
+      height: auto;
+      display: block;
     }
     footer {
       background: linear-gradient(135deg, #0b1220 0%, #0f172a 60%, #0b1220 100%);
@@ -86,6 +71,8 @@
     footer .footerWrap {
       max-width: 1200px;
       margin: 0 auto;
+      padding: 0 48px;
+      box-sizing: border-box;
       display: grid;
       grid-template-columns: 1.2fr 1fr 1fr 1fr;
       gap: 24px;
@@ -96,7 +83,7 @@
       flex-direction: column;
       gap: 10px;
     }
-    .footerBrand img { height: 36px; width: auto; }
+    .footerBrand img { height: 36px; width: auto; object-fit: contain; }
     .footerTitle { font-weight: 800; font-size: 16px; }
     .footerDesc { color: #94a3b8; font-size: 14px; line-height: 1.5; }
     .footerCol h4 { margin: 0 0 10px; font-size: 14px; }
@@ -108,17 +95,69 @@
       justify-content: center;
       padding: 10px 14px;
       border-radius: 999px;
-      background: linear-gradient(135deg, #39c6ff 0%, #2c7bff 100%);
-      color: #07101a;
+      background: linear-gradient(135deg, #35D07F 0%, #1AAE69 100%);
+      color: #0B1220;
       font-weight: 800;
       text-decoration: none;
       font-size: 14px;
       margin-top: 8px;
     }
+    .heroComo {
+      padding: 48px 20px 40px;
+      text-align: center;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .heroComo h1 { font-size: 36px; font-weight: 800; margin: 0 0 16px; color: #EAF0FF; line-height: 1.2; }
+    .heroComo p { font-size: 18px; color: #94a3b8; margin: 0 0 28px; line-height: 1.5; }
+    .ctaRow { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+    .ctaPrimary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 28px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #35D07F 0%, #1AAE69 100%);
+      color: #0B1220;
+      font-weight: 800;
+      font-size: 15px;
+      text-decoration: none;
+    }
+    .ctaPrimary:hover { opacity: 0.95; filter: brightness(1.05); }
+    .ctaSecondary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 28px;
+      border-radius: 14px;
+      border: 2px solid #1E2B45;
+      background: transparent;
+      color: #EAF0FF;
+      font-weight: 700;
+      font-size: 15px;
+      text-decoration: none;
+    }
+    .ctaSecondary:hover { background: #1E2B45; color: #CFF9E1; }
+    .ctaBlock {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      text-align: center;
+      border-top: 1px solid rgba(30, 43, 69, 0.5);
+    }
+    .ctaBlock h3 { font-size: 24px; font-weight: 800; color: #EAF0FF; margin: 0 0 12px; }
+    .ctaBlock p { color: #94a3b8; margin: 0 0 24px; font-size: 16px; }
+    .comoFuncionaSvg { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    @media (max-width: 768px) {
+      .heroComo h1 { font-size: 28px; }
+      .heroComo p { font-size: 16px; }
+      .ctaRow { flex-direction: column; }
+    }
     .footerBottom {
       max-width: 1200px;
       margin: 28px auto 0;
-      padding-top: 18px;
+      padding: 18px 48px 0;
+      box-sizing: border-box;
       border-top: 1px solid rgba(148, 163, 184, 0.2);
       color: #94a3b8;
       font-size: 12px;
@@ -128,175 +167,461 @@
       gap: 10px;
     }
     @media (max-width: 900px) {
-      footer .footerWrap { grid-template-columns: 1fr; }
+      section[id] .page-content { padding: 0 24px; }
+      .cf-card .page-content { padding: 32px 24px; }
+      footer .footerWrap { padding: 0 24px; grid-template-columns: 1fr; }
+      .footerBottom { padding: 18px 24px 0; }
     }
   </style>
 </head>
 <body>
-  <header>
+  <header class="site-header">
     <div class="nav">
       <a class="brand" href="/">
         <img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" />
       </a>
-      <div class="primaryLinks">
-        <a href="/personas.html">Personas</a>
-        <a href="/corredores.html">Corredores</a>
-      </div>
-      <div class="links">
+      <div class="navLinks">
         <a href="/como-funciona.html">Cómo funciona</a>
-        <a href="/modelo.html">Modelo</a>
-        <a href="/integracion.html">Integración</a>
+        <a href="/precios">Precios</a>
         <a href="/faq.html">FAQ</a>
         <a href="/contacto.html">Contacto</a>
-        <a class="cta" href="/formulario">Generar inspección</a>
+      </div>
+      <div class="topActions">
+        <a class="btn outline" href="/">Acceso</a>
       </div>
     </div>
   </header>
 
   <main>
-    <section id="como-funciona">
-      <div style="width:100%; overflow:hidden;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="1440" height="560" viewBox="0 0 1440 560" style="display:block; width:100%; height:auto;">
+    <section id="cf-1" class="cf-card">
+      <div class="page-content">
+        <div class="comoFuncionaSvg">
+        <svg width="1200" height="520" viewBox="0 0 1200 520" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block; width:100%; height:auto; max-width:100%;">
           <defs>
-            <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#060B12"/>
-              <stop offset="60%" stop-color="#07101A"/>
-              <stop offset="100%" stop-color="#05090F"/>
+            <linearGradient id="cf1bg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#05090F"/>
+              <stop offset="55%" stop-color="#07101A"/>
+              <stop offset="100%" stop-color="#05080D"/>
             </linearGradient>
-            <radialGradient id="glow" cx="70%" cy="30%" r="85%">
-              <stop offset="0%" stop-color="#0F2C45" stop-opacity="0.45"/>
+            <radialGradient id="cf1glow" cx="28%" cy="28%" r="85%">
+              <stop offset="0%" stop-color="#0E2B44" stop-opacity="0.42"/>
               <stop offset="55%" stop-color="#07101A" stop-opacity="0.55"/>
-              <stop offset="100%" stop-color="#05090F" stop-opacity="1"/>
+              <stop offset="100%" stop-color="#05080D" stop-opacity="1"/>
             </radialGradient>
-            <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#0F1C28"/>
-              <stop offset="100%" stop-color="#0B1520"/>
-            </linearGradient>
-            <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="#39C6FF"/>
-              <stop offset="100%" stop-color="#2C7BFF"/>
-            </linearGradient>
-            <linearGradient id="gGreen" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#27E38B"/>
-              <stop offset="100%" stop-color="#1AAE69"/>
-            </linearGradient>
-            <linearGradient id="gYellow" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#FFD36A"/>
-              <stop offset="100%" stop-color="#E8A93A"/>
-            </linearGradient>
-            <linearGradient id="gRed" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#FF6B6B"/>
-              <stop offset="100%" stop-color="#E54242"/>
-            </linearGradient>
-            <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse">
+            <pattern id="cf1grid" width="36" height="36" patternUnits="userSpaceOnUse">
               <path d="M36 0H0V36" fill="none" stroke="#142333" stroke-opacity="0.5" stroke-width="1"/>
             </pattern>
-            <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
-              <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000" flood-opacity="0.45"/>
-            </filter>
-            <style>
-              .kicker { font-family: Inter, ui-sans-serif, system-ui; font-size:12px; font-weight:700; letter-spacing:.6px; fill:#8EA2BA; text-transform:uppercase; }
-              .h2 { font-family: Inter, ui-sans-serif, system-ui; font-size:30px; font-weight:650; fill:#EAF2FF; }
-              .p { font-family: Inter, ui-sans-serif, system-ui; font-size:16px; font-weight:450; fill:#A9B8CC; }
-              .b { font-family: Inter, ui-sans-serif, system-ui; font-size:15px; font-weight:560; fill:#D7E6FA; }
-              .muted { font-family: Inter, ui-sans-serif, system-ui; font-size:13px; font-weight:500; fill:#8EA2BA; }
-              .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas; font-size:11px; fill:#8EA2BA; }
-              .label { font-family: Inter, ui-sans-serif, system-ui; font-size:12px; font-weight:700; }
-              .stroke { stroke:#203142; stroke-opacity:.9; }
-            </style>
           </defs>
+          <rect width="1200" height="520" fill="url(#cf1bg)"/>
+          <rect width="1200" height="520" fill="url(#cf1glow)"/>
+          <rect width="1200" height="520" fill="url(#cf1grid)" opacity="0.33"/>
 
-          <rect x="0" y="0" width="1440" height="560" fill="url(#bg)"/>
-          <rect x="0" y="0" width="1440" height="560" fill="url(#glow)"/>
-          <rect x="0" y="0" width="1440" height="560" fill="url(#grid)" opacity="0.35"/>
+          <!-- Title -->
+          <text x="92" y="162" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="44" font-weight="700" fill="#EAF0FF">¿Qué es Ainspecciona?</text>
 
-          <g transform="translate(92,90)">
-            <text class="kicker">Cómo funciona</text>
-            <text class="h2" x="0" y="44">Un flujo simple, técnico y auditable</text>
-            <text class="p" x="0" y="78">
-              <tspan x="0" dy="0">Ainspecciona convierte fotografías guiadas en un diagnóstico estructurado.</tspan>
-              <tspan x="0" dy="26">Cada paso genera datos trazables, listos para decisión o integración.</tspan>
+          <!-- Body copy -->
+          <text x="92" y="206" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="16" fill="#B9C7E2">
+            <tspan x="92" dy="0">Ainspecciona es un sistema de inspección inmobiliaria basado en captura guiada de fotografías</tspan>
+            <tspan x="92" dy="24">y análisis estructurado por componente. Permite evaluar el estado visible de un inmueble</tspan>
+            <tspan x="92" dy="24">de forma estandarizada, generando un diagnóstico técnico verificable.</tspan>
+          </text>
+
+          <!-- Pillar cards -->
+          <g>
+            <!-- Card 1 -->
+            <rect x="92" y="278" width="328" height="168" rx="18" fill="#0B1220" stroke="#1E2B45"/>
+            <circle cx="128" cy="318" r="18" fill="#0F1A2E" stroke="#1E2B45"/>
+            <path d="M122 318L126.5 322.5L135 314" stroke="#35D07F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="156" y="322" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="18" font-weight="700" fill="#EAF0FF">Estructurado</text>
+            <text x="128" y="354" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="14" fill="#B9C7E2">
+              <tspan x="128" dy="0">Cada imagen se asocia a un</tspan>
+              <tspan x="128" dy="20">componente específico del</tspan>
+              <tspan x="128" dy="20">inmueble.</tspan>
+            </text>
+
+            <!-- Card 2 -->
+            <rect x="436" y="278" width="328" height="168" rx="18" fill="#0B1220" stroke="#1E2B45"/>
+            <circle cx="472" cy="318" r="18" fill="#0F1A2E" stroke="#1E2B45"/>
+            <path d="M466 318L470.5 322.5L479 314" stroke="#35D07F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="500" y="322" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="18" font-weight="700" fill="#EAF0FF">Guiado</text>
+            <text x="472" y="354" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="14" fill="#B9C7E2">
+              <tspan x="472" dy="0">El proceso indica qué</tspan>
+              <tspan x="472" dy="20">fotografiar y cómo hacerlo.</tspan>
+            </text>
+
+            <!-- Card 3 -->
+            <rect x="780" y="278" width="328" height="168" rx="18" fill="#0B1220" stroke="#1E2B45"/>
+            <circle cx="816" cy="318" r="18" fill="#0F1A2E" stroke="#1E2B45"/>
+            <path d="M810 318L814.5 322.5L823 314" stroke="#35D07F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="844" y="322" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="18" font-weight="700" fill="#EAF0FF">Verificable</text>
+            <text x="816" y="354" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="14" fill="#B9C7E2">
+              <tspan x="816" dy="0">Cada resultado está respaldado</tspan>
+              <tspan x="816" dy="20">por evidencia y trazabilidad.</tspan>
             </text>
           </g>
 
-          <g transform="translate(92,210)">
-            <g filter="url(#shadow)">
-              <rect x="0" y="0" width="300" height="260" rx="18" fill="url(#card)" class="stroke"/>
-              <g transform="translate(22,22)">
-                <text class="label" x="0" y="0" fill="#39C6FF">01</text>
-                <text class="b" x="0" y="26" style="font-size:16px;">Captura guiada</text>
-                <text class="muted" x="0" y="50">
-                  <tspan x="0" dy="0">El usuario toma fotografías</tspan>
-                  <tspan x="0" dy="22">siguiendo instrucciones</tspan>
-                  <tspan x="0" dy="22">por slot técnico.</tspan>
-                </text>
-                <g transform="translate(0,120)">
-                  <rect x="0" y="0" width="256" height="90" rx="14" fill="#0B1520" class="stroke"/>
-                  <text class="mono" x="14" y="28">slot: baño</text>
-                  <text class="mono" x="14" y="48">foto: ducha / sellos</text>
-                  <text class="mono" x="14" y="68">validación: OK</text>
-                </g>
-              </g>
-            </g>
-
-            <g transform="translate(320,120)">
-              <line x1="0" y1="0" x2="60" y2="0" stroke="url(#accent)" stroke-width="2"/>
-              <polygon points="60,-6 72,0 60,6" fill="#2C7BFF"/>
-            </g>
-
-            <g transform="translate(400,0)" filter="url(#shadow)">
-              <rect x="0" y="0" width="300" height="260" rx="18" fill="url(#card)" class="stroke"/>
-              <g transform="translate(22,22)">
-                <text class="label" x="0" y="0" fill="#39C6FF">02</text>
-                <text class="b" x="0" y="26" style="font-size:16px;">Análisis por IA</text>
-                <text class="muted" x="0" y="50">
-                  <tspan x="0" dy="0">Modelos especializados</tspan>
-                  <tspan x="0" dy="22">analizan cada imagen</tspan>
-                  <tspan x="0" dy="22">según tipo de slot.</tspan>
-                </text>
-                <g transform="translate(0,120)">
-                  <rect x="0" y="0" width="256" height="90" rx="14" fill="#0B1520" class="stroke"/>
-                  <text class="mono" x="14" y="28">analysis_code</text>
-                  <text class="mono" x="14" y="48">severity: 1.3</text>
-                  <text class="mono" x="14" y="68">confidence: 0.86</text>
-                </g>
-              </g>
-            </g>
-
-            <g transform="translate(720,120)">
-              <line x1="0" y1="0" x2="60" y2="0" stroke="url(#accent)" stroke-width="2"/>
-              <polygon points="60,-6 72,0 60,6" fill="#2C7BFF"/>
-            </g>
-
-            <g transform="translate(800,0)" filter="url(#shadow)">
-              <rect x="0" y="0" width="300" height="260" rx="18" fill="url(#card)" class="stroke"/>
-              <g transform="translate(22,22)">
-                <text class="label" x="0" y="0" fill="#39C6FF">03</text>
-                <text class="b" x="0" y="26" style="font-size:16px;">Resultado accionable</text>
-                <text class="muted" x="0" y="50">
-                  <tspan x="0" dy="0">Se consolida el estado</tspan>
-                  <tspan x="0" dy="22">del inmueble en un</tspan>
-                  <tspan x="0" dy="22">badge claro y trazable.</tspan>
-                </text>
-                <g transform="translate(0,120)">
-                  <rect x="0" y="0" width="256" height="90" rx="14" fill="#0B1520" class="stroke"/>
-                  <rect x="14" y="18" width="86" height="26" rx="10" fill="url(#gGreen)"/>
-                  <text class="label" x="28" y="36" fill="#07101A">VERDE</text>
-                  <rect x="108" y="18" width="102" height="26" rx="10" fill="url(#gYellow)"/>
-                  <text class="label" x="124" y="36" fill="#07101A">AMARILLO</text>
-                  <rect x="14" y="52" width="86" height="26" rx="10" fill="url(#gRed)"/>
-                  <text class="label" x="30" y="70" fill="#07101A">ROJO</text>
-                </g>
-              </g>
-            </g>
-          </g>
-
-          <g transform="translate(92,500)" opacity="0.9">
-            <text class="mono">Pipeline determinístico · Evidencia por slot · Listo para integración API</text>
+          <!-- Comentario abajo (mono como home) -->
+          <g opacity="0.9">
+            <text x="92" y="486" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace" font-size="11" fill="#8EA2BA">Sistema de inspección inmobiliaria · Captura guiada · Diagnóstico verificable</text>
           </g>
         </svg>
+        </div>
       </div>
     </section>
+
+    <section id="cf-2" class="cf-card">
+      <div class="page-content">
+        <div class="comoFuncionaSvg">
+        <svg width="1200" height="780" viewBox="0 0 1200 780" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block; width:100%; height:auto; max-width:100%;">
+          <defs>
+            <linearGradient id="cf2bg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#05090F"/>
+              <stop offset="55%" stop-color="#07101A"/>
+              <stop offset="100%" stop-color="#05080D"/>
+            </linearGradient>
+            <radialGradient id="cf2glow" cx="72%" cy="32%" r="70%">
+              <stop offset="0%" stop-color="#0E2B44" stop-opacity="0.42"/>
+              <stop offset="55%" stop-color="#07101A" stop-opacity="0.55"/>
+              <stop offset="100%" stop-color="#05080D" stop-opacity="1"/>
+            </radialGradient>
+            <pattern id="cf2grid" width="36" height="36" patternUnits="userSpaceOnUse">
+              <path d="M36 0H0V36" fill="none" stroke="#142333" stroke-opacity="0.5" stroke-width="1"/>
+            </pattern>
+          </defs>
+          <rect width="1200" height="780" fill="url(#cf2bg)"/>
+          <rect width="1200" height="780" fill="url(#cf2glow)"/>
+          <rect width="1200" height="780" fill="url(#cf2grid)" opacity="0.33"/>
+
+          <!-- Title -->
+          <text x="92" y="162" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="44" font-weight="700" fill="#EAF0FF">Cómo se hace el proceso</text>
+
+          <!-- Subtitle -->
+          <text x="92" y="206" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="16" fill="#B9C7E2">
+            <tspan x="92" dy="0">Un flujo simple en 4 pasos: crear caso, capturar evidencia, análisis automático y entrega de resultados.</tspan>
+          </text>
+
+          <!-- Timeline (izquierda) -->
+          <g>
+            <line x1="170" y1="270" x2="170" y2="660" stroke="#1E2B45" stroke-width="2"/>
+
+            <!-- Step 1 -->
+            <circle cx="170" cy="300" r="16" fill="#0B1220" stroke="#35D07F" stroke-width="2"/>
+            <text x="164" y="306" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="14" font-weight="700" fill="#EAF0FF">1</text>
+            <text x="210" y="296" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="18" font-weight="700" fill="#EAF0FF">Crear caso (Desktop)</text>
+            <text x="210" y="324" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="14" fill="#B9C7E2">
+              <tspan x="210" dy="0">Ingresas dirección y ROL. El sistema estructura la inspección</tspan>
+              <tspan x="210" dy="20">y genera un link único para captura.</tspan>
+            </text>
+            <g opacity="0.95">
+              <rect x="210" y="352" width="62" height="24" rx="12" fill="#0B1220" stroke="#1E2B45"/>
+              <text x="231" y="369" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="12" fill="#A9B7D0">ROL</text>
+              <rect x="278" y="352" width="92" height="24" rx="12" fill="#0B1220" stroke="#1E2B45"/>
+              <text x="298" y="369" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="12" fill="#A9B7D0">Dirección</text>
+              <rect x="376" y="352" width="96" height="24" rx="12" fill="#0B1220" stroke="#1E2B45"/>
+              <text x="396" y="369" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="12" fill="#A9B7D0">Link móvil</text>
+            </g>
+
+            <!-- Step 2 -->
+            <circle cx="170" cy="430" r="16" fill="#0B1220" stroke="#35D07F" stroke-width="2"/>
+            <text x="162" y="436" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="14" font-weight="700" fill="#EAF0FF">2</text>
+            <text x="210" y="426" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="18" font-weight="700" fill="#EAF0FF">Captura guiada (Mobile)</text>
+            <text x="210" y="454" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="14" fill="#B9C7E2">
+              <tspan x="210" dy="0">Sigues instrucciones y tomas fotos por componente, desde tu celular.</tspan>
+              <tspan x="210" dy="20">Ainspecciona valida evidencia y cobertura.</tspan>
+            </text>
+
+            <!-- Step 3 -->
+            <circle cx="170" cy="560" r="16" fill="#0B1220" stroke="#35D07F" stroke-width="2"/>
+            <text x="162" y="566" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="14" font-weight="700" fill="#EAF0FF">3</text>
+            <text x="210" y="556" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="18" font-weight="700" fill="#EAF0FF">Análisis automático</text>
+            <text x="210" y="584" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="14" fill="#B9C7E2">
+              <tspan x="210" dy="0">El sistema evalúa cada componente, detecta hallazgos</tspan>
+              <tspan x="210" dy="20">y calcula severidad y confianza.</tspan>
+            </text>
+
+            <!-- Step 4 -->
+            <circle cx="170" cy="690" r="16" fill="#0B1220" stroke="#35D07F" stroke-width="2"/>
+            <text x="162" y="696" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="14" font-weight="700" fill="#EAF0FF">4</text>
+            <text x="210" y="686" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="18" font-weight="700" fill="#EAF0FF">Resultados listos</text>
+            <text x="210" y="714" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="14" fill="#B9C7E2">
+              <tspan x="210" dy="0">Se genera el informe técnico y el certificado para publicar</tspan>
+              <tspan x="210" dy="20">con acceso al reporte completo.</tspan>
+            </text>
+          </g>
+
+          <!-- Foto slot (captura real) - foreignObject + object-fit para padding igual -->
+          <g>
+            <rect x="820" y="248" width="270" height="464" rx="20" fill="#0B1220" stroke="#1E2B45"/>
+            <foreignObject x="830" y="258" width="250" height="444">
+              <div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;overflow:hidden;background:#0B1220;">
+                <img src="/assets/Photo-slot.jpeg" alt="Captura móvil" style="width:100%;height:100%;object-fit:contain;object-position:center;display:block;"/>
+              </div>
+            </foreignObject>
+          </g>
+
+          <!-- Footer hint -->
+          <g opacity="0.7">
+            <text x="92" y="752" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace" font-size="12" fill="#7F93B8">Pensado para operación simple: el flujo guía al usuario y estandariza el resultado.</text>
+          </g>
+        </svg>
+        </div>
+      </div>
+    </section>
+
+    <section id="cf-4" class="cf-card">
+      <div class="page-content">
+        <div class="comoFuncionaSvg">
+        <svg width="1200" height="520" viewBox="0 0 1200 520" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block; width:100%; height:auto; max-width:100%;">
+          <defs>
+            <linearGradient id="cf4bg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#05090F"/>
+              <stop offset="55%" stop-color="#07101A"/>
+              <stop offset="100%" stop-color="#05080D"/>
+            </linearGradient>
+            <radialGradient id="cf4glow" cx="28%" cy="28%" r="85%">
+              <stop offset="0%" stop-color="#0E2B44" stop-opacity="0.42"/>
+              <stop offset="55%" stop-color="#07101A" stop-opacity="0.55"/>
+              <stop offset="100%" stop-color="#05080D" stop-opacity="1"/>
+            </radialGradient>
+            <pattern id="cf4grid" width="36" height="36" patternUnits="userSpaceOnUse">
+              <path d="M36 0H0V36" fill="none" stroke="#142333" stroke-opacity="0.5" stroke-width="1"/>
+            </pattern>
+          </defs>
+          <rect width="1200" height="520" fill="url(#cf4bg)"/>
+          <rect width="1200" height="520" fill="url(#cf4glow)"/>
+          <rect width="1200" height="520" fill="url(#cf4grid)" opacity="0.33"/>
+
+          <!-- Title -->
+          <text x="92" y="168" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="44" font-weight="800" fill="#EAF0FF">Un flujo simple. Un resultado verificable.</text>
+
+          <!-- Subtitle -->
+          <text x="92" y="214" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="16" fill="#B9C7E2">
+            <tspan x="92" dy="0">Ainspecciona estandariza la evaluación visible de un inmueble</tspan>
+            <tspan x="92" dy="24">y la convierte en una señal publicable dentro del mercado.</tspan>
+          </text>
+
+          <!-- 3 closing chips -->
+          <g opacity="0.95">
+            <rect x="92" y="264" width="222" height="40" rx="20" fill="#0B1220" stroke="#1E2B45"/>
+            <text x="126" y="289" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="13" fill="#A9B7D0">Captura guiada</text>
+            <circle cx="112" cy="284" r="6" fill="#35D07F"/>
+
+            <rect x="330" y="264" width="246" height="40" rx="20" fill="#0B1220" stroke="#1E2B45"/>
+            <text x="364" y="289" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="13" fill="#A9B7D0">Diagnóstico técnico</text>
+            <circle cx="350" cy="284" r="6" fill="#35D07F"/>
+
+            <rect x="592" y="264" width="286" height="40" rx="20" fill="#0B1220" stroke="#1E2B45"/>
+            <text x="626" y="289" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="13" fill="#A9B7D0">Certificado publicable</text>
+            <circle cx="612" cy="284" r="6" fill="#35D07F"/>
+          </g>
+
+          <!-- CTA buttons -->
+          <g>
+            <!-- Primary -->
+            <rect x="92" y="336" width="210" height="48" rx="16" fill="#35D07F" opacity="0.16" stroke="#35D07F"/>
+            <text x="132" y="366" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="14" font-weight="700" fill="#CFF9E1">Ver informe real</text>
+
+            <!-- Secondary -->
+            <rect x="316" y="336" width="250" height="48" rx="16" fill="#0B1220" stroke="#1E2B45"/>
+            <text x="352" y="366" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="14" font-weight="600" fill="#EAF0FF">Solicitar acceso / demo</text>
+          </g>
+
+          <!-- Small note -->
+          <g opacity="0.7">
+            <text x="92" y="432" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace" font-size="12" fill="#7F93B8">Pensado para corredoras, portales, bancos y aseguradoras: mismo estándar, mismo output, misma señal visible.</text>
+          </g>
+        </svg>
+        </div>
+      </div>
+    </section>
+
+    <section id="cf-5" class="cf-card">
+      <div class="page-content">
+        <div class="comoFuncionaSvg">
+        <svg width="1200" height="680" viewBox="0 0 1200 680" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block; width:100%; height:auto; max-width:100%;">
+          <defs>
+            <linearGradient id="cf5bg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#05090F"/>
+              <stop offset="55%" stop-color="#07101A"/>
+              <stop offset="100%" stop-color="#05080D"/>
+            </linearGradient>
+            <radialGradient id="cf5glow" cx="28%" cy="28%" r="85%">
+              <stop offset="0%" stop-color="#0E2B44" stop-opacity="0.42"/>
+              <stop offset="55%" stop-color="#07101A" stop-opacity="0.55"/>
+              <stop offset="100%" stop-color="#05080D" stop-opacity="1"/>
+            </radialGradient>
+            <pattern id="cf5grid" width="36" height="36" patternUnits="userSpaceOnUse">
+              <path d="M36 0H0V36" fill="none" stroke="#142333" stroke-opacity="0.5" stroke-width="1"/>
+            </pattern>
+          </defs>
+          <rect width="1200" height="680" fill="url(#cf5bg)"/>
+          <rect width="1200" height="680" fill="url(#cf5glow)"/>
+          <rect width="1200" height="680" fill="url(#cf5grid)" opacity="0.33"/>
+
+          <!-- Title -->
+          <text x="92" y="162" font-family="Inter, system-ui" font-size="44" font-weight="700" fill="#EAF0FF">Informe técnico y certificado</text>
+
+          <!-- Subtitle -->
+          <text x="92" y="206" font-family="Inter, system-ui" font-size="16" fill="#B9C7E2">
+            El proceso genera un informe estructurado y un certificado listo para publicar en el aviso.
+          </text>
+
+          <!-- Left column - Informe -->
+          <rect x="92" y="248" width="520" height="330" rx="18" fill="#0B1220" stroke="#1E2B45"/>
+
+          <text x="120" y="284" font-family="Inter, system-ui" font-size="20" font-weight="700" fill="#EAF0FF">Informe técnico completo</text>
+
+          <text x="120" y="316" font-family="Inter, system-ui" font-size="14" fill="#B9C7E2">
+            <tspan x="120" dy="0">• Estado general del inmueble</tspan>
+            <tspan x="120" dy="22">• KPIs por categoría</tspan>
+            <tspan x="120" dy="22">• Evidencia asociada por componente</tspan>
+            <tspan x="120" dy="22">• Nivel de severidad y confianza</tspan>
+            <tspan x="120" dy="22">• Resumen ejecutivo</tspan>
+          </text>
+
+          <!-- KPIs imagen -->
+          <image href="/assets/KPIS.png" x="120" y="400" width="480" height="130" preserveAspectRatio="xMidYMid meet"/>
+
+          <!-- Right column - Certificado -->
+          <rect x="660" y="248" width="380" height="330" rx="18" fill="#0B1220" stroke="#1E2B45"/>
+
+          <text x="690" y="284" font-family="Inter, system-ui" font-size="20" font-weight="700" fill="#EAF0FF">Certificado para publicar</text>
+
+          <!-- Stars -->
+          <text x="690" y="330" font-family="Inter, system-ui" font-size="28" fill="#F6C945">★ ★ ★ ★ ☆</text>
+
+          <!-- Certificado imagen -->
+          <image href="/assets/certificado-4O7KF9GX.jpg" x="690" y="360" width="120" height="170" preserveAspectRatio="xMidYMid meet"/>
+
+          <text x="830" y="395" font-family="Inter, system-ui" font-size="14" fill="#B9C7E2">
+            <tspan x="830" dy="0">Se publica como última</tspan>
+            <tspan x="830" dy="20">imagen del aviso.</tspan>
+            <tspan x="830" dy="28">Permite verificar el</tspan>
+            <tspan x="830" dy="20">informe completo.</tspan>
+          </text>
+
+          <!-- Footer message -->
+          <text x="92" y="620" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace" font-size="12" fill="#7F93B8">Diseñado para generar confianza visible y estandarizada dentro del mercado.</text>
+        </svg>
+        </div>
+      </div>
+    </section>
+
+    <section id="cf-6" class="cf-card">
+      <div class="page-content">
+        <div class="comoFuncionaSvg">
+        <svg width="1200" height="660" viewBox="0 0 1200 660" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block; width:100%; height:auto; max-width:100%;">
+          <defs>
+            <linearGradient id="cf6bg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#05090F"/>
+              <stop offset="55%" stop-color="#07101A"/>
+              <stop offset="100%" stop-color="#05080D"/>
+            </linearGradient>
+            <radialGradient id="cf6glow" cx="72%" cy="32%" r="70%">
+              <stop offset="0%" stop-color="#0E2B44" stop-opacity="0.42"/>
+              <stop offset="55%" stop-color="#07101A" stop-opacity="0.55"/>
+              <stop offset="100%" stop-color="#05080D" stop-opacity="1"/>
+            </radialGradient>
+            <pattern id="cf6grid" width="36" height="36" patternUnits="userSpaceOnUse">
+              <path d="M36 0H0V36" fill="none" stroke="#142333" stroke-opacity="0.5" stroke-width="1"/>
+            </pattern>
+          </defs>
+          <rect width="1200" height="660" fill="url(#cf6bg)"/>
+          <rect width="1200" height="660" fill="url(#cf6glow)"/>
+          <rect width="1200" height="660" fill="url(#cf6grid)" opacity="0.33"/>
+
+          <!-- Title -->
+          <text x="92" y="162" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="44" font-weight="700" fill="#EAF0FF">Publicación y verificación en el aviso</text>
+
+          <!-- Subtitle -->
+          <text x="92" y="206" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="16" fill="#B9C7E2">
+            <tspan x="92" dy="0">El certificado se publica como última imagen del aviso y permite validar el informe completo vía QR.</tspan>
+          </text>
+
+          <!-- Left column: Steps -->
+          <rect x="92" y="248" width="520" height="330" rx="18" fill="#0B1220" stroke="#1E2B45"/>
+
+          <text x="120" y="284" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="20" font-weight="700" fill="#EAF0FF">En la práctica (30 segundos)</text>
+
+          <!-- Step pills -->
+          <g>
+            <!-- Step 1 -->
+            <circle cx="132" cy="330" r="14" fill="#0F1A2E" stroke="#35D07F" stroke-width="2"/>
+            <text x="127" y="335" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="12" font-weight="700" fill="#EAF0FF">1</text>
+            <text x="160" y="334" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="16" font-weight="600" fill="#EAF0FF">Descarga el certificado</text>
+            <text x="160" y="356" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="13" fill="#B9C7E2">Un archivo listo para subir al aviso.</text>
+
+            <!-- Step 2 -->
+            <circle cx="132" cy="404" r="14" fill="#0F1A2E" stroke="#35D07F" stroke-width="2"/>
+            <text x="127" y="409" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="12" font-weight="700" fill="#EAF0FF">2</text>
+            <text x="160" y="408" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="16" font-weight="600" fill="#EAF0FF">Publícalo como última foto</text>
+            <text x="160" y="430" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="13" fill="#B9C7E2">Queda visible junto a la galería de imágenes.</text>
+
+            <!-- Step 3 -->
+            <circle cx="132" cy="478" r="14" fill="#0F1A2E" stroke="#35D07F" stroke-width="2"/>
+            <text x="127" y="483" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="12" font-weight="700" fill="#EAF0FF">3</text>
+            <text x="160" y="482" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="16" font-weight="600" fill="#EAF0FF">El comprador verifica por QR</text>
+            <text x="160" y="504" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="13" fill="#B9C7E2">Accede al informe técnico completo y verificable.</text>
+          </g>
+
+          <!-- Divider line inside left card -->
+          <line x1="120" y1="306" x2="584" y2="306" stroke="#1E2B45"/>
+
+          <!-- Right column: Listing mock + certificate as last image -->
+          <rect x="660" y="248" width="452" height="330" rx="18" fill="#0B1220" stroke="#1E2B45"/>
+
+          <text x="690" y="284" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="20" font-weight="700" fill="#EAF0FF">Así se ve en un aviso</text>
+
+          <!-- Listing image strip -->
+          <rect x="690" y="306" width="392" height="72" rx="14" fill="#0F1A2E" stroke="#1E2B45"/>
+          <!-- Thumbnails: 5 fotos + certificado en la última -->
+          <g opacity="0.95">
+            <rect x="704" y="320" width="56" height="44" rx="10" fill="#0B1220" stroke="#1E2B45"/>
+            <image href="/assets/photo1.jpeg" x="704" y="320" width="56" height="44" preserveAspectRatio="xMidYMid meet"/>
+            <rect x="766" y="320" width="56" height="44" rx="10" fill="#0B1220" stroke="#1E2B45"/>
+            <image href="/assets/photo2.jpeg" x="766" y="320" width="56" height="44" preserveAspectRatio="xMidYMid meet"/>
+            <rect x="828" y="320" width="56" height="44" rx="10" fill="#0B1220" stroke="#1E2B45"/>
+            <image href="/assets/photo3.jpeg" x="828" y="320" width="56" height="44" preserveAspectRatio="xMidYMid meet"/>
+            <rect x="890" y="320" width="56" height="44" rx="10" fill="#0B1220" stroke="#1E2B45"/>
+            <image href="/assets/photo4.jpeg" x="890" y="320" width="56" height="44" preserveAspectRatio="xMidYMid meet"/>
+            <rect x="952" y="320" width="56" height="44" rx="10" fill="#0B1220" stroke="#1E2B45"/>
+            <image href="/assets/photo%205.jpeg" x="952" y="320" width="56" height="44" preserveAspectRatio="xMidYMid meet"/>
+            <!-- Última: certificado -->
+            <rect x="1014" y="316" width="64" height="52" rx="0" fill="#0B1220" stroke="#35D07F" stroke-width="2"/>
+            <image href="/assets/certificado-4O7KF9GX.jpg" x="1014" y="316" width="64" height="52" preserveAspectRatio="xMidYMid meet"/>
+          </g>
+
+          <!-- Certificate preview (QR) -->
+          <rect x="690" y="396" width="210" height="166" rx="16" fill="#0F1A2E" stroke="#1E2B45"/>
+          <image href="/assets/QR.png" x="698" y="404" width="194" height="150" preserveAspectRatio="xMidYMid meet"/>
+
+          <!-- Scale block -->
+          <rect x="920" y="396" width="192" height="166" rx="16" fill="#0F1A2E" stroke="#1E2B45"/>
+          <text x="940" y="426" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="14" font-weight="700" fill="#EAF0FF">Diseñado para escala</text>
+          <text x="940" y="454" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="13" fill="#B9C7E2">
+            <tspan x="940" dy="0">• Formato estándar</tspan>
+            <tspan x="940" dy="20">• Criterio homogéneo</tspan>
+            <tspan x="940" dy="20">• Señal visible</tspan>
+            <tspan x="940" dy="20">• Resultado verificable</tspan>
+          </text>
+
+          <!-- Footer hint -->
+          <g opacity="0.7">
+            <text x="92" y="628" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace" font-size="12" fill="#7F93B8">Cuando el certificado se vuelve común, el mercado empieza a esperarlo: eso crea estándar.</text>
+          </g>
+        </svg>
+        </div>
+      </div>
+    </section>
+
+    <div class="ctaBlock">
+      <h3>¿Listo para empezar?</h3>
+      <p>Crea tu primera inspección o revisa los planes disponibles.</p>
+      <div class="ctaRow">
+        <a href="https://meetings.hubspot.com/saraya-silva" target="_blank" rel="noopener" class="ctaPrimary">Agendar reunión</a>
+        <a href="/precios" class="ctaSecondary">Ver precios</a>
+      </div>
+    </div>
   </main>
 
   <footer>
@@ -305,31 +630,22 @@
         <img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" />
         <div class="footerTitle">Ainspecciona</div>
         <div class="footerDesc">Inspección técnica automatizada con evidencia por slot y trazabilidad completa.</div>
-        <a class="footerCta" href="/formulario">Generar inspección</a>
       </div>
       <div class="footerCol">
-        <h4>Producto</h4>
-        <a href="/como-funciona.html">Cómo funciona</a>
-        <a href="/modelo.html">Modelo</a>
-        <a href="/integracion.html">Integración</a>
-        <a href="/faq.html">FAQ</a>
+        <h4>Legal</h4>
+        <a href="/terminos">Términos y Condiciones</a>
+        <a href="/privacidad">Política de Privacidad</a>
       </div>
       <div class="footerCol">
-        <h4>Empresa</h4>
+        <h4>Contacto</h4>
         <a href="/contacto.html">Contacto</a>
-        <a href="/agendar.html">Agendar reunión</a>
-        <a href="/dashboard">Dashboard</a>
-      </div>
-      <div class="footerCol">
-        <h4>Recursos</h4>
-        <a href="/formulario">Crear caso</a>
-        <a href="/cases">Casos</a>
+        <a href="/precios">Precios</a>
       </div>
     </div>
     <div class="footerBottom">
       <div>© 2026 Ainspecciona. Todos los derechos reservados.</div>
-      <div>Audit-ready · Evidencia por slot · White-label</div>
     </div>
   </footer>
+  <script src="/assets/tracker.js" defer></script>
 </body>
 </html>

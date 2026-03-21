@@ -35,12 +35,14 @@ export const FINDING_TO_PROBLEM_V22 = {
   // Cosmético
   COSMETIC_WEAR: "COSMETIC",
 
-  // QA / validaciones técnicas del MVP actual (penaliza como COSMETIC)
+  // QA / validaciones técnicas (fotos rechazadas en captura, no llegan al scoring)
   NOT_PROPERTY_IMAGE: "COSMETIC",
   NOT_BATHROOM_IMAGE: "COSMETIC",
   PHOTO_TOO_DARK: "COSMETIC",
   PHOTO_TOO_SMALL: "COSMETIC",
   PHOTO_TOO_BLURRY: "COSMETIC",
+  PHOTO_TOO_BRIGHT: "COSMETIC",
+  PHOTO_LOW_DETAIL: "COSMETIC",
 };
 
 export function mapFindingToProblemType(findingCode) {

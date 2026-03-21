@@ -5,9 +5,13 @@
   "type": "module",
   "main": "server.js",
   "scripts": {
+    "start": "node server.js",
     "dev": "node server.js",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev"
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:seed": "node prisma/seed.js",
+    "seed:google-play-tester": "node prisma/seed-google-play-tester.js",
+    "qa:cases": "node scripts/qa-cases.mjs --file qa/case-baseline.json"
   },
   "keywords": [
     "inspection",
@@ -18,13 +22,16 @@
   "license": "ISC",
   "dependencies": {
     "@fastify/cookie": "^8.3.0",
+    "@fastify/cors": "^8.5.0",
     "@fastify/multipart": "^8.3.1",
     "@fastify/static": "^6.12.0",
     "@google-cloud/storage": "^7.17.2",
     "@prisma/client": "^6.0.0",
     "dotenv": "^17.2.3",
     "fastify": "^4.24.3",
+    "nodemailer": "^6.9.0",
     "openai": "^6.16.0",
+    "pdfkit": "^0.17.2",
     "sharp": "^0.32.6"
   },
   "devDependencies": {

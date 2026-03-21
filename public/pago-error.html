@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pago no completado · Ainspecciona</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Inter, sans-serif; background: #0B1220; color: #E5E7EB; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 20px; padding: 48px; max-width: 480px; text-align: center; }
+    .icon { font-size: 64px; margin-bottom: 24px; }
+    h1 { font-size: 24px; font-weight: 800; color: #F8FAFC; margin: 0 0 12px; }
+    p { color: #94a3b8; margin: 0 0 24px; line-height: 1.5; }
+    a { display: inline-block; padding: 14px 28px; border-radius: 14px; background: linear-gradient(135deg, #7C3AED 0%, #4F46E5 100%); color: #fff; text-decoration: none; font-weight: 800; margin: 0 8px 8px 0; }
+    a:hover { opacity: 0.95; }
+    .outline { background: transparent; border: 2px solid #334155; color: #e5e7eb; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">✕</div>
+    <h1>Pago no completado</h1>
+    <p>El pago no pudo procesarse. Puedes intentar nuevamente o contactarnos si necesitas ayuda.</p>
+    <a href="/pago">Intentar de nuevo</a>
+    <a href="/contacto.html" class="outline">Contactar</a>
+  </div>
+  <script src="/assets/tracker.js" defer></script>
+</body>
+</html>

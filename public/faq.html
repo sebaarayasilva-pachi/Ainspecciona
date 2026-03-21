@@ -4,6 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>FAQ · Ainspecciona</title>
+  <meta name="description" content="Preguntas frecuentes sobre inspección técnica inmobiliaria, certificado de propiedad, captura guiada y evaluación técnica para corredores y propietarios." />
+  <link rel="canonical" href="https://ainspecciona.com/faq.html" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://ainspecciona.com/faq.html" />
+  <meta property="og:title" content="FAQ · Ainspecciona" />
+  <meta property="og:description" content="Preguntas frecuentes sobre inspección técnica inmobiliaria, certificado de propiedad y evaluación técnica." />
+  <meta property="og:image" content="https://ainspecciona.com/assets/certificado-4O7KF9GX.jpg" />
+  <meta property="og:locale" content="es_CL" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="FAQ · Ainspecciona" />
+  <meta name="twitter:description" content="Preguntas frecuentes sobre inspección técnica inmobiliaria." />
+  <link rel="stylesheet" href="/assets/header.css" />
   <style>
     * { box-sizing: border-box; }
     body {
@@ -11,66 +23,6 @@
       font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: #F6F7F9;
       color: #0f172a;
-    }
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 20;
-      background: #ffffff;
-      border-bottom: 1px solid #e5e7eb;
-    }
-    .nav {
-      max-width: none;
-      margin: 0;
-      padding: 20px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
-      color: inherit;
-      font-weight: 800;
-    }
-    .brand img { height: 70px; }
-    .primaryLinks {
-      display: flex;
-      gap: 16px;
-      align-items: center;
-      margin-right: auto;
-      padding-left: 8px;
-    }
-    .primaryLinks a {
-      text-decoration: none;
-      color: #1f2937;
-      font-weight: 700;
-      font-size: 14px;
-    }
-    .links {
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    .links a {
-      text-decoration: none;
-      color: #1f2937;
-      font-weight: 600;
-      font-size: 14px;
-    }
-    .cta {
-      padding: 10px 14px;
-      border-radius: 999px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: #fff;
-      text-decoration: none;
-      font-weight: 800;
-      font-size: 14px;
     }
     .section {
       max-width: 900px;
@@ -87,6 +39,8 @@
     }
     summary { cursor: pointer; font-weight: 700; }
     summary::-webkit-details-marker { display: none; }
+    .card ul, .card ol { margin: 12px 0 0; padding-left: 20px; line-height: 1.6; }
+    .card li { margin-bottom: 6px; }
     summary:before {
       content: "+";
       display: inline-block;
@@ -113,7 +67,7 @@
       flex-direction: column;
       gap: 10px;
     }
-    .footerBrand img { height: 36px; width: auto; }
+    .footerBrand img { height: 36px; width: auto; object-fit: contain; }
     .footerTitle { font-weight: 800; font-size: 16px; }
     .footerDesc { color: #94a3b8; font-size: 14px; line-height: 1.5; }
     .footerCol h4 { margin: 0 0 10px; font-size: 14px; }
@@ -148,24 +102,38 @@
       footer .footerWrap { grid-template-columns: 1fr; }
     }
   </style>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+    {"@type":"Question","name":"¿Qué es Ainspecciona?","acceptedAnswer":{"@type":"Answer","text":"Es un sistema de inspección técnica digital que analiza propiedades a partir de fotografías guiadas y genera un informe técnico estructurado con evaluación objetiva y certificado publicable."}},
+    {"@type":"Question","name":"¿Quién puede solicitar una inspección?","acceptedAnswer":{"@type":"Answer","text":"Corredores de propiedades, oficinas inmobiliarias, administradores, propietarios e inversionistas."}},
+    {"@type":"Question","name":"¿Cómo se realiza la inspección?","acceptedAnswer":{"@type":"Answer","text":"1. Se compra el crédito. 2. Se completa el formulario del inmueble. 3. Se envía por mail el link de captura. 4. Se toman las fotos siguiendo el proceso guiado. 5. Se emite el informe técnico y el certificado."}},
+    {"@type":"Question","name":"¿Cuánto demora el informe?","acceptedAnswer":{"@type":"Answer","text":"El análisis se envía en 24 horas una vez finalizada la carga fotográfica."}},
+    {"@type":"Question","name":"¿Qué incluye el informe?","acceptedAnswer":{"@type":"Answer","text":"Evaluación por áreas (KPI técnicos), observaciones detectadas, evidencia fotográfica, diagnóstico estructurado y certificado con score publicable."}},
+    {"@type":"Question","name":"¿El certificado se puede publicar?","acceptedAnswer":{"@type":"Answer","text":"Sí. Puede usarse como última imagen del aviso o incluir el QR para acceder al informe completo."}},
+    {"@type":"Question","name":"¿Necesito aplicación?","acceptedAnswer":{"@type":"Answer","text":"No necesariamente. Funciona mediante enlace web. Puedes agregar la página a la pantalla de inicio como acceso directo."}},
+    {"@type":"Question","name":"¿Es reemplazo de una inspección presencial?","acceptedAnswer":{"@type":"Answer","text":"No. Es un diagnóstico técnico estandarizado basado en evidencia fotográfica. Sirve como filtro, respaldo comercial y elemento diferenciador."}},
+    {"@type":"Question","name":"¿Qué pasa si la propiedad tiene fallas graves?","acceptedAnswer":{"@type":"Answer","text":"El sistema las detecta y clasifica. En ese caso se recomienda una inspección técnica presencial que puedes contratar en nuestra página."}},
+    {"@type":"Question","name":"¿Puedo hacer varias inspecciones?","acceptedAnswer":{"@type":"Answer","text":"Sí. Cada inspección funciona por crédito individual o bolsa según el plan contratado."}},
+    {"@type":"Question","name":"¿Qué es un slot técnico?","acceptedAnswer":{"@type":"Answer","text":"Un slot es un componente específico del inmueble (ej.: ducha, muro, tablero) con instrucciones de captura y análisis propio."}},
+    {"@type":"Question","name":"¿Cómo se genera el badge final?","acceptedAnswer":{"@type":"Answer","text":"Se consolida la severidad y confianza de los slots y KPIs para definir un estado claro: verde, amarillo o rojo."}},
+    {"@type":"Question","name":"¿Qué pasa si una foto no es válida?","acceptedAnswer":{"@type":"Answer","text":"La captura se valida por calidad y se puede pedir reintento para asegurar evidencia útil."}}
+  ]}
+  </script>
 </head>
 <body>
-  <header>
+  <header class="site-header">
     <div class="nav">
       <a class="brand" href="/">
         <img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" />
       </a>
-      <div class="primaryLinks">
-        <a href="/personas.html">Personas</a>
-        <a href="/corredores.html">Corredores</a>
-      </div>
-      <div class="links">
+      <div class="navLinks">
         <a href="/como-funciona.html">Cómo funciona</a>
-        <a href="/modelo.html">Modelo</a>
-        <a href="/integracion.html">Integración</a>
+        <a href="/precios">Precios</a>
         <a href="/faq.html">FAQ</a>
         <a href="/contacto.html">Contacto</a>
-        <a class="cta" href="/formulario">Generar inspección</a>
+      </div>
+      <div class="topActions">
+        <a class="btn outline" href="/">Acceso</a>
       </div>
     </div>
   </header>
@@ -173,8 +141,66 @@
   <main>
     <section class="section">
       <h1>Preguntas frecuentes</h1>
-      <p>Respuestas rápidas sobre captura, análisis y entrega del reporte.</p>
+      <p>Respuestas rápidas sobre inspección, captura, informe y certificado.</p>
 
+      <details class="card">
+        <summary>¿Qué es Ainspecciona?</summary>
+        <p>Es un sistema de inspección técnica digital que analiza propiedades a partir de fotografías guiadas y genera un informe técnico estructurado con evaluación objetiva y certificado publicable.</p>
+      </details>
+      <details class="card">
+        <summary>¿Quién puede solicitar una inspección?</summary>
+        <ul>
+          <li>Corredores de propiedades</li>
+          <li>Oficinas inmobiliarias</li>
+          <li>Administradores</li>
+          <li>Propietarios</li>
+          <li>Inversionistas</li>
+        </ul>
+      </details>
+      <details class="card">
+        <summary>¿Cómo se realiza la inspección?</summary>
+        <ol>
+          <li>Se compra el crédito.</li>
+          <li>Se completa el formulario del inmueble.</li>
+          <li>Se envía por mail el link de captura.</li>
+          <li>Se toman las fotos siguiendo el proceso guiado.</li>
+          <li>Se emite el informe técnico y el certificado.</li>
+        </ol>
+      </details>
+      <details class="card">
+        <summary>¿Cuánto demora el informe?</summary>
+        <p>El análisis se envía en 24 horas una vez finalizada la carga fotográfica.</p>
+      </details>
+      <details class="card">
+        <summary>¿Qué incluye el informe?</summary>
+        <ul>
+          <li>Evaluación por áreas (KPI técnicos)</li>
+          <li>Observaciones detectadas</li>
+          <li>Evidencia fotográfica</li>
+          <li>Diagnóstico estructurado</li>
+          <li>Certificado con score publicable</li>
+        </ul>
+      </details>
+      <details class="card">
+        <summary>¿El certificado se puede publicar?</summary>
+        <p>Sí. Puede usarse como última imagen del aviso o incluir el QR para acceder al informe completo.</p>
+      </details>
+      <details class="card">
+        <summary>¿Necesito aplicación?</summary>
+        <p>No necesariamente. Funciona mediante enlace web. Puedes agregar la página a la pantalla de inicio como acceso directo.</p>
+      </details>
+      <details class="card">
+        <summary>¿Es reemplazo de una inspección presencial?</summary>
+        <p>No. Es un diagnóstico técnico estandarizado basado en evidencia fotográfica. Sirve como filtro, respaldo comercial y elemento diferenciador.</p>
+      </details>
+      <details class="card">
+        <summary>¿Qué pasa si la propiedad tiene fallas graves?</summary>
+        <p>El sistema las detecta y clasifica. En ese caso se recomienda una inspección técnica presencial que puedes contratar en nuestra página.</p>
+      </details>
+      <details class="card">
+        <summary>¿Puedo hacer varias inspecciones?</summary>
+        <p>Sí. Cada inspección funciona por crédito individual o bolsa según el plan contratado.</p>
+      </details>
       <details class="card">
         <summary>¿Qué es un slot técnico?</summary>
         <p>Un slot es un componente específico del inmueble (ej.: ducha, muro, tablero) con instrucciones de captura y análisis propio.</p>
@@ -182,14 +208,6 @@
       <details class="card">
         <summary>¿Cómo se genera el badge final?</summary>
         <p>Se consolida la severidad y confianza de los slots y KPIs para definir un estado claro: verde, amarillo o rojo.</p>
-      </details>
-      <details class="card">
-        <summary>¿Puedo integrar Ainspecciona en mi portal?</summary>
-        <p>Sí. Ofrecemos API y white-label para mostrar badges, reportes y evidencia en tu flujo.</p>
-      </details>
-      <details class="card">
-        <summary>¿Cuánto demora el análisis?</summary>
-        <p>El análisis se procesa automáticamente al subir la evidencia; el tiempo depende del plan y la cantidad de slots.</p>
       </details>
       <details class="card">
         <summary>¿Qué pasa si una foto no es válida?</summary>
@@ -204,31 +222,22 @@
         <img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" />
         <div class="footerTitle">Ainspecciona</div>
         <div class="footerDesc">Inspección técnica automatizada con evidencia por slot y trazabilidad completa.</div>
-        <a class="footerCta" href="/formulario">Generar inspección</a>
       </div>
       <div class="footerCol">
-        <h4>Producto</h4>
-        <a href="/como-funciona.html">Cómo funciona</a>
-        <a href="/modelo.html">Modelo</a>
-        <a href="/integracion.html">Integración</a>
-        <a href="/faq.html">FAQ</a>
+        <h4>Legal</h4>
+        <a href="/terminos">Términos y Condiciones</a>
+        <a href="/privacidad">Política de Privacidad</a>
       </div>
       <div class="footerCol">
-        <h4>Empresa</h4>
+        <h4>Contacto</h4>
         <a href="/contacto.html">Contacto</a>
-        <a href="/agendar.html">Agendar reunión</a>
-        <a href="/dashboard">Dashboard</a>
-      </div>
-      <div class="footerCol">
-        <h4>Recursos</h4>
-        <a href="/formulario">Crear caso</a>
-        <a href="/cases">Casos</a>
+        <a href="/precios">Precios</a>
       </div>
     </div>
     <div class="footerBottom">
       <div>© 2026 Ainspecciona. Todos los derechos reservados.</div>
-      <div>Audit-ready · Evidencia por slot · White-label</div>
     </div>
   </footer>
+  <script src="/assets/tracker.js" defer></script>
 </body>
 </html>

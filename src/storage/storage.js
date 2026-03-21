@@ -31,10 +31,12 @@ export function createStorage() {
 
     return {
       driver: 'gcs',
-      async saveImageBuffer({ buffer, contentType, ext, caseId }) {
+      async saveImageBuffer({ buffer, contentType, ext, caseId, tenantId }) {
         const id = crypto.randomUUID();
         const safeExt = String(ext || '').replace('.', '');
-        const object = `cases/${caseId}/${id}.${safeExt}`;
+        const object = tenantId
+          ? `tenants/${tenantId}/logo.${safeExt}`
+          : `cases/${caseId}/${id}.${safeExt}`;
 
         await bucket.file(object).save(buffer, {
           contentType,
@@ -51,6 +53,12 @@ export function createStorage() {
       },
       async readBuffer(filePath) {
         if (isHttpUrl(filePath)) {
+          const match = filePath.match(new RegExp(`https://storage\\.googleapis\\.com/${gcsBucket.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/(.+)`));
+          if (match) {
+            const object = decodeURIComponent(match[1].replace(/\/+/g, '/'));
+            const [buf] = await bucket.file(object).download();
+            return buf;
+          }
           const res = await fetch(filePath);
           if (!res.ok) throw new Error(`HTTP_FETCH_FAILED ${res.status}`);
           const ab = await res.arrayBuffer();
@@ -73,10 +81,10 @@ export function createStorage() {
 
   return {
     driver: 'local',
-    async saveImageBuffer({ buffer, contentType, ext }) {
+    async saveImageBuffer({ buffer, contentType, ext, caseId, tenantId }) {
       const id = crypto.randomUUID();
       const safeExt = String(ext || '').replace('.', '');
-      const storedFileName = `${id}.${safeExt}`;
+      const storedFileName = tenantId ? `tenants-${tenantId}-logo.${safeExt}` : `${id}.${safeExt}`;
       const absPath = join(dir, storedFileName);
       await fs.promises.writeFile(absPath, buffer);
       const filePath = `uploads/${storedFileName}`;

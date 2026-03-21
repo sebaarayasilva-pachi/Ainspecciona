@@ -4,6 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Contacto · Ainspecciona</title>
+  <meta name="description" content="Contacta a Ainspecciona para inspección técnica inmobiliaria. Corredores, oficinas, administradores y propietarios." />
+  <link rel="canonical" href="https://ainspecciona.com/contacto.html" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://ainspecciona.com/contacto.html" />
+  <meta property="og:title" content="Contacto · Ainspecciona" />
+  <meta property="og:description" content="Contacta a Ainspecciona para inspección técnica inmobiliaria." />
+  <meta property="og:image" content="https://ainspecciona.com/assets/certificado-4O7KF9GX.jpg" />
+  <meta property="og:locale" content="es_CL" />
+  <link rel="stylesheet" href="/assets/header.css" />
   <style>
     * { box-sizing: border-box; }
     body {
@@ -12,66 +21,20 @@
       background: #F6F7F9;
       color: #0f172a;
     }
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 20;
-      background: #ffffff;
-      border-bottom: 1px solid #e5e7eb;
-    }
-    .nav {
-      max-width: none;
-      margin: 0;
-      padding: 20px 20px;
-      display: flex;
+    .ctaAgendar {
+      display: inline-flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
-      color: inherit;
-      font-weight: 800;
-    }
-    .brand img { height: 70px; }
-    .primaryLinks {
-      display: flex;
-      gap: 16px;
-      align-items: center;
-      margin-right: auto;
-      padding-left: 8px;
-    }
-    .primaryLinks a {
-      text-decoration: none;
-      color: #1f2937;
-      font-weight: 700;
-      font-size: 14px;
-    }
-    .links {
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    .links a {
-      text-decoration: none;
-      color: #1f2937;
-      font-weight: 600;
-      font-size: 14px;
-    }
-    .cta {
-      padding: 10px 14px;
+      gap: 8px;
+      padding: 12px 20px;
       border-radius: 999px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #39c6ff 0%, #2c7bff 100%);
       color: #fff;
       text-decoration: none;
       font-weight: 800;
       font-size: 14px;
+      margin-top: 8px;
     }
+    .ctaAgendar:hover { opacity: 0.95; }
     .section {
       max-width: 1000px;
       margin: 0 auto;
@@ -98,6 +61,7 @@
       font-family: inherit;
     }
     textarea { min-height: 120px; resize: vertical; }
+    input::placeholder, textarea::placeholder { color: #475569; font-weight: 300; font-style: italic; font-size: 14px; }
     .btn {
       margin-top: 14px;
       padding: 10px 14px;
@@ -127,7 +91,7 @@
       flex-direction: column;
       gap: 10px;
     }
-    .footerBrand img { height: 36px; width: auto; }
+    .footerBrand img { height: 36px; width: auto; object-fit: contain; }
     .footerTitle { font-weight: 800; font-size: 16px; }
     .footerDesc { color: #94a3b8; font-size: 14px; line-height: 1.5; }
     .footerCol h4 { margin: 0 0 10px; font-size: 14px; }
@@ -164,22 +128,19 @@
   </style>
 </head>
 <body>
-  <header>
+  <header class="site-header">
     <div class="nav">
       <a class="brand" href="/">
         <img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" />
       </a>
-      <div class="primaryLinks">
-        <a href="/personas.html">Personas</a>
-        <a href="/corredores.html">Corredores</a>
-      </div>
-      <div class="links">
+      <div class="navLinks">
         <a href="/como-funciona.html">Cómo funciona</a>
-        <a href="/modelo.html">Modelo</a>
-        <a href="/integracion.html">Integración</a>
+        <a href="/precios">Precios</a>
         <a href="/faq.html">FAQ</a>
         <a href="/contacto.html">Contacto</a>
-        <a class="cta" href="/formulario">Generar inspección</a>
+      </div>
+      <div class="topActions">
+        <a class="btn outline" href="/">Acceso</a>
       </div>
     </div>
   </header>
@@ -207,7 +168,7 @@
           <h3>Información</h3>
           <p class="muted">Te respondemos en menos de 24 horas hábiles.</p>
           <p><strong>Email:</strong> contacto@ainspecciona.com</p>
-          <p><strong>Agenda:</strong> <a href="/agendar.html">Agendar reunión</a></p>
+          <p><a class="ctaAgendar" href="https://meetings.hubspot.com/saraya-silva" target="_blank" rel="noopener">Agendar reunión <span style="opacity:0.9;">→</span></a></p>
           <p><strong>Demo:</strong> Solicita un caso real con badges y evidencia.</p>
         </div>
       </div>
@@ -220,25 +181,16 @@
         <img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" />
         <div class="footerTitle">Ainspecciona</div>
         <div class="footerDesc">Inspección técnica automatizada con evidencia por slot y trazabilidad completa.</div>
-        <a class="footerCta" href="/formulario">Generar inspección</a>
       </div>
       <div class="footerCol">
-        <h4>Producto</h4>
-        <a href="/como-funciona.html">Cómo funciona</a>
-        <a href="/modelo.html">Modelo</a>
-        <a href="/integracion.html">Integración</a>
-        <a href="/faq.html">FAQ</a>
+        <h4>Legal</h4>
+        <a href="/terminos">Términos y Condiciones</a>
+        <a href="/privacidad">Política de Privacidad</a>
       </div>
       <div class="footerCol">
-        <h4>Empresa</h4>
+        <h4>Contacto</h4>
         <a href="/contacto.html">Contacto</a>
-        <a href="/agendar.html">Agendar reunión</a>
-        <a href="/dashboard">Dashboard</a>
-      </div>
-      <div class="footerCol">
-        <h4>Recursos</h4>
-        <a href="/formulario">Crear caso</a>
-        <a href="/cases">Casos</a>
+        <a href="/precios">Precios</a>
       </div>
     </div>
     <div class="footerBottom">
@@ -246,5 +198,6 @@
       <div>Audit-ready · Evidencia por slot · White-label</div>
     </div>
   </footer>
+  <script src="/assets/tracker.js" defer></script>
 </body>
 </html>

@@ -4,108 +4,137 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Ainspecciona – Formulario</title>
+  <link rel="stylesheet" href="/assets/header.css" />
   <style>
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #f6f7fb;
-      color: #111827;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: radial-gradient(circle at 20% 20%, #1f2b3a 0%, #0b121b 65%, #070b12 100%);
+      color: #e5eef7;
+      min-height: 100vh;
     }
     .container {
-      max-width: 920px;
-      margin: 24px auto;
-      padding: 0 16px 40px;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 24px 20px 40px;
     }
-    h1 { margin: 0 0 8px; }
-    .subtitle { color: #6b7280; margin-bottom: 16px; }
+    h1 { margin: 0 0 4px; font-size: 24px; font-weight: 800; color: #EAF0FF; }
+    h3 { margin: 0 0 8px; font-size: 14px; font-weight: 700; color: #A9B7D0; text-transform: uppercase; letter-spacing: 0.04em; }
+    .subtitle { color: #94a3b8; margin-bottom: 16px; font-size: 14px; }
     .card {
-      background: #fff;
-      border-radius: 16px;
-      padding: 18px;
-      box-shadow: 0 6px 16px rgba(17, 24, 39, 0.06);
-      margin-bottom: 16px;
-      border: 1px solid #e5e7eb;
+      background: #0F1A2E;
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 12px;
+      border: 1px solid #1E2B45;
     }
-    label { display: block; font-size: 12px; font-weight: 700; margin: 12px 0 6px; color: #374151; }
+    .card + .card h3 { margin-top: 4px; }
+    label { display: block; font-size: 11px; font-weight: 700; margin: 8px 0 4px; color: #94a3b8; }
     input, select {
       width: 100%;
-      padding: 10px 12px;
-      border-radius: 10px;
-      border: 1px solid #e5e7eb;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid #1E2B45;
       font-size: 14px;
-      background: #fff;
+      background: #0B1220;
+      color: #EAF0FF;
     }
-    .row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-    .row-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-    .checks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 10px; }
-    .checks label { font-weight: 600; }
+    input::placeholder { color: #7F93B8; }
+    select { color: #B9C7E2; }
+    select option { background: #0B1220; color: #EAF0FF; }
+    input:focus, select:focus {
+      outline: none;
+      border-color: #35D07F;
+      box-shadow: 0 0 0 2px rgba(53, 208, 127, 0.2);
+    }
+    .row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .row-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .row-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .checks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px 16px; margin-top: 8px; }
+    .checks label { font-weight: 600; font-size: 13px; color: #B9C7E2; margin: 4px 0; display: flex; align-items: center; gap: 8px; }
+    .checks input[type="checkbox"] { width: auto; margin: 0; accent-color: #35D07F; }
     .btn {
-      margin-top: 16px;
-      padding: 12px 14px;
+      margin-top: 14px;
+      padding: 12px 18px;
       border-radius: 10px;
       border: none;
       font-weight: 800;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: #fff;
+      font-size: 14px;
+      background: linear-gradient(135deg, #35D07F 0%, #1AAE69 100%);
+      color: #0B1220;
       cursor: pointer;
     }
-    .btn.secondary { background: #16a34a; }
+    .btn:hover { opacity: 0.95; filter: brightness(1.05); }
+    .btn.secondary { background: #35D07F; color: #0B1220; }
     .hidden { display: none; }
     .slot {
-      border: 1px solid #e5e7eb;
-      border-radius: 12px;
-      padding: 10px;
-      margin-bottom: 8px;
+      border: 1px solid #1E2B45;
+      border-radius: 10px;
+      padding: 8px 10px;
+      margin-bottom: 6px;
       font-size: 13px;
-      background: #f9fafb;
+      background: #0B1220;
+      color: #B9C7E2;
       white-space: pre-line;
     }
-    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
     .linkBtn {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 10px 12px;
-      border-radius: 10px;
+      padding: 8px 12px;
+      border-radius: 8px;
       text-decoration: none;
-      font-weight: 800;
-      border: 1px solid #e5e7eb;
-      background: #f3f6ff;
-      color: #4050d6;
+      font-weight: 700;
+      font-size: 13px;
+      border: 1px solid #1E2B45;
+      background: #0B1220;
+      color: #35D07F;
+    }
+    .linkBtn:hover { background: #1E2B45; color: #CFF9E1; }
+    .actions button.linkBtn { cursor: pointer; font-family: inherit; border: 1px solid #1E2B45; }
+    .linkBtn.secondary { background: rgba(53, 208, 127, 0.15); border-color: #35D07F; }
+    .linkBtn.secondary:hover { background: rgba(53, 208, 127, 0.25); }
+    .qrModal {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000;
+    }
+    .qrModal.hidden { display: none; }
+    .qrModalContent {
+      background: #0F1A2E; border-radius: 14px; padding: 24px; text-align: center; max-width: 340px; border: 1px solid #1E2B45;
+    }
+    .qrModalContent h3 { margin: 0 0 8px; color: #EAF0FF; }
+    .qrModalContent img { display: block; margin: 16px auto; border-radius: 8px; max-width: 280px; }
+    .qrModalContent .btn { margin-top: 12px; }
+    @media (max-width: 640px) {
+      .row, .row-4 { grid-template-columns: 1fr; }
+      .row-2 { grid-template-columns: 1fr; }
+      .checks { grid-template-columns: 1fr; }
+      .container { padding: 16px 16px 32px; }
     }
   </style>
 </head>
 <body>
+  <header class="site-header">
+    <div class="nav">
+      <a class="brand" href="/">
+        <img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" />
+      </a>
+      <div class="navLinks">
+        <a href="/como-funciona.html">Cómo funciona</a>
+        <a href="/precios">Precios</a>
+        <a href="/faq.html">FAQ</a>
+        <a href="/contacto.html">Contacto</a>
+      </div>
+    </div>
+  </header>
   <div class="container">
-    <h1>Ainspecciona</h1>
+    <h1>Generar photo plan</h1>
     <div class="subtitle">Completa los datos para generar el photo plan.</div>
 
     <div class="card">
-      <h3>Propietario</h3>
-      <div class="row-2">
-        <div>
-          <label>Nombre</label>
-          <input id="ownerName" placeholder="Nombre completo" />
-        </div>
-        <div>
-          <label>RUT</label>
-          <input id="ownerRut" placeholder="RUT" />
-        </div>
-      </div>
-
-      <h3 style="margin-top:16px;">Propiedad</h3>
-      <div class="row-2">
-        <div>
-          <label>ROL</label>
-          <input id="propertyRol" placeholder="ROL" />
-        </div>
-        <div>
-          <label>Comuna</label>
-          <input id="propertyComuna" placeholder="Comuna" />
-        </div>
-      </div>
-      <div class="row-2">
+      <h3>Propiedad</h3>
+      <div class="row-4">
         <div>
           <label>Calle</label>
           <input id="propertyStreet" placeholder="Calle" />
@@ -114,29 +143,16 @@
           <label>Número</label>
           <input id="propertyNumber" placeholder="Número" />
         </div>
-      </div>
-      <div class="row-2">
         <div>
           <label>Depto</label>
           <input id="propertyDept" placeholder="Depto / Interior" />
         </div>
         <div>
-          <label>Dirección completa</label>
-          <input id="propertyAddress" placeholder="Dirección completa" />
+          <label>Comuna</label>
+          <input id="propertyComuna" placeholder="Comuna" />
         </div>
       </div>
-      <div class="row-2">
-        <div>
-          <label>Tipo operación</label>
-          <input id="propertyOperationType" placeholder="Venta / Arriendo" />
-        </div>
-        <div>
-          <label>Superficie (m2)</label>
-          <input id="propertySurface" placeholder="Ej: 45" />
-        </div>
-      </div>
-
-      <div class="row">
+      <div class="row-4">
         <div>
           <label>Tipo de propiedad</label>
           <select id="propertyType">
@@ -152,29 +168,23 @@
           <label>Dormitorios</label>
           <input type="number" id="bedroomsCount" min="0" value="1" />
         </div>
+        <div>
+          <label>Superficie (m2)</label>
+          <input id="propertySurface" placeholder="Ej: 45" />
+        </div>
       </div>
-
-      <div class="row">
+      <div class="row-2">
         <div>
-          <label>Antigüedad</label>
-          <select id="propertyAgeRange">
+          <label>ROL</label>
+          <input id="propertyRol" placeholder="ROL" />
+        </div>
+        <div>
+          <label>Tipo operación</label>
+          <select id="propertyOperationType">
             <option value="">—</option>
-            <option value="LESS_THAN_10_YEARS">Menos de 10 años</option>
-            <option value="BETWEEN_10_AND_30_YEARS">Entre 10 y 30 años</option>
-            <option value="MORE_THAN_30_YEARS">Más de 30 años</option>
+            <option value="VENTA">Venta</option>
+            <option value="ARRENDO">Arriendo</option>
           </select>
-        </div>
-        <div>
-          <label>Tipo de piso</label>
-          <select id="floorType">
-            <option value="CONCRETE">Hormigón</option>
-            <option value="WOOD">Madera</option>
-            <option value="MIXED">Mixto</option>
-          </select>
-        </div>
-        <div>
-          <label>Año construcción (opcional)</label>
-          <input type="number" id="yearBuilt" min="1900" max="2100" placeholder="Ej: 2015" />
         </div>
       </div>
 
@@ -182,6 +192,9 @@
         <label><input type="checkbox" id="hasPatio" /> Tiene patio</label>
         <label><input type="checkbox" id="hasAttic" /> Tiene entretecho</label>
         <label><input type="checkbox" id="hasLaundry" /> Tiene loggia</label>
+        <label><input type="checkbox" id="hasElevator" /> Tiene ascensor</label>
+        <label><input type="checkbox" id="hasParking" /> Tiene estacionamiento</label>
+        <label><input type="checkbox" id="hasGreenCertificate" /> Certificado verde</label>
       </div>
 
       <label>WhatsApp (opcional)</label>
@@ -195,9 +208,21 @@
       <div id="resultMsg" class="subtitle"></div>
       <div class="actions">
         <a id="captureLink" class="linkBtn" target="_blank" rel="noreferrer" style="display:none;">Abrir captura (celular)</a>
+        <button type="button" id="shareBtn" class="linkBtn secondary" style="display:none;">Compartir link (WhatsApp)</button>
+        <button type="button" id="copyLinkBtn" class="linkBtn" style="display:none;">Copiar link</button>
+        <a id="whatsappLink" class="linkBtn" target="_blank" rel="noreferrer" style="display:none;">Enviar a número específico</a>
+        <button type="button" id="qrBtn" class="linkBtn" style="display:none;">Ver QR para escanear</button>
         <a id="reportLink" class="linkBtn" target="_blank" rel="noreferrer" style="display:none;">Ver informe</a>
-        <a id="whatsappLink" class="linkBtn secondary" target="_blank" rel="noreferrer" style="display:none;">Enviar WhatsApp</a>
       </div>
+      <div id="qrModal" class="qrModal hidden">
+        <div class="qrModalContent">
+          <h3>Escanear para abrir la captura</h3>
+          <p class="subtitle">El destinatario escanea este QR con la cámara del celular para abrir el link directamente.</p>
+          <img id="qrImage" alt="QR del link" />
+          <button type="button" id="qrClose" class="btn">Cerrar</button>
+        </div>
+      </div>
+      <div class="subtitle" id="shareHint" style="display:none; margin-top:8px; font-size:12px;">Usa "Compartir link" para enviar por WhatsApp: el link será clickeable. Si usas "Enviar a número específico", el destinatario debe responder primero al mensaje (o tenerte en contactos) para que el link se active. Alternativa: <strong>Ver QR</strong> — el destinatario escanea y abre el link sin depender de WhatsApp.</div>
     </div>
 
     <div id="planCard" class="card hidden">
@@ -214,13 +239,24 @@
     const planList = $('planList');
     const resultMsg = $('resultMsg');
     const captureLink = $('captureLink');
+    const shareBtn = $('shareBtn');
+    const copyLinkBtn = $('copyLinkBtn');
     const reportLink = $('reportLink');
     const whatsappLink = $('whatsappLink');
+    const qrBtn = $('qrBtn');
 
-    function buildWhatsApp(phone, url) {
+    function getFullCaptureUrl(url, fullFromApi) {
+      if (fullFromApi && fullFromApi.startsWith('http')) return fullFromApi;
+      if (!url) return '';
+      return url.startsWith('http') ? url : (location.origin + (url.startsWith('/') ? url : '/' + url));
+    }
+    function buildWhatsApp(phone, url, fullFromApi) {
       if (!phone) return null;
-      const msg = `Hola, aquí está tu link de captura:\n${url.startsWith('http') ? url : (location.origin + url)}`;
-      return `https://wa.me/${encodeURIComponent(phone)}?text=${encodeURIComponent(msg)}`;
+      const fullUrl = getFullCaptureUrl(url, fullFromApi);
+      const phoneDigits = String(phone).replace(/\D/g, '');
+      if (!phoneDigits) return null;
+      // Solo la URL: WhatsApp detecta mejor links cuando el mensaje es únicamente la URL
+      return `https://wa.me/${phoneDigits}?text=${encodeURIComponent(fullUrl)}`;
     }
 
     function renderPlan(slots) {
@@ -238,29 +274,26 @@
       const street = $('propertyStreet').value;
       const number = $('propertyNumber').value;
       const dept = $('propertyDept').value;
-      const fullAddress = $('propertyAddress').value;
       const addressParts = [
         [street, number].filter(Boolean).join(" "),
         dept ? `Depto ${dept}` : "",
         comuna
       ].filter(Boolean);
-      const addressValue = addressParts.length ? addressParts.join(", ") : fullAddress;
+      const addressValue = addressParts.length ? addressParts.join(", ") : null;
       const payload = {
-        ownerName: $('ownerName').value,
-        ownerRut: $('ownerRut').value,
         propertyRol: $('propertyRol').value,
         propertyAddress: addressValue,
-        propertyOperationType: $('propertyOperationType').value,
+        propertyOperationType: $('propertyOperationType').value || null,
         propertySurface: $('propertySurface').value,
         propertyType: $('propertyType').value,
         bathroomsCount: Number($('bathroomsCount').value || 1),
         bedroomsCount: Number($('bedroomsCount').value || 0),
-        propertyAgeRange: $('propertyAgeRange').value || null,
-        floorType: $('floorType').value,
-        yearBuilt: $('yearBuilt').value ? Number($('yearBuilt').value) : null,
         hasPatio: $('hasPatio').checked,
         hasAttic: $('hasAttic').checked,
-        hasLaundry: $('hasLaundry').checked
+        hasLaundry: $('hasLaundry').checked,
+        hasElevator: $('hasElevator').checked,
+        hasParking: $('hasParking').checked,
+        hasGreenCertificate: $('hasGreenCertificate').checked
       };
 
       const res = await fetch('/api/cases', {
@@ -279,8 +312,16 @@
       resultCard.classList.remove('hidden');
 
       if (json.captureUrl) {
-        captureLink.href = json.captureUrl;
+        const fullUrl = getFullCaptureUrl(json.captureUrl, json.captureUrlFull);
+        captureLink.href = fullUrl;
         captureLink.style.display = 'inline-flex';
+        shareBtn.style.display = 'inline-flex';
+        shareBtn.dataset.url = fullUrl;
+        copyLinkBtn.style.display = 'inline-flex';
+        copyLinkBtn.dataset.url = fullUrl;
+        qrBtn.style.display = 'inline-flex';
+        qrBtn.dataset.url = fullUrl;
+        $('shareHint').style.display = 'block';
       }
       if (json.reportUrl) {
         reportLink.href = json.reportUrl;
@@ -288,7 +329,7 @@
       }
 
       const phone = $('phoneNumber').value;
-      const wa = buildWhatsApp(phone, json.captureUrl || '');
+      const wa = buildWhatsApp(phone, json.captureUrl || '', json.captureUrlFull);
       if (wa) {
         whatsappLink.href = wa;
         whatsappLink.style.display = 'inline-flex';
@@ -298,6 +339,66 @@
         planCard.classList.remove('hidden');
         renderPlan(json.slots);
       }
+    });
+
+    shareBtn.addEventListener('click', async () => {
+      const url = shareBtn.dataset?.url;
+      if (!url) return;
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: 'Inspección Ainspecciona',
+            text: 'Link para iniciar la inspección',
+            url: url
+          });
+          shareBtn.textContent = 'Compartido';
+          setTimeout(() => { shareBtn.textContent = 'Compartir link (WhatsApp)'; }, 2000);
+        } catch (e) {
+          if (e.name !== 'AbortError') {
+            try {
+              await navigator.clipboard.writeText(url);
+              shareBtn.textContent = 'Link copiado';
+              setTimeout(() => { shareBtn.textContent = 'Compartir link (WhatsApp)'; }, 2000);
+            } catch {
+              shareBtn.textContent = 'Abre WhatsApp y pega el link';
+              setTimeout(() => { shareBtn.textContent = 'Compartir link (WhatsApp)'; }, 3000);
+            }
+          }
+        }
+      } else {
+        try {
+          await navigator.clipboard.writeText(url);
+          shareBtn.textContent = 'Link copiado. Pégalo en WhatsApp.';
+          setTimeout(() => { shareBtn.textContent = 'Compartir link (WhatsApp)'; }, 2000);
+        } catch {
+          window.open(url, '_blank');
+        }
+      }
+    });
+
+    copyLinkBtn.addEventListener('click', async () => {
+      const url = copyLinkBtn.dataset?.url;
+      if (!url) return;
+      try {
+        await navigator.clipboard.writeText(url);
+        copyLinkBtn.textContent = 'Copiado';
+        setTimeout(() => { copyLinkBtn.textContent = 'Copiar link'; }, 2000);
+      } catch {
+        copyLinkBtn.textContent = 'Error al copiar';
+        setTimeout(() => { copyLinkBtn.textContent = 'Copiar link'; }, 2000);
+      }
+    });
+
+    qrBtn.addEventListener('click', () => {
+      const url = qrBtn.dataset?.url;
+      if (!url) return;
+      const qrModal = $('qrModal');
+      const qrImage = $('qrImage');
+      qrImage.src = `/api/qr?data=${encodeURIComponent(url)}`;
+      qrModal.classList.remove('hidden');
+    });
+    $('qrClose').addEventListener('click', () => {
+      $('qrModal').classList.add('hidden');
     });
   </script>
 </body>

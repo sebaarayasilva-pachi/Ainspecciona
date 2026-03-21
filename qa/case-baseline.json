@@ -1,0 +1,44 @@
+[
+  {
+    "caseId": "M5MWAHY1",
+    "slots": [
+      {
+        "slotCode": "BATHROOM_1_OUTLETS",
+        "findingCode": "OK",
+        "severity": null,
+        "scorePenaltyApplied": 0,
+        "messageNotIncludes": [
+          "intervencion no estandar",
+          "cinta",
+          "huincha"
+        ],
+        "kpiAnalysisNotIncludes": [
+          "intervencion no estandar",
+          "cinta",
+          "huincha"
+        ]
+      },
+      {
+        "slotCode": "ELECTRICAL_PANEL",
+        "findingCode": "OK",
+        "severity": null,
+        "scorePenaltyApplied": 0,
+        "kpiAnalysisIncludes": [
+          "diferencial"
+        ],
+        "kpiAnalysisNotIncludes": [
+          "ausencia de diferencial",
+          "sin diferencial"
+        ]
+      },
+      {
+        "slotCode": "BEDROOM_1_FLOOR",
+        "severity": "medium",
+        "scorePenaltyApplied": 15,
+        "messageIncludes": [
+          "ceramica"
+        ]
+      }
+    ]
+  }
+]

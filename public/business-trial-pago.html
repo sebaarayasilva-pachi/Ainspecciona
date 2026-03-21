@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Validar tarjeta · Free Trial Business</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/header.css" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0B1220;
+      color: #E5E7EB;
+      min-height: 100vh;
+    }
+    .page { max-width: 960px; margin: 0 auto; padding: 44px 24px 70px; }
+    .backLink { color: #94a3b8; text-decoration: none; font-size: 14px; margin-bottom: 22px; display: inline-block; }
+    .backLink:hover { color: #e5e7eb; }
+    .h1 { font-size: 30px; font-weight: 900; margin: 0 0 8px; color: #F8FAFC; }
+    .p { font-size: 16px; color: #94a3b8; margin: 0 0 30px; line-height: 1.6; }
+    .card {
+      background: linear-gradient(180deg, #0F1A2E 0%, #0B1526 100%);
+      border: 1px solid #2A3C5C;
+      border-radius: 18px;
+      padding: 28px;
+      max-width: 760px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 7px 12px;
+      border-radius: 999px;
+      border: 1px solid #1f5062;
+      background: rgba(34, 211, 238, 0.14);
+      color: #67e8f9;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .title { margin: 0 0 10px; font-size: 24px; color: #F8FAFC; font-weight: 800; }
+    .note {
+      margin: 0 0 18px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      background: rgba(22, 163, 74, 0.12);
+      border: 1px solid rgba(22, 163, 74, 0.32);
+      color: #bbf7d0;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .list {
+      list-style: none;
+      margin: 0 0 18px;
+      padding: 0;
+      color: #cbd5e1;
+      font-size: 14px;
+    }
+    .list li { margin: 10px 0; padding-left: 22px; position: relative; }
+    .list li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #22d3ee;
+      font-weight: 800;
+    }
+    .muted { font-size: 13px; color: #94a3b8; margin-top: 6px; }
+    .actions { display: flex; gap: 12px; margin-top: 26px; flex-wrap: wrap; }
+    .btnPrimary {
+      border: none;
+      border-radius: 12px;
+      padding: 14px 20px;
+      min-width: 290px;
+      background: linear-gradient(135deg, #7C3AED 0%, #22D3EE 100%);
+      color: #0B1220;
+      font-size: 15px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+    .btnPrimary:disabled { opacity: 0.7; cursor: not-allowed; }
+    .btnGhost {
+      border-radius: 12px;
+      border: 1px solid #344660;
+      background: transparent;
+      color: #cbd5e1;
+      text-decoration: none;
+      padding: 14px 18px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .error { color: #f87171; font-size: 14px; margin-top: 14px; min-height: 18px; }
+    .partnerRow { margin-bottom: 18px; }
+    .partnerRow label { display: block; font-size: 13px; font-weight: 600; color: #94a3b8; margin-bottom: 6px; }
+    .partnerRow input {
+      width: 100%; max-width: 320px; padding: 12px 14px; border-radius: 10px;
+      border: 1px solid #344660; background: #0f172a; color: #e5e7eb; font-size: 15px;
+    }
+    .partnerRow input:focus { outline: none; border-color: #22d3ee; }
+    .partnerHint { font-size: 13px; color: #86efac; margin-top: 8px; min-height: 18px; }
+    .partnerHint.invalid { color: #fbbf24; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="nav">
+      <a class="brand" href="/"><img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" /></a>
+      <div class="navLinks">
+        <a href="/como-funciona.html">Cómo funciona</a>
+        <a href="/precios">Precios</a>
+        <a href="/faq.html">FAQ</a>
+        <a href="/contacto.html">Contacto</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <a href="/business/activar" class="backLink">← Volver a activación</a>
+    <h1 class="h1">Validar tarjeta para iniciar tu Free Trial</h1>
+    <p class="p">Antes de comenzar, debes registrar una tarjeta en MercadoPago para autorizar el trial. Esta validación permite activar la cuenta con cobro automático al finalizar el período de prueba.</p>
+
+    <section class="card">
+      <span class="badge" id="trialBadge">Free Trial Business · 14 días</span>
+      <h2 class="title">No se efectuará ningún cargo hoy</h2>
+      <p class="note" id="trialNoteTop">Durante esta etapa solo se valida tu tarjeta para aprobar el Free Trial. El primer cobro se realizará al finalizar el período de prueba, únicamente si no cancelas antes.</p>
+      <div class="partnerRow">
+        <label for="partnerCodeInput">Código de referido (opcional)</label>
+        <input type="text" id="partnerCodeInput" placeholder="Código de influencer, embajador o alianza" autocomplete="off" />
+        <div class="partnerHint" id="partnerHint"></div>
+      </div>
+      <ul class="list" id="trialBullets">
+        <li>Incluye 1 inspección real controlada durante el trial.</li>
+        <li>Acceso al dashboard Business desde el primer día.</li>
+        <li>Cobro automático de $39.990 al terminar el trial (si no cancelas).</li>
+        <li>Cancelación cuando quieras desde tu dashboard.</li>
+      </ul>
+      <p class="muted" id="trialMeta"></p>
+      <div class="actions">
+        <button class="btnPrimary" id="btnContinue">Validar tarjeta y comenzar Free Trial</button>
+        <a href="/business/activar" class="btnGhost">Editar datos</a>
+      </div>
+      <div class="error" id="errorBox"></div>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      const DEFAULT_DAYS = 14;
+      const DEFAULT_INSPECTIONS = 1;
+      const tenantId = sessionStorage.getItem('trial_checkout_tenant_id');
+      const btn = document.getElementById('btnContinue');
+      const errorBox = document.getElementById('errorBox');
+      const trialMeta = document.getElementById('trialMeta');
+      const partnerInput = document.getElementById('partnerCodeInput');
+      const partnerHint = document.getElementById('partnerHint');
+      const trialBadge = document.getElementById('trialBadge');
+      const trialBullets = document.getElementById('trialBullets');
+
+      function saveContext(ctx) {
+        try {
+          sessionStorage.setItem('trial_checkout_context', JSON.stringify(ctx));
+        } catch (_) {}
+      }
+
+      function applyTrialUI(days, inspections, partnerName) {
+        if (trialBadge) trialBadge.textContent = 'Free Trial Business · ' + days + ' días' + (partnerName ? ' (código partner)' : '');
+        if (trialBullets) {
+          trialBullets.innerHTML = [
+            '<li>Incluye ' + inspections + ' inspección' + (inspections > 1 ? 'es' : '') + ' real' + (inspections > 1 ? 'es' : '') + ' controlada' + (inspections > 1 ? 's' : '') + ' durante el trial.</li>',
+            '<li>Acceso al dashboard Business desde el primer día.</li>',
+            '<li>Cobro automático de $39.990 al terminar el trial (si no cancelas).</li>',
+            '<li>Cancelación cuando quieras desde tu dashboard.</li>'
+          ].join('');
+        }
+        if (trialMeta) {
+          trialMeta.textContent = partnerName
+            ? 'Beneficio por código ' + partnerName + ': ' + days + ' días y ' + inspections + ' inspecciones.'
+            : 'Tu trial tendrá una duración de ' + days + ' días.';
+        }
+      }
+
+      let ctx = { durationDays: DEFAULT_DAYS, includedInspections: DEFAULT_INSPECTIONS };
+      try {
+        const raw = sessionStorage.getItem('trial_checkout_context');
+        if (raw) ctx = { ...ctx, ...JSON.parse(raw) };
+      } catch (_) {}
+      try {
+        const ref = new URLSearchParams(window.location.search).get('ref');
+        if (ref && partnerInput) partnerInput.value = ref.trim();
+      } catch (_) {}
+      if (partnerInput && ctx.partnerCode && !partnerInput.value) partnerInput.value = ctx.partnerCode;
+
+      async function validatePartnerCode() {
+        if (!partnerHint) return;
+        const code = ((partnerInput && partnerInput.value) || '').trim();
+        partnerHint.textContent = '';
+        partnerHint.className = 'partnerHint';
+        if (!code) {
+          applyTrialUI(DEFAULT_DAYS, DEFAULT_INSPECTIONS, null);
+          saveContext({ ...ctx, partnerCode: undefined, durationDays: DEFAULT_DAYS, includedInspections: DEFAULT_INSPECTIONS });
+          return;
+        }
+        try {
+          const res = await fetch('/api/business/trial/partner-code', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code }),
+            credentials: 'include'
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!data.valid) {
+            partnerHint.textContent = 'Código no reconocido. Puedes continuar sin código (14 días, 1 inspección).';
+            partnerHint.className = 'partnerHint invalid';
+            applyTrialUI(DEFAULT_DAYS, DEFAULT_INSPECTIONS, null);
+            saveContext({ ...ctx, partnerCode: code, durationDays: DEFAULT_DAYS, includedInspections: DEFAULT_INSPECTIONS, partnerValid: false });
+            return;
+          }
+          partnerHint.textContent = 'Código aplicado: ' + (data.partnerName || 'Partner') + '.';
+          applyTrialUI(data.durationDays, data.totalTrialCredits, data.partnerName);
+          saveContext({
+            ...ctx,
+            partnerCode: code,
+            durationDays: data.durationDays,
+            includedInspections: data.totalTrialCredits,
+            partnerValid: true,
+            partnerName: data.partnerName
+          });
+        } catch (e) {
+          partnerHint.textContent = 'No pudimos validar el código. Intenta de nuevo o continúa sin él.';
+          partnerHint.className = 'partnerHint invalid';
+        }
+      }
+
+      if (partnerInput) {
+        partnerInput.addEventListener('blur', validatePartnerCode);
+        partnerInput.addEventListener('change', validatePartnerCode);
+      }
+
+      void validatePartnerCode();
+
+      if (!tenantId) {
+        btn.disabled = true;
+        errorBox.textContent = 'No encontramos una sesión de trial activa. Vuelve a iniciar desde Activar Plan Business.';
+        return;
+      }
+
+      btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        btn.textContent = 'Preparando validación de tarjeta...';
+        errorBox.textContent = '';
+        try {
+          const partnerCode = (partnerInput && partnerInput.value || '').trim() || undefined;
+          const res = await fetch('/api/business/trial/create-preapproval', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tenantId, partnerCode }),
+            credentials: 'include'
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            const reasonMap = {
+              STARTER_HISTORY_BLOCK: 'Trial bloqueado: existe historial Starter para esta empresa.',
+              CORPORATE_EMAIL_REQUIRED: 'Trial bloqueado: debes usar correo corporativo.',
+              TRIAL_KEY_ALREADY_USED: 'Trial bloqueado: esta empresa ya usó un trial.',
+              PARTNER_CODE_INVALID: 'Código de referido no válido. Corrígelo o bórralo para continuar.',
+              REFERRAL_ALREADY_ASSIGNED: 'Esta cuenta ya tiene un código de referido asignado.'
+            };
+            throw new Error(reasonMap[data?.reason] || reasonMap[data?.error] || data?.message || 'No fue posible preparar el Free Trial.');
+          }
+          if (!data?.redirectUrl) throw new Error('MercadoPago no devolvió URL de validación.');
+          btn.textContent = 'Redirigiendo a MercadoPago...';
+          window.location.href = data.redirectUrl;
+        } catch (err) {
+          errorBox.textContent = err?.message || 'Error al preparar el pago del trial.';
+          btn.disabled = false;
+          btn.textContent = 'Validar tarjeta y comenzar Free Trial';
+        }
+      });
+    })();
+  </script>
+  <script src="/assets/tracker.js" defer></script>
+</body>
+</html>
