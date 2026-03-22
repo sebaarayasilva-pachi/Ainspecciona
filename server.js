@@ -114,6 +114,79 @@ const scoreConfigRuntimeCache = {
   fetchedAt: 0
 };
 
+const PRESENCIAL_ORDER_STATUSES = ['PENDING_OC', 'SENT_TO_SUPPLIER', 'CONFIRMED', 'CANCELLED'];
+
+/** Proveedor por defecto para emitir OC (Paulo Inspecciona u otro marcado en Admin). */
+async function getDefaultPresencialSupplier() {
+  const envEmail = String(process.env.PRESENCIAL_SUPPLIER_EMAIL || '').trim() || null;
+  let s = await prisma.supplier.findFirst({
+    where: {
+      OR: [{ isDefaultPresencial: true }, { code: 'paulo-inspecciona' }]
+    },
+    orderBy: [{ isDefaultPresencial: 'desc' }, { createdAt: 'asc' }]
+  });
+  if (!s) {
+    s = await prisma.supplier.create({
+      data: {
+        code: 'paulo-inspecciona',
+        name: 'Paulo Inspecciona',
+        contactName: 'Paulo Yañez',
+        email: envEmail,
+        notes: 'Creado automáticamente al primer pago presencial.',
+        active: true,
+        isDefaultPresencial: true
+      }
+    });
+    return s;
+  }
+  return s;
+}
+
+/** Registra orden de inspección presencial tras pago aprobado (idempotente por MP payment id). */
+async function createPresencialOrderFromPayment({ tenantId, extRef, paymentIdStr, payment, log }) {
+  const existing = await prisma.presencialOrder.findUnique({ where: { mercadopagoPaymentId: paymentIdStr } });
+  if (existing) return { ok: true, skipped: true, order: existing };
+  const caseIdMatch = extRef.match(/caseId:([a-f0-9-]+)/i);
+  const caseId = caseIdMatch?.[1] || null;
+  let addressSnapshot = null;
+  let surfaceM2 = null;
+  let validCaseId = null;
+  if (caseId) {
+    const c = await prisma.case.findUnique({
+      where: { id: caseId },
+      include: { property: true }
+    });
+    if (c && c.tenantId === tenantId) {
+      validCaseId = caseId;
+      addressSnapshot = c.property?.address || null;
+      const surf = c.property?.surface;
+      if (surf) {
+        const n = parseInt(String(surf).replace(/\D/g, ''), 10);
+        if (!Number.isNaN(n) && n > 0) surfaceM2 = n;
+      }
+    }
+  }
+  const amt =
+    payment?.transaction_details?.total_paid_amount ??
+    payment?.transaction_amount ??
+    null;
+  const supplier = await getDefaultPresencialSupplier();
+  const order = await prisma.presencialOrder.create({
+    data: {
+      tenantId,
+      caseId: validCaseId,
+      supplierId: supplier.id,
+      mercadopagoPaymentId: paymentIdStr,
+      amountClp: typeof amt === 'number' && amt > 0 ? Math.round(amt) : null,
+      surfaceM2,
+      addressSnapshot,
+      status: 'PENDING_OC'
+    }
+  });
+  log?.info?.({ tenantId, paymentId: paymentIdStr, orderId: order.id }, 'presencial-order-created');
+  return { ok: true, order };
+}
+
 async function ensureAppSettingsTable() {
   const sql = `CREATE TABLE IF NOT EXISTS \`AppSetting\` (
     \`keyName\` VARCHAR(120) NOT NULL,
@@ -3086,6 +3159,19 @@ fastify.post('/api/mercadopago/webhook', async (req, reply) => {
       }
     }
 
+    // Inspección presencial: registrar OC / orden para proveedor (no suma créditos)
+    if (plan === 'inspeccion-presencial' && tenantId) {
+      const paymentIdStr = String(id);
+      await createPresencialOrderFromPayment({
+        tenantId,
+        extRef,
+        paymentIdStr,
+        payment,
+        log: fastify.log
+      });
+      return reply.code(200).send();
+    }
+
     // Planes con tenant: créditos (Business = 2 inspecciones incluidas; corporate/bolsas en dashboard)
     const PLANS = { starter: 1, business: 2, corporate: 100, 'credits-5': 5, 'credits-10': 10, 'credits-20': 20 };
     const credits = PLANS[plan] ?? 0;
@@ -3193,6 +3279,22 @@ fastify.post('/api/mercadopago/verify-payment', async (req, reply) => {
     const planMatch = extRef.match(/plan:([a-z0-9-]+)/i);
     const tenantId = tenantMatch?.[1] || null;
     const plan = planMatch?.[1] || '';
+
+    if (plan === 'inspeccion-presencial' && tenantId) {
+      const r = await createPresencialOrderFromPayment({
+        tenantId,
+        extRef,
+        paymentIdStr: String(paymentId),
+        payment,
+        log: fastify.log
+      });
+      return reply.send({
+        ok: true,
+        status: 'approved',
+        presencialOrder: true,
+        alreadyProcessed: !!r.skipped
+      });
+    }
 
     const PLANS = { business: 2, 'credits-5': 5, 'credits-10': 10, 'credits-20': 20 };
     const credits = PLANS[plan] ?? 0;
@@ -3897,6 +3999,152 @@ fastify.put('/api/admin/referral-partners/:partnerId', async (req, reply) => {
       return reply.code(404).send({ ok: false, error: 'PARTNER_NOT_FOUND' });
     }
     req.log.error({ err }, 'admin-referral-partners-update');
+    return reply.code(500).send({ ok: false, error: 'UPDATE_FAILED' });
+  }
+});
+
+fastify.get('/api/admin/suppliers', async (req, reply) => {
+  try {
+    const suppliers = await prisma.supplier.findMany({
+      orderBy: [{ isDefaultPresencial: 'desc' }, { name: 'asc' }]
+    });
+    return reply.send({ ok: true, suppliers });
+  } catch (err) {
+    if (String(err?.message || '').includes('Supplier') || String(err?.code || '') === 'P2021') {
+      return reply.code(503).send({
+        ok: false,
+        error: 'MIGRATION_REQUIRED',
+        message: 'Ejecuta migraciones Prisma (tabla Supplier).'
+      });
+    }
+    req.log.error({ err }, 'admin-suppliers-list');
+    return reply.code(500).send({ ok: false, error: 'LIST_FAILED' });
+  }
+});
+
+fastify.post('/api/admin/suppliers', async (req, reply) => {
+  try {
+    const p = req.body || {};
+    const code = String(p.code || '')
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '');
+    const name = String(p.name || '').trim();
+    if (!code || !name) return reply.code(400).send({ ok: false, error: 'CODE_AND_NAME_REQUIRED' });
+    const setDefault = p.isDefaultPresencial === true;
+    if (setDefault) {
+      await prisma.supplier.updateMany({ where: {}, data: { isDefaultPresencial: false } });
+    }
+    const supplier = await prisma.supplier.create({
+      data: {
+        code,
+        name,
+        legalName: p.legalName ? String(p.legalName).trim() : null,
+        rut: p.rut ? String(p.rut).trim() : null,
+        email: p.email ? String(p.email).trim().toLowerCase() : null,
+        phone: p.phone ? String(p.phone).trim() : null,
+        contactName: p.contactName ? String(p.contactName).trim() : null,
+        notes: p.notes ? String(p.notes) : null,
+        active: p.active !== false,
+        isDefaultPresencial: setDefault
+      }
+    });
+    return reply.send({ ok: true, supplier });
+  } catch (err) {
+    if (String(err?.message || '').includes('Unique') || String(err?.code || '') === 'P2002') {
+      return reply.code(409).send({ ok: false, error: 'CODE_EXISTS' });
+    }
+    req.log.error({ err }, 'admin-suppliers-create');
+    return reply.code(500).send({ ok: false, error: 'CREATE_FAILED' });
+  }
+});
+
+fastify.patch('/api/admin/suppliers/:supplierId', async (req, reply) => {
+  try {
+    const supplierId = String(req.params.supplierId || '');
+    const p = req.body || {};
+    const data = {};
+    if (p.name !== undefined) data.name = String(p.name).trim();
+    if (p.legalName !== undefined) data.legalName = p.legalName ? String(p.legalName).trim() : null;
+    if (p.rut !== undefined) data.rut = p.rut ? String(p.rut).trim() : null;
+    if (p.email !== undefined) data.email = p.email ? String(p.email).trim().toLowerCase() : null;
+    if (p.phone !== undefined) data.phone = p.phone ? String(p.phone).trim() : null;
+    if (p.contactName !== undefined) data.contactName = p.contactName ? String(p.contactName).trim() : null;
+    if (p.notes !== undefined) data.notes = p.notes ? String(p.notes) : null;
+    if (p.active !== undefined) data.active = Boolean(p.active);
+    if (p.isDefaultPresencial === true) {
+      await prisma.supplier.updateMany({ where: {}, data: { isDefaultPresencial: false } });
+      data.isDefaultPresencial = true;
+    } else if (p.isDefaultPresencial === false) {
+      data.isDefaultPresencial = false;
+    }
+    const supplier = await prisma.supplier.update({ where: { id: supplierId }, data });
+    return reply.send({ ok: true, supplier });
+  } catch (err) {
+    if (String(err?.code || '') === 'P2025') {
+      return reply.code(404).send({ ok: false, error: 'NOT_FOUND' });
+    }
+    req.log.error({ err }, 'admin-suppliers-patch');
+    return reply.code(500).send({ ok: false, error: 'UPDATE_FAILED' });
+  }
+});
+
+fastify.get('/api/admin/presencial-orders', async (req, reply) => {
+  try {
+    const status = req.query?.status ? String(req.query.status).toUpperCase() : null;
+    const where = status && PRESENCIAL_ORDER_STATUSES.includes(status) ? { status } : {};
+    const orders = await prisma.presencialOrder.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      take: 200,
+      include: {
+        tenant: { select: { id: true, name: true, email: true, phone: true } },
+        supplier: { select: { id: true, code: true, name: true, email: true, contactName: true } },
+        case: { select: { id: true, shortId: true, status: true } }
+      }
+    });
+    return reply.send({ ok: true, orders });
+  } catch (err) {
+    req.log.error({ err }, 'admin-presencial-orders-list');
+    return reply.code(500).send({ ok: false, error: 'LIST_FAILED' });
+  }
+});
+
+fastify.patch('/api/admin/presencial-orders/:orderId', async (req, reply) => {
+  try {
+    const orderId = String(req.params.orderId || '');
+    const p = req.body || {};
+    const data = {};
+    if (p.status !== undefined) {
+      const st = String(p.status).toUpperCase();
+      if (!PRESENCIAL_ORDER_STATUSES.includes(st)) {
+        return reply.code(400).send({ ok: false, error: 'INVALID_STATUS' });
+      }
+      data.status = st;
+    }
+    if (p.ocNumber !== undefined) data.ocNumber = p.ocNumber ? String(p.ocNumber).trim() : null;
+    if (p.adminNotes !== undefined) data.adminNotes = p.adminNotes ? String(p.adminNotes) : null;
+    if (p.supplierId !== undefined && p.supplierId) {
+      const sup = await prisma.supplier.findUnique({ where: { id: String(p.supplierId) } });
+      if (!sup) return reply.code(400).send({ ok: false, error: 'SUPPLIER_NOT_FOUND' });
+      data.supplierId = sup.id;
+    }
+    const order = await prisma.presencialOrder.update({
+      where: { id: orderId },
+      data,
+      include: {
+        tenant: { select: { id: true, name: true, email: true } },
+        supplier: { select: { id: true, name: true, email: true } },
+        case: { select: { id: true, shortId: true } }
+      }
+    });
+    return reply.send({ ok: true, order });
+  } catch (err) {
+    if (String(err?.code || '') === 'P2025') {
+      return reply.code(404).send({ ok: false, error: 'NOT_FOUND' });
+    }
+    req.log.error({ err }, 'admin-presencial-orders-patch');
     return reply.code(500).send({ ok: false, error: 'UPDATE_FAILED' });
   }
 });

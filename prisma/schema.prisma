@@ -103,6 +103,7 @@ model Tenant {
   creditTransactions CreditTransaction[]
   magicLinkTokens MagicLinkToken[]
   partnerCommissionAccruals PartnerCommissionAccrual[]
+  presencialOrders        PresencialOrder[]
 
   @@index([rut])
   @@index([mpSubscriptionId])
@@ -261,10 +262,59 @@ model Case {
   slots        Slot[]
   photos       Photo[]
   captureTokens CaptureToken[]
+  presencialOrders PresencialOrder[]
 
   @@index([propertyId])
   @@index([tenantId])
   @@index([assignedUserId])
+}
+
+// Proveedor de inspección presencial (ej. Paulo Inspecciona)
+model Supplier {
+  id                   String   @id @default(uuid())
+  code                 String   @unique @db.VarChar(64)
+  name                 String   @db.VarChar(255)
+  legalName            String?  @db.VarChar(255)
+  rut                  String?  @db.VarChar(32)
+  email                String?  @db.VarChar(255)
+  phone                String?  @db.VarChar(64)
+  contactName          String?  @db.VarChar(255)
+  notes                String?  @db.Text
+  active               Boolean  @default(true)
+  isDefaultPresencial  Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  presencialOrders PresencialOrder[]
+
+  @@index([active])
+  @@index([isDefaultPresencial])
+}
+
+// OC / solicitud tras pago de inspección presencial (Mercado Pago)
+model PresencialOrder {
+  id                   String   @id @default(uuid())
+  tenantId             String
+  tenant               Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  caseId               String?
+  case                 Case?    @relation(fields: [caseId], references: [id], onDelete: SetNull)
+  supplierId           String
+  supplier             Supplier @relation(fields: [supplierId], references: [id], onDelete: Restrict)
+  mercadopagoPaymentId String   @unique @db.VarChar(64)
+  amountClp            Int?
+  surfaceM2            Int?
+  addressSnapshot      String?  @db.Text
+  status               String   @default("PENDING_OC") @db.VarChar(32)
+  ocNumber             String?  @db.VarChar(64)
+  adminNotes           String?  @db.Text
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([caseId])
+  @@index([supplierId])
+  @@index([status])
+  @@index([createdAt])
 }
 
 model Owner {

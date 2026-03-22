@@ -425,6 +425,7 @@
         <a data-section-link="intelligence" href="#intelligence">Intelligence</a>
         <a data-section-link="tenants" href="#tenants">Corredoras</a>
         <a data-section-link="inspecciones" href="#inspecciones">Inspecciones</a>
+        <a data-section-link="proveedores" href="#proveedores">Proveedores</a>
       </nav>
     </aside>
 
@@ -908,6 +909,70 @@
         <div id="casesEmpty" style="display:none; padding:16px; text-align:center; color:#94a3b8;">
           No hay casos.
         </div>
+      </div>
+    </section>
+
+    <section class="content hidden" id="proveedores" data-section="proveedores">
+      <h1>Proveedores e inspección presencial</h1>
+      <div class="muted">
+        Cuando un cliente paga <strong>inspección presencial</strong> (Mercado Pago), se crea una <strong>orden</strong> aquí para emitir la OC al proveedor (por defecto Paulo Inspecciona).
+        Si ves error de migración, ejecuta <code style="color:#94a3b8;">npx prisma migrate deploy</code> en el entorno con DB.
+      </div>
+
+      <div class="card" style="margin-top:24px;">
+        <h3>Proveedores</h3>
+        <div class="kpiSubtle">Código único (slug). Solo uno puede ser “por defecto” para nuevas órdenes presenciales.</div>
+        <div id="suppliersMigrationNote" class="note" style="display:none;"></div>
+        <div class="grid" style="grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top:16px; gap:16px;">
+          <div>
+            <h4 style="margin:0 0 10px; font-size:14px; color:#A9B7D0;">Nuevo proveedor</h4>
+            <div class="row"><label>Código</label><input id="supCode" class="smallInput" placeholder="ej. otro-proveedor" /></div>
+            <div class="row"><label>Nombre</label><input id="supName" class="smallInput" placeholder="Razón social o marca" /></div>
+            <div class="row"><label>Contacto</label><input id="supContact" class="smallInput" placeholder="Nombre" /></div>
+            <div class="row"><label>Email</label><input id="supEmail" type="email" class="smallInput" placeholder="correo@proveedor.cl" /></div>
+            <div class="row"><label>Teléfono</label><input id="supPhone" class="smallInput" placeholder="+56..." /></div>
+            <div class="row"><label>RUT</label><input id="supRut" class="smallInput" placeholder="opcional" /></div>
+            <label style="display:flex; align-items:center; gap:8px; margin-top:8px; font-size:13px; color:#B9C7E2;">
+              <input type="checkbox" id="supDefault" /> Por defecto presencial
+            </label>
+            <button type="button" class="btn" id="supAddBtn" style="margin-top:12px;">Agregar</button>
+          </div>
+          <div id="suppliersList" class="kpiSubtle">Cargando…</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:20px;">
+        <h3>Órdenes presenciales (post-pago)</h3>
+        <div class="filters" style="margin-bottom:12px;">
+          <label>Estado:
+            <select class="smallInput" id="presencialFilterStatus" style="min-width:200px;">
+              <option value="">Todos</option>
+              <option value="PENDING_OC">Pendiente OC</option>
+              <option value="SENT_TO_SUPPLIER">Enviada a proveedor</option>
+              <option value="CONFIRMED">Confirmada</option>
+              <option value="CANCELLED">Cancelada</option>
+            </select>
+          </label>
+          <button type="button" class="btn outline" id="presencialRefreshBtn">Actualizar</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="table" id="presencialTable" style="display:none;">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Corredora</th>
+                <th>Caso</th>
+                <th>Dirección / m²</th>
+                <th>Monto</th>
+                <th>Proveedor</th>
+                <th>Estado · OC</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="presencialBody"></tbody>
+          </table>
+        </div>
+        <div id="presencialEmpty" style="display:none; padding:16px; text-align:center; color:#94a3b8;">No hay órdenes presenciales.</div>
       </div>
     </section>
 
@@ -2248,6 +2313,187 @@
     loadFilterTenants().catch(() => {});
     loadInspections().catch(() => {});
 
+    async function loadSuppliersAdmin() {
+      const note = document.getElementById("suppliersMigrationNote");
+      const list = document.getElementById("suppliersList");
+      if (!list) return;
+      list.textContent = "Cargando…";
+      if (note) { note.style.display = "none"; note.textContent = ""; }
+      try {
+        const res = await adminFetch("/api/admin/suppliers");
+        const d = await res.json().catch(() => ({}));
+        if (res.status === 503 && d.error === "MIGRATION_REQUIRED") {
+          if (note) {
+            note.style.display = "block";
+            note.textContent = d.message || "Falta migración: Supplier / PresencialOrder.";
+          }
+          list.innerHTML = "";
+          return;
+        }
+        if (!res.ok || !d.ok) {
+          list.textContent = "No se pudieron cargar proveedores.";
+          return;
+        }
+        const suppliers = d.suppliers || [];
+        if (!suppliers.length) {
+          list.innerHTML = '<span class="muted">Sin proveedores (crea uno o ejecuta migración con seed).</span>';
+          return;
+        }
+        list.innerHTML = suppliers.map((s) => {
+          const def = s.isDefaultPresencial ? '<span class="pill" style="background:#1F6BFF;color:#fff;font-size:10px;">Por defecto</span>' : "";
+          const act = s.active ? "" : '<span class="pill" style="background:#64748b;color:#fff;font-size:10px;">Inactivo</span>';
+          return `
+            <div class="card" style="margin-bottom:12px; padding:14px;" data-supplier-id="${escapeHtml(s.id)}">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px; flex-wrap:wrap;">
+                <div>
+                  <strong>${escapeHtml(s.name)}</strong> <span class="muted" style="font-size:12px;">${escapeHtml(s.code)}</span>
+                  ${def} ${act}
+                  <div class="muted" style="font-size:12px; margin-top:4px;">${escapeHtml(s.contactName || "—")} · ${escapeHtml(s.email || "—")} · ${escapeHtml(s.phone || "—")}</div>
+                </div>
+                <button type="button" class="btn outline" data-action="sup-default" data-id="${escapeHtml(s.id)}" ${s.isDefaultPresencial ? "disabled" : ""}>Marcar default</button>
+              </div>
+            </div>`;
+        }).join("");
+        list.querySelectorAll("[data-action=sup-default]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const id = btn.getAttribute("data-id");
+            const r = await adminFetch(`/api/admin/suppliers/${encodeURIComponent(id)}`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ isDefaultPresencial: true })
+            });
+            if (r.ok) loadSuppliersAdmin().catch(() => {});
+          });
+        });
+      } catch (e) {
+        list.textContent = "Error de red.";
+      }
+    }
+
+    document.getElementById("supAddBtn")?.addEventListener("click", async () => {
+      const code = document.getElementById("supCode")?.value?.trim();
+      const name = document.getElementById("supName")?.value?.trim();
+      const body = {
+        code,
+        name,
+        contactName: document.getElementById("supContact")?.value?.trim() || null,
+        email: document.getElementById("supEmail")?.value?.trim() || null,
+        phone: document.getElementById("supPhone")?.value?.trim() || null,
+        rut: document.getElementById("supRut")?.value?.trim() || null,
+        isDefaultPresencial: !!document.getElementById("supDefault")?.checked
+      };
+      const res = await adminFetch("/api/admin/suppliers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        alert(d.error || "No se pudo crear");
+        return;
+      }
+      document.getElementById("supCode").value = "";
+      document.getElementById("supName").value = "";
+      document.getElementById("supContact").value = "";
+      document.getElementById("supEmail").value = "";
+      document.getElementById("supPhone").value = "";
+      document.getElementById("supRut").value = "";
+      document.getElementById("supDefault").checked = false;
+      loadSuppliersAdmin().catch(() => {});
+    });
+
+    function formatClp(n) {
+      if (n == null || n === "") return "—";
+      return "$" + Number(n).toLocaleString("es-CL");
+    }
+
+    async function loadPresencialOrdersAdmin() {
+      const st = document.getElementById("presencialFilterStatus")?.value || "";
+      const url = st ? `/api/admin/presencial-orders?status=${encodeURIComponent(st)}` : "/api/admin/presencial-orders";
+      const tbody = document.getElementById("presencialBody");
+      const table = document.getElementById("presencialTable");
+      const empty = document.getElementById("presencialEmpty");
+      if (!tbody || !table || !empty) return;
+      try {
+        const res = await adminFetch(url);
+        const d = await res.json().catch(() => ({}));
+        if (!res.ok || !d.ok) {
+          tbody.innerHTML = "";
+          empty.style.display = "block";
+          empty.textContent = "No se pudo cargar el listado.";
+          table.style.display = "none";
+          return;
+        }
+        const orders = d.orders || [];
+        tbody.innerHTML = "";
+        if (!orders.length) {
+          table.style.display = "none";
+          empty.style.display = "block";
+          empty.textContent = "No hay órdenes presenciales.";
+          return;
+        }
+        empty.style.display = "none";
+        table.style.display = "table";
+        orders.forEach((o) => {
+          const created = o.createdAt ? new Date(o.createdAt).toLocaleString("es-CL") : "—";
+          const tenantN = o.tenant?.name || "—";
+          const caseRef = o.case?.shortId || o.case?.id?.slice(0, 8) || "—";
+          const addr = (o.addressSnapshot || "—") + (o.surfaceM2 ? ` · ${o.surfaceM2} m²` : "");
+          const sup = o.supplier?.name || "—";
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td data-label="Fecha"><div class="muted" style="font-size:11px;">${escapeHtml(created)}</div></td>
+            <td data-label="Corredora"><strong>${escapeHtml(tenantN)}</strong><div class="muted" style="font-size:11px;">${escapeHtml(o.tenant?.email || "")}</div></td>
+            <td data-label="Caso"><code style="font-size:11px;">${escapeHtml(caseRef)}</code></td>
+            <td data-label="Dir." style="max-width:220px; font-size:12px;">${escapeHtml(addr)}</td>
+            <td data-label="Monto">${escapeHtml(formatClp(o.amountClp))}</td>
+            <td data-label="Prov.">${escapeHtml(sup)}</td>
+            <td data-label="Estado" style="min-width:200px;">
+              <select class="smallInput po-status" data-id="${escapeHtml(o.id)}" style="width:100%; margin-bottom:6px;">
+                <option value="PENDING_OC">Pendiente OC</option>
+                <option value="SENT_TO_SUPPLIER">Enviada proveedor</option>
+                <option value="CONFIRMED">Confirmada</option>
+                <option value="CANCELLED">Cancelada</option>
+              </select>
+              <input type="text" class="smallInput po-oc" data-id="${escapeHtml(o.id)}" placeholder="Nº OC" value="${escapeHtml(o.ocNumber || "")}" style="width:100%;" />
+              <textarea class="smallInput po-notes" data-id="${escapeHtml(o.id)}" placeholder="Notas internas" rows="2" style="width:100%; margin-top:6px; resize:vertical;">${escapeHtml(o.adminNotes || "")}</textarea>
+            </td>
+            <td data-label=""><button type="button" class="btn po-save" data-id="${escapeHtml(o.id)}" style="white-space:nowrap;">Guardar</button></td>
+          `;
+          tr.querySelector(".po-status").value = o.status || "PENDING_OC";
+          tbody.appendChild(tr);
+        });
+        tbody.querySelectorAll(".po-save").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const id = btn.getAttribute("data-id");
+            const row = btn.closest("tr");
+            const status = row.querySelector(".po-status")?.value;
+            const ocNumber = row.querySelector(".po-oc")?.value?.trim() || null;
+            const adminNotes = row.querySelector(".po-notes")?.value || null;
+            btn.disabled = true;
+            const r = await adminFetch(`/api/admin/presencial-orders/${encodeURIComponent(id)}`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ status, ocNumber, adminNotes })
+            });
+            btn.disabled = false;
+            if (!r.ok) alert("No se pudo guardar");
+          });
+        });
+      } catch (e) {
+        empty.style.display = "block";
+        table.style.display = "none";
+      }
+    }
+
+    document.getElementById("presencialFilterStatus")?.addEventListener("change", () => loadPresencialOrdersAdmin().catch(() => {}));
+    document.getElementById("presencialRefreshBtn")?.addEventListener("click", () => loadPresencialOrdersAdmin().catch(() => {}));
+
+    function loadProveedoresSection() {
+      loadSuppliersAdmin().catch(() => {});
+      loadPresencialOrdersAdmin().catch(() => {});
+    }
+
     function setActiveSection() {
       const hash = String(window.location.hash || "").replace("#", "");
       const section = hash || "dashboard";
@@ -2259,6 +2505,7 @@
         const key = el.getAttribute("data-section-link");
         el.classList.toggle("active", key === section);
       });
+      if (section === "proveedores") loadProveedoresSection();
     }
 
     async function loadDashboardStats() {
