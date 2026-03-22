@@ -31,6 +31,21 @@ Current bucket:
 
 > Later we can switch to signed URLs (private bucket).
 
+### Hero video (`/corredores`)
+El MP4 del hero no va en Git (peso). Se sirve desde el **mismo bucket** en la ruta fija `site/video-hero.mp4`.
+
+1. Sube el archivo (ajusta el nombre del bucket si cambió):
+
+```bash
+gsutil cp video-hero.mp4 gs://ainspecciona-photos-852721861524/site/video-hero.mp4
+```
+
+2. **Lectura pública** del objeto (o política de bucket que ya uses para fotos). Si el video no carga en el navegador, revisa permisos del objeto y, si hace falta, CORS del bucket para `GET` desde `https://ainspecciona.web.app` (y tu dominio).
+
+URL pública usada en `public/corredores.html`:
+
+`https://storage.googleapis.com/ainspecciona-photos-852721861524/site/video-hero.mp4`
+
 ---
 
 ## 2) Create Cloud SQL (MySQL)
