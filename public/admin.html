@@ -161,6 +161,10 @@
       border-bottom: 1px solid #1E2B45;
     }
     .row:last-child { border-bottom: none; }
+    /* Proveedores: el .row global dejaba la columna del input en 120px */
+    #proveedores .card .row {
+      grid-template-columns: minmax(160px, 220px) minmax(0, 1fr);
+    }
     label { font-weight: 600; font-size: 14px; color: #B9C7E2; }
     input[type="number"], input[type="text"], input[type="email"], input[type="password"] {
       width: 100%;
@@ -923,16 +927,16 @@
         <h3>Proveedores</h3>
         <div class="kpiSubtle">Datos para OC y contacto. El <strong>código interno</strong> (slug) se genera desde la razón social si lo dejas vacío. Solo un proveedor puede ser “por defecto” para nuevas órdenes presenciales.</div>
         <div id="suppliersMigrationNote" class="note" style="display:none;"></div>
-        <div class="grid" style="grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top:16px; gap:16px;">
-          <div>
+        <div class="grid" style="grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); margin-top:16px; gap:20px; align-items:start;">
+          <div style="min-width:0;">
             <h4 style="margin:0 0 10px; font-size:14px; color:#A9B7D0;">Nuevo proveedor</h4>
-            <div class="row"><label>Razón social</label><input id="supLegalName" class="smallInput" placeholder="Ej. Paulo Inspecciona SpA" /></div>
-            <div class="row"><label>RUT</label><input id="supRut" class="smallInput" placeholder="12.345.678-9" /></div>
-            <div class="row"><label>Dirección</label><input id="supAddress" class="smallInput" placeholder="Calle, número, comuna" /></div>
-            <div class="row"><label>Cód.</label><input id="supCodigo" class="smallInput" placeholder="Ej. postal o comuna" /></div>
-            <div class="row"><label>Contacto</label><input id="supContact" class="smallInput" placeholder="Nombre del contacto" /></div>
-            <div class="row"><label>Mail</label><input id="supEmail" type="email" class="smallInput" placeholder="correo@proveedor.cl" /></div>
-            <div class="row"><label>Código interno (opcional)</label><input id="supCode" class="smallInput" placeholder="Vacío = slug desde razón social" /></div>
+            <div class="row"><label for="supLegalName">Razón social</label><input id="supLegalName" class="smallInput" placeholder="Ej. Paulo Inspecciona SpA" autocomplete="organization" /></div>
+            <div class="row"><label for="supRut">RUT <span class="muted" style="font-weight:600;">(obligatorio)</span></label><input id="supRut" class="smallInput" placeholder="12.345.678-9" inputmode="text" required autocomplete="off" /></div>
+            <div class="row"><label for="supAddress">Dirección</label><input id="supAddress" class="smallInput" placeholder="Calle, número, comuna" autocomplete="street-address" /></div>
+            <div class="row"><label for="supCodigo">Cód.</label><input id="supCodigo" class="smallInput" placeholder="Ej. postal o comuna" /></div>
+            <div class="row"><label for="supContact">Contacto</label><input id="supContact" class="smallInput" placeholder="Nombre del contacto" autocomplete="name" /></div>
+            <div class="row"><label for="supEmail">Mail</label><input id="supEmail" type="email" class="smallInput" placeholder="correo@proveedor.cl" autocomplete="email" /></div>
+            <div class="row"><label for="supCode">Código interno (opcional)</label><input id="supCode" class="smallInput" placeholder="Vacío = slug desde razón social" /></div>
             <label style="display:flex; align-items:center; gap:8px; margin-top:8px; font-size:13px; color:#B9C7E2;">
               <input type="checkbox" id="supDefault" /> Por defecto presencial
             </label>
@@ -2357,7 +2361,7 @@
                 </div>
               </div>
               <div class="row"><label>Razón social</label><input class="smallInput sup-inp" data-f="legalName" data-id="${sid}" value="${escapeHtml(s.legalName || s.name || "")}" /></div>
-              <div class="row"><label>RUT</label><input class="smallInput sup-inp" data-f="rut" data-id="${sid}" value="${escapeHtml(s.rut || "")}" /></div>
+              <div class="row"><label>RUT <span class="muted" style="font-weight:600;">(obligatorio)</span></label><input class="smallInput sup-inp" data-f="rut" data-id="${sid}" value="${escapeHtml(s.rut || "")}" required /></div>
               <div class="row"><label>Dirección</label><input class="smallInput sup-inp" data-f="address" data-id="${sid}" value="${escapeHtml(s.address || "")}" /></div>
               <div class="row"><label>Cód.</label><input class="smallInput sup-inp" data-f="codigo" data-id="${sid}" value="${escapeHtml(s.codigo || "")}" /></div>
               <div class="row"><label>Contacto</label><input class="smallInput sup-inp" data-f="contactName" data-id="${sid}" value="${escapeHtml(s.contactName || "")}" /></div>
@@ -2389,6 +2393,11 @@
             });
             if (body.legalName) body.name = body.legalName;
             body.active = !!card.querySelector(".sup-active")?.checked;
+            if (!body.rut || !String(body.rut).trim()) {
+              alert("El RUT del proveedor es obligatorio.");
+              btn.disabled = false;
+              return;
+            }
             btn.disabled = true;
             const r = await adminFetch(`/api/admin/suppliers/${encodeURIComponent(id)}`, {
               method: "PATCH",
@@ -2398,7 +2407,7 @@
             btn.disabled = false;
             if (!r.ok) {
               const d = await r.json().catch(() => ({}));
-              alert(d.error || "No se pudo guardar");
+              alert(d.error === "RUT_REQUIRED" ? "El RUT del proveedor es obligatorio." : d.error || "No se pudo guardar");
               return;
             }
             loadSuppliersAdmin().catch(() => {});
@@ -2411,10 +2420,16 @@
 
     document.getElementById("supAddBtn")?.addEventListener("click", async () => {
       const legalName = document.getElementById("supLegalName")?.value?.trim();
+      const rut = document.getElementById("supRut")?.value?.trim();
+      if (!rut) {
+        alert("El RUT del proveedor es obligatorio.");
+        document.getElementById("supRut")?.focus();
+        return;
+      }
       const body = {
         legalName,
         code: document.getElementById("supCode")?.value?.trim() || undefined,
-        rut: document.getElementById("supRut")?.value?.trim() || null,
+        rut,
         address: document.getElementById("supAddress")?.value?.trim() || null,
         codigo: document.getElementById("supCodigo")?.value?.trim() || null,
         contactName: document.getElementById("supContact")?.value?.trim() || null,
@@ -2428,7 +2443,12 @@
       });
       const d = await res.json().catch(() => ({}));
       if (!res.ok) {
-        let msg = d.error === "LEGAL_NAME_REQUIRED" ? "Indica la razón social." : (d.error || "No se pudo crear");
+        let msg =
+          d.error === "LEGAL_NAME_REQUIRED"
+            ? "Indica la razón social."
+            : d.error === "RUT_REQUIRED"
+              ? "El RUT del proveedor es obligatorio."
+              : d.error || "No se pudo crear";
         if (d.message) msg += "\n\n" + d.message;
         if (d.error === "CREATE_FAILED" && d.message && /Unknown column|does not exist|column/i.test(d.message)) {
           msg += "\n\nEjecuta en el entorno con la base de datos: npx prisma migrate deploy";

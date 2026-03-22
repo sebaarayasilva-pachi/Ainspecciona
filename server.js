@@ -4052,8 +4052,12 @@ fastify.post('/api/admin/suppliers', async (req, reply) => {
     const legalName = String(p.legalName || p.name || '').trim();
     const code = normalizeSupplierCodeInput(p.code, legalName);
     const name = String(p.name || legalName).trim();
+    const rutVal = String(p.rut || '').trim();
     if (!legalName || !code) {
       return reply.code(400).send({ ok: false, error: 'LEGAL_NAME_REQUIRED' });
+    }
+    if (!rutVal) {
+      return reply.code(400).send({ ok: false, error: 'RUT_REQUIRED' });
     }
     const setDefault = p.isDefaultPresencial === true;
     if (setDefault) {
@@ -4064,7 +4068,7 @@ fastify.post('/api/admin/suppliers', async (req, reply) => {
         code,
         name,
         legalName,
-        rut: p.rut ? String(p.rut).trim() : null,
+        rut: rutVal,
         address: p.address ? String(p.address).trim() : null,
         codigo: p.codigo ? String(p.codigo).trim() : null,
         email: p.email ? String(p.email).trim().toLowerCase() : null,
@@ -4094,7 +4098,13 @@ fastify.patch('/api/admin/suppliers/:supplierId', async (req, reply) => {
     const data = {};
     if (p.name !== undefined) data.name = String(p.name).trim();
     if (p.legalName !== undefined) data.legalName = p.legalName ? String(p.legalName).trim() : null;
-    if (p.rut !== undefined) data.rut = p.rut ? String(p.rut).trim() : null;
+    if (p.rut !== undefined) {
+      const rv = String(p.rut).trim();
+      if (!rv) {
+        return reply.code(400).send({ ok: false, error: 'RUT_REQUIRED' });
+      }
+      data.rut = rv;
+    }
     if (p.address !== undefined) data.address = p.address ? String(p.address).trim() : null;
     if (p.codigo !== undefined) data.codigo = p.codigo ? String(p.codigo).trim() : null;
     if (p.email !== undefined) data.email = p.email ? String(p.email).trim().toLowerCase() : null;
