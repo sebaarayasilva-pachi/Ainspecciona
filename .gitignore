@@ -30,3 +30,6 @@ Thumbs.db
 
 # Hero video (pesado): producción en GCS; copia local opcional para dev
 public/assets/video-hero.mp4
+
+# Cloud SQL Proxy (binario local, no versionar)
+cloud-sql-proxy*.exe
