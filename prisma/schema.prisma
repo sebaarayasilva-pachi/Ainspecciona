@@ -276,6 +276,8 @@ model Supplier {
   name                 String   @db.VarChar(255)
   legalName            String?  @db.VarChar(255)
   rut                  String?  @db.VarChar(32)
+  address              String?  @db.VarChar(512)
+  codigo               String?  @db.VarChar(64)
   email                String?  @db.VarChar(255)
   phone                String?  @db.VarChar(64)
   contactName          String?  @db.VarChar(255)

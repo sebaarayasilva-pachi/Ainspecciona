@@ -130,6 +130,7 @@ async function getDefaultPresencialSupplier() {
       data: {
         code: 'paulo-inspecciona',
         name: 'Paulo Inspecciona',
+        legalName: 'Paulo Inspecciona',
         contactName: 'Paulo Yañez',
         email: envEmail,
         notes: 'Creado automáticamente al primer pago presencial.',
@@ -4022,16 +4023,38 @@ fastify.get('/api/admin/suppliers', async (req, reply) => {
   }
 });
 
+function normalizeSupplierCodeInput(rawCode, fallbackText) {
+  let code = String(rawCode || '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+  if (!code && fallbackText) {
+    code = String(fallbackText)
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+      .slice(0, 64);
+  }
+  return code;
+}
+
 fastify.post('/api/admin/suppliers', async (req, reply) => {
   try {
     const p = req.body || {};
-    const code = String(p.code || '')
-      .trim()
-      .toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^a-z0-9-]/g, '');
-    const name = String(p.name || '').trim();
-    if (!code || !name) return reply.code(400).send({ ok: false, error: 'CODE_AND_NAME_REQUIRED' });
+    const legalName = String(p.legalName || p.name || '').trim();
+    const code = normalizeSupplierCodeInput(p.code, legalName);
+    const name = String(p.name || legalName).trim();
+    if (!legalName || !code) {
+      return reply.code(400).send({ ok: false, error: 'LEGAL_NAME_REQUIRED' });
+    }
     const setDefault = p.isDefaultPresencial === true;
     if (setDefault) {
       await prisma.supplier.updateMany({ where: {}, data: { isDefaultPresencial: false } });
@@ -4040,8 +4063,10 @@ fastify.post('/api/admin/suppliers', async (req, reply) => {
       data: {
         code,
         name,
-        legalName: p.legalName ? String(p.legalName).trim() : null,
+        legalName,
         rut: p.rut ? String(p.rut).trim() : null,
+        address: p.address ? String(p.address).trim() : null,
+        codigo: p.codigo ? String(p.codigo).trim() : null,
         email: p.email ? String(p.email).trim().toLowerCase() : null,
         phone: p.phone ? String(p.phone).trim() : null,
         contactName: p.contactName ? String(p.contactName).trim() : null,
@@ -4056,7 +4081,9 @@ fastify.post('/api/admin/suppliers', async (req, reply) => {
       return reply.code(409).send({ ok: false, error: 'CODE_EXISTS' });
     }
     req.log.error({ err }, 'admin-suppliers-create');
-    return reply.code(500).send({ ok: false, error: 'CREATE_FAILED' });
+    const msg = String(err?.message || 'Error desconocido');
+    const short = msg.length > 280 ? `${msg.slice(0, 280)}…` : msg;
+    return reply.code(500).send({ ok: false, error: 'CREATE_FAILED', message: short });
   }
 });
 
@@ -4068,6 +4095,8 @@ fastify.patch('/api/admin/suppliers/:supplierId', async (req, reply) => {
     if (p.name !== undefined) data.name = String(p.name).trim();
     if (p.legalName !== undefined) data.legalName = p.legalName ? String(p.legalName).trim() : null;
     if (p.rut !== undefined) data.rut = p.rut ? String(p.rut).trim() : null;
+    if (p.address !== undefined) data.address = p.address ? String(p.address).trim() : null;
+    if (p.codigo !== undefined) data.codigo = p.codigo ? String(p.codigo).trim() : null;
     if (p.email !== undefined) data.email = p.email ? String(p.email).trim().toLowerCase() : null;
     if (p.phone !== undefined) data.phone = p.phone ? String(p.phone).trim() : null;
     if (p.contactName !== undefined) data.contactName = p.contactName ? String(p.contactName).trim() : null;
@@ -4100,7 +4129,19 @@ fastify.get('/api/admin/presencial-orders', async (req, reply) => {
       take: 200,
       include: {
         tenant: { select: { id: true, name: true, email: true, phone: true } },
-        supplier: { select: { id: true, code: true, name: true, email: true, contactName: true } },
+        supplier: {
+          select: {
+            id: true,
+            code: true,
+            name: true,
+            legalName: true,
+            rut: true,
+            address: true,
+            codigo: true,
+            email: true,
+            contactName: true
+          }
+        },
         case: { select: { id: true, shortId: true, status: true } }
       }
     });

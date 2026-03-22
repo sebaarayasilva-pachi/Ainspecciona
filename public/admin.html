@@ -921,17 +921,18 @@
 
       <div class="card" style="margin-top:24px;">
         <h3>Proveedores</h3>
-        <div class="kpiSubtle">Código único (slug). Solo uno puede ser “por defecto” para nuevas órdenes presenciales.</div>
+        <div class="kpiSubtle">Datos para OC y contacto. El <strong>código interno</strong> (slug) se genera desde la razón social si lo dejas vacío. Solo un proveedor puede ser “por defecto” para nuevas órdenes presenciales.</div>
         <div id="suppliersMigrationNote" class="note" style="display:none;"></div>
         <div class="grid" style="grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top:16px; gap:16px;">
           <div>
             <h4 style="margin:0 0 10px; font-size:14px; color:#A9B7D0;">Nuevo proveedor</h4>
-            <div class="row"><label>Código</label><input id="supCode" class="smallInput" placeholder="ej. otro-proveedor" /></div>
-            <div class="row"><label>Nombre</label><input id="supName" class="smallInput" placeholder="Razón social o marca" /></div>
-            <div class="row"><label>Contacto</label><input id="supContact" class="smallInput" placeholder="Nombre" /></div>
-            <div class="row"><label>Email</label><input id="supEmail" type="email" class="smallInput" placeholder="correo@proveedor.cl" /></div>
-            <div class="row"><label>Teléfono</label><input id="supPhone" class="smallInput" placeholder="+56..." /></div>
-            <div class="row"><label>RUT</label><input id="supRut" class="smallInput" placeholder="opcional" /></div>
+            <div class="row"><label>Razón social</label><input id="supLegalName" class="smallInput" placeholder="Ej. Paulo Inspecciona SpA" /></div>
+            <div class="row"><label>RUT</label><input id="supRut" class="smallInput" placeholder="12.345.678-9" /></div>
+            <div class="row"><label>Dirección</label><input id="supAddress" class="smallInput" placeholder="Calle, número, comuna" /></div>
+            <div class="row"><label>Cód.</label><input id="supCodigo" class="smallInput" placeholder="Ej. postal o comuna" /></div>
+            <div class="row"><label>Contacto</label><input id="supContact" class="smallInput" placeholder="Nombre del contacto" /></div>
+            <div class="row"><label>Mail</label><input id="supEmail" type="email" class="smallInput" placeholder="correo@proveedor.cl" /></div>
+            <div class="row"><label>Código interno (opcional)</label><input id="supCode" class="smallInput" placeholder="Vacío = slug desde razón social" /></div>
             <label style="display:flex; align-items:center; gap:8px; margin-top:8px; font-size:13px; color:#B9C7E2;">
               <input type="checkbox" id="supDefault" /> Por defecto presencial
             </label>
@@ -2342,16 +2343,28 @@
         list.innerHTML = suppliers.map((s) => {
           const def = s.isDefaultPresencial ? '<span class="pill" style="background:#1F6BFF;color:#fff;font-size:10px;">Por defecto</span>' : "";
           const act = s.active ? "" : '<span class="pill" style="background:#64748b;color:#fff;font-size:10px;">Inactivo</span>';
+          const sid = escapeHtml(s.id);
           return `
-            <div class="card" style="margin-bottom:12px; padding:14px;" data-supplier-id="${escapeHtml(s.id)}">
-              <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px; flex-wrap:wrap;">
+            <div class="card" style="margin-bottom:14px; padding:14px;" data-supplier-id="${sid}">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
                 <div>
-                  <strong>${escapeHtml(s.name)}</strong> <span class="muted" style="font-size:12px;">${escapeHtml(s.code)}</span>
+                  <span class="muted" style="font-size:11px;">Código interno</span> <code style="font-size:12px;">${escapeHtml(s.code)}</code>
                   ${def} ${act}
-                  <div class="muted" style="font-size:12px; margin-top:4px;">${escapeHtml(s.contactName || "—")} · ${escapeHtml(s.email || "—")} · ${escapeHtml(s.phone || "—")}</div>
                 </div>
-                <button type="button" class="btn outline" data-action="sup-default" data-id="${escapeHtml(s.id)}" ${s.isDefaultPresencial ? "disabled" : ""}>Marcar default</button>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                  <button type="button" class="btn outline" data-action="sup-default" data-id="${sid}" ${s.isDefaultPresencial ? "disabled" : ""}>Marcar default</button>
+                  <button type="button" class="btn" data-action="sup-save" data-id="${sid}">Guardar</button>
+                </div>
               </div>
+              <div class="row"><label>Razón social</label><input class="smallInput sup-inp" data-f="legalName" data-id="${sid}" value="${escapeHtml(s.legalName || s.name || "")}" /></div>
+              <div class="row"><label>RUT</label><input class="smallInput sup-inp" data-f="rut" data-id="${sid}" value="${escapeHtml(s.rut || "")}" /></div>
+              <div class="row"><label>Dirección</label><input class="smallInput sup-inp" data-f="address" data-id="${sid}" value="${escapeHtml(s.address || "")}" /></div>
+              <div class="row"><label>Cód.</label><input class="smallInput sup-inp" data-f="codigo" data-id="${sid}" value="${escapeHtml(s.codigo || "")}" /></div>
+              <div class="row"><label>Contacto</label><input class="smallInput sup-inp" data-f="contactName" data-id="${sid}" value="${escapeHtml(s.contactName || "")}" /></div>
+              <div class="row"><label>Mail</label><input class="smallInput sup-inp" type="email" data-f="email" data-id="${sid}" value="${escapeHtml(s.email || "")}" /></div>
+              <label style="display:flex; align-items:center; gap:8px; margin-top:8px; font-size:12px; color:#B9C7E2;">
+                <input type="checkbox" class="sup-active" data-id="${sid}" ${s.active ? "checked" : ""} /> Activo
+              </label>
             </div>`;
         }).join("");
         list.querySelectorAll("[data-action=sup-default]").forEach((btn) => {
@@ -2365,21 +2378,47 @@
             if (r.ok) loadSuppliersAdmin().catch(() => {});
           });
         });
+        list.querySelectorAll("[data-action=sup-save]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const id = btn.getAttribute("data-id");
+            const card = btn.closest("[data-supplier-id]");
+            const body = {};
+            card.querySelectorAll(".sup-inp").forEach((inp) => {
+              const f = inp.getAttribute("data-f");
+              body[f] = inp.value.trim() || null;
+            });
+            if (body.legalName) body.name = body.legalName;
+            body.active = !!card.querySelector(".sup-active")?.checked;
+            btn.disabled = true;
+            const r = await adminFetch(`/api/admin/suppliers/${encodeURIComponent(id)}`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(body)
+            });
+            btn.disabled = false;
+            if (!r.ok) {
+              const d = await r.json().catch(() => ({}));
+              alert(d.error || "No se pudo guardar");
+              return;
+            }
+            loadSuppliersAdmin().catch(() => {});
+          });
+        });
       } catch (e) {
         list.textContent = "Error de red.";
       }
     }
 
     document.getElementById("supAddBtn")?.addEventListener("click", async () => {
-      const code = document.getElementById("supCode")?.value?.trim();
-      const name = document.getElementById("supName")?.value?.trim();
+      const legalName = document.getElementById("supLegalName")?.value?.trim();
       const body = {
-        code,
-        name,
+        legalName,
+        code: document.getElementById("supCode")?.value?.trim() || undefined,
+        rut: document.getElementById("supRut")?.value?.trim() || null,
+        address: document.getElementById("supAddress")?.value?.trim() || null,
+        codigo: document.getElementById("supCodigo")?.value?.trim() || null,
         contactName: document.getElementById("supContact")?.value?.trim() || null,
         email: document.getElementById("supEmail")?.value?.trim() || null,
-        phone: document.getElementById("supPhone")?.value?.trim() || null,
-        rut: document.getElementById("supRut")?.value?.trim() || null,
         isDefaultPresencial: !!document.getElementById("supDefault")?.checked
       };
       const res = await adminFetch("/api/admin/suppliers", {
@@ -2389,15 +2428,21 @@
       });
       const d = await res.json().catch(() => ({}));
       if (!res.ok) {
-        alert(d.error || "No se pudo crear");
+        let msg = d.error === "LEGAL_NAME_REQUIRED" ? "Indica la razón social." : (d.error || "No se pudo crear");
+        if (d.message) msg += "\n\n" + d.message;
+        if (d.error === "CREATE_FAILED" && d.message && /Unknown column|does not exist|column/i.test(d.message)) {
+          msg += "\n\nEjecuta en el entorno con la base de datos: npx prisma migrate deploy";
+        }
+        alert(msg);
         return;
       }
+      document.getElementById("supLegalName").value = "";
       document.getElementById("supCode").value = "";
-      document.getElementById("supName").value = "";
+      document.getElementById("supRut").value = "";
+      document.getElementById("supAddress").value = "";
+      document.getElementById("supCodigo").value = "";
       document.getElementById("supContact").value = "";
       document.getElementById("supEmail").value = "";
-      document.getElementById("supPhone").value = "";
-      document.getElementById("supRut").value = "";
       document.getElementById("supDefault").checked = false;
       loadSuppliersAdmin().catch(() => {});
     });
@@ -2439,7 +2484,7 @@
           const tenantN = o.tenant?.name || "—";
           const caseRef = o.case?.shortId || o.case?.id?.slice(0, 8) || "—";
           const addr = (o.addressSnapshot || "—") + (o.surfaceM2 ? ` · ${o.surfaceM2} m²` : "");
-          const sup = o.supplier?.name || "—";
+          const sup = o.supplier?.legalName || o.supplier?.name || "—";
           const tr = document.createElement("tr");
           tr.innerHTML = `
             <td data-label="Fecha"><div class="muted" style="font-size:11px;">${escapeHtml(created)}</div></td>
