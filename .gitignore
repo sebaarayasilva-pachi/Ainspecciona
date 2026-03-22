@@ -27,3 +27,6 @@ Thumbs.db
 
 # Firebase local cache
 .firebase/
+
+# Hero video (pesado): producción en GCS; copia local opcional para dev
+public/assets/video-hero.mp4

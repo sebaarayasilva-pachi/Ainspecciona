@@ -739,7 +739,8 @@
           controls
           preload="auto"
         >
-          <!-- Mismo bucket que GCS_BUCKET (fotos). Sube: gsutil cp video-hero.mp4 gs://BUCKET/site/video-hero.mp4 y lectura pública del objeto. -->
+          <!-- 1) Local (opcional): public/assets/video-hero.mp4 — no va en Git; útil en desarrollo. 2) Producción: GCS (mismo bucket que fotos). -->
+          <source src="/assets/video-hero.mp4" type="video/mp4" />
           <source
             src="https://storage.googleapis.com/ainspecciona-photos-852721861524/site/video-hero.mp4"
             type="video/mp4"

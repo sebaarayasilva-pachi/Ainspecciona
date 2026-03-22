@@ -42,9 +42,11 @@ gsutil cp video-hero.mp4 gs://ainspecciona-photos-852721861524/site/video-hero.m
 
 2. **Lectura pública** del objeto (o política de bucket que ya uses para fotos). Si el video no carga en el navegador, revisa permisos del objeto y, si hace falta, CORS del bucket para `GET` desde `https://ainspecciona.web.app` (y tu dominio).
 
-URL pública usada en `public/corredores.html`:
+URL pública usada en `public/corredores.html` (segundo `<source>` si el primero no existe):
 
 `https://storage.googleapis.com/ainspecciona-photos-852721861524/site/video-hero.mp4`
+
+Opcional en desarrollo: copia el MP4 a `public/assets/video-hero.mp4` (está en `.gitignore`; no se sube a Git).
 
 ---
 
