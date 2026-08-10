@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <script>(function(){try{var t=localStorage.getItem("postventa-portal-theme");document.documentElement.setAttribute("data-theme",t==="light"?"light":"dark");}catch(e){document.documentElement.setAttribute("data-theme","dark");}})();</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ingresar · Ainspecciona Postventa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/postventa/portal/assets/portal.css?v=20260726-chart1" />
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .login-card {
+      width: 100%;
+      max-width: 420px;
+      background: rgba(10, 10, 16, 0.88);
+      border: 1px solid rgba(34, 211, 238, 0.35);
+      border-radius: 0;
+      box-shadow: 0 0 28px rgba(34, 211, 238, 0.2), var(--shadow);
+      padding: 32px 28px 28px;
+      position: relative;
+    }
+    .login-card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0;
+      width: 22px; height: 22px;
+      border-top: 1px solid var(--neon);
+      border-left: 1px solid var(--neon);
+    }
+    .login-card::after {
+      content: "";
+      position: absolute;
+      bottom: 0; right: 0;
+      width: 22px; height: 22px;
+      border-bottom: 1px solid var(--neon);
+      border-right: 1px solid var(--neon);
+    }
+    .login-brand {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--neon);
+      margin: 0 0 8px;
+      font-family: var(--font-mono);
+      text-shadow: 0 0 12px rgba(34, 211, 238, 0.5);
+    }
+    .login-card h1 {
+      margin: 0 0 6px;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      font-family: var(--font-ui);
+    }
+    .login-card .sub {
+      margin: 0 0 22px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.45;
+      font-family: var(--font-mono);
+    }
+    label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      margin: 0 0 6px;
+      font-family: var(--font-mono);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid var(--border);
+      border-radius: 0;
+      padding: 12px 14px;
+      font-size: 14px;
+      font-family: var(--font-mono);
+      margin-bottom: 14px;
+      background: rgba(0, 0, 0, 0.35);
+      color: var(--text);
+    }
+    input:focus {
+      outline: none;
+      border-color: var(--neon-line);
+      box-shadow: 0 0 0 1px var(--neon-line), var(--hud-glow);
+    }
+    .btn-login {
+      width: 100%;
+      border: 1px solid var(--neon-line);
+      border-radius: 0;
+      padding: 13px 16px;
+      font-size: 13px;
+      font-weight: 700;
+      background: rgba(34, 211, 238, 0.18);
+      color: var(--neon);
+      margin-top: 4px;
+      font-family: var(--font-mono);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      box-shadow: var(--hud-glow);
+    }
+    .btn-login:disabled { opacity: .6; cursor: wait; }
+    .err {
+      display: none;
+      margin: 0 0 12px;
+      padding: 10px 12px;
+      border-radius: 0;
+      border: 1px solid rgba(251, 113, 133, 0.45);
+      background: rgba(251, 113, 133, 0.1);
+      color: var(--red);
+      font-size: 12px;
+      font-weight: 600;
+      font-family: var(--font-mono);
+    }
+    .err.show { display: block; }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <p class="login-brand">Ainspecciona Postventa</p>
+    <h1>Ingresar</h1>
+    <p class="sub">Portal de gestión de solicitudes de postventa para tu inmobiliaria.</p>
+    <div class="err" id="err"></div>
+    <form id="loginForm">
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" autocomplete="username" required />
+      <label for="password">Clave</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required />
+      <button class="btn-login" type="submit" id="submitBtn">Entrar</button>
+    </form>
+  </div>
+  <script src="/postventa/portal/assets/portal-app.js?v=20260806-sep1"></script>
+  <script>
+    (function () {
+      const P = window.PvPortal;
+      const form = document.getElementById("loginForm");
+      const err = document.getElementById("err");
+      const btn = document.getElementById("submitBtn");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        err.classList.remove("show");
+        btn.disabled = true;
+        try {
+          const res = await fetch("/api/postventa/portal/login", {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: document.getElementById("email").value,
+              password: document.getElementById("password").value
+            })
+          });
+          const data = await res.json();
+          if (!res.ok || !data.ok) {
+            err.textContent = data.message || "No se pudo iniciar sesión.";
+            err.classList.add("show");
+            btn.disabled = false;
+            return;
+          }
+          if (P && P.setStoredToken) P.setStoredToken(data.token || "");
+          else {
+            try {
+              sessionStorage.setItem("postventa_session", data.token || "");
+            } catch (e) {
+              /* ignore */
+            }
+          }
+          const next = new URLSearchParams(location.search).get("next") || "/postventa";
+          const safe =
+            next.startsWith("/postventa") &&
+            !next.startsWith("/postventa/captura") &&
+            !next.startsWith("/postventa/capture") &&
+            !next.startsWith("/postventa/inspector");
+          const dest = new URL(safe ? next : "/postventa", location.origin);
+          if (data.token) dest.searchParams.set("pv_s", data.token);
+          location.replace(dest.pathname + dest.search + dest.hash);
+        } catch {
+          err.textContent = "Error de red. Intenta de nuevo.";
+          err.classList.add("show");
+          btn.disabled = false;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

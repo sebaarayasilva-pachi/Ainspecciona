@@ -1,0 +1,32 @@
+-- Aintelligence: feedback de hallazgos (PropertyCheck, inspecciones, postventa)
+CREATE TABLE `ai_feedback` (
+    `id` VARCHAR(191) NOT NULL,
+    `tenantId` VARCHAR(191) NULL,
+    `source` ENUM('PROPERTYCHECK', 'AINSPECTA', 'POSTVENTA') NOT NULL DEFAULT 'PROPERTYCHECK',
+    `status` ENUM('draft', 'pending_review', 'approved', 'rejected', 'archived') NOT NULL DEFAULT 'draft',
+    `externalFeedbackId` VARCHAR(128) NOT NULL,
+    `externalInspectionId` VARCHAR(128) NOT NULL,
+    `captureId` VARCHAR(128) NOT NULL,
+    `planItemId` VARCHAR(128) NOT NULL,
+    `sequence` INTEGER NULL,
+    `kpiKey` VARCHAR(64) NULL,
+    `photoPlan` JSON NULL,
+    `analyzeContext` JSON NULL,
+    `aiSnapshot` JSON NOT NULL,
+    `humanLabel` JSON NOT NULL,
+    `reviewer` JSON NULL,
+    `imagePath` VARCHAR(512) NULL,
+    `imageSha256` VARCHAR(64) NULL,
+    `imageMimeType` VARCHAR(64) NULL,
+    `payloadFingerprint` VARCHAR(64) NULL,
+    `idempotencyKey` VARCHAR(128) NULL,
+    `submittedAt` DATETIME(3) NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `ai_feedback_source_externalFeedbackId_key`(`source`, `externalFeedbackId`),
+    INDEX `ai_feedback_tenantId_idx`(`tenantId`),
+    INDEX `ai_feedback_status_idx`(`status`),
+    INDEX `ai_feedback_source_externalInspectionId_idx`(`source`, `externalInspectionId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

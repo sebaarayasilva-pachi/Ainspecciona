@@ -2,7 +2,7 @@ import PDFDocument from 'pdfkit';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
-import { classifyKpiFromSlot, badgeFromScore, DEFAULT_SCORE_CONFIG } from '../scoring/scoringV2_2.js';
+import { classifyKpiFromSlot, badgeFromScore, DEFAULT_SCORE_CONFIG, kpiPenaltyFromSeverity } from '../scoring/scoringV2_2.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const LOGO_PATH = path.join(__dirname, '../../public/assets/Logo 2 ainspecciona.png');
@@ -95,8 +95,43 @@ function formatDate(value) {
   return d.toLocaleDateString('es-CL', { day: '2-digit', month: 'long', year: 'numeric' });
 }
 
-function buildKpiGroups(slots, scoreConfig) {
+async function fetchLogoBuffer(logoUrl) {
+  const url = String(logoUrl || '').trim();
+  if (!url || !/^https?:\/\//i.test(url)) return null;
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+    if (!res.ok) return null;
+    const ab = await res.arrayBuffer();
+    return Buffer.from(ab);
+  } catch (_) {
+    return null;
+  }
+}
+
+function kpiPenaltyForSlot(slot, kpiKey, cfg) {
+  return kpiPenaltyFromSeverity(kpiKey, slot.severity, cfg);
+}
+
+/** Misma lógica que computeScoringByKpi: promedio de penalización por slot, no suma total. */
+function scoreKpiFromSlots(items, kpiKey, cfg) {
+  if (!items.length) return null;
+  const impact = items.reduce((acc, s) => acc + kpiPenaltyForSlot(s, kpiKey, cfg), 0);
+  const avgPenalty = impact / items.length;
+  return Math.max(0, Math.min(100, Math.round(100 - avgPenalty)));
+}
+
+function slotScoreForPdf(slot, kpiKey, cfg) {
+  if (slot.omitted || String(slot.status || '').toUpperCase() === 'NOT_CAPTURABLE') return null;
+  const penalty = kpiPenaltyForSlot(slot, kpiKey, cfg);
+  if (!slot.severity) return 100;
+  return Math.max(0, 100 - penalty);
+}
+
+function buildKpiGroups(slots, scoreConfig, byGroupArr = []) {
   const cfg = scoreConfig || DEFAULT_SCORE_CONFIG;
+  const backendMap = new Map(
+    (byGroupArr || []).map((g) => [String(g.groupKey || '').toUpperCase(), g])
+  );
   const buckets = new Map(KPI_ORDER.map((k) => [k, []]));
 
   slots.forEach((s) => {
@@ -106,22 +141,14 @@ function buildKpiGroups(slots, scoreConfig) {
 
   return KPI_ORDER.map((key) => {
     const items = buckets.get(key) || [];
-    if (!items.length) {
-      return { key, title: kpiLabel(key), score: null, badge: 'GRAY', items: [] };
-    }
-    const penalties = items.map((s) => {
-      const sev = String(s.severity || '').toLowerCase();
-      const kpiCfg = cfg?.kpis?.[key] || DEFAULT_SCORE_CONFIG.kpis[key];
-      if (sev === 'high') return Number(kpiCfg?.high ?? 0);
-      if (sev === 'medium') return Number(kpiCfg?.medium ?? 0);
-      if (sev === 'low') return Number(kpiCfg?.low ?? 0);
-      return 0;
-    });
-    const totalPenalty = penalties.reduce((a, b) => a + b, 0);
-    const score = Math.max(0, Math.min(100, 100 - totalPenalty));
+    if (!items.length) return null;
+    const backend = backendMap.get(key);
+    const score = backend?.scoreIfOnlyGroup != null
+      ? Math.round(Number(backend.scoreIfOnlyGroup))
+      : scoreKpiFromSlots(items, key, cfg);
     const badge = badgeFromScore(score, cfg);
     return { key, title: kpiLabel(key), score, badge, items };
-  }).filter((g) => g.items.length > 0);
+  }).filter(Boolean);
 }
 
 export async function generateReportPdf({ summary, storage, prisma, scoreConfig }) {
@@ -136,16 +163,28 @@ export async function generateReportPdf({ summary, storage, prisma, scoreConfig 
   const score = Math.round(Math.max(0, Math.min(100, summary.score ?? 0)));
   const badge = summary.badge || 'GRAY';
 
-  const kpiGroups = buildKpiGroups(slots, cfg);
+  const kpiGroups = buildKpiGroups(slots, cfg, summary.byGroup || []);
 
   // === HEADER (dark premium) ===
   doc.rect(0, 0, doc.page.width, 56).fill('#0B1220');
   doc.rect(0, 0, doc.page.width, 3).fill('#7C3AED');
-  if (fs.existsSync(LOGO_PATH)) {
-    try { doc.image(LOGO_PATH, 28, 8, { fit: [90, 40], align: 'center', valign: 'center' }); } catch (_) {}
+  let logoX = 28;
+  const tenantLogoUrl = summary.tenant?.logoUrl || null;
+  const tenantLogoBuf = tenantLogoUrl ? await fetchLogoBuffer(tenantLogoUrl) : null;
+  if (tenantLogoBuf) {
+    try {
+      doc.image(tenantLogoBuf, logoX, 8, { fit: [88, 40], align: 'center', valign: 'center' });
+      logoX += 96;
+    } catch (_) {}
   }
-  const headerTextX = fs.existsSync(LOGO_PATH) ? 130 : 40;
-  doc.fontSize(16).fillColor('#F8FAFC').font('Helvetica-Bold').text('Informe Técnico del Inmueble', headerTextX, 14, { width: 380 });
+  if (fs.existsSync(LOGO_PATH)) {
+    try {
+      doc.image(LOGO_PATH, logoX, 8, { fit: [90, 40], align: 'center', valign: 'center' });
+      logoX += 98;
+    } catch (_) {}
+  }
+  const headerTextX = logoX > 28 ? logoX + 4 : 40;
+  doc.fontSize(16).fillColor('#F8FAFC').font('Helvetica-Bold').text('Informe Técnico del Inmueble', headerTextX, 14, { width: Math.max(200, 420 - (headerTextX - 40)) });
   doc.fontSize(10).fillColor('#94a3b8').text('Evaluación automatizada basada en evidencia fotográfica', headerTextX, 34);
   doc.fontSize(9).fillColor('#64748b').text(`STI v3.0 · ${formatDate(c.createdAt)}`, 0, 22, { width: doc.page.width - 40, align: 'right' });
 
@@ -190,24 +229,29 @@ export async function generateReportPdf({ summary, storage, prisma, scoreConfig 
   y += 28;
 
   const kpiSummaryMap = new Map(kpiGroups.map((g) => [g.key, g]));
-  const kpiSummary = KPI_ORDER.map((key) => kpiSummaryMap.get(key) || { key, title: kpiLabel(key), score: null, badge: 'GRAY' }).slice(0, 8);
-  const colW = 110;
-  const rowH = 68;
-  const gaugeR = 13;
+  const kpiSummary = KPI_ORDER
+    .map((key) => kpiSummaryMap.get(key) || { key, title: kpiLabel(key), score: null, badge: 'GRAY' })
+    .filter((k) => kpiSummaryMap.has(k.key));
+  const colW = 122;
+  const colGap = 10;
+  const rowH = 88;
+  const gaugeR = 16;
   kpiSummary.forEach((kpi, idx) => {
     const col = idx % 4;
     const row = Math.floor(idx / 4);
-    const x = margin + col * (colW + 30);
-    const ky = y + row * (rowH + 12) + gaugeR + 12;
+    const x = margin + col * (colW + colGap);
+    const rowY = y + row * (rowH + 14);
+    const gaugeCx = x + colW / 2;
+    const gaugeCy = rowY + 24;
 
-    drawCircleGauge(doc, x + gaugeR + 4, ky - gaugeR - 12, gaugeR, kpi.score, badgeColor(kpi.badge));
+    drawCircleGauge(doc, gaugeCx, gaugeCy, gaugeR, kpi.score, badgeColor(kpi.badge));
     const scoreText = kpi.score == null ? '—' : String(Math.round(kpi.score));
-    doc.fontSize(10).fillColor('#111827').font('Helvetica-Bold').text(scoreText, x, ky - gaugeR - 14, { width: gaugeR * 2 + 8, align: 'center' });
-    doc.fontSize(9).fillColor('#374151').font('Helvetica').text(kpi.title, x + gaugeR * 2 + 14, ky - gaugeR - 14, { width: colW - 45 });
-    doc.fontSize(8).fillColor(badgeColor(kpi.badge)).text(badgeLabel(kpi.badge), x + gaugeR * 2 + 14, ky - gaugeR + 8);
+    doc.fontSize(10).fillColor('#111827').font('Helvetica-Bold').text(scoreText, gaugeCx - 22, gaugeCy - 5, { width: 44, align: 'center' });
+    doc.fontSize(8).fillColor('#374151').font('Helvetica').text(kpi.title, x, gaugeCy + gaugeR + 10, { width: colW, align: 'center', lineGap: 1 });
+    doc.fontSize(7).fillColor(badgeColor(kpi.badge)).font('Helvetica-Bold').text(badgeLabel(kpi.badge), x, gaugeCy + gaugeR + 34, { width: colW, align: 'center' });
   });
 
-  y += (Math.ceil(kpiSummary.length / 4) * (rowH + 12)) + 35;
+  y += (Math.ceil(Math.max(kpiSummary.length, 1) / 4) * (rowH + 14)) + 28;
 
   // === RESUMEN EJECUTIVO ===
   const execSummary = c.executiveSummary || null;
@@ -243,9 +287,13 @@ export async function generateReportPdf({ summary, storage, prisma, scoreConfig 
     const groupGaugeCy = y + 12;
     drawCircleGauge(doc, groupGaugeCx, groupGaugeCy, groupGaugeR, group.score, badgeColor(group.badge));
     doc.fontSize(10).fillColor('#111827').font('Helvetica-Bold').text(String(Math.round(group.score ?? 0)), margin, groupGaugeCy - 2, { width: groupGaugeR * 2 + 8, align: 'center' });
-    doc.fontSize(13).fillColor('#111827').font('Helvetica-Bold').text(group.title, margin + groupGaugeR * 2 + 20, y + 4);
-    doc.fontSize(9).fillColor(badgeColor(group.badge)).font('Helvetica-Bold').text(badgeLabel(group.badge), margin + groupGaugeR * 2 + 20, y + 18);
-    doc.fontSize(9).fillColor('#6B7280').text(`${group.items.length} slots`, margin + groupGaugeR * 2 + 95, y + 18);
+    const metaX = margin + groupGaugeR * 2 + 20;
+    doc.fontSize(13).fillColor('#111827').font('Helvetica-Bold').text(group.title, metaX, y + 4);
+    doc.fontSize(9).fillColor(badgeColor(group.badge)).font('Helvetica-Bold');
+    const badgeText = badgeLabel(group.badge);
+    doc.text(badgeText, metaX, y + 18);
+    const badgeW = doc.widthOfString(badgeText);
+    doc.fillColor('#6B7280').font('Helvetica').text(`${group.items.length} slots`, metaX + badgeW + 14, y + 18);
     y += 42;
 
     for (const slot of group.items) {
@@ -254,15 +302,19 @@ export async function generateReportPdf({ summary, storage, prisma, scoreConfig 
         y = 50;
       }
 
-      const sev = String(slot.severity || '').toUpperCase() || 'LOW';
+      const isOmitted = !!slot.omitted || String(slot.status || '').toUpperCase() === 'NOT_CAPTURABLE';
+      const sev = isOmitted
+        ? 'OMITIDA'
+        : (String(slot.severity || '').toUpperCase() || 'OK');
       const source = String(slot.source || '').toUpperCase() === 'OPENAI' ? 'OpenAI' : 'V1';
+      const slotScore = slotScoreForPdf(slot, group.key, cfg);
       const sanitize = (t) => t && typeof t === 'string' ? t.replace(/\bLIVING_CEILING\b/gi, 'el techo del living').replace(/\bLIVING_WALLS\b/gi, 'los muros').replace(/\bBATHROOM_\d+_\w+/g, (m) => m.replace(/_/g, ' ').toLowerCase()).replace(/\bKITCHEN_\w+/g, (m) => m.replace(/_/g, ' ').toLowerCase()) : t;
       const desc = removeRetakePhrases(sanitize(slot?.analysisDebug?.openai?.parsed?.description || slot.message || 'Sin observaciones.'));
       const kpiAnalysis = removeRetakePhrases(sanitize(slot?.analysisDebug?.openai?.parsed?.kpi_analysis || ''));
       const analysisText = kpiAnalysis || desc;
 
-      const imgW = 64;
-      const imgH = 48;
+      const imgW = 80;
+      const imgH = 60;
       const textWidth = doc.page.width - margin * 2 - imgW - 24;
       const textH = doc.fontSize(9).heightOfString(analysisText, { width: textWidth });
       const slotH = Math.max(78, 34 + textH + 10);
@@ -278,7 +330,8 @@ export async function generateReportPdf({ summary, storage, prisma, scoreConfig 
       doc.lineWidth(0.4).strokeColor('#E5E7EB').moveTo(margin, y).lineTo(doc.page.width - margin, y).stroke();
       doc.lineWidth(1);
       doc.fontSize(10).fillColor('#111827').font('Helvetica-Bold').text(slot.title || slot.slotCode || '—', margin, y + 2);
-      doc.fontSize(8).fillColor('#6B7280').text(`Severidad: ${sev} · Fuente: ${source} · Puntaje: ${100 - (slot.severity ? 5 : 0)}`, margin, y + 16);
+      const scoreLine = slotScore == null ? 'Foto omitida' : `Puntaje: ${slotScore}/100`;
+      doc.fontSize(8).fillColor('#6B7280').text(`Severidad: ${sev} · Fuente: ${source} · ${scoreLine}`, margin, y + 16);
       doc.fontSize(9).fillColor('#4B5563').font('Helvetica').text(analysisText, margin, y + 30, { width: textWidth });
 
       if (slot.photoId && storage && prisma) {
@@ -299,7 +352,12 @@ export async function generateReportPdf({ summary, storage, prisma, scoreConfig 
     y += 15;
   }
 
-  if (y > 650) {
+  const footerMarginTop = 24;
+  const footerHeight = doc.fontSize(9).heightOfString(
+    'Documentación técnica del análisis automatizado',
+    { width: doc.page.width - margin * 2 }
+  ) + 320;
+  if (y + footerMarginTop + footerHeight > doc.page.height - margin) {
     doc.addPage();
     y = 50;
   }

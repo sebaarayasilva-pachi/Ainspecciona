@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Contrato · In &amp; Out</title>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/inout/assets/inout.css" />
+</head>
+<body class="io-shell">
+  <div class="io-layout">
+    <div id="shell"></div>
+    <main class="io-main">
+      <p style="margin:0 0 12px"><a id="backLink" href="/inout/portal">← Dashboard</a></p>
+      <h1 id="title">Contrato</h1>
+      <p class="sub" id="meta"></p>
+      <p id="msg" class="okmsg" hidden></p>
+      <p id="err" class="err" hidden></p>
+      <div class="card" id="actions"></div>
+      <div class="card">
+        <h2 style="margin:0 0 12px;font-size:16px">Visitas</h2>
+        <div id="visits"></div>
+      </div>
+    </main>
+  </div>
+  <script src="/inout/portal/assets/inout-app.js"></script>
+  <script>
+    const Io = window.IoPortal;
+    const id = new URLSearchParams(location.search).get("id");
+    const msg = document.getElementById("msg");
+    const err = document.getElementById("err");
+    function show(el, t) {
+      el.textContent = t;
+      el.hidden = !t;
+    }
+
+    async function api(path, opts) {
+      const res = await Io.ioFetch(path, opts);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.ok === false) throw new Error(data.message || data.error || "Error");
+      return data;
+    }
+
+    async function load() {
+      show(msg, "");
+      show(err, "");
+      const data = await api("/api/inout/leases/" + encodeURIComponent(id));
+      const l = data.lease;
+      document.getElementById("title").textContent = l.property?.address || "Contrato";
+      document.getElementById("meta").textContent =
+        Io.statusLabel(l.cycleStatus) +
+        " · " +
+        (l.tenantName || "Sin arrendatario") +
+        " · " +
+        (l.property?.propertyType || "");
+
+      const inVisit = (l.visits || []).find((v) => v.phase === "IN");
+      const outVisit = (l.visits || []).find((v) => v.phase === "OUT");
+      const actions = document.getElementById("actions");
+      actions.innerHTML = '<h2 style="margin:0 0 12px;font-size:16px">Acciones</h2>';
+
+      const addBtn = (label, fn, secondary) => {
+        const b = document.createElement("button");
+        b.className = "btn" + (secondary ? " secondary" : "");
+        b.type = "button";
+        b.textContent = label;
+        b.style.marginRight = "8px";
+        b.style.marginBottom = "8px";
+        b.onclick = fn;
+        actions.appendChild(b);
+      };
+
+      if (inVisit?.captureToken) {
+        addBtn("Abrir captura IN", () => {
+          location.href = "/inout/capture/" + encodeURIComponent(inVisit.captureToken);
+        });
+        addBtn(
+          "Completar IN",
+          async () => {
+            try {
+              await api("/api/inout/visits/" + inVisit.id + "/complete", { method: "POST" });
+              show(msg, "IN completada");
+              load();
+            } catch (e) {
+              show(err, e.message);
+            }
+          },
+          true
+        );
+      }
+      if (["in_completed", "out_ready"].includes(l.cycleStatus)) {
+        addBtn(
+          "Aceptar línea base IN",
+          async () => {
+            try {
+              await api("/api/inout/leases/" + id + "/accept-in", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: "{}"
+              });
+              show(msg, "Línea base aceptada");
+              load();
+            } catch (e) {
+              show(err, e.message);
+            }
+          },
+          true
+        );
+        addBtn("Iniciar OUT", async () => {
+          try {
+            const r = await api("/api/inout/leases/" + id + "/start-out", { method: "POST" });
+            location.href = "/inout/capture/" + encodeURIComponent(r.captureToken);
+          } catch (e) {
+            show(err, e.message);
+          }
+        });
+      }
+      if (outVisit?.captureToken) {
+        addBtn("Abrir captura OUT", () => {
+          location.href = "/inout/capture/" + encodeURIComponent(outVisit.captureToken);
+        });
+        addBtn(
+          "Completar OUT",
+          async () => {
+            try {
+              await api("/api/inout/visits/" + outVisit.id + "/complete", { method: "POST" });
+              show(msg, "OUT completada");
+              load();
+            } catch (e) {
+              show(err, e.message);
+            }
+          },
+          true
+        );
+      }
+      if (l.cycleStatus === "analyzing") {
+        show(msg, "Generando informe comparativo…");
+        addBtn(
+          "Ver informe",
+          () => {
+            location.href = Io.appHref("/inout/portal/report?id=" + encodeURIComponent(id));
+          },
+          true
+        );
+      }
+      if (["out_completed", "under_review"].includes(l.cycleStatus)) {
+        addBtn("Reanalizar", async () => {
+          try {
+            show(msg, "Analizando…");
+            await api("/api/inout/leases/" + id + "/analyze-diff", { method: "POST" });
+            location.href = Io.appHref("/inout/portal/report?id=" + encodeURIComponent(id));
+          } catch (e) {
+            show(err, e.message);
+          }
+        });
+        addBtn(
+          "Ver informe",
+          () => {
+            location.href = Io.appHref("/inout/portal/report?id=" + encodeURIComponent(id));
+          },
+          true
+        );
+      }
+      if (l.cycleStatus === "under_review") {
+        addBtn(
+          "Cerrar ciclo",
+          async () => {
+            try {
+              await api("/api/inout/leases/" + id + "/close", { method: "POST" });
+              show(msg, "Ciclo cerrado");
+              load();
+            } catch (e) {
+              show(err, e.message);
+            }
+          },
+          true
+        );
+      }
+
+      const visitsEl = document.getElementById("visits");
+      visitsEl.innerHTML =
+        (l.visits || [])
+          .map((v) => {
+            const done = (v.slots || []).filter((s) => s.status === "UPLOADED").length;
+            const total = (v.slots || []).length;
+            return `<div style="margin-bottom:14px">
+          <strong>${v.phase}</strong> · ${v.status} · ${done}/${total} fotos
+          ${
+            v.captureToken
+              ? '· <a href="/inout/capture/' + encodeURIComponent(v.captureToken) + '">Captura</a>'
+              : ""
+          }
+          <div style="margin-top:6px;font-size:12px;color:var(--muted)">
+            ${(v.slots || [])
+              .slice(0, 8)
+              .map((s) => s.title + " [" + s.status + "]")
+              .join(" · ")}
+            ${(v.slots || []).length > 8 ? "…" : ""}
+          </div>
+        </div>`;
+          })
+          .join("") || '<p class="sub">Sin visitas</p>';
+    }
+
+    (async function () {
+      const me = await Io.ensureAuth();
+      if (!me) return;
+      document.getElementById("shell").outerHTML = Io.renderShell("overview", me);
+      Io.bindShell();
+      document.getElementById("backLink").href = Io.appHref("/inout/portal");
+      if (!id) location.href = Io.appHref("/inout/portal");
+      else load().catch((e) => show(err, e.message));
+    })();
+  </script>
+</body>
+</html>

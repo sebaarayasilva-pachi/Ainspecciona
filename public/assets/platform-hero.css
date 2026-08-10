@@ -1,0 +1,437 @@
+/* Platform hub — fondo unificado header + hero + PNG edificio (#000) */
+:root {
+  --platform-bg: #0b0d0f;
+  --platform-grid: rgba(255, 255, 255, 0.045);
+}
+
+html:has(.platform-page),
+html:has(.platform-page) body.platform-page {
+  margin: 0;
+  background: var(--platform-bg);
+}
+
+.platform-page {
+  color: #f3f1ec;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  overflow-x: clip;
+  background: var(--platform-bg);
+}
+
+/* Una sola capa de fondo para nav + hero */
+.platform-canvas {
+  position: relative;
+  min-height: auto;
+  background: var(--platform-bg);
+  overflow: visible;
+}
+
+.platform-canvas::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-color: var(--platform-bg);
+  background-image:
+    linear-gradient(var(--platform-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--platform-grid) 1px, transparent 1px);
+  background-size: 64px 64px;
+  background-position: center top;
+  background-attachment: fixed;
+}
+
+.platform-canvas > * {
+  position: relative;
+  z-index: 1;
+}
+
+.platform-page .site-header,
+.platform-page .site-header-v2 {
+  background: transparent !important;
+  border-bottom: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.platform-page .site-header-v2 .nav {
+  max-width: 1280px;
+  min-height: 72px;
+  padding: 0 80px;
+  box-sizing: border-box;
+}
+
+.platform-page .site-header-v2 .navTopLink,
+.platform-page .site-header-v2 .navDropdownToggle {
+  color: #a9afb4;
+  font-weight: 500;
+}
+
+.platform-page .site-header-v2 .navTopLink.is-active,
+.platform-page .site-header-v2 .navDropdownToggle.is-active,
+.platform-page .site-header-v2 .navTopLink:hover,
+.platform-page .site-header-v2 .navDropdownToggle:hover {
+  color: #f3f1ec;
+}
+
+.platform-page .site-header-v2 .navDemoCta {
+  border-radius: 8px;
+  background: #e53a30;
+  box-shadow: none;
+  font-weight: 600;
+  padding: 10px 16px;
+}
+
+.platform-page .site-header-v2 .navDemoCta:hover {
+  background: #cf342b;
+  filter: none;
+}
+
+.platform-page main {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.platform-hero {
+  min-height: calc(920px - 72px);
+  background: transparent;
+}
+
+.platform-hero__inner {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 48px 80px 80px;
+  display: grid;
+  grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr);
+  gap: 32px;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.platform-hero__tag {
+  margin: 0 0 20px;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #a9afb4;
+}
+
+.platform-hero__title {
+  margin: 0 0 32px;
+  font-size: clamp(36px, 4.2vw, 56px);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  color: #f3f1ec;
+  max-width: 12ch;
+}
+
+.platform-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}
+
+.platform-hero__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  cursor: pointer;
+  font-family: inherit;
+  border: none;
+}
+
+.platform-hero__cta--ghost {
+  background: transparent;
+  color: #f3f1ec;
+  border: 1px solid rgba(243, 241, 236, 0.22);
+}
+
+.platform-hero__cta--ghost:hover {
+  border-color: rgba(243, 241, 236, 0.45);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.platform-hero__cta--primary {
+  background: #e53a30;
+  color: #fff;
+  border: 1px solid #e53a30;
+}
+
+.platform-hero__cta--primary:hover {
+  background: #cf342b;
+  border-color: #cf342b;
+}
+
+/* Hero con arte final edificio_hero_vf.png */
+.platform-hero--vf {
+  min-height: auto;
+  padding-bottom: 24px;
+}
+
+.platform-hero__inner--vf {
+  max-width: 1180px;
+  padding: 24px 48px 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+}
+
+.platform-hero__vf {
+  margin: 0;
+  width: 100%;
+  max-width: 1040px;
+}
+
+.platform-hero__vf img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.platform-hero__actions--vf {
+  justify-content: center;
+}
+
+.platform-hero__visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  overflow: visible;
+}
+
+.platform-hero__lifecycle {
+  --hero-visual-scale: 1.3;
+  position: relative;
+  width: 100%;
+  max-width: 620px;
+  aspect-ratio: 1 / 1;
+  overflow: visible;
+  transform: scale(var(--hero-visual-scale));
+  transform-origin: center center;
+}
+
+.platform-hero__lifecycle img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+}
+
+.platform-hero__steps {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  pointer-events: none;
+}
+
+.platform-hero__step {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin: 0;
+  padding: 0;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: clamp(22px, 3.6vw, 28px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+  color: #f8f6f1;
+  text-shadow: 0 0 14px rgba(255, 255, 255, 0.75), 0 2px 6px rgba(0, 0, 0, 0.85);
+}
+
+.platform-hero__step:not(.platform-hero__step--node) > span {
+  display: block;
+  width: 1ch;
+  text-align: center;
+  line-height: 1;
+}
+
+/* Centros de cada nodo (calibrados sobre edificio-hero.png) */
+.platform-hero__step--1 { left: 50%; top: 14.55%; }
+.platform-hero__step--2 { left: 82.1%; top: 35.4%; }
+.platform-hero__step--3 { left: 72.2%; top: 76.4%; }
+.platform-hero__step--4 { left: 24.5%; top: 76.3%; }
+.platform-hero__step--5 { left: 16.3%; top: 37.6%; }
+
+/* ——— Nodo 1: Recepción Técnica ——— */
+.platform-hero__step--node {
+  pointer-events: auto;
+  width: auto;
+  height: auto;
+  font-size: inherit;
+  color: inherit;
+  text-shadow: none;
+}
+
+.platform-hero__nodeBtn {
+  position: relative;
+  z-index: 2;
+  width: 38px;
+  height: 38px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.platform-hero__nodeBtn:hover,
+.platform-hero__nodeBtn.is-active,
+.platform-hero__nodeBtn[aria-pressed="true"] {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.platform-hero__nodeNum {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1em;
+  height: 1em;
+  font-family: "Inter", sans-serif;
+  font-size: clamp(24px, 3.8vw, 30px);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.35), 0 2px 10px rgba(0, 0, 0, 0.95);
+  transform: translate(0.5px, 1px);
+  transition: transform 0.15s ease;
+  pointer-events: none;
+}
+
+.platform-hero__nodeBtn:hover .platform-hero__nodeNum,
+.platform-hero__nodeBtn.is-active .platform-hero__nodeNum,
+.platform-hero__nodeBtn[aria-pressed="true"] .platform-hero__nodeNum {
+  transform: translate(0.5px, 1px) scale(1.08);
+  color: #ffffff;
+}
+
+.platform-hero__nodeLabel {
+  position: absolute;
+  left: calc(50% + 36px);
+  bottom: calc(100% + 16px);
+  transform: translateX(0);
+  display: inline-block;
+  width: max-content;
+  max-width: none;
+  box-sizing: border-box;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  text-align: center;
+  line-height: 1.25;
+  color: #f3f1ec;
+  pointer-events: none;
+  opacity: 1;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+}
+
+.platform-hero__step--node .platform-hero__nodeLabel {
+  width: max-content;
+}
+
+@media (max-width: 1100px) {
+  .platform-page .site-header-v2 .nav {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .platform-page .site-header-v2 .navMain.open {
+    background: var(--platform-bg) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .platform-hero__inner--vf {
+    padding: 16px 24px 40px;
+  }
+
+  .platform-hero__inner {
+    grid-template-columns: 1fr;
+    padding: 32px 24px 64px;
+    gap: 40px;
+  }
+
+  .platform-hero__title {
+    max-width: none;
+  }
+
+  .platform-hero__lifecycle {
+    --hero-visual-scale: 1.22;
+    max-width: 520px;
+  }
+
+  .platform-hero__step {
+    width: 44px;
+    height: 44px;
+    font-size: clamp(20px, 4.5vw, 24px);
+  }
+
+  .platform-hero__nodeBtn {
+    width: 34px;
+    height: 34px;
+  }
+
+  .platform-hero__nodeNum {
+    font-size: clamp(22px, 4.5vw, 26px);
+  }
+
+  .platform-hero__nodeLabel {
+    left: calc(50% + 28px);
+    font-size: 10px;
+    padding: 5px 10px;
+    bottom: calc(100% + 12px);
+  }
+}
+
+@media (max-width: 600px) {
+  .platform-canvas {
+    min-height: auto;
+  }
+
+  .platform-hero {
+    min-height: auto;
+  }
+
+  .platform-hero__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .platform-hero__cta {
+    justify-content: center;
+  }
+}

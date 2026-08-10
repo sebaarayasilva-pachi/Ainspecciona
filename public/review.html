@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Centro de Revisión ITO · Ainspecciona</title>
+  <meta name="robots" content="noindex" />
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Inter", -apple-system, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #e2e8f0; }
+    header { padding: 16px 24px; background: #1e293b; border-bottom: 1px solid #334155; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    header h1 { margin: 0; font-size: 18px; }
+    header .sub { color: #94a3b8; font-size: 13px; }
+    main { max-width: 1100px; margin: 0 auto; padding: 24px 20px 60px; }
+    .chips { display: flex; gap: 8px; margin: 14px 0 18px; flex-wrap: wrap; }
+    .chip { padding: 6px 14px; border-radius: 999px; border: 1px solid #334155; background: #1e293b; color: #cbd5e1; cursor: pointer; font-size: 13px; }
+    .chip.active { background: #2563eb; border-color: #2563eb; color: #fff; }
+    .chip .n { font-weight: 700; margin-left: 6px; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 16px; margin-bottom: 12px; }
+    .qItem { display: flex; justify-content: space-between; align-items: center; gap: 12px; cursor: pointer; transition: border-color .15s; }
+    .qItem:hover { border-color: #2563eb; }
+    .qItem .meta { min-width: 0; }
+    .qItem .title { font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .qItem .subtitle { color: #94a3b8; font-size: 12px; margin-top: 3px; }
+    .tag { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 6px; white-space: nowrap; }
+    .tag.AINSPECTA { background: #1d4ed8; color: #fff; }
+    .tag.PROPERTYCHECK { background: #7c3aed; color: #fff; }
+    .tag.POSTVENTA { background: #0d9488; color: #fff; }
+    .tag.ENTREGA { background: #b45309; color: #fff; }
+    .muted { color: #94a3b8; font-size: 13px; }
+    .btn { padding: 10px 18px; border-radius: 10px; border: none; cursor: pointer; font-weight: 700; font-size: 14px; }
+    .btn.ok { background: #059669; color: #fff; }
+    .btn.warn { background: #d97706; color: #fff; }
+    .btn.primary { background: #2563eb; color: #fff; }
+    .btn.ghost { background: transparent; border: 1px solid #475569; color: #cbd5e1; }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+    /* Vista revisión caso */
+    .reviewWrap { display: grid; grid-template-columns: 1.4fr 1fr; gap: 18px; }
+    .photoBox { background: #0b1220; border: 1px solid #334155; border-radius: 14px; padding: 10px; display: flex; align-items: center; justify-content: center; min-height: 380px; }
+    .photoBox img { max-width: 100%; max-height: 540px; border-radius: 8px; }
+    .findingBox h3 { margin: 0 0 4px; font-size: 15px; }
+    .sev { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; margin-left: 8px; }
+    .sev.low { background: #365314; color: #d9f99d; }
+    .sev.medium { background: #713f12; color: #fde68a; }
+    .sev.high, .sev.critical { background: #7f1d1d; color: #fecaca; }
+    .progressBar { height: 8px; background: #334155; border-radius: 999px; overflow: hidden; margin: 10px 0 4px; }
+    .progressBar > div { height: 100%; background: linear-gradient(90deg, #2563eb, #06b6d4); transition: width .3s; }
+    label { display: block; font-size: 12px; color: #94a3b8; margin: 10px 0 4px; }
+    input, select, textarea { width: 100%; padding: 9px 11px; border-radius: 9px; border: 1px solid #334155; background: #0b1220; color: #e2e8f0; font-family: inherit; font-size: 13px; }
+    textarea { min-height: 64px; resize: vertical; }
+    .actions { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+    .statusMsg { font-size: 13px; margin-top: 10px; }
+    .hidden { display: none !important; }
+    .photoGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 10px; }
+    .photoGrid figure { margin: 0; background: #0b1220; border: 1px solid #334155; border-radius: 10px; overflow: hidden; cursor: pointer; }
+    .photoGrid img { width: 100%; height: 110px; object-fit: cover; display: block; }
+    .photoGrid figcaption { font-size: 11px; color: #94a3b8; padding: 6px 8px; }
+    .evItem { border: 1px solid #334155; border-radius: 10px; padding: 12px; margin-top: 10px; background: #0b1220; }
+    .evItem .evHead { display: flex; justify-content: space-between; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .miniBtns { display: flex; gap: 6px; }
+    .btn.mini { padding: 5px 10px; font-size: 12px; }
+    /* Asistente */
+    .urgBadge { font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 5px; background: #7f1d1d; color: #fecaca; margin-left: 6px; }
+    .refChip { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: 11px; font-weight: 700; color: #93c5fd; background: rgba(30, 58, 138, .45); border: 1px solid #1e40af; padding: 1px 7px; border-radius: 5px; margin-right: 8px; vertical-align: middle; }
+    .refLink { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-weight: 700; color: #93c5fd; cursor: pointer; text-decoration: underline; text-decoration-style: dotted; }
+    .refLink:hover { color: #bfdbfe; }
+    .ageBadge { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 5px; background: #78350f; color: #fde68a; margin-left: 6px; }
+    .groupHeader { font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: .04em; margin: 18px 0 8px; }
+    .aiCard { background: linear-gradient(135deg, #1e293b, #172554); border: 1px solid #3b82f6; }
+    .aiCard .aiLabel { font-size: 11px; font-weight: 800; color: #93c5fd; letter-spacing: .05em; }
+    #chatFab { position: fixed; bottom: 22px; right: 22px; z-index: 60; border-radius: 999px; padding: 13px 20px; box-shadow: 0 8px 24px rgba(37,99,235,.45); }
+    #chatDrawer { position: fixed; top: 0; right: 0; bottom: 0; width: 400px; max-width: 95vw; background: #0b1220; border-left: 1px solid #334155; z-index: 70; display: flex; flex-direction: column; transform: translateX(105%); transition: transform .22s ease; }
+    #chatDrawer.open { transform: translateX(0); }
+    #chatHead { padding: 14px 16px; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; background: #1e293b; }
+    #chatCtx { font-size: 11px; color: #67e8f9; margin-top: 2px; }
+    #chatMsgs { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+    .msg { max-width: 88%; padding: 10px 13px; border-radius: 12px; font-size: 13px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+    .msg.user { align-self: flex-end; background: #2563eb; color: #fff; border-bottom-right-radius: 4px; }
+    .msg.assistant { align-self: flex-start; background: #1e293b; border: 1px solid #334155; border-bottom-left-radius: 4px; }
+    .msg.thinking { align-self: flex-start; color: #94a3b8; background: transparent; }
+    #chatInputRow { padding: 12px; border-top: 1px solid #334155; display: flex; gap: 8px; }
+    #chatInput { flex: 1; min-height: 42px; max-height: 120px; }
+    @media (max-width: 860px) { .reviewWrap { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Centro de Revisión ITO</h1>
+      <div class="sub">Cada veredicto (OK o corrección) alimenta la base de conocimiento de la IA.</div>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <button type="button" class="btn ghost" id="kbBtn">📚 Biblioteca KB</button>
+      <button type="button" class="btn ghost" id="backBtn" style="display:none;">← Volver a la cola</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Cola unificada -->
+    <section id="queueView">
+      <div class="card aiCard" id="briefingCard">
+        <div class="aiLabel">✨ ASISTENTE · RESUMEN DEL DÍA</div>
+        <div id="briefingText" class="muted" style="margin-top:6px; font-size:13px; color:#cbd5e1;">Generando briefing…</div>
+      </div>
+      <div class="chips" id="chips">
+        <button type="button" class="chip active" data-src="ALL">Todas <span class="n" id="nALL">—</span></button>
+        <button type="button" class="chip" data-src="AINSPECTA">Ainspecciona <span class="n" id="nAINSPECTA">—</span></button>
+        <button type="button" class="chip" data-src="PROPERTYCHECK">Property-chk <span class="n" id="nPROPERTYCHECK">—</span></button>
+        <button type="button" class="chip" data-src="POSTVENTA">Postventa <span class="n" id="nPOSTVENTA">—</span></button>
+        <span style="flex:1"></span>
+        <select id="groupMode" style="width:auto; padding:6px 10px; font-size:13px;">
+          <option value="priority">Orden: prioridad</option>
+          <option value="tenant">Agrupar: inmobiliaria</option>
+          <option value="type">Agrupar: tipo/categoría</option>
+        </select>
+      </div>
+      <div id="queueList"></div>
+      <div id="queueEmpty" class="muted hidden" style="text-align:center; padding:40px;">Sin revisiones pendientes. 🎉</div>
+    </section>
+
+    <!-- Revisión Ainspecciona foto a foto -->
+    <section id="caseView" class="hidden">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+          <div>
+            <strong id="caseTitle">—</strong>
+            <div class="muted" id="caseSubtitle">—</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <button type="button" class="btn ghost mini" id="caseBriefBtn">✨ Resumen</button>
+            <div class="muted" id="progressText">—</div>
+          </div>
+        </div>
+        <div class="progressBar"><div id="progressFill" style="width:0%"></div></div>
+        <div id="caseBriefBox" class="hidden" style="margin-top:10px; font-size:13px; color:#cbd5e1; border-top:1px solid #334155; padding-top:10px;"></div>
+      </div>
+
+      <div class="reviewWrap">
+        <div>
+          <div class="photoBox"><img id="slotPhoto" alt="Foto del slot" /></div>
+          <div class="actions" style="justify-content:space-between;">
+            <button type="button" class="btn ghost" id="prevBtn">← Anterior</button>
+            <button type="button" class="btn ghost" id="nextBtn">Siguiente →</button>
+          </div>
+        </div>
+        <div>
+          <div class="card findingBox">
+            <h3 id="slotTitle">—</h3>
+            <div class="muted" id="slotCode">—</div>
+            <div style="margin-top:12px;">
+              <div class="muted" style="font-size:12px;">Análisis IA</div>
+              <div id="aiFinding" style="margin-top:6px; font-size:14px;">—</div>
+            </div>
+            <div id="reviewState" class="statusMsg"></div>
+            <div class="actions">
+              <button type="button" class="btn ok" id="okBtn">✓ OK — hallazgo correcto</button>
+              <button type="button" class="btn warn" id="correctBtn">✎ Corregir</button>
+            </div>
+          </div>
+
+          <div class="card hidden" id="correctionForm">
+            <strong style="font-size:14px;">Corrección del revisor</strong>
+            <label for="humanCode">Código correcto (OK = sin hallazgo)</label>
+            <select id="humanCode">
+              <option value="OK">OK — sin hallazgo (falso positivo)</option>
+              <option value="HUMIDITY_FILTRATION">HUMIDITY_FILTRATION</option>
+              <option value="PIPE_LEAK_CORROSION">PIPE_LEAK_CORROSION</option>
+              <option value="ELECTRICAL_RISK">ELECTRICAL_RISK</option>
+              <option value="STRUCTURAL_CRACK">STRUCTURAL_CRACK</option>
+              <option value="MATERIAL_DETACHMENT">MATERIAL_DETACHMENT</option>
+              <option value="SANITARY_RISK">SANITARY_RISK</option>
+              <option value="SEAL_FAILURE">SEAL_FAILURE</option>
+              <option value="FLOOR_MOISTURE_JOINT_DAMAGE">FLOOR_MOISTURE_JOINT_DAMAGE</option>
+              <option value="COSMETIC_WEAR">COSMETIC_WEAR</option>
+            </select>
+            <label for="humanSeverity">Severidad</label>
+            <select id="humanSeverity">
+              <option value="">—</option>
+              <option value="low">low</option>
+              <option value="medium">medium</option>
+              <option value="high">high</option>
+            </select>
+            <label for="humanMessage">Descripción correcta del hallazgo</label>
+            <textarea id="humanMessage" placeholder="Qué se observa realmente en la foto"></textarea>
+            <button type="button" class="btn ghost mini" id="draftSlotBtn" style="margin-top:6px;">✨ Redactar con asistente</button>
+            <label for="note">Nota para la IA (opcional, criterio a aprender)</label>
+            <textarea id="note" placeholder="Ej: las sombras de la esquina no son humedad"></textarea>
+            <div class="actions">
+              <button type="button" class="btn primary" id="saveCorrectionBtn">Guardar corrección</button>
+              <button type="button" class="btn ghost" id="cancelCorrectionBtn">Cancelar</button>
+            </div>
+          </div>
+
+          <div class="card" id="finishCard">
+            <div class="muted" id="finishHint">Revisa todos los slots para finalizar.</div>
+            <div class="actions">
+              <button type="button" class="btn primary" id="finishBtn" disabled>Finalizar revisión y aprobar informe</button>
+              <button type="button" class="btn ghost" id="regenBtn">Regenerar resumen ejecutivo</button>
+            </div>
+            <div class="statusMsg" id="finishStatus"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Revisión Property-chk (AiFeedback) -->
+    <section id="pchkView" class="hidden">
+      <div class="reviewWrap">
+        <div>
+          <div class="photoBox"><img id="pchkPhoto" alt="Foto del feedback" /></div>
+        </div>
+        <div>
+          <div class="card">
+            <h3 id="pchkTitle" style="margin:0 0 4px; font-size:15px;">—</h3>
+            <div class="muted" id="pchkMeta">—</div>
+            <div style="margin-top:12px;">
+              <div class="muted" style="font-size:12px;">Análisis IA</div>
+              <div id="pchkAi" style="margin-top:6px; font-size:14px;">—</div>
+            </div>
+            <div style="margin-top:12px;">
+              <div class="muted" style="font-size:12px;">Label del inspector (Property-chk)</div>
+              <div id="pchkHuman" style="margin-top:6px; font-size:14px;">—</div>
+            </div>
+            <div id="pchkState" class="statusMsg"></div>
+            <div class="actions">
+              <button type="button" class="btn ok" id="pchkOkBtn">✓ Aprobar criterio</button>
+              <button type="button" class="btn warn" id="pchkCorrectBtn">✎ Corregir</button>
+              <button type="button" class="btn ghost" id="pchkRejectBtn">Rechazar</button>
+            </div>
+          </div>
+          <div class="card hidden" id="pchkForm">
+            <strong style="font-size:14px;">Corrección del ITO</strong>
+            <label for="pchkSignal">Señal / criterio correcto</label>
+            <textarea id="pchkSignal" placeholder="Ej: fisura capilar en cerámico, no humedad"></textarea>
+            <button type="button" class="btn ghost mini" id="draftPchkBtn" style="margin-top:6px;">✨ Redactar con asistente</button>
+            <label for="pchkSeverity">Severidad</label>
+            <select id="pchkSeverity">
+              <option value="">—</option>
+              <option value="low">low</option>
+              <option value="medium">medium</option>
+              <option value="high">high</option>
+            </select>
+            <label for="pchkNote">Nota (opcional)</label>
+            <textarea id="pchkNote"></textarea>
+            <div class="actions">
+              <button type="button" class="btn primary" id="pchkSaveBtn">Guardar corrección</button>
+              <button type="button" class="btn ghost" id="pchkCancelBtn">Cancelar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Revisión Postventa (PvTicket) -->
+    <section id="pvView" class="hidden">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; align-items:center;">
+          <div>
+            <strong id="pvTitle">—</strong>
+            <div class="muted" id="pvMeta">—</div>
+          </div>
+          <div class="miniBtns">
+            <button type="button" class="btn ghost mini" id="pvBriefBtn">✨ Resumen</button>
+            <button type="button" class="btn ghost mini" id="pvReanalyzeBtn">↺ Re-analizar IA</button>
+            <button type="button" class="btn primary mini" id="pvFinishBtn">Finalizar revisión</button>
+          </div>
+        </div>
+        <div class="statusMsg" id="pvStatus"></div>
+        <div id="pvBriefBox" class="hidden" style="margin-top:10px; font-size:13px; color:#cbd5e1; border-top:1px solid #334155; padding-top:10px;"></div>
+      </div>
+
+      <div class="card">
+        <div class="muted" style="font-size:12px;">Fotos de evidencia</div>
+        <div class="photoGrid" id="pvPhotos"></div>
+      </div>
+
+      <div class="card">
+        <div class="evHead" style="display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap;">
+          <div>
+            <strong style="font-size:14px;">Diagnóstico IA (global)</strong>
+            <div id="pvAiGlobal" style="margin-top:6px; font-size:14px; color:#cbd5e1;">—</div>
+            <div id="pvGlobalState" class="statusMsg"></div>
+          </div>
+          <div class="miniBtns">
+            <button type="button" class="btn ok mini" id="pvGlobalOkBtn">✓ OK</button>
+            <button type="button" class="btn mini" id="pvGlobalSinFallaBtn" style="border-color:#64748b; color:#cbd5e1;">∅ Sin falla</button>
+            <button type="button" class="btn warn mini" id="pvGlobalCorrectBtn">✎ Corregir</button>
+          </div>
+        </div>
+        <div class="hidden" id="pvGlobalForm" style="margin-top:12px;">
+          <label for="pvHumanCategory">Categoría correcta</label>
+          <select id="pvHumanCategory">
+            <option value="">—</option>
+            <option value="filtracion_agua">filtracion_agua</option>
+            <option value="humedad_condensacion">humedad_condensacion</option>
+            <option value="electricidad">electricidad</option>
+            <option value="sanitarios_grifería">sanitarios_griferia</option>
+            <option value="puertas_ventanas">puertas_ventanas</option>
+            <option value="terminaciones">terminaciones</option>
+            <option value="estructural">estructural</option>
+            <option value="otro">otro</option>
+          </select>
+          <label for="pvHumanSeverity">Severidad</label>
+          <select id="pvHumanSeverity">
+            <option value="">—</option>
+            <option value="low">low</option>
+            <option value="medium">medium</option>
+            <option value="high">high</option>
+            <option value="critical">critical</option>
+          </select>
+          <label for="pvHumanMessage">Diagnóstico correcto</label>
+          <textarea id="pvHumanMessage"></textarea>
+          <button type="button" class="btn ghost mini" id="draftPvBtn" style="margin-top:6px;">✨ Redactar con asistente</button>
+          <label for="pvNote">Nota para la IA (opcional)</label>
+          <textarea id="pvNote"></textarea>
+          <div class="actions">
+            <button type="button" class="btn primary" id="pvGlobalSaveBtn">Guardar corrección</button>
+            <button type="button" class="btn ghost" id="pvGlobalCancelBtn">Cancelar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <strong style="font-size:14px;">Revisión por evidencia</strong>
+        <div id="pvEvidence"></div>
+      </div>
+    </section>
+
+    <!-- Biblioteca KB -->
+    <section id="kbView" class="hidden">
+      <div class="card">
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:end;">
+          <div style="flex:1; min-width:160px;">
+            <label for="kbSearch">Buscar en el texto</label>
+            <input id="kbSearch" type="text" placeholder="Ej: sellado, humedad…" />
+          </div>
+          <div>
+            <label for="kbStatusFilter">Estado</label>
+            <select id="kbStatusFilter">
+              <option value="">Todos</option>
+              <option value="approved" selected>approved</option>
+              <option value="candidate">candidate</option>
+              <option value="disabled">disabled</option>
+              <option value="rejected">rejected</option>
+            </select>
+          </div>
+          <div>
+            <label for="kbSourceFilter">Fuente</label>
+            <select id="kbSourceFilter">
+              <option value="">Todas</option>
+              <option value="AINSPECTA">Ainspecciona</option>
+              <option value="PROPERTYCHECK">Property-chk</option>
+              <option value="POSTVENTA">Postventa</option>
+              <option value="ENTREGA">Entrega (informes históricos)</option>
+            </select>
+          </div>
+          <button type="button" class="btn primary" id="kbReloadBtn">Filtrar</button>
+        </div>
+        <div class="muted" id="kbCounts" style="margin-top:10px;">—</div>
+      </div>
+      <div id="kbList"></div>
+    </section>
+  </main>
+
+  <!-- Asistente: chat lateral contextual -->
+  <button type="button" class="btn primary" id="chatFab">✨ Asistente</button>
+  <div id="chatDrawer">
+    <div id="chatHead">
+      <div>
+        <strong style="font-size:14px;">✨ Asistente ITO</strong>
+        <div id="chatCtx">contexto: cola</div>
+      </div>
+      <button type="button" class="btn ghost mini" id="chatCloseBtn">✕</button>
+    </div>
+    <div id="chatMsgs">
+      <div class="msg assistant">Hola. Veo lo mismo que tú: la cola o el caso que tengas abierto. Pregúntame por criterios de la KB, casos similares, o por qué la IA clasificó algo de cierta forma. El veredicto siempre es tuyo.</div>
+    </div>
+    <div id="chatInputRow">
+      <textarea id="chatInput" placeholder="Pregunta al asistente…" rows="1"></textarea>
+      <button type="button" class="btn primary" id="chatSendBtn">➤</button>
+    </div>
+  </div>
+
+  <script>
+    // ── Auth (mismo esquema que admin.html) ─────────────────────────────────
+    let adminUser = localStorage.getItem('ainspectaAdminUser');
+    let adminPass = localStorage.getItem('ainspectaAdminPass');
+    function ensureCreds() {
+      if (!adminUser || !adminPass) {
+        adminUser = prompt('Usuario admin:') || '';
+        adminPass = prompt('Contraseña admin:') || '';
+        localStorage.setItem('ainspectaAdminUser', adminUser);
+        localStorage.setItem('ainspectaAdminPass', adminPass);
+      }
+    }
+    async function adminFetch(url, options = {}) {
+      ensureCreds();
+      const headers = Object.assign({}, options.headers || {}, {
+        'x-admin-user': adminUser || '',
+        'x-admin-pass': adminPass || ''
+      });
+      const res = await fetch(url, Object.assign({}, options, { headers }));
+      if (res.status === 401) {
+        localStorage.removeItem('ainspectaAdminUser');
+        localStorage.removeItem('ainspectaAdminPass');
+        adminUser = null; adminPass = null;
+        alert('Credenciales inválidas.');
+        throw new Error('UNAUTHORIZED');
+      }
+      return res;
+    }
+    const $ = (id) => document.getElementById(id);
+    function esc(s) { const d = document.createElement('div'); d.textContent = String(s ?? ''); return d.innerHTML; }
+
+    // ── Cola ────────────────────────────────────────────────────────────────
+    let queueItems = [];
+    let activeFilter = 'ALL';
+
+    async function loadQueue() {
+      const res = await adminFetch('/api/admin/review/queue');
+      const data = await res.json();
+      if (!data.ok) { $('queueList').innerHTML = '<div class="muted">Error al cargar la cola.</div>'; return; }
+      queueItems = data.items || [];
+      $('nALL').textContent = data.counts.total;
+      $('nAINSPECTA').textContent = data.counts.AINSPECTA;
+      $('nPROPERTYCHECK').textContent = data.counts.PROPERTYCHECK;
+      $('nPOSTVENTA').textContent = data.counts.POSTVENTA;
+      renderQueue();
+      renderBriefing(); // re-linkea los IDs del briefing con la cola ya cargada
+    }
+
+    function qItemHtml(i) {
+      const ageH = Number(i.ageHours) || 0;
+      const ageLabel = ageH >= 24 ? 'hace ' + Math.round(ageH / 24) + 'd' : 'hace ' + ageH + 'h';
+      const extra = i.source === 'AINSPECTA'
+        ? (i.findingsCount + ' hallazgos · ' + i.slotsWithPhoto + ' fotos')
+        : (i.severity ? 'severidad ' + i.severity : '');
+      const urgent = i.urgencyFlag || ['high', 'critical'].includes(String(i.severity || ''));
+      const badges = (urgent ? '<span class="urgBadge">URGENTE</span>' : '') +
+        (ageH >= 48 ? '<span class="ageBadge">+' + Math.round(ageH / 24) + 'd</span>' : '');
+      return '<div class="card qItem" data-idx="' + queueItems.indexOf(i) + '">' +
+        '<div class="meta"><div class="title"><span class="refChip">' + esc(i.source === 'PROPERTYCHECK' ? String(i.refId).slice(0, 8) : i.refId) + '</span>' + esc(i.title) + badges + '</div>' +
+        '<div class="subtitle">' + esc(i.subtitle || '') + (extra ? ' · ' + esc(extra) : '') + ' · ' + ageLabel + '</div></div>' +
+        '<span class="tag ' + i.source + '">' + i.source + '</span></div>';
+    }
+
+    function renderQueue() {
+      const items = queueItems.filter((i) => activeFilter === 'ALL' || i.source === activeFilter);
+      $('queueEmpty').classList.toggle('hidden', items.length > 0);
+      const mode = $('groupMode').value;
+      if (mode === 'priority') {
+        // El server ya ordena por prioridad desc.
+        $('queueList').innerHTML = items.map(qItemHtml).join('');
+        return;
+      }
+      const keyOf = mode === 'tenant'
+        ? (i) => i.tenantName || 'Sin inmobiliaria'
+        : (i) => i.groupKey || (i.source === 'AINSPECTA' ? 'Casos Ainspecciona' : 'Sin categoría');
+      const groups = new Map();
+      for (const i of items) {
+        const k = keyOf(i);
+        if (!groups.has(k)) groups.set(k, []);
+        groups.get(k).push(i);
+      }
+      $('queueList').innerHTML = [...groups.entries()]
+        .sort((a, b) => b[1].length - a[1].length)
+        .map(([k, list]) => '<div class="groupHeader">' + esc(k) + ' (' + list.length + ')</div>' + list.map(qItemHtml).join(''))
+        .join('');
+    }
+
+    $('groupMode').addEventListener('change', renderQueue);
+
+    // ── Asistente: briefing del día ─────────────────────────────────────────
+    function openItem(item) {
+      if (!item) return;
+      if (item.kind === 'case_review') return openCase(item.refId);
+      if (item.source === 'PROPERTYCHECK') return openFeedback(item.refId);
+      if (item.source === 'POSTVENTA') return openTicket(item.refId);
+    }
+
+    /** IDs de la cola mencionados en el briefing → enlaces que abren el ítem. */
+    function linkifyRefs(text) {
+      let html = esc(text);
+      for (const i of queueItems) {
+        const ref = String(i.refId);
+        const shown = i.source === 'PROPERTYCHECK' ? ref.slice(0, 8) : ref;
+        if (shown.length < 6) continue;
+        html = html.split(esc(shown)).join('<span class="refLink" data-ref="' + esc(ref) + '">' + esc(shown) + '</span>');
+      }
+      return html;
+    }
+
+    let briefingRaw = '';
+    function renderBriefing() {
+      if (briefingRaw) $('briefingText').innerHTML = linkifyRefs(briefingRaw);
+    }
+
+    async function loadBriefing() {
+      try {
+        const res = await adminFetch('/api/admin/review/assistant/briefing');
+        const data = await res.json();
+        if (!data.ok) { $('briefingText').textContent = 'Briefing no disponible.'; return; }
+        briefingRaw = data.briefing;
+        renderBriefing();
+      } catch {
+        $('briefingText').textContent = 'Briefing no disponible.';
+      }
+    }
+
+    $('briefingText').addEventListener('click', (e) => {
+      const link = e.target.closest('.refLink');
+      if (!link) return;
+      const ref = link.getAttribute('data-ref');
+      openItem(queueItems.find((i) => String(i.refId) === ref));
+    });
+
+    document.getElementById('chips').addEventListener('click', (e) => {
+      const chip = e.target.closest('.chip');
+      if (!chip) return;
+      activeFilter = chip.getAttribute('data-src');
+      document.querySelectorAll('.chip').forEach((c) => c.classList.toggle('active', c === chip));
+      renderQueue();
+    });
+
+    document.getElementById('queueList').addEventListener('click', (e) => {
+      const el = e.target.closest('.qItem');
+      if (!el) return;
+      const item = queueItems[Number(el.getAttribute('data-idx'))];
+      if (!item) return;
+      if (item.kind === 'case_review') return openCase(item.refId);
+      if (item.source === 'PROPERTYCHECK') return openFeedback(item.refId);
+      if (item.source === 'POSTVENTA') return openTicket(item.refId);
+    });
+
+    function showView(id) {
+      ['queueView', 'caseView', 'pchkView', 'pvView', 'kbView'].forEach((v) => $(v).classList.toggle('hidden', v !== id));
+      $('backBtn').style.display = id === 'queueView' ? 'none' : '';
+    }
+
+    // ── Revisión de caso (Ainspecciona) ─────────────────────────────────────
+    let currentCase = null;
+    let slots = [];
+    let cursor = 0;
+
+    async function openCase(refId) {
+      const res = await adminFetch('/api/admin/review/cases/' + encodeURIComponent(refId) + '/slots');
+      const data = await res.json();
+      if (!data.ok) { alert(data.error || 'Error al abrir el caso'); return; }
+      currentCase = data.case;
+      slots = data.slots || [];
+      // Posicionarse en el primer slot que realmente necesita al ITO (sin veredicto y no auto-validable)
+      cursor = slots.findIndex((s) => !s.review && !s.autoApprove);
+      if (cursor === -1) cursor = Math.max(0, slots.findIndex((s) => !s.review));
+      if (cursor === -1) cursor = 0;
+      $('caseTitle').textContent = currentCase.address || ('Caso ' + currentCase.shortId);
+      $('caseSubtitle').textContent = (currentCase.tenantName || '') + ' · ' + currentCase.shortId;
+      $('caseBriefBox').classList.add('hidden');
+      showView('caseView');
+      renderSlot();
+    }
+
+    function reviewedCount() { return slots.filter((s) => s.review).length; }
+
+    function renderSlot() {
+      if (!slots.length) { $('slotTitle').textContent = 'Sin fotos para revisar'; return; }
+      const s = slots[cursor];
+      $('slotPhoto').src = s.photoUrl || '';
+      $('slotTitle').textContent = s.title || s.slotCode;
+      $('slotCode').textContent = s.slotCode + ' · ' + (cursor + 1) + ' de ' + slots.length;
+      const a = s.analysis || {};
+      const hasFinding = a.code && a.code !== 'OK' && a.code !== 'NOT_CAPTURABLE';
+      $('aiFinding').innerHTML = hasFinding
+        ? '<strong>' + esc(a.code) + '</strong>' +
+          (a.severity ? '<span class="sev ' + esc(a.severity) + '">' + esc(a.severity) + '</span>' : '') +
+          '<div style="margin-top:6px; color:#cbd5e1;">' + esc(a.message || '') + '</div>'
+        : '<span style="color:#86efac;">Sin hallazgo (OK)</span>';
+      $('reviewState').innerHTML = s.review
+        ? (s.review.verdict === 'ok'
+            ? '<span style="color:#86efac;">✓ Validado por revisor</span>'
+            : '<span style="color:#fbbf24;">✎ Corregido: ' + esc(s.review.humanCode || '') + ' ' + esc(s.review.humanMessage || '') + '</span>')
+        : (s.autoApprove
+            ? '<span style="color:#67e8f9;">⚡ Auto-validable — IA confiable en ' + esc(s.kpiKey || 'este KPI') +
+              (s.kpiAccuracy ? ' (' + s.kpiAccuracy.accuracyPct + '% en ' + s.kpiAccuracy.reviews + ' revisiones)' : '') +
+              '. Se validará solo al finalizar; puedes revisarlo igual.</span>'
+            : '<span class="muted">Pendiente de veredicto</span>');
+      $('correctionForm').classList.add('hidden');
+      const autoCount = slots.filter((x) => !x.review && x.autoApprove).length;
+      const effective = reviewedCount() + autoCount;
+      const pct = slots.length ? Math.round((effective / slots.length) * 100) : 0;
+      $('progressFill').style.width = pct + '%';
+      $('progressText').textContent = reviewedCount() + '/' + slots.length + ' revisados' + (autoCount ? ' · ⚡' + autoCount + ' auto' : '');
+      const done = effective === slots.length;
+      $('finishBtn').disabled = !done;
+      $('finishHint').textContent = done
+        ? (autoCount ? 'Listo: ' + autoCount + ' slot(s) se auto-validarán al finalizar.' : 'Todos los slots revisados. Puedes finalizar.')
+        : 'Revisa los slots pendientes (los ⚡ auto-validables no requieren veredicto).';
+    }
+
+    async function sendVerdict(payload) {
+      const s = slots[cursor];
+      const res = await adminFetch(
+        '/api/admin/review/cases/' + encodeURIComponent(currentCase.id) + '/slots/' + encodeURIComponent(s.id),
+        { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }
+      );
+      const data = await res.json();
+      if (!data.ok) { alert(data.error || 'Error al guardar veredicto'); return false; }
+      s.review = {
+        verdict: payload.verdict,
+        humanCode: payload.humanCode || null,
+        humanSeverity: payload.humanSeverity || null,
+        humanMessage: payload.humanMessage || null,
+        note: payload.note || null
+      };
+      s.autoApprove = false;
+      return true;
+    }
+
+    $('okBtn').addEventListener('click', async () => {
+      if (await sendVerdict({ verdict: 'ok' })) {
+        if (cursor < slots.length - 1) cursor++;
+        renderSlot();
+      }
+    });
+    $('correctBtn').addEventListener('click', () => {
+      const s = slots[cursor];
+      $('humanCode').value = (s.review && s.review.humanCode) || 'OK';
+      $('humanSeverity').value = (s.review && s.review.humanSeverity) || '';
+      $('humanMessage').value = (s.review && s.review.humanMessage) || '';
+      $('note').value = (s.review && s.review.note) || '';
+      $('correctionForm').classList.remove('hidden');
+    });
+    $('cancelCorrectionBtn').addEventListener('click', () => $('correctionForm').classList.add('hidden'));
+    $('saveCorrectionBtn').addEventListener('click', async () => {
+      const ok = await sendVerdict({
+        verdict: 'corrected',
+        humanCode: $('humanCode').value,
+        humanSeverity: $('humanSeverity').value,
+        humanMessage: $('humanMessage').value.trim(),
+        note: $('note').value.trim()
+      });
+      if (ok) {
+        if (cursor < slots.length - 1) cursor++;
+        renderSlot();
+      }
+    });
+    $('prevBtn').addEventListener('click', () => { if (cursor > 0) { cursor--; renderSlot(); } });
+    $('nextBtn').addEventListener('click', () => { if (cursor < slots.length - 1) { cursor++; renderSlot(); } });
+
+    $('finishBtn').addEventListener('click', async () => {
+      $('finishBtn').disabled = true;
+      $('finishStatus').textContent = 'Finalizando…';
+      try {
+        const fin = await adminFetch('/api/admin/review/cases/' + encodeURIComponent(currentCase.id) + '/finish', { method: 'POST' });
+        const finData = await fin.json();
+        if (!finData.ok) { $('finishStatus').textContent = finData.hint || finData.error; $('finishBtn').disabled = false; return; }
+        $('finishStatus').textContent = 'Exactitud IA: ' + finData.accuracyPct + '% (' + finData.slotsCorrected + ' corregidos de ' + finData.slotsTotal +
+          (finData.autoApproved ? ' · ⚡' + finData.autoApproved + ' auto-validados' : '') + '). Aprobando…';
+        const ap = await adminFetch('/api/cases/' + encodeURIComponent(currentCase.id) + '/approve', { method: 'POST' });
+        const apData = await ap.json();
+        if (apData.ok) {
+          const to = (apData.sent || []).map((s) => s.email).filter(Boolean).join(', ');
+          $('finishStatus').textContent = '✓ Informe aprobado' +
+            (apData.emailSent ? (to ? ' · email a ' + to : ' · email enviado') : ' · sin email (revisa SMTP / destinatario)');
+        } else {
+          $('finishStatus').textContent = 'Revisión finalizada, pero falló la aprobación: ' + (apData.error || '');
+        }
+        setTimeout(() => { backToQueue(); loadQueue(); }, 2200);
+      } catch (err) {
+        $('finishStatus').textContent = 'Error: ' + err.message;
+        $('finishBtn').disabled = false;
+      }
+    });
+
+    $('regenBtn').addEventListener('click', async () => {
+      $('finishStatus').textContent = 'Regenerando resumen ejecutivo…';
+      try {
+        const res = await adminFetch('/api/cases/' + encodeURIComponent(currentCase.id) + '/executive-summary?force=1', { method: 'POST' });
+        const data = await res.json();
+        $('finishStatus').textContent = data.ok !== false ? '✓ Resumen regenerado.' : 'Error al regenerar: ' + (data.error || '');
+      } catch (err) {
+        $('finishStatus').textContent = 'Error: ' + err.message;
+      }
+    });
+
+    // ── Revisión Property-chk ───────────────────────────────────────────────
+    let currentFeedback = null;
+
+    async function openFeedback(id) {
+      const res = await adminFetch('/api/admin/review/feedback/' + encodeURIComponent(id));
+      const data = await res.json();
+      if (!data.ok) { alert(data.error || 'Error al abrir feedback'); return; }
+      currentFeedback = data.item;
+      const it = currentFeedback;
+      $('pchkPhoto').src = it.imageUrl || '';
+      $('pchkTitle').textContent = (it.kpiKey || 'Sin KPI') + ' · ' + (it.planItemId || it.id.slice(0, 8));
+      $('pchkMeta').textContent = 'Inspección ' + (it.externalInspectionId || '—') + ' · estado ' + it.status;
+      $('pchkAi').innerHTML = esc(it.aiDescription || 'Sin descripción IA') +
+        (Array.isArray(it.aiSignals) && it.aiSignals.length
+          ? '<div class="muted" style="margin-top:4px;">Señales: ' + it.aiSignals.map(esc).join(', ') + '</div>'
+          : '');
+      $('pchkHuman').innerHTML = '<strong>' + esc(it.humanSignal || '—') + '</strong>' +
+        (it.humanSeverity ? '<span class="sev ' + esc(it.humanSeverity) + '">' + esc(it.humanSeverity) + '</span>' : '') +
+        (it.feedbackType ? '<div class="muted" style="margin-top:4px;">Tipo: ' + esc(it.feedbackType) + '</div>' : '');
+      $('pchkState').textContent = '';
+      $('pchkForm').classList.add('hidden');
+      showView('pchkView');
+    }
+
+    async function sendFeedbackVerdict(payload) {
+      $('pchkState').textContent = 'Guardando…';
+      const res = await adminFetch('/api/admin/review/feedback/' + encodeURIComponent(currentFeedback.id), {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!data.ok) { $('pchkState').textContent = data.message || data.error || 'Error'; return; }
+      $('pchkState').textContent = '✓ Veredicto guardado' + (data.kb && data.kb.entryId ? ' y agregado a la KB.' : '.');
+      setTimeout(() => { backToQueue(); loadQueue(); }, 1200);
+    }
+
+    $('pchkOkBtn').addEventListener('click', () => sendFeedbackVerdict({ verdict: 'ok' }));
+    $('pchkRejectBtn').addEventListener('click', () => {
+      const note = prompt('Motivo del rechazo (opcional):') || '';
+      sendFeedbackVerdict({ verdict: 'rejected', note });
+    });
+    $('pchkCorrectBtn').addEventListener('click', () => {
+      $('pchkSignal').value = currentFeedback.humanSignal || '';
+      $('pchkSeverity').value = currentFeedback.humanSeverity || '';
+      $('pchkNote').value = '';
+      $('pchkForm').classList.remove('hidden');
+    });
+    $('pchkCancelBtn').addEventListener('click', () => $('pchkForm').classList.add('hidden'));
+    $('pchkSaveBtn').addEventListener('click', () => {
+      const signal = $('pchkSignal').value.trim();
+      if (!signal) { alert('Indica la señal/criterio correcto.'); return; }
+      sendFeedbackVerdict({
+        verdict: 'corrected',
+        signal,
+        severity: $('pchkSeverity').value,
+        note: $('pchkNote').value.trim()
+      });
+    });
+
+    // ── Revisión Postventa ──────────────────────────────────────────────────
+    let currentTicket = null;
+
+    async function openTicket(refId) {
+      const res = await adminFetch('/api/admin/review/tickets/' + encodeURIComponent(refId));
+      const data = await res.json();
+      if (!data.ok) { alert(data.error || 'Error al abrir ticket'); return; }
+      currentTicket = data;
+      const t = data.ticket;
+      $('pvTitle').textContent = t.shortId + ' · ' + (t.categoryLabel || t.category);
+      $('pvMeta').textContent = [t.tenantName, t.unit && t.unit.projectName, t.ownerName, t.statusLabel].filter(Boolean).join(' · ');
+      $('pvStatus').textContent = '';
+      $('pvBriefBox').classList.add('hidden');
+      $('pvPhotos').innerHTML = (data.photos || []).map((p) =>
+        '<figure onclick="window.open(\'' + p.photoUrl + '\', \'_blank\')">' +
+        '<img src="' + p.photoUrl + '" alt="' + esc(p.title) + '" />' +
+        '<figcaption>' + esc(p.title) + '</figcaption></figure>'
+      ).join('') || '<div class="muted">Sin fotos.</div>';
+      renderPvAnalysis();
+      showView('pvView');
+    }
+
+    function pvReviewFor(slotCode) {
+      return (currentTicket.reviews || []).find((r) => (r.slotCode || null) === (slotCode || null)) || null;
+    }
+
+    function pvStateHtml(r) {
+      if (!r) return '<span class="muted">Pendiente de veredicto</span>';
+      if (r.verdict === 'ok') return '<span style="color:#86efac;">✓ Validado</span>';
+      if (r.verdict === 'sin_falla') return '<span style="color:#94a3b8;">∅ Sin falla — se informa a la inmobiliaria: ' + esc(r.humanMessage || '') + '</span>';
+      return '<span style="color:#fbbf24;">✎ Corregido: ' + esc(r.humanCategory || '') + ' ' + esc(r.humanMessage || '') + '</span>';
+    }
+
+    function renderPvAnalysis() {
+      const a = currentTicket.analysis;
+      const rep = (a && a.report) || {};
+      const claim = rep.claim_assessment || null;
+      const claimHtml = claim
+        ? '<div style="margin-top:6px; font-size:13px;' + (claim.verdict === 'sin_falla_aparente' ? ' color:#94a3b8;' : ' color:#cbd5e1;') + '">' +
+          '<strong>Evaluación IA del reclamo:</strong> ' + esc(String(claim.verdict || '').replace(/_/g, ' ')) +
+          (claim.probable_cause ? ' · causa probable: ' + esc(claim.probable_cause) : '') +
+          (claim.explanation_for_inmobiliaria ? '<div style="margin-top:2px;">' + esc(claim.explanation_for_inmobiliaria) + '</div>' : '') +
+          '</div>'
+        : '';
+      $('pvAiGlobal').innerHTML = a
+        ? '<strong>' + esc((rep.category_assessment && rep.category_assessment.confirmed_category) || currentTicket.ticket.category) + '</strong>' +
+          (a.severity ? '<span class="sev ' + esc(a.severity) + '">' + esc(a.severity) + '</span>' : '') +
+          '<div style="margin-top:6px;">' + esc(rep.finding_description || a.summaryText || '') + '</div>' + claimHtml
+        : '<span class="muted">Sin análisis IA aún.</span>';
+      $('pvGlobalState').innerHTML = pvStateHtml(pvReviewFor(null));
+      $('pvGlobalForm').classList.add('hidden');
+
+      const evidence = Array.isArray(rep.evidence_review) ? rep.evidence_review : [];
+      $('pvEvidence').innerHTML = evidence.length
+        ? evidence.map((e) => {
+            const r = pvReviewFor(e.slot_code);
+            return '<div class="evItem"><div class="evHead">' +
+              '<div><strong>' + esc(e.slot_title || e.slot_code) + '</strong>' +
+              (e.severity && e.severity !== 'none' ? '<span class="sev ' + esc(e.severity) + '">' + esc(e.severity) + '</span>' : '') +
+              '<div style="margin-top:4px; font-size:13px; color:#cbd5e1;">' + esc(e.observation || '') + '</div>' +
+              '<div class="statusMsg">' + pvStateHtml(r) + '</div></div>' +
+              '<div class="miniBtns">' +
+              '<button type="button" class="btn ok mini" onclick="pvVerdict(\'' + esc(e.slot_code) + '\', \'ok\')">✓ OK</button>' +
+              '<button type="button" class="btn warn mini" onclick="pvCorrect(\'' + esc(e.slot_code) + '\')">✎</button>' +
+              '</div></div></div>';
+          }).join('')
+        : '<div class="muted" style="margin-top:8px;">Sin evidencias en el informe IA.</div>';
+    }
+
+    async function sendTicketVerdict(payload) {
+      const res = await adminFetch('/api/admin/review/tickets/' + encodeURIComponent(currentTicket.ticket.shortId) + '/verdict', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!data.ok) { alert(data.error || 'Error al guardar veredicto'); return false; }
+      const reviews = currentTicket.reviews || [];
+      const idx = reviews.findIndex((r) => (r.slotCode || null) === (payload.slotCode || null));
+      const updated = {
+        slotCode: payload.slotCode || null,
+        verdict: payload.verdict,
+        humanCategory: payload.humanCategory || null,
+        humanSeverity: payload.humanSeverity || null,
+        humanMessage: payload.humanMessage || null,
+        note: payload.note || null
+      };
+      if (idx >= 0) reviews[idx] = updated; else reviews.push(updated);
+      currentTicket.reviews = reviews;
+      renderPvAnalysis();
+      return true;
+    }
+
+    window.pvVerdict = (slotCode, verdict) => sendTicketVerdict({ verdict, slotCode: slotCode || null });
+    window.pvCorrect = (slotCode) => {
+      const msg = prompt('Observación correcta para esta evidencia:');
+      if (msg === null) return;
+      const sev = prompt('Severidad (low/medium/high, vacío = sin cambio):') || '';
+      sendTicketVerdict({ verdict: 'corrected', slotCode, humanMessage: msg.trim(), humanSeverity: sev.trim(), note: '' });
+    };
+
+    $('pvGlobalOkBtn').addEventListener('click', () => sendTicketVerdict({ verdict: 'ok', slotCode: null }));
+    $('pvGlobalSinFallaBtn').addEventListener('click', () => {
+      const msg = prompt('Observación "sin falla" para la inmobiliaria (ej. qué se observa y por qué no es falla de fabricación):');
+      if (msg === null) return;
+      if (!msg.trim()) { alert('La observación es obligatoria: el ticket se envía igual a la inmobiliaria con ella.'); return; }
+      sendTicketVerdict({ verdict: 'sin_falla', slotCode: null, humanMessage: msg.trim() });
+    });
+    $('pvGlobalCorrectBtn').addEventListener('click', () => $('pvGlobalForm').classList.remove('hidden'));
+    $('pvGlobalCancelBtn').addEventListener('click', () => $('pvGlobalForm').classList.add('hidden'));
+    $('pvGlobalSaveBtn').addEventListener('click', async () => {
+      await sendTicketVerdict({
+        verdict: 'corrected',
+        slotCode: null,
+        humanCategory: $('pvHumanCategory').value,
+        humanSeverity: $('pvHumanSeverity').value,
+        humanMessage: $('pvHumanMessage').value.trim(),
+        note: $('pvNote').value.trim()
+      });
+    });
+
+    $('pvReanalyzeBtn').addEventListener('click', async () => {
+      if (!confirm('¿Re-analizar el ticket con IA? El ticket saldrá de la cola hasta terminar.')) return;
+      $('pvStatus').textContent = 'Encolando re-análisis…';
+      const res = await adminFetch('/api/admin/review/tickets/' + encodeURIComponent(currentTicket.ticket.shortId) + '/reanalyze', { method: 'POST' });
+      const data = await res.json();
+      $('pvStatus').textContent = data.ok ? '✓ Re-análisis encolado. Vuelve en unos minutos.' : 'Error: ' + (data.error || '');
+      if (data.ok) setTimeout(() => { backToQueue(); loadQueue(); }, 1500);
+    });
+
+    $('pvFinishBtn').addEventListener('click', async () => {
+      if (!pvReviewFor(null)) { alert('Da primero un veredicto al diagnóstico global.'); return; }
+      $('pvStatus').textContent = 'Finalizando…';
+      const res = await adminFetch('/api/admin/review/tickets/' + encodeURIComponent(currentTicket.ticket.shortId) + '/finish', { method: 'POST' });
+      const data = await res.json();
+      $('pvStatus').textContent = data.ok ? '✓ Revisión finalizada (ticket en revisión interna).' : 'Error: ' + (data.error || '');
+      if (data.ok) setTimeout(() => { backToQueue(); loadQueue(); }, 1500);
+    });
+
+    // ── Biblioteca KB ───────────────────────────────────────────────────────
+    let kbItems = [];
+
+    async function loadKb() {
+      const params = new URLSearchParams();
+      const st = $('kbStatusFilter').value;
+      const src = $('kbSourceFilter').value;
+      const q = $('kbSearch').value.trim();
+      if (st) params.set('status', st);
+      if (src) params.set('source', src);
+      if (q) params.set('q', q);
+      params.set('limit', '100');
+      const res = await adminFetch('/api/admin/review/kb?' + params.toString());
+      const data = await res.json();
+      if (!data.ok) { $('kbList').innerHTML = '<div class="muted">Error al cargar la biblioteca.</div>'; return; }
+      kbItems = data.items || [];
+      const c = data.counts || {};
+      $('kbCounts').textContent = 'Mostrando ' + kbItems.length + ' de ' + data.total +
+        ' · approved: ' + (c.approved || 0) + ' · candidate: ' + (c.candidate || 0) +
+        ' · disabled: ' + (c.disabled || 0) + ' · rejected: ' + (c.rejected || 0);
+      renderKb();
+    }
+
+    function kbTypeLabel(t) {
+      return { finding_example: 'Ejemplo', anti_example: 'Anti-ejemplo', correction: 'Corrección', ticket_learning: 'Postventa' }[t] || t;
+    }
+
+    function renderKb() {
+      $('kbList').innerHTML = kbItems.length ? kbItems.map((e, i) => {
+        const dimmed = e.status === 'disabled' || e.status === 'rejected';
+        return '<div class="card" style="' + (dimmed ? 'opacity:.55;' : '') + '">' +
+          '<div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; align-items:center;">' +
+          '<div><span class="tag ' + e.source + '">' + e.source + '</span> ' +
+          '<span class="muted" style="font-size:12px;">' + kbTypeLabel(e.entryType) +
+          (e.kpiKey ? ' · ' + esc(e.kpiKey) : '') + (e.category ? ' · ' + esc(e.category) : '') +
+          (e.severity ? ' · sev ' + esc(e.severity) : '') + ' · ' + esc(e.status) +
+          (e.embeddingModel ? ' · 🧠' : ' · sin vector') + '</span></div>' +
+          '<div class="miniBtns">' +
+          '<button type="button" class="btn ghost mini" onclick="kbEdit(' + i + ')">✎ Editar</button>' +
+          (e.status === 'approved'
+            ? '<button type="button" class="btn warn mini" onclick="kbSetStatus(' + i + ', \'disabled\')">Desactivar</button>'
+            : '<button type="button" class="btn ok mini" onclick="kbSetStatus(' + i + ', \'approved\')">Activar</button>') +
+          '</div></div>' +
+          '<div style="margin-top:8px; font-size:13px; color:#cbd5e1;">' + esc(e.text) + '</div>' +
+          '<div class="muted" style="margin-top:6px; font-size:11px;">' + esc(e.sourceRef || '') + ' · ' + new Date(e.createdAt).toLocaleString() + (e.createdBy ? ' · ' + esc(e.createdBy) : '') + '</div>' +
+          '</div>';
+      }).join('') : '<div class="muted" style="text-align:center; padding:30px;">Sin entradas con estos filtros.</div>';
+    }
+
+    window.kbSetStatus = async (i, status) => {
+      const e = kbItems[i];
+      const res = await adminFetch('/api/admin/review/kb/' + e.id, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status })
+      });
+      const data = await res.json();
+      if (!data.ok) { alert(data.error || 'Error'); return; }
+      e.status = status;
+      renderKb();
+    };
+
+    window.kbEdit = async (i) => {
+      const e = kbItems[i];
+      const text = prompt('Texto del criterio (se re-embebe al guardar):', e.text);
+      if (text === null || !text.trim() || text.trim() === e.text) return;
+      const res = await adminFetch('/api/admin/review/kb/' + e.id, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: text.trim() })
+      });
+      const data = await res.json();
+      if (!data.ok) { alert(data.error || 'Error'); return; }
+      e.text = data.entry.text;
+      renderKb();
+    };
+
+    $('kbBtn').addEventListener('click', () => { showView('kbView'); loadKb(); });
+    $('kbReloadBtn').addEventListener('click', loadKb);
+    $('kbSearch').addEventListener('keydown', (e) => { if (e.key === 'Enter') loadKb(); });
+
+    function backToQueue() {
+      showView('queueView');
+      currentCase = null;
+      currentFeedback = null;
+      currentTicket = null;
+    }
+    $('backBtn').addEventListener('click', backToQueue);
+
+    // ── Asistente: contexto, chat, resúmenes y redacción ────────────────────
+    function assistantCtx() {
+      if (currentCase) return { view: 'case', ref: currentCase.shortId || currentCase.id, label: 'caso ' + (currentCase.shortId || '') };
+      if (currentTicket) return { view: 'ticket', ref: currentTicket.ticket.shortId, label: 'ticket ' + currentTicket.ticket.shortId };
+      if (currentFeedback) return { view: 'feedback', ref: currentFeedback.id, label: 'feedback ' + currentFeedback.id.slice(0, 8) };
+      return { view: 'queue', ref: '', label: 'cola' };
+    }
+
+    // Chat lateral
+    const chatHistory = [];
+    let chatBusy = false;
+
+    function addMsg(role, text) {
+      const div = document.createElement('div');
+      div.className = 'msg ' + role;
+      div.textContent = text;
+      $('chatMsgs').appendChild(div);
+      $('chatMsgs').scrollTop = $('chatMsgs').scrollHeight;
+      return div;
+    }
+
+    async function sendChat() {
+      const text = $('chatInput').value.trim();
+      if (!text || chatBusy) return;
+      $('chatInput').value = '';
+      addMsg('user', text);
+      chatHistory.push({ role: 'user', content: text });
+      const thinking = addMsg('thinking', 'Pensando…');
+      chatBusy = true;
+      try {
+        const ctx = assistantCtx();
+        const res = await adminFetch('/api/admin/review/assistant/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: chatHistory, view: ctx.view, ref: ctx.ref })
+        });
+        const data = await res.json();
+        thinking.remove();
+        const answer = data.ok ? data.answer : 'No pude responder (' + (data.error || 'error') + ').';
+        addMsg('assistant', answer);
+        chatHistory.push({ role: 'assistant', content: answer });
+      } catch (err) {
+        thinking.remove();
+        addMsg('assistant', 'Error de conexión: ' + err.message);
+      } finally {
+        chatBusy = false;
+      }
+    }
+
+    $('chatFab').addEventListener('click', () => {
+      $('chatDrawer').classList.toggle('open');
+      $('chatCtx').textContent = 'contexto: ' + assistantCtx().label;
+      if ($('chatDrawer').classList.contains('open')) $('chatInput').focus();
+    });
+    $('chatCloseBtn').addEventListener('click', () => $('chatDrawer').classList.remove('open'));
+    $('chatSendBtn').addEventListener('click', sendChat);
+    $('chatInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
+    });
+
+    // Resumen pre-caso / pre-ticket
+    async function loadBrief(ref, type, boxId, btnId) {
+      const box = $(boxId);
+      if (!box.classList.contains('hidden')) { box.classList.add('hidden'); return; }
+      box.classList.remove('hidden');
+      box.textContent = 'Generando resumen…';
+      $(btnId).disabled = true;
+      try {
+        const res = await adminFetch('/api/admin/review/assistant/case-brief/' + encodeURIComponent(ref) + '?type=' + type);
+        const data = await res.json();
+        box.textContent = data.ok ? data.brief : 'Resumen no disponible.';
+      } catch {
+        box.textContent = 'Resumen no disponible.';
+      } finally {
+        $(btnId).disabled = false;
+      }
+    }
+    $('caseBriefBtn').addEventListener('click', () => {
+      if (currentCase) loadBrief(currentCase.shortId || currentCase.id, 'case', 'caseBriefBox', 'caseBriefBtn');
+    });
+    $('pvBriefBtn').addEventListener('click', () => {
+      if (currentTicket) loadBrief(currentTicket.ticket.shortId, 'ticket', 'pvBriefBox', 'pvBriefBtn');
+    });
+
+    // Redacción asistida de correcciones (el ITO ya decidió; el asistente solo redacta)
+    async function draftInto(textareaId, btnId, slotCode) {
+      const ta = $(textareaId);
+      const notes = ta.value.trim();
+      if (!notes) { alert('Escribe primero un apunte breve de tu corrección; el asistente lo redacta formal.'); return; }
+      const btn = $(btnId);
+      btn.disabled = true;
+      btn.textContent = '✨ Redactando…';
+      try {
+        const ctx = assistantCtx();
+        const res = await adminFetch('/api/admin/review/assistant/draft-correction', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ view: ctx.view, ref: ctx.ref, slotCode: slotCode || null, notes })
+        });
+        const data = await res.json();
+        if (data.ok && data.draft) ta.value = data.draft;
+        else alert(data.error || 'No se pudo redactar.');
+      } catch (err) {
+        alert('Error: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '✨ Redactar con asistente';
+      }
+    }
+    $('draftSlotBtn').addEventListener('click', () => draftInto('humanMessage', 'draftSlotBtn', slots[cursor] && slots[cursor].slotCode));
+    $('draftPchkBtn').addEventListener('click', () => draftInto('pchkSignal', 'draftPchkBtn', null));
+    $('draftPvBtn').addEventListener('click', () => draftInto('pvHumanMessage', 'draftPvBtn', null));
+
+    loadQueue().catch((e) => { if (e.message !== 'UNAUTHORIZED') console.error(e); });
+    loadBriefing().catch(() => {});
+
+    // Deep-link desde admin: /review?case=<id>
+    const deepCase = new URLSearchParams(window.location.search).get('case');
+    if (deepCase) openCase(deepCase).catch((e) => { if (e.message !== 'UNAUTHORIZED') console.error(e); });
+  </script>
+</body>
+</html>

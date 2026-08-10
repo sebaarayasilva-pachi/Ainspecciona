@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <script>(function(){try{var t=localStorage.getItem("postventa-portal-theme");document.documentElement.setAttribute("data-theme",t==="light"?"light":"dark");}catch(e){document.documentElement.setAttribute("data-theme","dark");}})();</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Solicitud · Ainspecciona Postventa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/postventa/portal/assets/portal.css?v=20260728-sched1" />
+  <link rel="stylesheet" href="/postventa/assets/schedule-picker.css?v=5" />
+</head>
+<body>
+  <div class="app" id="app">
+    <div id="sidebar"></div>
+    <div class="main">
+      <header class="topbar">
+        <div class="titles">
+          <h1 id="ticketTitle">Solicitud</h1>
+          <div class="crumb" id="ticketCrumb">Detalle</div>
+        </div>
+        <div class="spacer"></div>
+        <div class="date-chip" id="dateChip"></div>
+      </header>
+      <div class="content" id="content"><div class="empty">Cargando…</div></div>
+    </div>
+  </div>
+
+  <script src="/postventa/assets/schedule-picker.js?v=3"></script>
+  <script src="/postventa/portal/assets/portal-app.js?v=20260806-sep1"></script>
+  <script>
+    (async function () {
+      const P = window.PvPortal;
+      const me = await P.ensureAuth();
+      if (!me) return;
+
+      const id = P.qs("id", "");
+      if (!id) {
+        location.replace(P.appHref("/postventa/portal"));
+        return;
+      }
+
+      document.getElementById("dateChip").textContent = P.dateChip();
+
+      async function load() {
+        const res = await P.portalFetch("/api/postventa/portal/tickets/" + encodeURIComponent(id));
+        const data = await res.json();
+        const content = document.getElementById("content");
+        if (!res.ok || !data.ok) {
+          document.getElementById("sidebar").innerHTML = P.renderSidebar("proyecto", null);
+          content.innerHTML = `<div class="empty">${P.escapeHtml(data.message || "Solicitud no encontrada.")}</div>`;
+          return;
+        }
+
+        const t = data.ticket;
+        const project = t.unit
+          ? { name: t.unit.projectName || "Proyecto", slug: t.unit.projectSlug || "", comuna: t.unit.comuna || "" }
+          : null;
+        document.getElementById("sidebar").innerHTML = P.renderSidebar("proyecto", project && project.slug ? project : null);
+        document.getElementById("ticketTitle").textContent = t.shortId;
+        document.getElementById("ticketCrumb").textContent =
+          [t.unit?.projectName, t.unitLabel, t.categoryLabel].filter(Boolean).join(" · ");
+
+        const a = t.analysis || {};
+        const photos = t.photosDetail || [];
+        const OPS = data.opsPipeline || ["recibido", "asignada", "programado", "en_ejecucion", "terminado"];
+        const EXITS = data.exitStatuses || ["routed", "rejected"];
+        const allowedSet = new Set(data.allowedStatuses || [...OPS, ...EXITS]);
+
+        function statusBtn(s, kind) {
+          const current = s === t.status;
+          const actionLabel = s === "routed" ? "Derivar" : s === "rejected" ? "Rechazar" : labelStatus(s);
+          const cls =
+            kind === "exit"
+              ? `btn exit${current ? " is-current" : ""}`
+              : `btn primary${current ? " is-current" : ""}`;
+          return `<button type="button" class="${cls}" data-status="${P.escapeHtml(s)}"${
+            current ? ' disabled aria-current="true"' : ""
+          }${!allowedSet.has(s) ? " disabled" : ""}>${actionLabel}</button>`;
+        }
+
+        function fmtSchedule(iso) {
+          if (!iso) return "—";
+          const d = new Date(iso);
+          if (!Number.isFinite(d.getTime())) return String(iso).slice(0, 16).replace("T", " ");
+          return d.toLocaleString("es-CL", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+          });
+        }
+
+        function askScheduleDate(currentIso) {
+          return window.PvSchedulePicker.openModal({
+            initialIso: currentIso,
+            title: "Programar visita",
+            hint: "Elige el día y la hora de la visita o reparación."
+          });
+        }
+
+        content.innerHTML = `
+          <div class="panel">
+            <div class="detail-grid">
+              <div class="detail-item"><div class="label">Estado</div><div class="value"><span class="pill ${P.statusPillClass(t.status)}">${P.escapeHtml(t.statusLabel)}</span>${t.urgent ? ' <span class="pill bad">urgente</span>' : ""}</div></div>
+              <div class="detail-item"><div class="label">Inspector</div><div class="value">${P.escapeHtml(t.assignedToName || "—")}${!t.assignedToName && t.status === "recibido" ? '<div class="muted" style="font-size:12px;">Configura el inspector en el proyecto para auto-asignar</div>' : ""}</div></div>
+              <div class="detail-item"><div class="label">Categoría</div><div class="value">${P.escapeHtml(t.categoryLabel || "—")}</div></div>
+              <div class="detail-item"><div class="label">Severidad IA</div><div class="value">${a.severity ? `<span class="pill ${P.severityPillClass(a.severity)}">${P.escapeHtml(a.severity)}</span>` : "—"}</div></div>
+              <div class="detail-item"><div class="label">Garantía</div><div class="value">${P.escapeHtml(t.warrantyStatusLabel || "—")}</div></div>
+              <div class="detail-item"><div class="label">Propietario</div><div class="value">${P.escapeHtml(t.ownerName || "—")}<div class="muted" style="font-size:12px;">${P.escapeHtml(t.ownerEmail || "")}</div></div></div>
+              <div class="detail-item"><div class="label">Contacto visita</div><div class="value">${P.escapeHtml(t.contactName || "—")}<div class="muted" style="font-size:12px;">${P.escapeHtml(t.contactPhone || "")}</div></div></div>
+              <div class="detail-item"><div class="label">Unidad</div><div class="value">${P.escapeHtml(t.unitLabel || "—")}<div class="muted" style="font-size:12px;">${P.escapeHtml([t.unit?.comuna, t.unit?.address].filter(Boolean).join(" · "))}</div></div></div>
+              <div class="detail-item"><div class="label">Creada</div><div class="value mono">${P.escapeHtml((t.createdAt || "").slice(0, 16).replace("T", " "))}</div></div>
+              <div class="detail-item"><div class="label">Programada</div><div class="value mono">${t.scheduledAt ? P.escapeHtml(fmtSchedule(t.scheduledAt)) : "—"}</div></div>
+              <div class="detail-item"><div class="label">Aging</div><div class="value mono">${P.fmt(t.ageDays)} días</div></div>
+            </div>
+            <div style="margin-top:16px;">
+              <div class="label muted" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;">Resumen</div>
+              <p style="margin:6px 0 0;line-height:1.5;">${P.escapeHtml(t.summary || "—")}</p>
+            </div>
+            ${a.summaryText ? `<div style="margin-top:14px;"><div class="label muted" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;">Informe IA</div><p style="margin:6px 0 0;line-height:1.5;">${P.escapeHtml(a.summaryText)}</p></div>` : ""}
+            <div class="detail-grid" style="margin-top:16px;">
+              <div class="detail-item"><div class="label">Veredicto</div><div class="value">${P.escapeHtml(a.verdict || "—")}</div></div>
+              <div class="detail-item"><div class="label">Causa probable</div><div class="value">${P.escapeHtml(a.probableCause || "—")}</div></div>
+              <div class="detail-item"><div class="label">Routing</div><div class="value">${P.escapeHtml(a.recommendedRouting || "—")}</div></div>
+              <div class="detail-item"><div class="label">Fotos</div><div class="value">${P.fmt(t.photos?.withPhoto || 0)} / ${P.fmt(t.photos?.total || 0)}</div></div>
+            </div>
+            <div class="ot-box" id="otBox">
+              <h2 style="margin:0 0 6px;">Orden de Trabajo</h2>
+              <p class="muted" style="margin:0 0 12px;font-size:13px;">Equipo libre, fecha acordada con el cliente e inspector asignado en el PDF.</p>
+              <div class="detail-item" style="margin-bottom:12px;">
+                <div class="label">Inspector en la OT</div>
+                <div class="value">${P.escapeHtml(t.assignedToName || "Sin inspector asignado")}${
+                  !t.assignedToName
+                    ? '<div class="muted" style="font-size:12px;">Asigna un inspector en el proyecto para que figure en la OT.</div>'
+                    : ""
+                }</div>
+              </div>
+              <div class="ot-fields">
+                <div>
+                  <label class="muted" for="otTeam" style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;margin-bottom:6px;">Equipo</label>
+                  <input type="text" id="otTeam" placeholder="Ej. Gasfitería López" value="${P.escapeHtml(t.repairTeamName || "")}" />
+                </div>
+                <div>
+                  <label class="muted" for="otContact" style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;margin-bottom:6px;">Contacto (opcional)</label>
+                  <input type="text" id="otContact" placeholder="Email o teléfono" value="${P.escapeHtml(t.repairTeamContact || "")}" />
+                </div>
+                <div class="ot-field-full">
+                  <label class="muted" style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;margin-bottom:6px;">Fecha acordada con el cliente</label>
+                  <div id="otScheduleMount"></div>
+                </div>
+              </div>
+              <div class="ot-actions">
+                <button type="button" class="btn primary" id="otDownloadBtn">Descargar OT (PDF)</button>
+                ${t.otGeneratedAt ? `<span class="muted" style="font-size:12px;">Última OT: ${P.escapeHtml((t.otGeneratedAt || "").slice(0, 16).replace("T", " "))}</span>` : ""}
+              </div>
+              <div id="otMsg" class="muted" style="margin-top:8px;font-size:12px;"></div>
+            </div>
+            <div class="actions">
+              <div class="actions-nav">
+                ${t.unit?.projectSlug ? `<a class="btn" data-back href="${P.appHref("/postventa/portal/proyecto?slug=" + encodeURIComponent(t.unit.projectSlug))}">← Volver al proyecto</a>` : `<a class="btn" data-back href="${P.appHref("/postventa/portal")}">← Portafolio</a>`}
+                ${t.reportUrl ? `<a class="btn" href="${P.escapeHtml(t.reportUrl)}" target="_blank" rel="noopener">Ver informe</a>` : ""}
+              </div>
+              <div class="actions-pipeline" role="group" aria-label="Pipeline operativo">
+                ${OPS.map((s) => statusBtn(s, "ops")).join("")}
+              </div>
+              <div class="actions-exits" role="group" aria-label="Salidas">
+                ${EXITS.map((s) => statusBtn(s, "exit")).join("")}
+              </div>
+            </div>
+            <div id="actionMsg" class="muted" style="margin-top:10px;font-size:12px;"></div>
+          </div>
+          ${
+            t.closeNote || t.closePhotoUrl
+              ? `<div class="panel" style="margin-top:16px;">
+                  <h2>Cierre en terreno</h2>
+                  ${t.closedAt ? `<div class="muted" style="font-size:12px;margin-bottom:10px;">Cerrado: ${P.escapeHtml((t.closedAt || "").slice(0, 16).replace("T", " "))}</div>` : ""}
+                  ${t.closePhotoUrl ? `<figure class="evidence-card has-photo" data-photo="${P.escapeHtml(photoSrc({ hasPhoto: true, photoUrl: t.closePhotoUrl }))}" data-title="Foto de cierre" style="max-width:280px;cursor:pointer;"><img src="${P.escapeHtml(photoSrc({ hasPhoto: true, photoUrl: t.closePhotoUrl }))}" alt="Cierre" loading="lazy" /><figcaption><strong>Foto después</strong></figcaption></figure>` : ""}
+                  ${t.closeNote ? `<p style="margin:12px 0 0;line-height:1.5;">${P.escapeHtml(t.closeNote)}</p>` : ""}
+                </div>`
+              : ""
+          }
+          <div class="panel">
+            <h2>Evidencia</h2>
+            ${photos.length
+              ? `<div class="evidence-grid">${photos.map((p) => {
+                  const src = photoSrc(p);
+                  return `<figure class="evidence-card ${src ? "has-photo" : ""}" ${src ? `data-photo="${P.escapeHtml(src)}" data-title="${P.escapeHtml(p.title || p.slotCode)}"` : ""}>
+                    ${src
+                      ? `<img src="${P.escapeHtml(src)}" alt="${P.escapeHtml(p.title || p.slotCode)}" loading="lazy" />`
+                      : `<div class="evidence-placeholder">Sin foto</div>`}
+                    <figcaption>
+                      <strong>${P.escapeHtml(p.title || p.slotCode)}</strong>
+                      <span class="pill ${p.hasPhoto ? "ok" : "warn"}">${P.escapeHtml(p.status)}</span>
+                    </figcaption>
+                  </figure>`;
+                }).join("")}</div>`
+              : `<div class="empty">Sin slots de captura.</div>`}
+          </div>
+          <div id="photoLightbox" class="photo-lightbox" hidden>
+            <button type="button" class="photo-lightbox-close" aria-label="Cerrar">×</button>
+            <img id="photoLightboxImg" alt="" />
+            <div id="photoLightboxCaption" class="photo-lightbox-caption"></div>
+          </div>`;
+
+        function photoSrc(p) {
+          if (!p || !p.hasPhoto || !p.photoUrl) return "";
+          const token = P.getStoredToken();
+          if (!token) return p.photoUrl;
+          const sep = p.photoUrl.indexOf("?") >= 0 ? "&" : "?";
+          return p.photoUrl + sep + "token=" + encodeURIComponent(token);
+        }
+
+        const lightbox = document.getElementById("photoLightbox");
+        const lightboxImg = document.getElementById("photoLightboxImg");
+        const lightboxCap = document.getElementById("photoLightboxCaption");
+        content.querySelectorAll(".evidence-card[data-photo]").forEach((card) => {
+          card.addEventListener("click", () => {
+            lightboxImg.src = card.getAttribute("data-photo") || "";
+            lightboxCap.textContent = card.getAttribute("data-title") || "";
+            lightbox.hidden = false;
+          });
+        });
+        lightbox?.querySelector(".photo-lightbox-close")?.addEventListener("click", () => {
+          lightbox.hidden = true;
+          lightboxImg.src = "";
+        });
+        lightbox?.addEventListener("click", (e) => {
+          if (e.target === lightbox) {
+            lightbox.hidden = true;
+            lightboxImg.src = "";
+          }
+        });
+
+        const otScheduleMount = document.getElementById("otScheduleMount");
+        let otPicker = null;
+        if (otScheduleMount && window.PvSchedulePicker) {
+          otPicker = window.PvSchedulePicker.mount(otScheduleMount, {
+            initialIso: t.scheduledAt || null
+          });
+        }
+
+        const otBtn = document.getElementById("otDownloadBtn");
+        if (otBtn) {
+          otBtn.addEventListener("click", async () => {
+            const otMsg = document.getElementById("otMsg");
+            const team = (document.getElementById("otTeam")?.value || "").trim();
+            const contact = (document.getElementById("otContact")?.value || "").trim();
+            const scheduledAtIso = otPicker ? otPicker.getIso() : null;
+            if (!team) {
+              otMsg.textContent = "Indica el nombre del equipo.";
+              otMsg.style.color = "var(--bad, #f87171)";
+              return;
+            }
+            if (!scheduledAtIso) {
+              otMsg.textContent = "Elige fecha y hora en el calendario.";
+              otMsg.style.color = "var(--bad, #f87171)";
+              return;
+            }
+            otBtn.disabled = true;
+            otMsg.style.color = "";
+            otMsg.textContent = "Guardando y generando PDF…";
+            try {
+              const saveRes = await P.portalFetch(
+                "/api/postventa/portal/tickets/" + encodeURIComponent(t.shortId) + "/ot",
+                {
+                  method: "POST",
+                  body: JSON.stringify({
+                    repairTeamName: team,
+                    repairTeamContact: contact,
+                    scheduledAt: scheduledAtIso
+                  })
+                }
+              );
+              const saveData = await saveRes.json();
+              if (!saveRes.ok || !saveData.ok) {
+                otMsg.textContent = saveData.message || "No se pudo guardar el equipo.";
+                otMsg.style.color = "var(--bad, #f87171)";
+                otBtn.disabled = false;
+                return;
+              }
+              await P.downloadOtPdf(t.shortId, "OT-" + t.shortId + ".pdf");
+              otMsg.textContent = "OT descargada.";
+              await load();
+            } catch (err) {
+              otMsg.textContent = err?.message || "Error al descargar la OT.";
+              otMsg.style.color = "var(--bad, #f87171)";
+              otBtn.disabled = false;
+            }
+          });
+        }
+
+        content.querySelectorAll("[data-status]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const status = btn.getAttribute("data-status");
+            const msg = document.getElementById("actionMsg");
+            btn.disabled = true;
+            msg.textContent = "Actualizando…";
+            try {
+              const body = { status };
+              if (status === "programado") {
+                const scheduledAt = await askScheduleDate(t.scheduledAt);
+                if (!scheduledAt) {
+                  msg.textContent = "Programación cancelada.";
+                  btn.disabled = false;
+                  return;
+                }
+                body.scheduledAt = scheduledAt;
+              }
+              const patchRes = await P.portalFetch(
+                "/api/postventa/portal/tickets/" + encodeURIComponent(t.shortId),
+                {
+                  method: "PATCH",
+                  body: JSON.stringify(body)
+                }
+              );
+              const patchData = await patchRes.json();
+              if (!patchRes.ok || !patchData.ok) {
+                msg.textContent = patchData.message || "No se pudo actualizar.";
+                btn.disabled = false;
+                return;
+              }
+              P.rememberTicketStatus(
+                t.shortId,
+                patchData.status || status,
+                patchData.statusLabel || labelStatus(status)
+              );
+              msg.textContent = "Estado actualizado.";
+              await load();
+            } catch {
+              msg.textContent = "Error de red.";
+              btn.disabled = false;
+            }
+          });
+        });
+      }
+
+      function labelStatus(s) {
+        const map = {
+          classified: "Clasificado",
+          recibido: "Recibida",
+          asignada: "Asignada",
+          programado: "Programada",
+          en_ejecucion: "En ejecución",
+          terminado: "Terminada",
+          in_review: "En revisión",
+          routed: "Derivado",
+          closed: "Cerrado",
+          rejected: "Rechazado"
+        };
+        return map[s] || s;
+      }
+
+      await load();
+    })();
+  </script>
+</body>
+</html>

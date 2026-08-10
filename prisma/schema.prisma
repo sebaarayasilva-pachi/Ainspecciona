@@ -61,6 +61,11 @@ enum CreditTransactionType {
   ADJUSTMENT
 }
 
+enum WhatsAppMessageDirection {
+  INBOUND
+  OUTBOUND
+}
+
 model Tenant {
   id        String       @id @default(uuid())
   name      String
@@ -69,6 +74,8 @@ model Tenant {
   passwordHash String?
   email     String?
   phone     String?
+  /// Logo de la corredora (URL pública GCS/local).
+  logoUrl   String?      @db.VarChar(512)
   facturacionJson Json?  // Razón social, RUT, dirección, comuna, ciudad, giro, email (para boleta/factura)
   status    TenantStatus @default(ACTIVE)
   createdAt DateTime     @default(now())
@@ -91,6 +98,9 @@ model Tenant {
   referralPartner     ReferralPartner? @relation(fields: [referralPartnerId], references: [id], onDelete: SetNull)
   referralCodeSnapshot String? @db.VarChar(64)
   trialPartnerBenefitsAt DateTime?
+  peerReferralCode     String?  @unique @db.VarChar(32)
+  /// Tras recuperación por email (clave temporal): el panel exige definir clave nueva antes de continuar.
+  mustChangePassword   Boolean  @default(false)
 
   users        User[]
   cases        Case[]
@@ -104,6 +114,12 @@ model Tenant {
   magicLinkTokens MagicLinkToken[]
   partnerCommissionAccruals PartnerCommissionAccrual[]
   presencialOrders        PresencialOrder[]
+  peerReferralsMade       PeerReferralAttribution[] @relation("PeerReferrer")
+  peerReferralReceived    PeerReferralAttribution?  @relation("PeerReferred")
+  ambassadorReferralReceived AmbassadorReferralAttribution? @relation("AmbassadorReferredTenant")
+  whatsappConversations   WhatsAppConversation[]
+  simpleFacturaEmissions  SimpleFacturaEmission[]
+  promoRedemption         PromoRedemption?
 
   @@index([rut])
   @@index([mpSubscriptionId])
@@ -112,6 +128,42 @@ model Tenant {
   @@index([trialEndsAt])
   @@index([trialEligibilityKey])
   @@index([referralPartnerId])
+}
+
+/// Códigos promo para 1 inspección gratis (sin suscripción $39.990).
+model PromoCode {
+  id        String   @id @default(uuid())
+  code      String   @unique @db.VarChar(64)
+  active    Boolean  @default(true)
+  credits   Int      @default(1)
+  label     String?  @db.VarChar(191)
+  createdAt DateTime @default(now())
+
+  redemptions PromoRedemption[]
+}
+
+model PromoRedemption {
+  id          String   @id @default(uuid())
+  promoCodeId String
+  promoCode   PromoCode @relation(fields: [promoCodeId], references: [id], onDelete: Cascade)
+  tenantId    String   @unique
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  rutNorm     String   @unique @db.VarChar(32)
+  createdAt   DateTime @default(now())
+
+  @@index([promoCodeId])
+}
+
+model PeerReferralAttribution {
+  id               String   @id @default(uuid())
+  referrerTenantId String
+  referrerTenant   Tenant   @relation("PeerReferrer", fields: [referrerTenantId], references: [id], onDelete: Cascade)
+  referredTenantId String   @unique
+  referredTenant   Tenant   @relation("PeerReferred", fields: [referredTenantId], references: [id], onDelete: Cascade)
+  peerCodeUsed     String   @db.VarChar(32)
+  createdAt        DateTime @default(now())
+
+  @@index([referrerTenantId])
 }
 
 model ReferralPartner {
@@ -201,6 +253,8 @@ model User {
   invitedAt DateTime?
   activatedAt DateTime?
   createdAt DateTime   @default(now())
+  /// Tras recuperación por email (clave temporal): la app exige definir clave nueva antes del dashboard.
+  mustChangePassword Boolean @default(false)
 
   activationTokens ActivationToken[]
   assignedCases Case[] @relation("AssignedCases")
@@ -244,6 +298,8 @@ model Case {
   hasElevator  Boolean      @default(false)
   hasParking   Boolean      @default(false)
   hasGreenCertificate Boolean @default(false)
+  /// Casa: reja o cerramiento en acceso de entrada (opcional en plan de fotos).
+  hasEntranceGrille Boolean @default(false)
   planVersion  String       @default("v1")
   status       CaseStatus   @default(DRAFT)
   createdAt    DateTime     @default(now())
@@ -251,6 +307,8 @@ model Case {
   reviewStatus    String?  @db.VarChar(32)  // pending_review | approved (Beta: Paulo revisa antes de enviar)
   reviewedAt      DateTime?
   reviewerEmail   String?  @db.VarChar(255)
+  /// Email “informe listo” al ejecutivo (idempotente; solo tenants Business).
+  executiveReportNotifiedAt DateTime?
 
   // Starter: contacto y vínculo con pago
   contactEmail         String?  @db.VarChar(255)
@@ -366,7 +424,7 @@ model Slot {
 
   slotCode     String
   title        String
-  instructions String
+  instructions String   @db.Text
   required     Boolean    @default(true)
   orderIndex   Int
   status       SlotStatus @default(PENDING)
@@ -430,10 +488,28 @@ model CaptureToken {
   @@index([tenantId])
 }
 
+/// Tiempo de respuesta del servidor en POST /api/capture/.../capture (subida + análisis en backend).
+model CaptureUploadMetric {
+  id         String   @id @default(uuid())
+  caseId     String
+  tenantId   String?
+  slotId     String
+  durationMs Int
+  passed     Boolean
+  imageBytes Int?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([caseId])
+  @@index([tenantId])
+}
+
 model Session {
   id        String   @id @default(uuid())
   token     String   @unique
-  type      String   // 'tenant' | 'exec'
+  /// 'tenant' | 'exec' | 'postventa' | 'entrega' | 'inout' | 'platform' | 'control'
+  /// Para type=platform|control: userId=PlatformUser.id, tenantId=Organization.id
+  type      String
   tenantId  String?
   userId    String?
   expiresAt DateTime
@@ -455,6 +531,50 @@ model PageView {
   @@index([path])
 }
 
+// WhatsApp (360dialog / Cloud API compatible): conversaciones y deduplicación de webhooks
+model WhatsAppConversation {
+  id          String   @id @default(uuid())
+  waId        String   @unique @db.VarChar(32)
+  tenantId    String?
+  tenant      Tenant?  @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  state       String   @default("default") @db.VarChar(64)
+  handoffAt   DateTime?
+  lastInboundAt DateTime?
+  /// Nombre que dio el usuario (extracción + confirmación en prompt; no inventar otro).
+  contactName String?  @db.VarChar(120)
+  /// Correo capturado desde el mensaje (lead / seguimiento; extracción automática).
+  contactEmail String? @db.VarChar(255)
+  /// Ya se ofreció la asesoría gratuita / enlace agendar (evitar repetir en cada turno).
+  advisoryOffered Boolean @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  messages WhatsAppMessage[]
+
+  @@index([tenantId])
+  @@index([lastInboundAt])
+}
+
+model WhatsAppMessage {
+  id             String   @id @default(uuid())
+  conversationId String
+  conversation   WhatsAppConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  direction      WhatsAppMessageDirection
+  body           String?  @db.Text
+  externalId     String?  @unique @db.VarChar(128)
+  meta           Json?
+  createdAt      DateTime @default(now())
+
+  @@index([conversationId])
+  @@index([createdAt])
+}
+
+model WhatsAppProcessedEvent {
+  id         String   @id @default(uuid())
+  externalId String   @unique @db.VarChar(128)
+  createdAt  DateTime @default(now())
+}
+
 // Starter: datos capturados antes del pago (contacto + facturación)
 model PendingStarterPayment {
   id               String    @id @default(uuid())
@@ -474,4 +594,1063 @@ model PendingStarterPayment {
   createdAt        DateTime  @default(now())
 
   @@index([createdAt])
+}
+
+/// Embajadores del programa (awards): código único (manual en admin o auto: primer nombre + correlativo, ej. maria1).
+model Ambassador {
+  id        String   @id @default(uuid())
+  fullName  String   @db.VarChar(191)
+  rut       String   @db.VarChar(32)
+  email     String   @db.VarChar(191)
+  phone     String?  @db.VarChar(32)
+  code      String   @unique @db.VarChar(64)
+  createdAt DateTime @default(now())
+
+  referrals AmbassadorReferralAttribution[]
+
+  @@index([email])
+  @@index([rut])
+}
+
+/// Referido (tenant) asociado a un embajador al inscribirse con su código (trial / checkout).
+model AmbassadorReferralAttribution {
+  id                 String    @id @default(uuid())
+  ambassadorId       String
+  ambassador         Ambassador @relation(fields: [ambassadorId], references: [id], onDelete: Cascade)
+  referredTenantId   String    @unique
+  referredTenant     Tenant    @relation("AmbassadorReferredTenant", fields: [referredTenantId], references: [id], onDelete: Cascade)
+  codeSnapshot       String    @db.VarChar(64)
+  firstAccreditedAt  DateTime?
+  /// Fin del período de comisión (3 meses calendario desde el mes del primer pago acreditado).
+  commissionUntil    DateTime?
+  createdAt          DateTime  @default(now())
+
+  commissionLines AmbassadorCommissionLine[]
+
+  @@index([ambassadorId])
+}
+
+/// Líneas idempotentes por pago MP: neto liquidado y comisión 30% (base antes de retención embajador).
+/// Registro idempotente de emisión DTE vía SimpleFactura (boleta/factura electrónica).
+model SimpleFacturaEmission {
+  id                   String   @id @default(uuid())
+  tenantId             String
+  tenant               Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  mercadopagoPaymentId String   @unique @db.VarChar(96)
+  tipoDte              Int
+  status               String   @db.VarChar(16)
+  folio                Int?
+  trackId              String?  @db.VarChar(128)
+  responseJson         Json?
+  errorMessage         String?  @db.Text
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@index([tenantId])
+}
+
+model AmbassadorCommissionLine {
+  id                   String   @id @default(uuid())
+  attributionId        String
+  attribution          AmbassadorReferralAttribution @relation(fields: [attributionId], references: [id], onDelete: Cascade)
+  mercadopagoPaymentId String   @unique @db.VarChar(96)
+  kind                 String   @db.VarChar(16)
+  netAmountClp         Int
+  accreditedAt         DateTime
+  yearMonth            String   @db.VarChar(7)
+  plan                 String?  @db.VarChar(64)
+  commissionClp        Int
+  createdAt            DateTime @default(now())
+
+  @@index([attributionId, yearMonth])
+  @@index([yearMonth])
+}
+
+// --- Postventa inmobiliaria (Pv*) — aislado de Tenant/Case inspecciones ---
+
+enum PvTenantStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum PvCaptureSlotStatus {
+  pending
+  uploaded
+  skipped
+  analyzed
+  rejected
+}
+
+model PvTenant {
+  id        String         @id @default(uuid())
+  slug      String         @unique @db.VarChar(64)
+  name      String         @db.VarChar(191)
+  status    PvTenantStatus @default(ACTIVE)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  projects PvProject[]
+  owners   PvOwner[]
+  tickets  PvTicket[]
+  users    PvUser[]
+
+  @@map("pv_tenant")
+}
+
+enum PvUserRole {
+  ADMIN
+  EXECUTIVE
+  OPERATOR
+  INSPECTOR
+}
+
+enum PvUserStatus {
+  ACTIVE
+  DISABLED
+}
+
+model PvUser {
+  id           String       @id @default(uuid())
+  tenantId     String
+  tenant       PvTenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  email        String       @unique @db.VarChar(191)
+  fullName     String       @db.VarChar(191)
+  role         PvUserRole   @default(OPERATOR)
+  status       PvUserStatus @default(ACTIVE)
+  passwordHash String       @db.VarChar(255)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  defaultProjects PvProject[] @relation("PvProjectDefaultInspector")
+  assignedTickets PvTicket[]  @relation("PvTicketAssignee")
+
+  @@index([tenantId])
+  @@map("pv_user")
+}
+
+model PvProject {
+  id                 String    @id @default(uuid())
+  tenantId           String
+  tenant             PvTenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name               String    @db.VarChar(191)
+  slug               String    @db.VarChar(64)
+  address            String?   @db.VarChar(255)
+  comuna             String?   @db.VarChar(64)
+  defaultInspectorId String?
+  defaultInspector   PvUser?   @relation("PvProjectDefaultInspector", fields: [defaultInspectorId], references: [id], onDelete: SetNull)
+  createdAt          DateTime  @default(now())
+
+  units PvUnit[]
+
+  @@unique([tenantId, slug])
+  @@index([tenantId])
+  @@index([comuna])
+  @@index([defaultInspectorId])
+  @@map("pv_project")
+}
+
+model PvOwner {
+  id        String   @id @default(uuid())
+  tenantId  String
+  tenant    PvTenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  fullName  String   @db.VarChar(191)
+  rut       String?  @db.VarChar(32)
+  phone     String?  @db.VarChar(32)
+  email     String?  @db.VarChar(191)
+  createdAt DateTime @default(now())
+
+  units   PvUnit[]
+  tickets PvTicket[]
+
+  @@index([tenantId])
+  @@index([rut])
+  @@index([phone])
+  @@map("pv_owner")
+}
+
+model PvUnit {
+  id         String    @id @default(uuid())
+  projectId  String
+  project    PvProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  ownerId    String?
+  owner      PvOwner?  @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  tower      String    @default("") @db.VarChar(32)
+  unitNumber String    @db.VarChar(32)
+  label      String?   @db.VarChar(191)
+  domReceptionDate    DateTime?
+  cbrInscriptionDate  DateTime?
+  createdAt  DateTime  @default(now())
+
+  tickets PvTicket[]
+
+  @@unique([projectId, tower, unitNumber])
+  @@index([projectId])
+  @@index([ownerId])
+  @@map("pv_unit")
+}
+
+model PvTicket {
+  id                    String   @id @default(uuid())
+  tenantId              String
+  tenant                PvTenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  unitId                String?
+  unit                  PvUnit?  @relation(fields: [unitId], references: [id], onDelete: SetNull)
+  ownerId               String?
+  owner                 PvOwner? @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  projectId             String?
+  assignedToUserId      String?
+  assignedTo            PvUser?  @relation("PvTicketAssignee", fields: [assignedToUserId], references: [id], onDelete: SetNull)
+  assignedAt            DateTime?
+  scheduledAt           DateTime?
+  closedAt              DateTime?
+  closeNote             String?   @db.VarChar(1000)
+  closePhotoPath        String?   @db.VarChar(512)
+  repairTeamName        String?   @db.VarChar(191)
+  repairTeamContact     String?   @db.VarChar(191)
+  otGeneratedAt         DateTime?
+  contactName           String?   @db.VarChar(191)
+  contactPhone          String?   @db.VarChar(32)
+  shortId               String   @unique @db.VarChar(32)
+  status                String   @default("draft") @db.VarChar(32)
+  source                String?  @db.VarChar(16)
+  conversationSessionId String?  @db.VarChar(128)
+  summary               String   @db.Text
+  preliminaryCategory   String   @db.VarChar(64)
+  roomHint              String?  @db.VarChar(191)
+  warrantyStatus        String?  @db.VarChar(32)
+  warrantyTier          String?  @db.VarChar(32)
+  warrantyYears         Int?
+  warrantyExpiresAt     DateTime?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  captureSessions PvCaptureSession[]
+  events          PvTicketEvent[]
+  aiAnalyses      PvAIAnalysis[]
+
+  @@index([tenantId])
+  @@index([status])
+  @@index([shortId])
+  @@index([assignedToUserId])
+  @@index([scheduledAt])
+  @@map("pv_ticket")
+}
+
+model PvCaptureSession {
+  id        String   @id @default(uuid())
+  ticketId  String
+  ticket    PvTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  token     String   @unique @db.VarChar(64)
+  category  String   @db.VarChar(64)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  slots PvCaptureSlot[]
+
+  @@index([ticketId])
+  @@map("pv_capture_session")
+}
+
+model PvCaptureSlot {
+  id               String              @id @default(uuid())
+  captureSessionId String
+  captureSession   PvCaptureSession    @relation(fields: [captureSessionId], references: [id], onDelete: Cascade)
+  slotCode         String              @db.VarChar(64)
+  title            String              @db.VarChar(191)
+  instructions     String?             @db.Text
+  sortOrder        Int                 @default(0)
+  status           PvCaptureSlotStatus @default(pending)
+  photoPath        String?             @db.VarChar(512)
+  mimeType         String?             @db.VarChar(64)
+  rejectMessage    String?             @db.Text
+  uploadedAt       DateTime?
+  createdAt        DateTime            @default(now())
+
+  @@index([captureSessionId])
+  @@map("pv_capture_slot")
+}
+
+model PvTicketEvent {
+  id        String   @id @default(uuid())
+  ticketId  String
+  ticket    PvTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  eventType String   @db.VarChar(64)
+  payload   Json?
+  createdAt DateTime @default(now())
+
+  @@index([ticketId])
+  @@map("pv_ticket_event")
+}
+
+model PvAIAnalysis {
+  id           String    @id @default(uuid())
+  ticketId     String
+  ticket       PvTicket  @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  status       String    @default("pending") @db.VarChar(32)
+  model        String?   @db.VarChar(64)
+  severity     String?   @db.VarChar(16)
+  summaryText  String?   @db.Text
+  report       Json?
+  errorMessage String?   @db.Text
+  confidence   Float?
+  createdAt    DateTime  @default(now())
+  completedAt  DateTime?
+
+  @@index([ticketId])
+  @@map("pv_ai_analysis")
+}
+
+enum AiFeedbackSource {
+  PROPERTYCHECK
+  AINSPECTA
+  POSTVENTA
+  /// Informes de entrega de obra nueva (mirada fabricación/terminaciones, ej. PDFs históricos)
+  ENTREGA
+}
+
+enum AiFeedbackStatus {
+  draft
+  pending_review
+  approved
+  rejected
+  archived
+}
+
+/// Borrador de aprendizaje Aintelligence (correcciones humanas antes de aprobar en KB).
+model AiFeedback {
+  id                   String           @id @default(uuid())
+  tenantId             String?
+  source               AiFeedbackSource @default(PROPERTYCHECK)
+  status               AiFeedbackStatus @default(draft)
+
+  externalFeedbackId   String           @db.VarChar(128)
+  externalInspectionId String           @db.VarChar(128)
+  captureId            String           @db.VarChar(128)
+  planItemId           String           @db.VarChar(128)
+  sequence             Int?
+
+  kpiKey               String?          @db.VarChar(64)
+  photoPlan            Json?
+  analyzeContext       Json?
+  aiSnapshot           Json
+  humanLabel           Json
+  reviewer             Json?
+
+  imagePath            String?          @db.VarChar(512)
+  imageSha256          String?          @db.VarChar(64)
+  imageMimeType        String?          @db.VarChar(64)
+  payloadFingerprint   String?          @db.VarChar(64)
+
+  idempotencyKey       String?          @db.VarChar(128)
+
+  submittedAt          DateTime?
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+
+  @@unique([source, externalFeedbackId])
+  @@index([tenantId])
+  @@index([status])
+  @@index([source, externalInspectionId])
+  @@map("ai_feedback")
+}
+
+/// Métrica de exactitud: correcciones por informe (slots reanalizados / total).
+model AiReportCorrection {
+  id                   String           @id @default(uuid())
+  source               AiFeedbackSource @default(AINSPECTA)
+  caseId               String?
+  caseShortId          String?          @db.VarChar(32)
+  tenantId             String?
+  externalInspectionId String?          @db.VarChar(128)
+  slotsCorrected       Int
+  slotsTotal           Int
+  accuracyPct          Float
+  slotCodes            Json?
+  createdAt            DateTime         @default(now())
+
+  @@index([createdAt])
+  @@index([caseId])
+  @@index([tenantId])
+  @@index([source])
+  @@map("ai_report_correction")
+}
+
+enum KnowledgeEntryType {
+  finding_example
+  anti_example
+  correction
+  ticket_learning
+}
+
+enum KnowledgeEntryStatus {
+  candidate
+  approved
+  rejected
+  disabled
+}
+
+/// KB unificada (RAG): conocimiento aprendido de inspecciones, postventa y Property-chk.
+model KnowledgeEntry {
+  id             String               @id @default(uuid())
+  tenantId       String?
+  source         AiFeedbackSource
+  entryType      KnowledgeEntryType
+  status         KnowledgeEntryStatus @default(candidate)
+
+  kpiKey         String?              @db.VarChar(64)
+  category       String?              @db.VarChar(64)
+  severity       String?              @db.VarChar(16)
+
+  /// Texto canónico: se embebe y se inyecta en prompts.
+  text           String               @db.Text
+  /// Snapshot estructurado de la fuente (IA vs humano, contexto).
+  payload        Json?
+  /// Referencia al origen: caseId/slotId, ticketId, feedbackId.
+  sourceRef      String?              @db.VarChar(191)
+  fingerprint    String               @unique @db.VarChar(64)
+
+  embedding      Json?
+  embeddingModel String?              @db.VarChar(64)
+
+  createdBy      String?              @db.VarChar(255)
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  @@index([status])
+  @@index([source, entryType])
+  @@index([kpiKey])
+  @@index([category])
+  @@index([tenantId])
+  @@map("knowledge_entry")
+}
+
+/// Veredicto ITO por slot. Si verdict=corrected, también se aplica al Slot del informe
+/// (análisis IA original queda en analysisDebug.aiBeforeHumanReview).
+model SlotReview {
+  id            String   @id @default(uuid())
+  slotId        String   @unique
+  caseId        String
+  /// 'ok' | 'corrected'
+  verdict       String   @db.VarChar(16)
+
+  humanCode     String?  @db.VarChar(64)
+  humanSeverity String?  @db.VarChar(16)
+  humanMessage  String?  @db.Text
+  humanKpiKey   String?  @db.VarChar(64)
+  note          String?  @db.Text
+
+  reviewerEmail String?  @db.VarChar(255)
+  reviewedAt    DateTime @default(now())
+
+  @@index([caseId])
+  @@map("slot_review")
+}
+
+/// Veredicto ITO por hallazgo del análisis IA de un ticket postventa.
+model PvAnalysisReview {
+  id            String   @id @default(uuid())
+  ticketId      String
+  analysisId    String?
+  /// slotCode del informe IA al que aplica el veredicto; null = veredicto global del ticket.
+  slotCode      String?  @db.VarChar(64)
+  /// 'ok' | 'corrected'
+  verdict       String   @db.VarChar(16)
+
+  humanCategory String?  @db.VarChar(64)
+  humanSeverity String?  @db.VarChar(16)
+  humanMessage  String?  @db.Text
+  note          String?  @db.Text
+
+  reviewerEmail String?  @db.VarChar(255)
+  reviewedAt    DateTime @default(now())
+
+  @@unique([ticketId, analysisId, slotCode])
+  @@index([ticketId])
+  @@map("pv_analysis_review")
+}
+
+// --- Ainspecciona Entrega (recepción técnica) — aislado de Tenant corredoras y PvTenant ---
+
+enum EntregaTenantStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum EntregaUserRole {
+  ADMIN
+  EXECUTIVE
+  INSPECTOR
+}
+
+enum EntregaUserStatus {
+  ACTIVE
+  DISABLED
+}
+
+model EntregaTenant {
+  id        String              @id @default(uuid())
+  slug      String              @unique @db.VarChar(64)
+  name      String              @db.VarChar(191)
+  status    EntregaTenantStatus @default(ACTIVE)
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+
+  users EntregaUser[]
+
+  @@map("entrega_tenant")
+}
+
+model EntregaUser {
+  id           String            @id @default(uuid())
+  tenantId     String
+  tenant       EntregaTenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  email        String            @unique @db.VarChar(191)
+  fullName     String            @db.VarChar(191)
+  role         EntregaUserRole   @default(INSPECTOR)
+  status       EntregaUserStatus @default(ACTIVE)
+  passwordHash String            @db.VarChar(255)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  @@index([tenantId])
+  @@map("entrega_user")
+}
+
+// ——— Ainspecciona In & Out (arriendos: inspección comparativa IN/OUT) ———
+
+enum IoTenantStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum IoUserRole {
+  ADMIN
+  OPERATOR
+  INSPECTOR
+}
+
+enum IoUserStatus {
+  ACTIVE
+  DISABLED
+}
+
+enum IoVisitPhase {
+  IN
+  OUT
+}
+
+enum IoVisitStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum IoSlotStatus {
+  PENDING
+  UPLOADED
+  NEEDS_RECAPTURE
+  SKIPPED
+}
+
+enum IoDiffClass {
+  sin_cambio
+  cambio_detectado
+  posible_deterioro
+  elemento_faltante
+  no_comparable
+}
+
+enum IoDiffReviewStatus {
+  pending
+  accepted
+  rejected
+  needs_recapture
+}
+
+enum IoReportKind {
+  IN_BASELINE
+  DIFF
+}
+
+model IoTenant {
+  id        String         @id @default(uuid())
+  slug      String         @unique @db.VarChar(64)
+  name      String         @db.VarChar(191)
+  status    IoTenantStatus @default(ACTIVE)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  users      IoUser[]
+  properties IoProperty[]
+  leases     IoLease[]
+
+  @@map("io_tenant")
+}
+
+model IoUser {
+  id           String       @id @default(uuid())
+  tenantId     String
+  tenant       IoTenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  email        String       @unique @db.VarChar(191)
+  fullName     String       @db.VarChar(191)
+  role         IoUserRole   @default(INSPECTOR)
+  status       IoUserStatus @default(ACTIVE)
+  passwordHash String       @db.VarChar(255)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  visitsCaptured IoVisit[] @relation("IoVisitCapturedBy")
+
+  @@index([tenantId])
+  @@map("io_user")
+}
+
+model IoProperty {
+  id                 String       @id @default(uuid())
+  tenantId           String
+  tenant             IoTenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  label              String?      @db.VarChar(191)
+  address            String       @db.VarChar(255)
+  comuna             String?      @db.VarChar(64)
+  propertyType       PropertyType @default(DEPARTMENT)
+  bedroomsCount      Int          @default(1)
+  bathroomsCount     Int          @default(1)
+  hasPatio           Boolean      @default(false)
+  hasLaundry         Boolean      @default(false)
+  hasParking         Boolean      @default(false)
+  hasElevator        Boolean      @default(false)
+  hasEntranceGrille  Boolean      @default(false)
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  leases IoLease[]
+
+  @@index([tenantId])
+  @@map("io_property")
+}
+
+model IoLease {
+  id              String    @id @default(uuid())
+  tenantId        String
+  tenant          IoTenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  propertyId      String
+  property        IoProperty @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  /// draft | in_in_progress | in_completed | out_ready | out_in_progress | out_completed | analyzing | under_review | closed
+  cycleStatus     String    @default("draft") @db.VarChar(32)
+  tenantName      String?   @db.VarChar(191)
+  tenantRut       String?   @db.VarChar(32)
+  tenantEmail     String?   @db.VarChar(191)
+  tenantPhone     String?   @db.VarChar(32)
+  ownerName       String?   @db.VarChar(191)
+  ownerEmail      String?   @db.VarChar(191)
+  startDate       DateTime?
+  endDate         DateTime?
+  notes           String?   @db.Text
+  inAcceptedAt    DateTime?
+  inAcceptedBy    String?   @db.VarChar(191)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  visits  IoVisit[]
+  reports IoReport[]
+
+  @@index([tenantId])
+  @@index([propertyId])
+  @@index([cycleStatus])
+  @@map("io_lease")
+}
+
+model IoVisit {
+  id             String        @id @default(uuid())
+  leaseId        String
+  lease          IoLease       @relation(fields: [leaseId], references: [id], onDelete: Cascade)
+  phase          IoVisitPhase
+  status         IoVisitStatus @default(PENDING)
+  pairedVisitId  String?
+  pairedVisit    IoVisit?      @relation("IoVisitPair", fields: [pairedVisitId], references: [id], onDelete: SetNull)
+  pairChildren   IoVisit[]     @relation("IoVisitPair")
+  captureToken   String?       @unique @db.VarChar(64)
+  capturedById   String?
+  capturedBy     IoUser?       @relation("IoVisitCapturedBy", fields: [capturedById], references: [id], onDelete: SetNull)
+  startedAt      DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  slots       IoVisitSlot[]
+  photos      IoPhoto[]
+  diffResults IoDiffResult[]
+
+  @@index([leaseId])
+  @@index([phase])
+  @@index([pairedVisitId])
+  @@map("io_visit")
+}
+
+model IoVisitSlot {
+  id           String       @id @default(uuid())
+  visitId      String
+  visit        IoVisit      @relation(fields: [visitId], references: [id], onDelete: Cascade)
+  slotCode     String       @db.VarChar(64)
+  title        String       @db.VarChar(191)
+  instructions String?      @db.Text
+  sortOrder    Int          @default(0)
+  required     Boolean      @default(true)
+  status       IoSlotStatus @default(PENDING)
+  recaptureCount Int        @default(0)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  photos IoPhoto[]
+  diffs  IoDiffResult[]
+
+  @@unique([visitId, slotCode])
+  @@index([visitId])
+  @@map("io_visit_slot")
+}
+
+model IoPhoto {
+  id              String   @id @default(uuid())
+  visitId         String
+  visit           IoVisit  @relation(fields: [visitId], references: [id], onDelete: Cascade)
+  slotId          String
+  slot            IoVisitSlot @relation(fields: [slotId], references: [id], onDelete: Cascade)
+  filePath        String   @db.VarChar(1024)
+  mimeType        String?  @db.VarChar(64)
+  width           Int?
+  height          Int?
+  qualityJson     Json?
+  comparableJson  Json?
+  deviceInfo      String?  @db.VarChar(255)
+  geoLat          Float?
+  geoLng          Float?
+  capturedAt      DateTime @default(now())
+  createdAt       DateTime @default(now())
+
+  @@index([visitId])
+  @@index([slotId])
+  @@map("io_photo")
+}
+
+model IoDiffResult {
+  id              String             @id @default(uuid())
+  visitId         String
+  visit           IoVisit            @relation(fields: [visitId], references: [id], onDelete: Cascade)
+  /// Slot de la visita OUT (mismo slotCode que IN)
+  outSlotId       String
+  outSlot         IoVisitSlot        @relation(fields: [outSlotId], references: [id], onDelete: Cascade)
+  slotCode        String             @db.VarChar(64)
+  classification  IoDiffClass        @default(no_comparable)
+  severity        String?            @db.VarChar(32)
+  confidence      Float?
+  description     String?            @db.Text
+  reviewStatus    IoDiffReviewStatus @default(pending)
+  reviewerNote    String?            @db.Text
+  rawJson         Json?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@unique([visitId, slotCode])
+  @@index([visitId])
+  @@index([outSlotId])
+  @@index([classification])
+  @@map("io_diff_result")
+}
+
+model IoReport {
+  id        String       @id @default(uuid())
+  leaseId   String
+  lease     IoLease      @relation(fields: [leaseId], references: [id], onDelete: Cascade)
+  kind      IoReportKind
+  version   Int          @default(1)
+  summaryJson Json?
+  htmlSnapshot String?   @db.LongText
+  createdAt DateTime     @default(now())
+
+  @@index([leaseId])
+  @@index([kind])
+  @@map("io_report")
+}
+
+// ——— TOC TOC partner hub (/toctoc) ———
+
+enum TtTenantStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum TtUserStatus {
+  ACTIVE
+  DISABLED
+}
+
+model TtTenant {
+  id        String         @id @default(uuid())
+  slug      String         @unique @db.VarChar(64)
+  name      String         @db.VarChar(191)
+  status    TtTenantStatus @default(ACTIVE)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  users TtUser[]
+
+  @@map("tt_tenant")
+}
+
+model TtUser {
+  id               String       @id @default(uuid())
+  tenantId         String
+  tenant           TtTenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  email            String       @unique @db.VarChar(191)
+  fullName         String       @db.VarChar(191)
+  status           TtUserStatus @default(ACTIVE)
+  passwordHash     String       @db.VarChar(255)
+  termsAcceptedAt  DateTime?
+  ndaAcceptedAt    DateTime?
+  ndaVersion       String?      @db.VarChar(64)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  @@index([tenantId])
+  @@map("tt_user")
+}
+
+// ——— Ainspecciona Scan (tour 3D + planimetría marketing) ———
+
+enum ScanOrgStatus {
+  ACTIVE
+  DISABLED
+}
+
+enum ScanUserStatus {
+  ACTIVE
+  DISABLED
+}
+
+enum ScanJobStatus {
+  DRAFT
+  CAPTURING
+  CAPTURED
+  UPLOADING
+  UPLOADED
+  QUEUED
+  PROCESSING
+  READY
+  FAILED
+}
+
+enum ScanCaptureMode {
+  MOCK
+  ARCORE_DEPTH
+  ARCORE_STANDARD
+}
+
+enum ScanModelType {
+  GLB
+  GAUSSIAN_SPLAT
+  MOCK_SCENE
+}
+
+model ScanOrg {
+  id        String        @id @default(uuid())
+  slug      String        @unique @db.VarChar(64)
+  name      String        @db.VarChar(191)
+  status    ScanOrgStatus @default(ACTIVE)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  users      ScanUser[]
+  properties ScanProperty[]
+  scans      ScanJob[]
+
+  @@map("scan_org")
+}
+
+model ScanUser {
+  id           String         @id @default(uuid())
+  orgId        String
+  org          ScanOrg        @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  email        String         @unique @db.VarChar(191)
+  fullName     String         @db.VarChar(191)
+  status       ScanUserStatus @default(ACTIVE)
+  passwordHash String         @db.VarChar(255)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([orgId])
+  @@map("scan_user")
+}
+
+model ScanProperty {
+  id        String   @id @default(uuid())
+  orgId     String
+  org       ScanOrg  @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  name      String   @db.VarChar(191)
+  address   String?  @db.VarChar(255)
+  bedrooms  Int?
+  bathrooms Int?
+  areaM2    Float?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  scans ScanJob[]
+
+  @@index([orgId])
+  @@map("scan_property")
+}
+
+model ScanJob {
+  id                 String          @id @default(uuid())
+  orgId              String
+  org                ScanOrg         @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  propertyId         String
+  property           ScanProperty    @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  publicId           String          @unique @db.VarChar(32)
+  status             ScanJobStatus   @default(DRAFT)
+  captureMode        ScanCaptureMode @default(MOCK)
+  processingProgress Int             @default(0)
+  modelType          ScanModelType?
+  modelUrl           String?         @db.VarChar(1024)
+  planUrl            String?         @db.VarChar(1024)
+  planJson           Json?
+  packagePath        String?         @db.VarChar(1024)
+  durationSeconds    Int             @default(0)
+  acceptedFrames     Int             @default(0)
+  errorMessage       String?         @db.VarChar(512)
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  readyAt            DateTime?
+
+  @@index([orgId])
+  @@index([propertyId])
+  @@index([status])
+  @@map("scan_job")
+}
+
+// ─── Platform core (identidad / org canónica; productos siguen en tablas legacy) ───
+
+enum OrganizationStatus {
+  ACTIVE
+  DISABLED
+}
+
+enum OrganizationType {
+  DEVELOPER
+  BROKER
+  PROPERTY_MANAGER
+  INTERNAL
+  OTHER
+}
+
+enum PlatformUserStatus {
+  ACTIVE
+  DISABLED
+}
+
+enum OrganizationMemberRole {
+  PLATFORM_ADMIN
+  ORGANIZATION_ADMIN
+  MEMBER
+  VIEWER
+}
+
+enum PlatformProductCode {
+  INSPECTION
+  RECEPTION
+  POSTSALE
+  INOUT
+  SCAN
+}
+
+enum OrganizationProductStatus {
+  ENABLED
+  DISABLED
+}
+
+model Organization {
+  id        String             @id @default(uuid())
+  slug      String             @unique @db.VarChar(64)
+  name      String             @db.VarChar(191)
+  rut       String?            @db.VarChar(32)
+  type      OrganizationType   @default(OTHER)
+  status    OrganizationStatus @default(ACTIVE)
+  logoUrl   String?            @db.VarChar(512)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  members  OrganizationMember[]
+  products OrganizationProduct[]
+  links    LegacyIdentityLink[]
+
+  @@map("platform_organization")
+}
+
+model PlatformUser {
+  id           String             @id @default(uuid())
+  email        String             @unique @db.VarChar(191)
+  fullName     String             @db.VarChar(191)
+  passwordHash String             @db.VarChar(255)
+  status       PlatformUserStatus @default(ACTIVE)
+  isPlatformAdmin Boolean         @default(false)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  memberships OrganizationMember[]
+  links       LegacyIdentityLink[]
+
+  @@map("platform_user")
+}
+
+model OrganizationMember {
+  id             String                 @id @default(uuid())
+  organizationId String
+  organization   Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           PlatformUser           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role           OrganizationMemberRole @default(MEMBER)
+  status         PlatformUserStatus     @default(ACTIVE)
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+  @@map("platform_organization_member")
+}
+
+model OrganizationProduct {
+  id             String                    @id @default(uuid())
+  organizationId String
+  organization   Organization              @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  product        PlatformProductCode
+  status         OrganizationProductStatus @default(ENABLED)
+  plan           String?                   @db.VarChar(64)
+  settings       Json?
+  startedAt      DateTime?
+  expiresAt      DateTime?
+  createdAt      DateTime                  @default(now())
+  updatedAt      DateTime                  @updatedAt
+
+  @@unique([organizationId, product])
+  @@index([product])
+  @@map("platform_organization_product")
+}
+
+/// Puente PlatformUser ↔ usuario/tenant legacy de un producto.
+model LegacyIdentityLink {
+  id              String              @id @default(uuid())
+  platformUserId  String
+  platformUser    PlatformUser        @relation(fields: [platformUserId], references: [id], onDelete: Cascade)
+  organizationId  String
+  organization    Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  product         PlatformProductCode
+  legacyTenantId  String              @db.VarChar(191)
+  legacyUserId    String              @db.VarChar(191)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  @@unique([platformUserId, product])
+  @@index([product, legacyTenantId, legacyUserId])
+  @@index([organizationId])
+  @@map("platform_legacy_identity_link")
 }

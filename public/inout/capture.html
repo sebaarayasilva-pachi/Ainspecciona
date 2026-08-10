@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f1419" />
+  <title>Visita guiada · In &amp; Out</title>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Source Sans 3", "Segoe UI", sans-serif;
+      background: #0f1419;
+      color: #e8eef4;
+      min-height: 100vh;
+      min-height: 100dvh;
+    }
+    a { color: #2bb673; text-decoration: none; }
+    .top {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      padding: 12px 16px; border-bottom: 1px solid #2a3542;
+      position: sticky; top: 0; z-index: 20; background: rgba(15,20,25,0.92); backdrop-filter: blur(8px);
+    }
+    .brand { font-weight: 800; font-size: 14px; }
+    .phase-pill {
+      display: inline-flex; padding: 4px 10px; border-radius: 999px;
+      font-weight: 800; font-size: 12px; letter-spacing: 0.04em; margin-left: 8px;
+    }
+    .phase-pill.in { background: rgba(70,130,180,0.25); color: #9ec9ef; }
+    .phase-pill.out { background: rgba(230,162,60,0.25); color: #f0c27a; }
+    .main { max-width: 520px; margin: 0 auto; padding: 16px 16px 120px; }
+    .muted { color: #8b9aab; font-size: 13px; line-height: 1.4; }
+    .title { font-size: 20px; font-weight: 800; margin: 0 0 6px; }
+    .progress-wrap { margin: 12px 0 16px; }
+    .progress {
+      height: 8px; background: #2a3542; border-radius: 999px; overflow: hidden;
+    }
+    .progress > div { height: 100%; background: #2bb673; width: 0%; transition: width .25s ease; }
+    .cam-box {
+      position: relative; width: 100%; aspect-ratio: 3/4; background: #000;
+      border-radius: 16px; overflow: hidden; border: 1px solid #2a3542;
+    }
+    .cam-box video, .cam-box img.ghost, .cam-box img.freeze {
+      position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+    }
+    img.ghost { opacity: 0.4; pointer-events: none; }
+    img.freeze { z-index: 3; }
+    .ghost-banner {
+      position: absolute; left: 10px; right: 10px; top: 10px; z-index: 4;
+      background: rgba(0,0,0,0.55); color: #f0c27a; font-size: 12px; font-weight: 700;
+      padding: 8px 10px; border-radius: 8px; text-align: center;
+    }
+    .check-ok {
+      position: absolute; inset: 0; z-index: 5; display: none; place-items: center;
+      background: rgba(0,0,0,0.35); font-size: 64px; color: #2bb673;
+    }
+    .check-ok.show { display: grid; }
+    .sticky {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+      max-width: 520px; margin: 0 auto;
+      background: rgba(15,20,25,0.96); border-top: 1px solid #2a3542;
+      padding: 12px 16px max(12px, env(safe-area-inset-bottom));
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .sticky.hidden { display: none; }
+    .btn {
+      border: none; border-radius: 12px; padding: 14px 16px; font-weight: 800; font-size: 15px;
+      cursor: pointer; background: #2bb673; color: #062415; width: 100%;
+      font-family: inherit;
+    }
+    .btn.secondary { background: transparent; color: #e8eef4; border: 1px solid #2a3542; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn.enviar.ready { box-shadow: 0 0 0 2px rgba(43,182,115,0.45); }
+    .err { color: #e85d5d; font-size: 13px; font-weight: 600; margin: 8px 0 0; }
+    .okmsg { color: #2bb673; font-size: 13px; font-weight: 600; margin: 8px 0 0; }
+    .overlay {
+      position: fixed; inset: 0; z-index: 50; background: #0f1419;
+      display: none; flex-direction: column; padding: 24px 20px 32px; overflow-y: auto;
+    }
+    .overlay.show { display: flex; }
+    .overlay .n { font-size: 13px; font-weight: 700; color: #8b9aab; letter-spacing: 0.06em; text-transform: uppercase; }
+    .overlay h1 { font-size: 28px; font-weight: 800; margin: 10px 0 12px; line-height: 1.2; }
+    .overlay ul { margin: 0; padding-left: 18px; color: #b8c5d4; font-size: 16px; line-height: 1.45; }
+    .overlay ul li { margin-bottom: 8px; }
+    .overlay .actions { margin-top: auto; padding-top: 24px; display: grid; gap: 10px; }
+    .done-card {
+      background: #1a222c; border: 1px solid #2a3542; border-radius: 16px; padding: 20px;
+      text-align: center;
+    }
+    .hidden { display: none !important; }
+    .opacity-row {
+      display: none; align-items: center; gap: 8px; color: #8b9aab; font-size: 12px; margin-top: 8px;
+    }
+    .opacity-row.show { display: flex; }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="brand">Visita guiada <span id="phasePill" class="phase-pill">—</span></div>
+    <a href="/inout/captura" id="backHub">← Hub</a>
+  </header>
+
+  <main class="main" id="mainUi">
+    <div class="muted" id="propLabel"></div>
+    <div class="progress-wrap">
+      <div class="muted" id="progressText">Cargando…</div>
+      <div class="progress"><div id="progressBar"></div></div>
+    </div>
+    <h1 class="title" id="slotTitle">—</h1>
+    <p class="muted" id="slotHint"></p>
+
+    <div class="cam-box" id="camBox">
+      <div id="ghostBanner" class="ghost-banner" hidden>Ghost OUT · alinea con la foto IN</div>
+      <video id="video" playsinline muted autoplay></video>
+      <img id="ghost" class="ghost" alt="" hidden />
+      <img id="freeze" class="freeze" alt="" hidden />
+      <div class="check-ok" id="checkOk">✓</div>
+    </div>
+    <div class="opacity-row" id="opacityWrap">
+      Opacidad ghost
+      <input type="range" id="opacity" min="0" max="80" value="40" style="flex:1" />
+    </div>
+    <p class="err" id="err" hidden></p>
+    <p class="okmsg" id="status" hidden></p>
+
+    <div class="done-card hidden" id="doneCard">
+      <h2 style="margin:0 0 8px;font-size:22px">Visita completa</h2>
+      <p class="muted" id="doneMsg">Todas las fotos de esta etapa están listas.</p>
+      <button class="btn" type="button" id="btnFinish" style="margin-top:16px">Finalizar visita</button>
+      <a class="btn secondary" id="doneHub" href="/inout/captura" style="margin-top:10px;display:block">Volver a Captura</a>
+    </div>
+  </main>
+
+  <div class="sticky" id="sticky">
+    <button class="btn" type="button" id="shotBtn">Tomar foto</button>
+    <button class="btn enviar" type="button" id="uploadBtn" disabled>Enviar</button>
+    <button class="btn secondary" type="button" id="omitBtn" hidden>Omitir (opcional)</button>
+    <button class="btn secondary" type="button" id="retakeBtn" hidden>Volver a tomar</button>
+  </div>
+
+  <div class="overlay" id="slotOverlay" aria-hidden="true">
+    <div class="n" id="overlayCounter">Foto 1 de N</div>
+    <h1 id="overlayTitle">Antes de capturar</h1>
+    <p class="muted" id="overlayPhase"></p>
+    <ul id="overlayList"></ul>
+    <div class="actions">
+      <button class="btn" type="button" id="overlayContinue">Continuar</button>
+    </div>
+  </div>
+
+  <script>
+    const parts = location.pathname.split("/").filter(Boolean);
+    const token = decodeURIComponent(parts[parts.length - 1] || "");
+    const API = "/api/inout/capture/" + encodeURIComponent(token);
+
+    let visit = null;
+    let slot = null;
+    let progress = null;
+    let stream = null;
+    let pendingBlob = null;
+    let mode = "live"; // live | preview
+
+    const video = document.getElementById("video");
+    const ghost = document.getElementById("ghost");
+    const freeze = document.getElementById("freeze");
+    const checkOk = document.getElementById("checkOk");
+    const errEl = document.getElementById("err");
+    const statusEl = document.getElementById("status");
+    const sticky = document.getElementById("sticky");
+    const shotBtn = document.getElementById("shotBtn");
+    const uploadBtn = document.getElementById("uploadBtn");
+    const omitBtn = document.getElementById("omitBtn");
+    const retakeBtn = document.getElementById("retakeBtn");
+    const overlay = document.getElementById("slotOverlay");
+
+    (function tuneBack() {
+      const hub = "/inout/captura";
+      document.getElementById("backHub").href = hub;
+      document.getElementById("doneHub").href = hub;
+    })();
+
+    function show(el, t) {
+      el.textContent = t || "";
+      el.hidden = !t;
+    }
+
+    function setPhase(phase) {
+      const pill = document.getElementById("phasePill");
+      const isOut = String(phase || "").toUpperCase() === "OUT";
+      pill.textContent = isOut ? "OUT" : "IN";
+      pill.className = "phase-pill " + (isOut ? "out" : "in");
+      document.getElementById("opacityWrap").classList.toggle("show", isOut);
+    }
+
+    function setProgress(p) {
+      progress = p || { done: 0, total: 0, pct: 0 };
+      document.getElementById("progressText").textContent =
+        "Progreso: " + progress.done + " / " + progress.total + " (" + progress.pct + "%)";
+      document.getElementById("progressBar").style.width = (progress.pct || 0) + "%";
+    }
+
+    function waitForVideoSize(maxMs) {
+      const deadline = Date.now() + (maxMs || 4000);
+      return new Promise((resolve, reject) => {
+        function tick() {
+          const w = video.videoWidth || 0;
+          const h = video.videoHeight || 0;
+          if (w >= 640 && h >= 480) return resolve({ w, h });
+          if (Date.now() >= deadline) {
+            if (w > 0 && h > 0) return resolve({ w, h });
+            return reject(new Error("La cámara no entregó un frame usable."));
+          }
+          requestAnimationFrame(tick);
+        }
+        tick();
+      });
+    }
+
+    async function ensureCam() {
+      if (stream) {
+        await waitForVideoSize(2000).catch(() => {});
+        return;
+      }
+      const attempts = [
+        { video: { facingMode: { ideal: "environment" }, width: { ideal: 1920, min: 1280 }, height: { ideal: 1080, min: 720 } }, audio: false },
+        { video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false },
+        { video: { facingMode: { ideal: "environment" } }, audio: false },
+        { video: true, audio: false }
+      ];
+      let lastErr = null;
+      for (const c of attempts) {
+        try { stream = await navigator.mediaDevices.getUserMedia(c); break; }
+        catch (e) { lastErr = e; }
+      }
+      if (!stream) throw lastErr || new Error("No se pudo abrir la cámara");
+      video.srcObject = stream;
+      try { await video.play(); } catch (e) { /* ignore */ }
+      await waitForVideoSize(5000);
+    }
+
+    async function snapJpeg() {
+      await ensureCam();
+      const srcW = video.videoWidth || 0;
+      const srcH = video.videoHeight || 0;
+      if (!srcW || !srcH) throw new Error("Frame de cámara vacío");
+      let outW = srcW, outH = srcH;
+      const minW = 1280, minH = 720;
+      if (outW < minW || outH < minH) {
+        const scale = Math.max(minW / outW, minH / outH);
+        outW = Math.round(outW * scale);
+        outH = Math.round(outH * scale);
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = outW;
+      canvas.height = outH;
+      canvas.getContext("2d").drawImage(video, 0, 0, outW, outH);
+      const blob = await new Promise((r) => canvas.toBlob(r, "image/jpeg", 0.9));
+      if (!blob) throw new Error("No se pudo generar la imagen");
+      return { blob, previewUrl: canvas.toDataURL("image/jpeg", 0.85) };
+    }
+
+    function setLiveMode() {
+      mode = "live";
+      pendingBlob = null;
+      freeze.hidden = true;
+      freeze.removeAttribute("src");
+      checkOk.classList.remove("show");
+      video.style.visibility = "visible";
+      shotBtn.hidden = false;
+      uploadBtn.disabled = true;
+      uploadBtn.classList.remove("ready");
+      uploadBtn.textContent = "Enviar";
+      retakeBtn.hidden = true;
+      omitBtn.hidden = !(slot && !slot.required);
+    }
+
+    function setPreviewMode(previewUrl) {
+      mode = "preview";
+      freeze.src = previewUrl;
+      freeze.hidden = false;
+      checkOk.classList.add("show");
+      video.style.visibility = "hidden";
+      shotBtn.hidden = true;
+      uploadBtn.disabled = false;
+      uploadBtn.classList.add("ready");
+      retakeBtn.hidden = false;
+      omitBtn.hidden = true;
+    }
+
+    function showOverlay(s) {
+      const isOut = String(visit?.phase || "").toUpperCase() === "OUT";
+      document.getElementById("overlayCounter").textContent =
+        "Foto " + (s.index || 1) + " de " + (s.total || progress?.total || "—");
+      document.getElementById("overlayTitle").textContent = s.title || "Siguiente foto";
+      document.getElementById("overlayPhase").textContent = isOut
+        ? "Etapa OUT: alinea con el ghost (foto IN) y toma la misma toma."
+        : "Etapa IN: captura la línea base de este elemento.";
+      const ul = document.getElementById("overlayList");
+      ul.innerHTML = "";
+      const lines = String(s.instructions || "Encuadre el elemento completo y con buena luz.")
+        .split(/\n|·|;/)
+        .map((x) => x.trim())
+        .filter(Boolean);
+      (lines.length ? lines : ["Encuadre el elemento completo y con buena luz."]).forEach((line) => {
+        const li = document.createElement("li");
+        li.textContent = line;
+        ul.appendChild(li);
+      });
+      if (isOut) {
+        const li = document.createElement("li");
+        li.innerHTML = "<strong>Ghost overlay:</strong> usa la imagen semitransparente como guía de encuadre.";
+        ul.appendChild(li);
+      }
+      overlay.classList.add("show");
+      overlay.setAttribute("aria-hidden", "false");
+      sticky.classList.add("hidden");
+    }
+
+    function hideOverlay() {
+      overlay.classList.remove("show");
+      overlay.setAttribute("aria-hidden", "true");
+      sticky.classList.remove("hidden");
+    }
+
+    async function applyGhost(s) {
+      const isOut = String(visit?.phase || "").toUpperCase() === "OUT";
+      if (isOut && s.ghostUrl) {
+        ghost.src = s.ghostUrl;
+        ghost.hidden = false;
+        document.getElementById("ghostBanner").hidden = false;
+        ghost.style.opacity = String(Number(document.getElementById("opacity").value) / 100);
+      } else {
+        ghost.removeAttribute("src");
+        ghost.hidden = true;
+        document.getElementById("ghostBanner").hidden = true;
+      }
+    }
+
+    function showDone() {
+      document.getElementById("camBox").classList.add("hidden");
+      document.getElementById("slotTitle").classList.add("hidden");
+      document.getElementById("slotHint").classList.add("hidden");
+      document.getElementById("opacityWrap").classList.remove("show");
+      sticky.classList.add("hidden");
+      document.getElementById("doneCard").classList.remove("hidden");
+      const isIn = String(visit?.phase || "").toUpperCase() === "IN";
+      document.getElementById("doneMsg").textContent = isIn
+        ? "IN lista. Finaliza y luego en el hub elige esta apertura para cerrar (OUT)."
+        : "OUT lista. Finaliza para dejar el ciclo en revisión.";
+    }
+
+    async function loadNext(opts) {
+      opts = opts || {};
+      show(errEl, "");
+      show(statusEl, "");
+      if (!token || token === "{token}" || token.includes("{") || token === "capture" || token === "captura") {
+        show(errEl, "Captura incompleta. Abre el hub de Captura e inicia o continúa un ciclo.");
+        sticky.classList.add("hidden");
+        return;
+      }
+      const res = await fetch(API + "/next");
+      const data = await res.json().catch(() => ({}));
+      if (!data.ok) {
+        show(errEl, data.message || data.error || "No se pudo cargar la visita");
+        sticky.classList.add("hidden");
+        return;
+      }
+      visit = data.visit;
+      setPhase(visit.phase);
+      setProgress(data.progress);
+      document.getElementById("propLabel").textContent = visit.property?.address || "";
+
+      if (data.done || !data.slot) {
+        slot = null;
+        showDone();
+        return;
+      }
+
+      slot = data.slot;
+      document.getElementById("doneCard").classList.add("hidden");
+      document.getElementById("camBox").classList.remove("hidden");
+      document.getElementById("slotTitle").classList.remove("hidden");
+      document.getElementById("slotHint").classList.remove("hidden");
+      document.getElementById("slotTitle").textContent = slot.title;
+      document.getElementById("slotHint").textContent = slot.instructions || "";
+      setLiveMode();
+      await applyGhost(slot);
+      if (!opts.skipOverlay) showOverlay(slot);
+      else {
+        hideOverlay();
+        try { await ensureCam(); } catch (e) { show(errEl, e.message); }
+      }
+    }
+
+    document.getElementById("overlayContinue").onclick = async () => {
+      hideOverlay();
+      try { await ensureCam(); } catch (e) { show(errEl, e.message); }
+    };
+
+    document.getElementById("opacity").oninput = (e) => {
+      ghost.style.opacity = String(Number(e.target.value) / 100);
+    };
+
+    shotBtn.onclick = async () => {
+      if (!slot || mode !== "live") return;
+      show(errEl, "");
+      show(statusEl, "");
+      shotBtn.disabled = true;
+      try {
+        const { blob, previewUrl } = await snapJpeg();
+        pendingBlob = blob;
+        setPreviewMode(previewUrl);
+      } catch (e) {
+        show(errEl, e.message || "Error al capturar");
+      } finally {
+        shotBtn.disabled = false;
+      }
+    };
+
+    retakeBtn.onclick = () => {
+      setLiveMode();
+      show(statusEl, "");
+    };
+
+    uploadBtn.onclick = async () => {
+      if (!slot || !pendingBlob) return;
+      uploadBtn.disabled = true;
+      uploadBtn.textContent = "Enviando…";
+      show(errEl, "");
+      show(statusEl, "Subiendo…");
+      try {
+        const fd = new FormData();
+        fd.append("photo", pendingBlob, "capture.jpg");
+        const res = await fetch(API + "/slots/" + encodeURIComponent(slot.id), { method: "POST", body: fd });
+        const data = await res.json().catch(() => ({}));
+        if (!data.ok) {
+          show(statusEl, "");
+          show(errEl, data.problem?.message || data.message || data.error || "Error al enviar");
+          setLiveMode();
+          return;
+        }
+        show(statusEl, "Foto guardada");
+        await loadNext();
+      } catch (e) {
+        show(statusEl, "");
+        show(errEl, e.message || "Error de red");
+        setLiveMode();
+      }
+    };
+
+    omitBtn.onclick = async () => {
+      if (!slot || slot.required) return;
+      omitBtn.disabled = true;
+      try {
+        const res = await fetch(API + "/slots/" + encodeURIComponent(slot.id) + "/omit", { method: "POST" });
+        const data = await res.json().catch(() => ({}));
+        if (!data.ok) throw new Error(data.message || data.error || "No se pudo omitir");
+        await loadNext();
+      } catch (e) {
+        show(errEl, e.message);
+      } finally {
+        omitBtn.disabled = false;
+      }
+    };
+
+    document.getElementById("btnFinish").onclick = async () => {
+      const btn = document.getElementById("btnFinish");
+      btn.disabled = true;
+      show(errEl, "");
+      try {
+        const res = await fetch(API + "/finish", { method: "POST" });
+        const data = await res.json().catch(() => ({}));
+        if (!data.ok) throw new Error(data.message || data.error || "No se pudo finalizar");
+        const isOut = String(visit?.phase || "").toUpperCase() === "OUT" || data.phase === "OUT";
+        if (isOut || data.reportQueued) {
+          show(statusEl, "Visita finalizada. Generando informe…");
+          document.getElementById("doneMsg").textContent =
+            "Visita finalizada. Estamos generando el informe comparativo; lo verás en el portal.";
+        } else {
+          show(statusEl, "Visita finalizada (" + (data.cycleStatus || "ok") + ")");
+          document.getElementById("doneMsg").textContent =
+            "IN lista. Finaliza y luego en el hub elige esta apertura para cerrar (OUT).";
+        }
+      } catch (e) {
+        show(errEl, e.message);
+        btn.disabled = false;
+      }
+    };
+
+    loadNext();
+  </script>
+</body>
+</html>

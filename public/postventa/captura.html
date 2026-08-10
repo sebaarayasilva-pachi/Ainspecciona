@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Postventa · Ainspecciona</title>
+  <meta name="description" content="Asistente de postventa inmobiliaria. Indica la dirección de tu departamento, valida garantía y sube fotos guiadas de tu solicitud." />
+  <link rel="canonical" href="https://ainspecciona.com/postventa/captura" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://ainspecciona.com/postventa/captura" />
+  <meta property="og:title" content="Postventa · Ainspecciona" />
+  <meta property="og:description" content="Registra reclamos de postventa con asistencia conversacional y captura guiada de fotos." />
+  <meta property="og:image" content="https://ainspecciona.com/assets/certificado-4O7KF9GX.jpg" />
+  <meta property="og:locale" content="es_CL" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://api.elevenlabs.io" crossorigin />
+  <link rel="stylesheet" href="/assets/header.css" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+      background: #070812;
+      color: #ECF2FF;
+      min-height: 100vh;
+    }
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 48px 24px 120px;
+    }
+    .hero {
+      text-align: center;
+      padding: 32px 0 40px;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #7dd3fc;
+      background: rgba(125, 211, 252, 0.12);
+      border: 1px solid rgba(125, 211, 252, 0.25);
+      border-radius: 999px;
+      padding: 6px 14px;
+      margin-bottom: 20px;
+    }
+    h1 {
+      font-size: clamp(28px, 5vw, 40px);
+      font-weight: 800;
+      line-height: 1.15;
+      margin: 0 0 16px;
+      letter-spacing: -0.03em;
+    }
+    .lead {
+      font-size: 17px;
+      line-height: 1.6;
+      color: #A9B6DD;
+      max-width: 640px;
+      margin: 0 auto 28px;
+    }
+    .pv-cta {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin: 8px auto 40px;
+    }
+    .pv-contact {
+      width: min(100%, 420px);
+      text-align: left;
+      margin: 0 auto 8px;
+      padding: 18px 18px 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(125, 211, 252, 0.22);
+      background: rgba(15, 23, 42, 0.55);
+    }
+    .pv-contact h2 {
+      margin: 0 0 4px;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .pv-contact .hint {
+      margin: 0 0 14px;
+      font-size: 13px;
+      line-height: 1.45;
+      color: #A9B6DD;
+    }
+    .pv-contact label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #8aa0b2;
+      margin: 0 0 6px;
+    }
+    .pv-contact input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(125, 211, 252, 0.25);
+      background: #0b1220;
+      color: #ECF2FF;
+      font: inherit;
+      font-size: 15px;
+      margin-bottom: 12px;
+    }
+    .pv-contact input:focus {
+      outline: none;
+      border-color: #22d3ee;
+      box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.15);
+    }
+    .pv-contact-err {
+      min-height: 18px;
+      margin: -4px 0 4px;
+      font-size: 12px;
+      color: #f87171;
+    }
+    .pv-cta-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: min(100%, 320px);
+      padding: 28px 24px 22px;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      background: linear-gradient(145deg, #2563eb 0%, #1d4ed8 55%, #1e40af 100%);
+      color: #fff;
+      box-shadow:
+        0 0 0 1px rgba(125, 211, 252, 0.25),
+        0 16px 40px rgba(37, 99, 235, 0.35);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+    }
+    .pv-cta-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow:
+        0 0 0 1px rgba(125, 211, 252, 0.4),
+        0 20px 48px rgba(37, 99, 235, 0.45);
+    }
+    .pv-cta-btn:active:not(:disabled) { transform: translateY(0); }
+    .pv-cta-btn:disabled {
+      opacity: 0.65;
+      cursor: wait;
+    }
+    .pv-cta-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+    }
+    .pv-cta-icon svg { width: 34px; height: 34px; }
+    .pv-cta-label {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .pv-cta-note {
+      margin: 0;
+      font-size: 13px;
+      color: #64748b;
+      max-width: 360px;
+      line-height: 1.45;
+    }
+    .pv-cta-note.is-error { color: #f87171; }
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin: 40px 0;
+      text-align: left;
+    }
+    .step {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .step-num {
+      font-size: 13px;
+      font-weight: 700;
+      color: #7dd3fc;
+      margin-bottom: 8px;
+    }
+    .step h2 {
+      font-size: 15px;
+      font-weight: 700;
+      margin: 0 0 8px;
+      color: #ECF2FF;
+    }
+    .step p {
+      font-size: 14px;
+      line-height: 1.5;
+      margin: 0;
+      color: #94a3b8;
+    }
+    .cta-hint {
+      font-size: 15px;
+      color: #cbd5e1;
+      margin-top: 8px;
+    }
+    .cta-hint strong { color: #7dd3fc; }
+    /* Barra del asistente (SDK WebRTC, sin widget ElevenLabs) */
+    #pv-voice-shell {
+      display: none;
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 2147483001;
+      background: linear-gradient(180deg, rgba(11, 18, 32, 0.98) 0%, #0b1220 100%);
+      border-top: 1px solid rgba(125, 211, 252, 0.2);
+      box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.45);
+      padding: 16px 20px max(16px, env(safe-area-inset-bottom));
+    }
+    body.pv-assistant-active #pv-voice-shell {
+      display: block;
+    }
+    body.pv-assistant-active .page {
+      padding-bottom: 120px;
+    }
+    .pv-voice-bar {
+      max-width: 960px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .pv-voice-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #64748b;
+      flex-shrink: 0;
+    }
+    .pv-voice-dot.live {
+      background: #22c55e;
+      box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.25);
+      animation: pv-pulse 1.4s ease-in-out infinite;
+    }
+    @keyframes pv-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.55; }
+    }
+    #pv-voice-status {
+      flex: 1;
+      font-size: 15px;
+      font-weight: 600;
+      color: #ecf2ff;
+    }
+    #pv-voice-end {
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: rgba(255, 255, 255, 0.06);
+      color: #cbd5e1;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* Modo captura: asistente arriba, cámara abajo */
+    body.pv-capture-mode {
+      overflow: hidden;
+    }
+    body.pv-capture-mode .site-header,
+    body.pv-capture-mode .page {
+      display: none !important;
+    }
+    body.pv-capture-mode #pv-voice-shell {
+      display: block !important;
+      top: 0;
+      bottom: auto;
+      height: min(32dvh, 240px);
+      min-height: 180px;
+      max-height: 32dvh;
+      border-top: none;
+      border-bottom: 1px solid rgba(125, 211, 252, 0.2);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      padding: 14px 16px;
+    }
+    #pv-capture-shell {
+      display: none;
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      top: min(32dvh, 240px);
+      z-index: 2147483000;
+      background: #f6f7f9;
+      overflow: hidden;
+      flex-direction: column;
+    }
+    body.pv-capture-mode #pv-capture-shell {
+      display: flex;
+    }
+    #pv-capture-panel {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      background: #f6f7f9;
+    }
+    #pv-capture-panel iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+      flex: 1;
+      min-height: 0;
+      background: #f6f7f9;
+    }
+    .pv-cap-root {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 0;
+      font-family: Inter, system-ui, sans-serif;
+      color: #0f172a;
+    }
+    .pv-cap-scroll {
+      flex: 1;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 12px 12px 8px;
+      min-height: 0;
+    }
+    .pv-cap-ticket { margin: 0 0 6px; font-size: 13px; font-weight: 700; color: #334155; }
+    .pv-cap-progress { height: 6px; background: #e5e7eb; border-radius: 999px; overflow: hidden; }
+    .pv-cap-progress > div { height: 100%; background: #2563eb; width: 0%; transition: width 0.2s; }
+    .pv-cap-progress-text { margin: 6px 0 0; font-size: 12px; color: #64748b; }
+    .pv-cap-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 14px; margin-bottom: 10px; }
+    .pv-cap-step { margin: 0 0 4px; font-size: 12px; font-weight: 700; color: #2563eb; text-transform: uppercase; letter-spacing: 0.04em; }
+    .pv-cap-label { margin: 0 0 4px; font-size: 13px; font-weight: 600; color: #64748b; }
+    .pv-cap-title { margin: 0 0 6px; font-size: 22px; font-weight: 800; color: #0f172a; line-height: 1.2; }
+    .pv-cap-muted { margin: 0; font-size: 14px; line-height: 1.45; color: #64748b; }
+    .pv-cap-status { margin: 10px 0 0; font-size: 13px; color: #475569; }
+    .pv-cap-media { width: 100%; border-radius: 10px; max-height: 28vh; object-fit: cover; background: #000; margin-top: 10px; }
+    .pv-cap-error { color: #b91c1c; font-size: 13px; margin-top: 8px; }
+    .pv-cap-ok { color: #15803d; font-size: 14px; margin: 8px 0 0; }
+    .pv-cap-actions {
+      padding: 8px 12px max(12px, env(safe-area-inset-bottom));
+      background: #fff;
+      border-top: 1px solid #e5e7eb;
+      display: grid;
+      gap: 8px;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 2;
+    }
+    .pv-cap-head { margin-bottom: 10px; }
+    .pv-cap-btn {
+      padding: 13px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 15px;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+    }
+    .pv-cap-btn.primary { background: #2563eb; color: #fff; }
+    .pv-cap-btn.outline { background: #fff; color: #334155; border: 1px solid #cbd5e1; }
+    .pv-cap-btn.ghost { background: transparent; color: #64748b; border: 1px solid #e2e8f0; }
+    .pv-cap-btn:disabled { opacity: 0.6; cursor: wait; }
+    .pv-cap-email { display: grid; gap: 8px; margin-top: 12px; }
+    .pv-cap-email input { padding: 12px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 15px; width: 100%; }
+    .hidden { display: none !important; }
+    @media (max-width: 640px) {
+      #pv-capture-shell { top: min(32dvh, 240px); }
+    }
+    .legal {
+      margin-top: 48px;
+      padding: 16px 20px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 13px;
+      line-height: 1.55;
+      color: #64748b;
+      text-align: center;
+    }
+    @media (max-width: 640px) {
+      .page { padding-bottom: 140px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="nav">
+      <a class="brand" href="/">
+        <img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" />
+      </a>
+      <div class="navLinks">
+        <a href="/como-funciona.html">Cómo funciona</a>
+        <a href="/precios">Precios</a>
+        <a href="/faq.html">FAQ</a>
+        <a href="/contacto.html">Contacto</a>
+      </div>
+      <div class="topActions">
+        <a class="btn outline" href="/">Inicio</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="hero">
+      <span class="badge">Postventa inmobiliaria</span>
+      <h1>Registra tu solicitud de postventa</h1>
+      <p class="lead">
+        Indica tu nombre y celular para que el inspector te contacte.
+        Luego el asistente ubicará tu departamento, validará la garantía y te guiará con las fotos.
+      </p>
+
+      <div class="pv-cta">
+        <div class="pv-contact" id="pv-contact-form">
+          <h2>Datos de contacto</h2>
+          <p class="hint">Puede ser el ocupante, no necesariamente el propietario. El inspector usará estos datos para agendar la visita.</p>
+          <label for="pv-contact-name">Tu nombre</label>
+          <input id="pv-contact-name" type="text" autocomplete="name" placeholder="Ej. Camila Rojas" maxlength="80" />
+          <label for="pv-contact-phone">Celular</label>
+          <input id="pv-contact-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="Ej. 9 1234 5678" maxlength="20" />
+          <div class="pv-contact-err" id="pv-contact-err" aria-live="polite"></div>
+        </div>
+        <button type="button" class="pv-cta-btn" id="pv-start-cta" disabled aria-label="Iniciar asistente de postventa">
+          <span class="pv-cta-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M19 11v1a7 7 0 0 1-14 0v-1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M12 18v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M8 21h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="pv-cta-label">Iniciar asistente</span>
+        </button>
+        <p class="pv-cta-note" id="pv-cta-status">Cargando asistente…</p>
+      </div>
+    </section>
+
+    <div class="steps">
+      <article class="step">
+        <div class="step-num">Paso 1</div>
+        <h2>Tu contacto</h2>
+        <p>Nombre y celular de quien recibe la visita (ocupante o propietario).</p>
+      </article>
+      <article class="step">
+        <div class="step-num">Paso 2</div>
+        <h2>Ubica tu departamento</h2>
+        <p>Indica comuna, calle con número y departamento. El asistente valida tu unidad en el sistema.</p>
+      </article>
+      <article class="step">
+        <div class="step-num">Paso 3</div>
+        <h2>Garantía, registro y fotos</h2>
+        <p>Prevalidamos la garantía, creamos tu ticket y te guiamos foto a foto en el mismo celular.</p>
+      </article>
+    </div>
+
+    <p class="legal">
+      Este servicio realiza una prevalidación operativa de tu solicitud.
+      No constituye dictamen legal ni resolución definitiva sobre garantías.
+      Un ejecutivo de postventa revisará tu caso tras recibir las evidencias.
+    </p>
+  </main>
+
+  <div id="pv-voice-shell" aria-hidden="true">
+    <div class="pv-voice-bar">
+      <span class="pv-voice-dot" id="pv-voice-dot" aria-hidden="true"></span>
+      <span id="pv-voice-status">Asistente de postventa</span>
+      <button type="button" id="pv-voice-end">Finalizar</button>
+    </div>
+  </div>
+
+  <div id="pv-capture-shell" aria-hidden="true">
+    <div id="pv-capture-panel"></div>
+  </div>
+
+  <script src="/assets/postventa-capture-embed.js?v=voice2"></script>
+  <script src="/assets/postventa-voice.js?v=voice2"></script>
+  <script src="/assets/elevenlabs-postventa.js?v=captura1" defer></script>
+</body>
+</html>

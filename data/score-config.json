@@ -39,6 +39,11 @@
       "low": 5,
       "medium": 15,
       "high": 30
+    },
+    "DOCUMENTOS_CUMPLIMIENTO": {
+      "low": 5,
+      "medium": 15,
+      "high": 30
     }
   },
   "slotKpiMap": {
@@ -82,9 +87,11 @@
     "LAUNDRY_WALLS_FLOOR": "HUMEDAD",
     "ELECTRICAL_PANEL": "ELECTRICIDAD",
     "PUERTA_ENTRADA": "PUERTAS_HERRAJES",
-    "ELEVATOR": "ELECTRICIDAD",
+    "ASCENSOR_CERTIFICADO_INSPECCION": "DOCUMENTOS_CUMPLIMIENTO",
+    "ASCENSOR_CABINA": "DOCUMENTOS_CUMPLIMIENTO",
+    "ELEVATOR": "DOCUMENTOS_CUMPLIMIENTO",
     "ESTACIONAMIENTO": "PISOS",
-    "CERTIFICADO_VERDE": "ELECTRICIDAD"
+    "CERTIFICADO_VERDE": "DOCUMENTOS_CUMPLIMIENTO"
   },
   "messages": {
     "MUROS_PINTURA": {
@@ -126,6 +133,11 @@
       "low": "Se observan condiciones visibles menores en mobiliario fijo del área inspeccionada.",
       "medium": "Se observan condiciones visibles en mobiliario fijo del área inspeccionada.",
       "high": "Se observan condiciones visibles relevantes en mobiliario fijo del área inspeccionada."
+    },
+    "DOCUMENTOS_CUMPLIMIENTO": {
+      "low": "Se observan observaciones menores en documentación del área inspeccionada.",
+      "medium": "No fue posible confirmar plenamente la vigencia o legibilidad del documento registrado.",
+      "high": "El certificado o documento registrado no se encuentra vigente o presenta incumplimiento relevante."
     }
   },
   "recommendations": {
@@ -135,6 +147,11 @@
   },
   "badge": {
     "yellowFrom": 60,
-    "greenFrom": 85
+    "greenFrom": 86
+  },
+  "kpiWeights": {
+    "HUMEDAD": 2,
+    "SANITARIOS": 2,
+    "ELECTRICIDAD": 2
   }
 }

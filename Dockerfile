@@ -12,6 +12,8 @@ RUN npm ci
 # Copy source
 COPY . .
 
+RUN mkdir -p /app/uploads
+
 # Prisma generate en build: prisma-build.env (no está en .gitignore)
 RUN cp prisma-build.env .env && npx prisma generate && rm .env
 

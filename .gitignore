@@ -33,3 +33,17 @@ public/assets/video-hero.mp4
 
 # Cloud SQL Proxy (binario local, no versionar)
 cloud-sql-proxy*.exe
+
+# Dumps / temporales locales (no respaldar)
+cookies*.txt
+headers.txt
+me-body.txt
+tmp-*
+_tmp_*
+*-backup*.json
+workflow-backup.json
+deploy-pid.txt
+deploy-tag.txt
+deploy-last.log*
+agent-backup-before-workflow.json
+tmp-nda-xml/

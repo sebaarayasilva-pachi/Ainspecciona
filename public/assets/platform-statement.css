@@ -1,0 +1,396 @@
+/* PlatformStatementSection — transición editorial post-hero */
+.platform-statement {
+  --ps-bg: #0e1114;
+  --ps-text: #f3f1ec;
+  --ps-muted: #a9afb4;
+  --ps-accent: #f04438;
+  --ps-line: rgba(255, 255, 255, 0.1);
+  --ps-line-active: rgba(255, 255, 255, 0.22);
+  --ps-max: 1280px;
+
+  background: var(--ps-bg);
+  color: var(--ps-text);
+}
+
+.platform-statement__inner {
+  max-width: var(--ps-max);
+  margin: 0 auto;
+  padding: 72px 80px 120px;
+  box-sizing: border-box;
+}
+
+/* ——— Header (12-col) ——— */
+.platform-statement__header {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  column-gap: 48px;
+  align-items: start;
+}
+
+.platform-statement__main {
+  grid-column: 1 / span 7;
+  min-width: 0;
+}
+
+.platform-statement__statement {
+  grid-column: 9 / span 4;
+  min-width: 0;
+  margin: 0;
+  padding-top: 24px;
+  border-top: 1px solid var(--ps-line);
+  font-size: clamp(30px, 2.4vw, 36px);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--ps-text);
+}
+
+.platform-statement__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ps-muted);
+}
+
+.platform-statement__eyebrow::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  background: var(--ps-accent);
+}
+
+.platform-statement__title {
+  margin: 24px 0 0;
+  max-width: 760px;
+  font-size: clamp(48px, 4.5vw, 72px);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  color: var(--ps-text);
+}
+
+.platform-statement__title-block {
+  display: block;
+}
+
+.platform-statement__lead {
+  margin: 28px 0 0;
+  max-width: 560px;
+  font-size: 18px;
+  line-height: 1.65;
+  color: var(--ps-muted);
+}
+
+/* ——— Timeline ——— */
+.platform-statement__timeline {
+  margin-top: 96px;
+}
+
+.platform-statement__track {
+  position: relative;
+  height: 6px;
+  margin-bottom: 20px;
+}
+
+.platform-statement__track-line {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--ps-line);
+  transform: translateY(-50%);
+}
+
+.platform-statement__track-line--active {
+  right: auto;
+  width: 25%;
+  background: var(--ps-line-active);
+  z-index: 1;
+  transform: translateY(-50%) scaleX(0);
+  transform-origin: left center;
+}
+
+.platform-statement__stages {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.platform-statement__stage {
+  position: relative;
+  padding-top: 4px;
+  cursor: default;
+  transition: color 180ms ease;
+}
+
+.platform-statement__stage-num {
+  display: block;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--ps-accent);
+}
+
+.platform-statement__stage-dot {
+  position: absolute;
+  top: -3px;
+  left: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ps-muted);
+  transition: background 180ms ease, transform 180ms ease;
+}
+
+.platform-statement__stage-name {
+  display: block;
+  margin-top: 12px;
+  max-width: 150px;
+  font-size: 14px;
+  line-height: 1.35;
+  color: var(--ps-muted);
+  transition: color 180ms ease;
+}
+
+.platform-statement__stage.is-active .platform-statement__stage-dot {
+  background: var(--ps-accent);
+}
+
+.platform-statement__stage.is-active .platform-statement__stage-name {
+  color: var(--ps-text);
+}
+
+.platform-statement__stage:hover .platform-statement__stage-dot,
+.platform-statement__stage:focus-within .platform-statement__stage-dot {
+  background: var(--ps-accent);
+  transform: scale(1.25);
+}
+
+.platform-statement__stage:hover .platform-statement__stage-name,
+.platform-statement__stage:focus-within .platform-statement__stage-name {
+  color: var(--ps-text);
+}
+
+/* ——— Animaciones ——— */
+.platform-statement [data-animate="fade"] {
+  opacity: 0;
+}
+
+.platform-statement [data-animate="block"] {
+  opacity: 0;
+  transform: translateY(14px);
+}
+
+.platform-statement [data-animate="up"] {
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+.platform-statement [data-animate="fade-in"] {
+  opacity: 0;
+}
+
+.platform-statement__stage {
+  opacity: 0;
+}
+
+.platform-statement.is-visible [data-animate="fade"] {
+  animation: psFadeIn 550ms ease forwards;
+}
+
+.platform-statement.is-visible [data-animate="block"] {
+  animation: psBlockUp 650ms ease forwards;
+}
+
+.platform-statement.is-visible .platform-statement__title-block:nth-child(2) {
+  animation-delay: 90ms;
+}
+
+.platform-statement.is-visible [data-animate="up"] {
+  animation: psFadeUp 650ms ease forwards;
+  animation-delay: 180ms;
+}
+
+.platform-statement.is-visible [data-animate="fade-in"] {
+  animation: psFadeIn 700ms ease forwards;
+  animation-delay: 280ms;
+}
+
+.platform-statement.is-visible .platform-statement__track-line--active {
+  animation: psLineDraw 900ms ease forwards;
+  animation-delay: 360ms;
+}
+
+.platform-statement.is-visible .platform-statement__stage {
+  animation: psStageIn 500ms ease forwards;
+}
+
+.platform-statement.is-visible .platform-statement__stage:nth-child(1) { animation-delay: 480ms; }
+.platform-statement.is-visible .platform-statement__stage:nth-child(2) { animation-delay: 560ms; }
+.platform-statement.is-visible .platform-statement__stage:nth-child(3) { animation-delay: 640ms; }
+.platform-statement.is-visible .platform-statement__stage:nth-child(4) { animation-delay: 720ms; }
+
+@keyframes psFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes psBlockUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes psFadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes psLineDraw {
+  from { transform: translateY(-50%) scaleX(0); }
+  to { transform: translateY(-50%) scaleX(1); }
+}
+
+@keyframes psStageIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .platform-statement [data-animate],
+  .platform-statement__stage {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+
+  .platform-statement__track-line--active {
+    transform: translateY(-50%) scaleX(1) !important;
+    animation: none !important;
+  }
+}
+
+/* ——— Tablet ——— */
+@media (max-width: 1024px) {
+  .platform-statement__inner {
+    padding: 64px 40px 96px;
+  }
+
+  .platform-statement__header {
+    grid-template-columns: 1fr;
+    row-gap: 40px;
+  }
+
+  .platform-statement__main,
+  .platform-statement__statement {
+    grid-column: 1 / -1;
+  }
+
+  .platform-statement__statement {
+    max-width: 560px;
+  }
+
+  .platform-statement__timeline {
+    margin-top: 72px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 900px) {
+  .platform-statement__stages {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 36px;
+    column-gap: 24px;
+  }
+
+  .platform-statement__track-line--active {
+    width: 50%;
+  }
+}
+
+/* ——— Mobile ——— */
+@media (max-width: 768px) {
+  .platform-statement__inner {
+    padding: 48px 20px 72px;
+  }
+
+  .platform-statement__title {
+    font-size: clamp(40px, 11vw, 54px);
+  }
+
+  .platform-statement__statement {
+    font-size: 26px;
+  }
+
+  .platform-statement__timeline {
+    margin-top: 56px;
+  }
+
+  .platform-statement__track {
+    display: none;
+  }
+
+  .platform-statement__stages {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+    padding-left: 32px;
+  }
+
+  .platform-statement__stages::before {
+    content: "";
+    position: absolute;
+    top: 10px;
+    bottom: 10px;
+    left: 7px;
+    width: 1px;
+    background: var(--ps-line);
+  }
+
+  .platform-statement__stage {
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    column-gap: 12px;
+    align-items: start;
+    padding: 0 0 28px;
+  }
+
+  .platform-statement__stage:last-child {
+    padding-bottom: 0;
+  }
+
+  .platform-statement__stage-num {
+    grid-column: 1;
+    grid-row: 1;
+    line-height: 1.4;
+  }
+
+  .platform-statement__stage-dot {
+    position: absolute;
+    top: 5px;
+    left: -28px;
+  }
+
+  .platform-statement__stage-name {
+    grid-column: 2;
+    grid-row: 1;
+    margin-top: 0;
+    max-width: none;
+    font-size: 13px;
+  }
+
+  .platform-statement__track-line--active {
+    display: none;
+  }
+}

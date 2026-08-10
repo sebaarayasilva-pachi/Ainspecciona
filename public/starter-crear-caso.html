@@ -119,14 +119,6 @@
             <label for="propertySurface">Superficie (m²)</label>
             <input id="propertySurface" placeholder="Ej: 45" />
           </div>
-          <div class="checks">
-            <label><input type="checkbox" id="hasPatio" /> Tiene patio</label>
-            <label><input type="checkbox" id="hasAttic" /> Tiene entretecho</label>
-            <label><input type="checkbox" id="hasLaundry" /> Tiene loggia</label>
-            <label><input type="checkbox" id="hasElevator" /> Tiene ascensor</label>
-            <label><input type="checkbox" id="hasParking" /> Tiene estacionamiento</label>
-            <label><input type="checkbox" id="hasGreenCertificate" /> Certificado verde</label>
-          </div>
         </div>
 
         <button type="submit" class="btn" id="submitBtn">Crear inspección</button>
@@ -187,12 +179,9 @@
           propertyType: document.getElementById('propertyType').value,
           bathroomsCount: Number(document.getElementById('bathroomsCount').value || 1),
           bedroomsCount: Number(document.getElementById('bedroomsCount').value || 1),
-          hasPatio: document.getElementById('hasPatio').checked,
-          hasAttic: document.getElementById('hasAttic').checked,
-          hasLaundry: document.getElementById('hasLaundry').checked,
-          hasElevator: document.getElementById('hasElevator').checked,
-          hasParking: document.getElementById('hasParking').checked,
-          hasGreenCertificate: document.getElementById('hasGreenCertificate').checked
+          hasLaundry: true,
+          hasElevator: true,
+          hasGreenCertificate: true
         };
 
         try {

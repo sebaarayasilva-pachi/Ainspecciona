@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <script>(function(){try{var t=localStorage.getItem("entrega-theme");document.documentElement.setAttribute("data-theme",t==="light"?"light":"dark");}catch(e){document.documentElement.setAttribute("data-theme","dark");}})();</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Portafolio · Ainspecciona Recepción</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/entrega/assets/entrega.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    .fam-group { margin-bottom: 22px; }
+    .fam-head { display:flex; align-items:center; gap:10px; margin:4px 0 12px; }
+    .fam-title { font-size:15px; font-weight:800; color:var(--text); }
+    .fam-sub { font-size:12px; font-weight:600; color:var(--muted); }
+    .fam-line { flex:1; height:1px; background:var(--border); }
+    .proj-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(330px, 1fr)); gap:16px; }
+    .proj-card { display:block; text-decoration:none; color:inherit; background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:18px; transition:box-shadow .14s ease, transform .14s ease, border-color .14s ease; }
+    .proj-card:hover { box-shadow:var(--shadow); transform:translateY(-2px); border-color:var(--primary); }
+    .pc-head { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:14px; }
+    .pc-name { font-size:17px; font-weight:800; color:var(--text); }
+    .pc-meta { font-size:12px; color:var(--muted); margin-top:2px; }
+    .pcm { margin-bottom:9px; }
+    .pcm-row { display:flex; align-items:center; gap:9px; }
+    .pcm-label { font-size:11px; color:var(--muted); min-width:108px; }
+    .pcm .bar { flex:1; height:7px; border-radius:99px; background:var(--border); overflow:hidden; }
+    .pcm .bar > i { display:block; height:100%; border-radius:99px; }
+    .pcm-val { font-size:12px; font-weight:700; min-width:34px; text-align:right; }
+    .pc-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:14px 0 12px; padding-top:12px; border-top:1px solid var(--border); }
+    .pc-stats > div { text-align:center; }
+    .pc-stats b { display:block; font-size:18px; font-weight:800; color:var(--text); line-height:1.1; }
+    .pc-stats span { font-size:10px; color:var(--muted); }
+    .pc-stats .crit b { color:#EF4444; }
+    .pc-foot { display:flex; align-items:center; justify-content:space-between; }
+    .pc-link { font-size:12px; font-weight:700; color:var(--primary); }
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+    <div id="sidebar"></div>
+    <div class="main">
+      <header class="topbar">
+        <div class="titles">
+          <h1 id="tenantTitle">Portafolio</h1>
+          <div class="crumb">Portafolio de proyectos · Inmobiliaria</div>
+        </div>
+        <div class="spacer"></div>
+        <div id="dateChip"></div>
+      </header>
+      <div class="content" id="content"></div>
+    </div>
+  </div>
+
+  <script src="/entrega/assets/entrega-app.js"></script>
+  <script>
+    (async function () {
+      const E = window.Entrega;
+      const seed = await E.loadSeed();
+      const kpiCatalog = await E.loadKpiCatalog(seed);
+      let current = E.getProject(seed, E.currentProjectId());
+
+      // Enriquecer proyecto activo con hallazgos live
+      try {
+        const findingsMap = await E.loadProjectFindingsMap(seed, current.id);
+        const enriched = E.enrichProjectWithFindings(current, findingsMap, seed, kpiCatalog);
+        current = enriched.project;
+        const idx = (seed.projects || []).findIndex((p) => p.id === current.id);
+        if (idx >= 0) seed.projects[idx] = current;
+      } catch (err) {
+        console.warn("[overview] enrich", err);
+      }
+
+      document.getElementById("sidebar").innerHTML = E.renderSidebar("overview", current, seed);
+      document.getElementById("tenantTitle").textContent = seed.tenant.name;
+
+      const projects = E.entregaProjects(seed);
+
+      // KPIs agregados del portafolio
+      const agg = projects.reduce((a, p) => {
+        const m = p.metrics || {};
+        a.unidades += m.unidadesTotales || 0;
+        a.listas += m.unidadesListas || 0;
+        a.criticas += m.criticasAbiertas || 0;
+        a.ot += m.otActivas || 0;
+        a.avW += (m.avanceRecepcion || 0) * (m.unidadesTotales || 0);
+        return a;
+      }, { unidades: 0, listas: 0, criticas: 0, ot: 0, avW: 0 });
+      const avancePromedio = agg.unidades ? Math.round(agg.avW / agg.unidades) : 0;
+
+      // Agrupar por familia
+      const fams = {}, famOrder = [];
+      projects.forEach((p) => {
+        const f = p.familia || "Sin familia";
+        if (!fams[f]) { fams[f] = []; famOrder.push(f); }
+        fams[f].push(p);
+      });
+
+      const content = document.getElementById("content");
+      content.innerHTML = `
+        <div class="kpi-row">
+          <div class="kpi"><div class="k-label">🏗️ Proyectos</div><div class="k-value">${projects.length}</div><div class="k-sub">${famOrder.length} familia${famOrder.length > 1 ? "s" : ""}</div></div>
+          <div class="kpi with-donut"><div><div class="k-label">% Avance recepción</div><div class="k-value">${avancePromedio}%</div><div class="k-sub">promedio ponderado</div></div>${miniDonut(avancePromedio, "#6366F1")}</div>
+          <div class="kpi"><div class="k-label">👥 Unidades totales</div><div class="k-value">${E.fmt(agg.unidades)}</div><div class="k-sub">${agg.listas} listas</div></div>
+          <div class="kpi"><div class="k-label">🚩 Críticas abiertas</div><div class="k-value crit">${E.fmt(agg.criticas)}</div></div>
+          <div class="kpi"><div class="k-label">🔧 OT activas</div><div class="k-value">${E.fmt(agg.ot)}</div></div>
+        </div>
+
+        ${famOrder.map((f) => famGroup(f, fams[f])).join("")}`;
+
+      function famGroup(fam, list) {
+        const u = list.reduce((s, p) => s + (p.metrics.unidadesTotales || 0), 0);
+        return `<div class="fam-group">
+          <div class="fam-head"><span class="fam-title">${fam}</span><span class="fam-sub">${list.length} proyecto${list.length > 1 ? "s" : ""} · ${E.fmt(u)} unidades</span><span class="fam-line"></span></div>
+          <div class="proj-grid">${list.map(projCard).join("")}</div>
+        </div>`;
+      }
+
+      function projCard(p) {
+        const m = p.metrics || {};
+        const riesgo = (p.riesgoEntrega || "").toLowerCase();
+        const statusCls = p.status === "finalizado" ? "lista" : p.status === "en_curso" ? "pendiente_intermedio" : "pendiente_menor";
+        return `<a class="proj-card" href="${E.withProject("/entrega/proyecto", p.id)}">
+          <div class="pc-head">
+            <div><div class="pc-name">${p.name}</div><div class="pc-meta">${p.building || ""}${p.comuna ? " · " + p.comuna : ""}</div></div>
+            <span class="badge ${riesgo}" title="Riesgo de entrega">${p.riesgoEntrega || "—"}</span>
+          </div>
+          <div class="pcm"><div class="pcm-row"><span class="pcm-label">Avance recepción</span><span class="bar"><i style="width:${m.avanceRecepcion || 0}%;background:#6366F1"></i></span><span class="pcm-val">${m.avanceRecepcion || 0}%</span></div></div>
+          <div class="pcm"><div class="pcm-row"><span class="pcm-label">Avance cierre</span><span class="bar"><i style="width:${m.avanceCierre || 0}%;background:#22C55E"></i></span><span class="pcm-val">${m.avanceCierre || 0}%</span></div></div>
+          <div class="pc-stats">
+            <div><b>${E.fmt(m.unidadesTotales || 0)}</b><span>unidades</span></div>
+            <div><b>${E.fmt(m.unidadesListas || 0)}</b><span>listas</span></div>
+            <div class="crit"><b>${E.fmt(m.criticasAbiertas || 0)}</b><span>críticas</span></div>
+            <div><b>${E.fmt(m.otActivas || 0)}</b><span>OT activas</span></div>
+          </div>
+          <div class="pc-foot"><span class="badge ${statusCls}">${p.statusLabel || p.status || ""}</span><span class="pc-link">Abrir proyecto →</span></div>
+        </a>`;
+      }
+    })();
+
+    function miniDonut(pct, color) {
+      const id = "d" + Math.random().toString(36).slice(2);
+      setTimeout(() => {
+        const cv = document.getElementById(id);
+        if (cv && window.Chart) new Chart(cv, { type: "doughnut", data: { datasets: [{ data: [pct, 100 - pct], backgroundColor: [color, E.cssVar("--chart-grid", "#243044")], borderWidth: 0 }] }, options: { cutout: "72%", plugins: { legend: { display: false }, tooltip: { enabled: false } }, responsive: false } });
+      }, 0);
+      return `<div class="donut" style="width:54px;height:54px"><canvas id="${id}" width="54" height="54"></canvas><div class="donut-center">${pct}%</div></div>`;
+    }
+  </script>
+</body>
+</html>

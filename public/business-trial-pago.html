@@ -127,8 +127,8 @@
       <h2 class="title">No se efectuará ningún cargo hoy</h2>
       <p class="note" id="trialNoteTop">Durante esta etapa solo se valida tu tarjeta para aprobar el Free Trial. El primer cobro se realizará al finalizar el período de prueba, únicamente si no cancelas antes.</p>
       <div class="partnerRow">
-        <label for="partnerCodeInput">Código de referido (opcional)</label>
-        <input type="text" id="partnerCodeInput" placeholder="Código de influencer, embajador o alianza" autocomplete="off" />
+        <label for="partnerCodeInput">Código ref. (opcional)</label>
+        <input type="text" id="partnerCodeInput" placeholder="Si te lo compartieron" autocomplete="off" />
         <div class="partnerHint" id="partnerHint"></div>
       </div>
       <ul class="list" id="trialBullets">
@@ -165,8 +165,11 @@
         } catch (_) {}
       }
 
-      function applyTrialUI(days, inspections, partnerName) {
-        if (trialBadge) trialBadge.textContent = 'Free Trial Business · ' + days + ' días' + (partnerName ? ' (código partner)' : '');
+      function applyTrialUI(days, inspections, label, channel) {
+        var suffix = '';
+        if (channel === 'partner') suffix = ' (código partner)';
+        else if (channel === 'peer') suffix = ' (código ref.)';
+        if (trialBadge) trialBadge.textContent = 'Free Trial Business · ' + days + ' días' + suffix;
         if (trialBullets) {
           trialBullets.innerHTML = [
             '<li>Incluye ' + inspections + ' inspección' + (inspections > 1 ? 'es' : '') + ' real' + (inspections > 1 ? 'es' : '') + ' controlada' + (inspections > 1 ? 's' : '') + ' durante el trial.</li>',
@@ -176,9 +179,13 @@
           ].join('');
         }
         if (trialMeta) {
-          trialMeta.textContent = partnerName
-            ? 'Beneficio por código ' + partnerName + ': ' + days + ' días y ' + inspections + ' inspecciones.'
-            : 'Tu trial tendrá una duración de ' + days + ' días.';
+          if (channel === 'partner' && label) {
+            trialMeta.textContent = 'Beneficio por código ' + label + ': ' + days + ' días y ' + inspections + ' inspecciones.';
+          } else if (channel === 'peer' && label) {
+            trialMeta.textContent = 'Código ref. de ' + label + ': ' + days + ' días y ' + inspections + ' inspecciones.';
+          } else {
+            trialMeta.textContent = 'Tu trial tendrá una duración de ' + days + ' días.';
+          }
         }
       }
 
@@ -199,8 +206,8 @@
         partnerHint.textContent = '';
         partnerHint.className = 'partnerHint';
         if (!code) {
-          applyTrialUI(DEFAULT_DAYS, DEFAULT_INSPECTIONS, null);
-          saveContext({ ...ctx, partnerCode: undefined, durationDays: DEFAULT_DAYS, includedInspections: DEFAULT_INSPECTIONS });
+          applyTrialUI(DEFAULT_DAYS, DEFAULT_INSPECTIONS, null, null);
+          saveContext({ ...ctx, partnerCode: undefined, referralChannel: null, durationDays: DEFAULT_DAYS, includedInspections: DEFAULT_INSPECTIONS });
           return;
         }
         try {
@@ -212,24 +219,28 @@
           });
           const data = await res.json().catch(() => ({}));
           if (!data.valid) {
-            partnerHint.textContent = 'Código no reconocido. Puedes continuar sin código (14 días, 1 inspección).';
+            partnerHint.textContent = 'Código ref. no reconocido. Puedes seguir sin él (14 días, 1 inspección).';
             partnerHint.className = 'partnerHint invalid';
-            applyTrialUI(DEFAULT_DAYS, DEFAULT_INSPECTIONS, null);
-            saveContext({ ...ctx, partnerCode: code, durationDays: DEFAULT_DAYS, includedInspections: DEFAULT_INSPECTIONS, partnerValid: false });
+            applyTrialUI(DEFAULT_DAYS, DEFAULT_INSPECTIONS, null, null);
+            saveContext({ ...ctx, partnerCode: code, referralChannel: null, durationDays: DEFAULT_DAYS, includedInspections: DEFAULT_INSPECTIONS, partnerValid: false });
             return;
           }
-          partnerHint.textContent = 'Código aplicado: ' + (data.partnerName || 'Partner') + '.';
-          applyTrialUI(data.durationDays, data.totalTrialCredits, data.partnerName);
+          var ch = data.channel || (data.partnerName ? 'partner' : null);
+          var lbl = ch === 'peer' ? (data.peerReferrerLabel || 'Corredora') : (data.partnerName || 'Partner');
+          partnerHint.textContent = 'Código ref. aplicado: ' + lbl + '.';
+          applyTrialUI(data.durationDays, data.totalTrialCredits, lbl, ch);
           saveContext({
             ...ctx,
             partnerCode: code,
+            referralChannel: ch,
             durationDays: data.durationDays,
             includedInspections: data.totalTrialCredits,
             partnerValid: true,
-            partnerName: data.partnerName
+            partnerName: data.partnerName,
+            peerReferrerLabel: data.peerReferrerLabel
           });
         } catch (e) {
-          partnerHint.textContent = 'No pudimos validar el código. Intenta de nuevo o continúa sin él.';
+          partnerHint.textContent = 'No pudimos validar el código ref. Intenta de nuevo o sigue sin él.';
           partnerHint.className = 'partnerHint invalid';
         }
       }
@@ -265,8 +276,8 @@
               STARTER_HISTORY_BLOCK: 'Trial bloqueado: existe historial Starter para esta empresa.',
               CORPORATE_EMAIL_REQUIRED: 'Trial bloqueado: debes usar correo corporativo.',
               TRIAL_KEY_ALREADY_USED: 'Trial bloqueado: esta empresa ya usó un trial.',
-              PARTNER_CODE_INVALID: 'Código de referido no válido. Corrígelo o bórralo para continuar.',
-              REFERRAL_ALREADY_ASSIGNED: 'Esta cuenta ya tiene un código de referido asignado.'
+              PARTNER_CODE_INVALID: 'Código ref. no válido. Corrígelo o bórralo para continuar.',
+              REFERRAL_ALREADY_ASSIGNED: 'Esta cuenta ya tiene un código ref. asignado.'
             };
             throw new Error(reasonMap[data?.reason] || reasonMap[data?.error] || data?.message || 'No fue posible preparar el Free Trial.');
           }

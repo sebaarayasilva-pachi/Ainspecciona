@@ -1,0 +1,438 @@
+/* FoundersSection — equipo fundador */
+.founders-section {
+  --fd-bg: #f1efe9;
+  --fd-text: #111315;
+  --fd-muted: #62676c;
+  --fd-accent: #f04438;
+  --fd-blue: #1e5aa8;
+  --fd-areas: #7a7f84;
+  --fd-line: rgba(17, 19, 21, 0.1);
+  --fd-max: 1280px;
+
+  background: var(--fd-bg);
+  color: var(--fd-text);
+  border-top: 1px solid var(--fd-line);
+}
+
+.founders-section__inner {
+  max-width: var(--fd-max);
+  margin: 0 auto;
+  padding: 150px 80px 130px;
+  box-sizing: border-box;
+}
+
+/* ——— Intro ——— */
+.founders-section__intro {
+  max-width: 900px;
+}
+
+.founders-section__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fd-muted);
+}
+
+.founders-section__eyebrow::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  background: var(--fd-accent);
+}
+
+.founders-section__title {
+  margin: 24px 0 0;
+  font-size: clamp(52px, 4.6vw, 76px);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.045em;
+  color: var(--fd-text);
+}
+
+.founders-section__title-line {
+  display: block;
+}
+
+.founders-section__lead {
+  margin: 30px 0 0;
+  max-width: 720px;
+  font-size: 19px;
+  line-height: 1.65;
+  color: var(--fd-muted);
+}
+
+/* ——— Team grid ——— */
+.founders-section__team {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  margin-top: 100px;
+  align-items: stretch;
+}
+
+.founder-profile {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+}
+
+.founder-profile:not(:first-child) {
+  padding-left: 32px;
+  border-left: 1px solid var(--fd-line);
+}
+
+.founder-profile__photo-wrap {
+  position: relative;
+  overflow: hidden;
+  width: min(100%, 280px);
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  background: #d8d4cc;
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.founder-profile__photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  display: block;
+  filter: grayscale(1);
+  transition: transform 220ms ease;
+}
+
+.founder-profile__photo-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 1px rgba(17, 19, 21, 0.08);
+  opacity: 0;
+  transition: opacity 220ms ease, box-shadow 220ms ease;
+}
+
+.founder-profile:hover .founder-profile__photo {
+  transform: scale(1.02);
+}
+
+.founder-profile:hover .founder-profile__photo-wrap::after {
+  opacity: 1;
+  box-shadow: inset 0 0 0 1px rgba(17, 19, 21, 0.14);
+}
+
+.founder-profile__photo-wrap--placeholder {
+  display: flex;
+  align-items: flex-end;
+  padding: 20px;
+  background: linear-gradient(165deg, #c8c4bc 0%, #b8b4ac 100%);
+}
+
+.founder-profile__placeholder-name {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(17, 19, 21, 0.45);
+}
+
+.founder-profile__num {
+  display: block;
+  margin-top: 24px;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--fd-accent);
+  opacity: 0;
+}
+
+.founder-profile__name {
+  margin: 12px 0 0;
+  font-size: clamp(28px, 2.2vw, 34px);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  color: var(--fd-text);
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.founder-profile__role {
+  display: block;
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fd-blue);
+  opacity: 0;
+}
+
+.founder-profile__desc {
+  margin: 22px 0 0;
+  flex: 1;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--fd-muted);
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.founder-profile__areas {
+  display: block;
+  margin-top: auto;
+  padding-top: 24px;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fd-areas);
+  white-space: nowrap;
+  opacity: 0;
+}
+
+.founder-profile__highlight {
+  margin: 24px 0 0;
+  padding-top: 18px;
+  border-top: 1px solid var(--fd-line);
+  font-size: clamp(20px, 1.6vw, 24px);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--fd-text);
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+/* ——— Statement ——— */
+.founders-section__statement {
+  margin-top: 120px;
+  max-width: 780px;
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.founders-section__marker {
+  display: block;
+  width: 48px;
+  height: 2px;
+  background: var(--fd-accent);
+  margin-bottom: 28px;
+}
+
+.founders-section__declaration {
+  margin: 0;
+  font-size: clamp(42px, 4vw, 64px);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  color: var(--fd-text);
+}
+
+.founders-section__declaration-line {
+  display: block;
+}
+
+/* ——— Animations ——— */
+.founders-section [data-fd-intro] {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.founders-section.is-visible [data-fd-intro="eyebrow"] {
+  animation: fdFadeIn 500ms ease forwards;
+}
+
+.founders-section.is-visible [data-fd-intro="title"] {
+  animation: fdFadeUp 600ms ease forwards;
+  animation-delay: 80ms;
+}
+
+.founders-section.is-visible [data-fd-intro="lead"] {
+  animation: fdFadeUp 600ms ease forwards;
+  animation-delay: 160ms;
+}
+
+.founders-section.is-visible .founder-profile:nth-child(1) .founder-profile__photo-wrap {
+  animation: fdFadeUp 550ms ease forwards;
+  animation-delay: 280ms;
+}
+
+.founders-section.is-visible .founder-profile:nth-child(2) .founder-profile__photo-wrap {
+  animation: fdFadeUp 550ms ease forwards;
+  animation-delay: 380ms;
+}
+
+.founders-section.is-visible .founder-profile:nth-child(3) .founder-profile__photo-wrap {
+  animation: fdFadeUp 550ms ease forwards;
+  animation-delay: 480ms;
+}
+
+.founders-section.is-visible .founder-profile:nth-child(1) .founder-profile__num { animation: fdFadeIn 450ms ease forwards; animation-delay: 420ms; }
+.founders-section.is-visible .founder-profile:nth-child(2) .founder-profile__num { animation: fdFadeIn 450ms ease forwards; animation-delay: 520ms; }
+.founders-section.is-visible .founder-profile:nth-child(3) .founder-profile__num { animation: fdFadeIn 450ms ease forwards; animation-delay: 620ms; }
+
+.founders-section.is-visible .founder-profile:nth-child(1) .founder-profile__name { animation: fdFadeUp 500ms ease forwards; animation-delay: 480ms; }
+.founders-section.is-visible .founder-profile:nth-child(2) .founder-profile__name { animation: fdFadeUp 500ms ease forwards; animation-delay: 580ms; }
+.founders-section.is-visible .founder-profile:nth-child(3) .founder-profile__name { animation: fdFadeUp 500ms ease forwards; animation-delay: 680ms; }
+
+.founders-section.is-visible .founder-profile:nth-child(1) .founder-profile__role { animation: fdFadeIn 450ms ease forwards; animation-delay: 540ms; }
+.founders-section.is-visible .founder-profile:nth-child(2) .founder-profile__role { animation: fdFadeIn 450ms ease forwards; animation-delay: 640ms; }
+.founders-section.is-visible .founder-profile:nth-child(3) .founder-profile__role { animation: fdFadeIn 450ms ease forwards; animation-delay: 740ms; }
+
+.founders-section.is-visible .founder-profile:nth-child(1) .founder-profile__desc { animation: fdFadeUp 500ms ease forwards; animation-delay: 600ms; }
+.founders-section.is-visible .founder-profile:nth-child(2) .founder-profile__desc { animation: fdFadeUp 500ms ease forwards; animation-delay: 700ms; }
+.founders-section.is-visible .founder-profile:nth-child(3) .founder-profile__desc { animation: fdFadeUp 500ms ease forwards; animation-delay: 800ms; }
+
+.founders-section.is-visible .founder-profile:nth-child(1) .founder-profile__areas { animation: fdFadeIn 450ms ease forwards; animation-delay: 660ms; }
+.founders-section.is-visible .founder-profile:nth-child(2) .founder-profile__areas { animation: fdFadeIn 450ms ease forwards; animation-delay: 760ms; }
+.founders-section.is-visible .founder-profile:nth-child(3) .founder-profile__areas { animation: fdFadeIn 450ms ease forwards; animation-delay: 860ms; }
+
+.founders-section.is-visible .founder-profile__highlight {
+  animation: fdFadeUp 500ms ease forwards;
+  animation-delay: 820ms;
+}
+
+.founders-section.is-visible .founders-section__statement {
+  animation: fdFadeUp 600ms ease forwards;
+  animation-delay: 920ms;
+}
+
+@keyframes fdFadeIn {
+  to { opacity: 1; }
+}
+
+@keyframes fdFadeUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .founders-section [data-fd-intro],
+  .founder-profile__photo-wrap,
+  .founder-profile__num,
+  .founder-profile__name,
+  .founder-profile__role,
+  .founder-profile__desc,
+  .founder-profile__areas,
+  .founder-profile__highlight,
+  .founders-section__statement {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+
+  .founder-profile:hover .founder-profile__photo {
+    transform: none;
+  }
+}
+
+/* ——— Tablet ——— */
+@media (max-width: 1024px) {
+  .founders-section__inner {
+    padding: 120px 40px 100px;
+  }
+
+  .founders-section__team {
+    grid-template-columns: repeat(2, 1fr);
+    row-gap: 48px;
+  }
+
+  .founder-profile:not(:first-child) {
+    padding-left: 0;
+    border-left: none;
+  }
+
+  .founder-profile:nth-child(2) {
+    padding-left: 32px;
+    border-left: 1px solid var(--fd-line);
+  }
+
+  .founder-profile:nth-child(3) {
+    grid-column: 1 / 2;
+    max-width: none;
+    padding-top: 0;
+    border-top: none;
+    margin-top: 0;
+  }
+}
+
+/* ——— Mobile ——— */
+@media (max-width: 720px) {
+  .founders-section__inner {
+    padding: 96px 20px 80px;
+  }
+
+  .founders-section__title {
+    font-size: clamp(42px, 11vw, 54px);
+  }
+
+  .founders-section__lead {
+    font-size: 17px;
+  }
+
+  .founders-section__team {
+    grid-template-columns: 1fr;
+    margin-top: 64px;
+    gap: 0;
+  }
+
+  .founder-profile {
+    padding: 0 0 72px;
+    border-left: none !important;
+    padding-left: 0 !important;
+  }
+
+  .founder-profile:not(:last-child) {
+    border-bottom: 1px solid var(--fd-line);
+    margin-bottom: 72px;
+    padding-bottom: 72px;
+  }
+
+  .founder-profile:nth-child(3) {
+    grid-column: auto;
+    max-width: none;
+    border-top: none;
+    padding-top: 0;
+    margin-bottom: 0;
+  }
+
+  .founder-profile {
+    height: auto;
+  }
+
+  .founder-profile__desc {
+    flex: none;
+  }
+
+  .founder-profile__areas {
+    margin-top: 24px;
+    padding-top: 0;
+    white-space: normal;
+    font-size: 11px;
+  }
+
+  .founder-profile__photo-wrap {
+    width: min(72vw, 320px);
+    margin: 0 auto;
+  }
+
+  .founders-section__statement {
+    margin-top: 88px;
+  }
+
+  .founders-section__declaration {
+    font-size: clamp(36px, 9vw, 44px);
+  }
+}

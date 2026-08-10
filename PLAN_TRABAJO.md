@@ -1,94 +1,90 @@
 # Plan de trabajo – Ainspecciona
 
-## Resumen
-
-| # | Tarea | Prioridad | Complejidad |
-|---|-------|-----------|-------------|
-| 1 | Mejorar página Cómo funciona | 1 | Media |
-| 2 | Integrar créditos y cuenta corriente en tenants | 2 | Alta |
-| 3 | Headers consistentes | 3 | Baja |
+**Última revisión:** marzo 2026.
 
 ---
 
-## 1. Mejorar página Cómo funciona ✅ COMPLETADO
+## Resumen (pendiente vs hecho)
+
+| Estado | Tema | Notas |
+|--------|------|--------|
+| ✅ Hecho | Página Cómo funciona | `public/como-funciona.html` |
+| ✅ Hecho | Headers consistentes | `public/assets/header.css` + snippet en páginas públicas |
+| ✅ Hecho | Créditos y cuenta corriente tenant | Prisma `TenantCredit` / `CreditTransaction`, API, MP webhook, UI en `tenant.html` |
+| 🔄 En curso | **Apps móviles en producción** | Android en Play (periodo de espera típico ~14 días); iOS: cuenta Apple Developer + build EAS + TestFlight/App Store |
+| ⏸️ Postergado | Facturación electrónica SII | Solo después de Android **e** iOS en producción (proveedor tipo SimpleFactura) |
+| ⏸️ En pausa | Referencias CDT / manuales en análisis | Ver `docs/ANALISIS_REFERENCIAS_CDT_MANUAL_MANTENCION.md` |
+
+---
+
+## Prioridades actuales
+
+1. **Cerrar iOS:** Apple Developer Program → App ID `com.ainspecta.capture` → App Store Connect → `eas build --platform ios` → `eas submit` → TestFlight y prueba end-to-end contra API producción. Guía: `mobile_capture_app/docs/ios-prerequisites.md`.
+2. **Android:** Completar periodo de revisión de Play Console; revisar correo de Google por requisitos adicionales.
+3. **Tras ambas tiendas en producción:** contratar e integrar facturación electrónica; comprobante PDF sigue vigente hasta entonces.
+
+---
+
+## 1. Página Cómo funciona ✅ COMPLETADO
 
 **Archivo:** `public/como-funciona.html`
 
-**Estado actual:** Página con tema oscuro, secciones SVG, header unificado.
-
-**Mejoras realizadas:**
-- [x] Hero con título y CTAs (Crear inspección / Ver precios)
-- [x] Alineado con verde #35D07F (footer CTA, botones)
-- [x] CTA bloque final "¿Listo para empezar?"
-- [x] Footer CTA "Crear inspección" en verde
-- [x] UX móvil: responsive con overflow-x para SVGs
+- [x] Hero, CTAs, verde #35D07F, footer CTA, responsive móvil
 
 ---
 
-## 2. Integrar sistema de créditos y cuenta corriente en tenants
+## 2. Créditos y cuenta corriente en tenants ✅ COMPLETADO
 
-**Estado actual:**
-- MercadoPago: planes starter (1 crédito), business (50), corporate (100)
-- Precios: menciona "Cuenta corriente de créditos", "Cuenta corriente avanzada"
-- Schema: no hay modelos de créditos en Prisma
+**Implementado en código (referencia):**
 
-**Tareas técnicas:**
+- **Schema:** `TenantCredit`, `CreditTransaction`, enum `CreditTransactionType` en `prisma/schema.prisma`.
+- **API:** `GET /api/tenant/credits`, `GET /api/tenant/credits/transactions`; consumo al crear inspección; acreditación vía webhook MercadoPago (planes y packs `credits-*`).
+- **UI:** badge y sección «Cuenta corriente» en `public/tenant.html`, flujo compra `tenant-comprar-creditos.html`, aviso si no hay créditos.
 
-### 2.1 Schema y base de datos
-- [ ] Crear modelo `TenantCredit` o `CreditAccount`:
-  - `tenantId`, `balance` (int), `createdAt`, `updatedAt`
-- [ ] Crear modelo `CreditTransaction`:
-  - `tenantId`, `amount` (+/-), `type` (PURCHASE, CONSUMPTION, ADJUSTMENT), `caseId?`, `description`, `createdAt`
-- [ ] Migración Prisma
-
-### 2.2 API
-- [ ] `GET /api/tenant/credits` – devolver balance actual
-- [ ] `GET /api/tenant/credits/transactions` – historial de movimientos
-- [ ] Al crear inspección (`POST /api/tenant/inspections`): descontar 1 crédito si hay balance
-- [ ] Webhook MercadoPago: al pago aprobado, sumar créditos al tenant
-
-### 2.3 UI en tenant
-- [ ] Mostrar saldo de créditos en header o sidebar
-- [ ] Sección "Cuenta corriente" con historial de movimientos
-- [ ] Bloqueo o aviso si no hay créditos al crear inspección
-- [ ] Link a /precios o /pago para comprar créditos
-
-### 2.4 Flujo de pago
-- [ ] Vincular pago con `tenantId` (ej. email de tenant en MercadoPago)
-- [ ] `external_reference` en preferencia con `tenantId` para identificar al comprador
+*(El resumen antiguo que decía «no hay modelos en Prisma» estaba desactualizado.)*
 
 ---
 
 ## 3. Headers consistentes ✅ COMPLETADO
 
-**Estado actual (inconsistencias):**
-Resuelto: Se unificaron los headers en todas las páginas públicas (`como-funciona.html`, `precios.html`, `corredores.html`, `faq.html`, etc.) usando el mismo bloque HTML y `header.css`.
-
-- [x] Crear `public/partials/header.html` o `public/assets/header.css` compartido
-- [x] Definir variantes: `header--public`, `header--simple`, `header--tenant`
-- [x] Aplicar en cada página
-
-**Nota:** Sin componentes compartidos (JS/SSR), la opción práctica es un CSS común y un snippet HTML que se copie/actualice en cada página.
+`public/assets/header.css` y variantes; aplicado en páginas públicas principales.
 
 ---
 
-## Orden sugerido de ejecución
+## 4. Apps móviles → producción 🔄 EN CURSO
 
-1. **Headers** (3) – más rápido, mejora percepción inmediata
-2. **Cómo funciona** (1) – contenido y UX
-3. **Créditos** (2) – más trabajo, requiere schema, API y UI
+**Repo:** `mobile_capture_app/` · **Bundle / package:** `com.ainspecta.capture` · **API prod:** `app.json` → `extra.apiBaseUrl` (`https://ainspecciona.com`).
+
+| Plataforma | Estado sugerido | Siguiente paso |
+|------------|-----------------|----------------|
+| Android | En Google Play, esperando ventana de publicación / revisión | Monitorear Play Console; piloto según `docs/pilot-release-android.md` |
+| iOS | Pendiente publicación | Pago Apple Developer → identificador + app en App Store Connect → EAS build/submit → incrementar `ios.buildNumber` si hace falta |
+
+**Opcional (calidad):** conectar errores de app a Sentry/Crashlytics (`EXPO_PUBLIC_SENTRY_DSN`).
 
 ---
 
-## Facturación electrónica (POSTERGADO ETAPA 2)
+## Facturación electrónica ⏸️ POSTERGADO
 
 **Plan:** Integrar con **SimpleFactura** u otro proveedor para emitir factura electrónica SII.
-**Estado:** Pospuesto para después de la fase Beta para evitar costos fijos mensuales. Actualmente el sistema envía un comprobante PDF temporal por correo y la facturación se puede hacer manual en el portal del SII si es necesario.
+
+**Criterio para pagar e implementar:** cuando **Android e iOS estén en producción** (tiendas públicas). Hasta entonces: costo fijo y complejidad fuera de foco.
+
+**Hoy:** comprobante PDF (`src/pdf/receiptPdf.js`); facturación manual portal SII si aplica.
+
+**Datos empresa (operativo):** RUT definitivo **78.362.551-2** (Ainspecciona SpA) alineado con términos/privacidad; cuenta corriente **BCI** — no versionar números de cuenta en el repo; usar `.env` o proceso interno cuando se expongan datos de transferencia.
 
 ---
 
-## Notas
+## Notas técnicas
 
-- `DEPLOY_GCP.md` tiene instrucciones de deploy
-- MercadoPago: `MERCADOPAGO_ACCESS_TOKEN` en .env
-- Prisma: `npx prisma migrate dev` para migraciones locales
+- Deploy: `DEPLOY_GCP.md`
+- MercadoPago: `MERCADOPAGO_ACCESS_TOKEN` en `.env`
+- Prisma: `npx prisma migrate dev` (local) / `migrate deploy` (prod)
+- Partners / comisiones: `docs/PARTNERS.md`
+
+---
+
+## Stack raíz `client/` + `server/` (React + Express)
+
+No es el producto en producción: el MVP vive en **`ainspecta_web`**. El monorepo antiguo queda como referencia o futura separación front/back; no figura en prioridades actuales.

@@ -1,0 +1,75 @@
+/* Home — responsive polish and overflow guards (audit) */
+
+.platform-page img,
+.platform-page picture {
+  max-width: 100%;
+}
+
+.platform-page .home-hero__visual picture,
+.platform-page .home-hero__visual picture img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.platform-page .solutions-building picture,
+.platform-page .solutions-building__base {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.platform-page .solutions-building picture img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+@media (max-width: 1280px) {
+  .platform-page .site-header-v2 .nav,
+  .home-hero__inner,
+  .platform-statement__inner,
+  .solutions-section__inner,
+  .rag-technology__inner,
+  .founders-section__inner,
+  .integrations-section__inner,
+  .final-cta__inner,
+  .site-footer__inner {
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+}
+
+@media (max-width: 1280px) {
+  .solutions-section__stage {
+    grid-template-columns: 160px minmax(0, 420px) minmax(0, 1fr);
+    gap: 28px 32px;
+  }
+
+  .solutions-panel {
+    max-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-footer__link:hover {
+    transform: none;
+  }
+}
+
+.platform-page .founder-profile__photo-wrap picture,
+.platform-page .founder-profile__photo-wrap picture img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.platform-page .founder-profile__photo-wrap picture,
+.platform-page .founder-profile__photo-wrap picture img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

@@ -1,0 +1,18 @@
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - --platform=linux/amd64
+      - -t
+      - southamerica-west1-docker.pkg.dev/ainspecciona/cloud-run-source-deploy/ainspecciona-api:hotfix-404
+      - .
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - southamerica-west1-docker.pkg.dev/ainspecciona/cloud-run-source-deploy/ainspecciona-api:hotfix-404
+images:
+  - southamerica-west1-docker.pkg.dev/ainspecciona/cloud-run-source-deploy/ainspecciona-api:hotfix-404
+options:
+  logging: CLOUD_LOGGING_ONLY
+  requestedVerifyOption: NOT_VERIFIED
+timeout: 1200s

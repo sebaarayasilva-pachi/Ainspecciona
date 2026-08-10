@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <script>(function(){try{var t=localStorage.getItem("postventa-portal-theme");document.documentElement.setAttribute("data-theme",t==="light"?"light":"dark");}catch(e){document.documentElement.setAttribute("data-theme","dark");}})();</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Configuración · Ainspecciona Postventa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/postventa/portal/assets/portal.css?v=20260728-config1" />
+  <style>
+    .users-grid { display: grid; grid-template-columns: minmax(280px, 360px) 1fr; gap: 16px; align-items: start; }
+    @media (max-width: 960px) { .users-grid { grid-template-columns: 1fr; } }
+    .cfg-form label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      color: var(--muted, #94a3b8);
+      margin: 12px 0 6px;
+    }
+    .cfg-form input,
+    .cfg-form select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border, #333);
+      background: var(--surface-2, #111);
+      color: inherit;
+      font: inherit;
+      box-sizing: border-box;
+    }
+    .cfg-form .btn { margin-top: 14px; width: 100%; }
+    .row-actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .row-actions select { max-width: 140px; padding: 6px 8px; border-radius: 8px; background: var(--surface-2,#111); border: 1px solid var(--border,#333); color: inherit; }
+    .msg { font-size: 12px; margin: 0 0 8px; min-height: 1.2em; }
+    .msg.ok { color: #22C55E; }
+    .msg.err { color: #FB7185; }
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+    <div id="sidebar"></div>
+    <div class="main">
+      <header class="topbar">
+        <div class="titles">
+          <h1>Configuración</h1>
+          <div class="crumb">Usuarios e inspectores</div>
+        </div>
+        <div class="spacer"></div>
+        <div class="date-chip" id="dateChip"></div>
+      </header>
+      <div class="content" id="content"><div class="empty">Cargando…</div></div>
+    </div>
+  </div>
+
+  <script src="/postventa/portal/assets/portal-app.js?v=20260806-sep1"></script>
+  <script>
+    (async function () {
+      const P = window.PvPortal;
+      const me = await P.ensureAuth();
+      if (!me) return;
+
+      document.getElementById("sidebar").innerHTML = P.renderSidebar("config", null);
+      document.getElementById("dateChip").textContent = P.dateChip();
+
+      const content = document.getElementById("content");
+      const role = me.user && me.user.role;
+      const canManage = role === "ADMIN" || role === "EXECUTIVE";
+      if (!canManage) {
+        content.innerHTML = `<div class="empty">Solo un administrador o ejecutivo puede gestionar usuarios. Pide acceso a tu admin.</div>`;
+        return;
+      }
+
+      const ROLE_OPTS = [
+        { key: "INSPECTOR", label: "Inspector" },
+        { key: "OPERATOR", label: "Operador" },
+        { key: "EXECUTIVE", label: "Ejecutivo" },
+        { key: "ADMIN", label: "Administrador" }
+      ];
+
+      content.innerHTML = `
+        <div class="users-grid">
+          <div class="panel">
+            <h2>Nuevo usuario</h2>
+            <p class="muted" style="margin:0 0 8px;font-size:13px;line-height:1.45;">
+              Crea inspectores u operadores. Luego asígnalos como inspector de una obra en el proyecto.
+            </p>
+            <div class="msg" id="formMsg"></div>
+            <form class="cfg-form" id="createForm">
+              <label for="fullName">Nombre completo</label>
+              <input id="fullName" required placeholder="Nombre y apellido" />
+              <label for="email">Email</label>
+              <input id="email" type="email" required placeholder="inspector@inmobiliaria.cl" />
+              <label for="role">Rol</label>
+              <select id="role" required>
+                ${ROLE_OPTS.map((r) => `<option value="${r.key}"${r.key === "INSPECTOR" ? " selected" : ""}>${r.label}</option>`).join("")}
+              </select>
+              <label for="password">Clave temporal</label>
+              <input id="password" type="text" required minlength="8" placeholder="Mínimo 8 caracteres" autocomplete="new-password" />
+              <button class="btn primary" type="submit" id="createBtn">Crear usuario</button>
+            </form>
+          </div>
+          <div class="panel">
+            <h2>Usuarios</h2>
+            <p class="muted" style="margin:0 0 10px;font-size:13px;">${P.escapeHtml(me.tenant.name || "")}</p>
+            <div class="msg" id="listMsg"></div>
+            <div id="usersTableWrap"><div class="empty">Cargando…</div></div>
+          </div>
+        </div>`;
+
+      const formMsg = document.getElementById("formMsg");
+      const listMsg = document.getElementById("listMsg");
+      const wrap = document.getElementById("usersTableWrap");
+
+      function setMsg(el, type, text) {
+        el.className = "msg " + (type || "");
+        el.textContent = text || "";
+      }
+
+      async function loadUsers() {
+        const res = await P.portalFetch("/api/postventa/portal/users?all=1");
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          wrap.innerHTML = `<div class="empty">${P.escapeHtml(data.message || "No se pudo cargar.")}</div>`;
+          return;
+        }
+        const users = data.users || [];
+        if (!users.length) {
+          wrap.innerHTML = `<div class="empty">Aún no hay usuarios.</div>`;
+          return;
+        }
+        wrap.innerHTML = `
+          <div class="table-wrap">
+            <table class="data">
+              <thead><tr><th>Usuario</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr></thead>
+              <tbody>
+                ${users
+                  .map((u) => {
+                    const isSelf = u.id === me.user.id;
+                    return `<tr data-id="${P.escapeHtml(u.id)}">
+                      <td><b>${P.escapeHtml(u.fullName)}</b><div class="muted" style="font-size:11px;">${P.escapeHtml(u.email)}</div></td>
+                      <td>${P.escapeHtml(u.roleLabel || u.role)}</td>
+                      <td><span class="pill ${u.status === "ACTIVE" ? "ok" : "warn"}">${u.status === "ACTIVE" ? "Activo" : "Desactivado"}</span></td>
+                      <td>
+                        <div class="row-actions">
+                          <select class="roleSel" ${isSelf ? "disabled" : ""}>
+                            ${ROLE_OPTS.map(
+                              (r) =>
+                                `<option value="${r.key}"${u.role === r.key ? " selected" : ""}>${r.label}</option>`
+                            ).join("")}
+                          </select>
+                          <button type="button" class="btn toggleBtn" ${isSelf ? "disabled" : ""}>${
+                            u.status === "ACTIVE" ? "Desactivar" : "Activar"
+                          }</button>
+                          <button type="button" class="btn resetBtn">Nueva clave</button>
+                        </div>
+                      </td>
+                    </tr>`;
+                  })
+                  .join("")}
+              </tbody>
+            </table>
+          </div>`;
+
+        wrap.querySelectorAll("tr[data-id]").forEach((tr) => {
+          const id = tr.getAttribute("data-id");
+          const roleSel = tr.querySelector(".roleSel");
+          const toggleBtn = tr.querySelector(".toggleBtn");
+          const resetBtn = tr.querySelector(".resetBtn");
+          if (roleSel) {
+            roleSel.onchange = async () => {
+              setMsg(listMsg, "", "Actualizando rol…");
+              const res = await P.portalFetch("/api/postventa/portal/users/" + encodeURIComponent(id), {
+                method: "PATCH",
+                body: JSON.stringify({ role: roleSel.value })
+              });
+              const data = await res.json();
+              if (!res.ok || !data.ok) {
+                setMsg(listMsg, "err", data.message || "No se pudo cambiar el rol");
+                await loadUsers();
+                return;
+              }
+              setMsg(listMsg, "ok", "Rol actualizado.");
+              await loadUsers();
+            };
+          }
+          if (toggleBtn) {
+            toggleBtn.onclick = async () => {
+              const next = toggleBtn.textContent.includes("Desactivar") ? "DISABLED" : "ACTIVE";
+              setMsg(listMsg, "", "Actualizando…");
+              const res = await P.portalFetch("/api/postventa/portal/users/" + encodeURIComponent(id), {
+                method: "PATCH",
+                body: JSON.stringify({ status: next })
+              });
+              const data = await res.json();
+              if (!res.ok || !data.ok) {
+                setMsg(listMsg, "err", data.message || "No se pudo actualizar");
+                return;
+              }
+              setMsg(listMsg, "ok", next === "ACTIVE" ? "Usuario activado." : "Usuario desactivado.");
+              await loadUsers();
+            };
+          }
+          if (resetBtn) {
+            resetBtn.onclick = async () => {
+              const pwd = window.prompt("Nueva clave (mín. 8 caracteres):");
+              if (!pwd) return;
+              if (pwd.length < 8) {
+                setMsg(listMsg, "err", "La clave debe tener al menos 8 caracteres.");
+                return;
+              }
+              const res = await P.portalFetch("/api/postventa/portal/users/" + encodeURIComponent(id), {
+                method: "PATCH",
+                body: JSON.stringify({ password: pwd })
+              });
+              const data = await res.json();
+              if (!res.ok || !data.ok) {
+                setMsg(listMsg, "err", data.message || "No se pudo cambiar la clave");
+                return;
+              }
+              setMsg(listMsg, "ok", "Clave actualizada.");
+            };
+          }
+        });
+      }
+
+      document.getElementById("createForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById("createBtn");
+        btn.disabled = true;
+        setMsg(formMsg, "", "Creando…");
+        try {
+          const res = await P.portalFetch("/api/postventa/portal/users", {
+            method: "POST",
+            body: JSON.stringify({
+              fullName: document.getElementById("fullName").value.trim(),
+              email: document.getElementById("email").value.trim(),
+              role: document.getElementById("role").value,
+              password: document.getElementById("password").value
+            })
+          });
+          const data = await res.json();
+          if (!res.ok || !data.ok) {
+            setMsg(formMsg, "err", data.message || "No se pudo crear");
+            return;
+          }
+          setMsg(formMsg, "ok", "Usuario creado: " + (data.user?.email || ""));
+          document.getElementById("createForm").reset();
+          document.getElementById("role").value = "INSPECTOR";
+          await loadUsers();
+        } catch {
+          setMsg(formMsg, "err", "Error de red");
+        } finally {
+          btn.disabled = false;
+        }
+      });
+
+      await loadUsers();
+    })();
+  </script>
+</body>
+</html>

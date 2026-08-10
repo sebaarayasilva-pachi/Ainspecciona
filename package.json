@@ -11,7 +11,26 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "node prisma/seed.js",
     "seed:google-play-tester": "node prisma/seed-google-play-tester.js",
-    "qa:cases": "node scripts/qa-cases.mjs --file qa/case-baseline.json"
+    "qa:cases": "node scripts/qa-cases.mjs --file qa/case-baseline.json",
+    "tenant:set-password": "node scripts/set-tenant-password-simple.mjs",
+    "tenant:activate-all-users": "node scripts/activate-all-tenant-users.mjs",
+    "agrega-tester": "node scripts/agrega-tester.mjs",
+    "kickoff:cleanup": "node scripts/kickoff-cleanup.mjs",
+    "kickoff:cleanup:prod": "powershell -NoProfile -ExecutionPolicy Bypass -File ./kickoff-cleanup-prod.ps1",
+    "ensure:starter-tenant": "node scripts/ensure-starter-tenant.mjs",
+    "seed:postventa-demo": "node scripts/seed-postventa-demo.mjs",
+    "seed:pv-portal-user": "node scripts/seed-pv-portal-user.mjs",
+    "sync:elevenlabs-postventa": "node scripts/sync-elevenlabs-postventa-agent.mjs",
+    "sync:elevenlabs-entrega": "node scripts/sync-elevenlabs-entrega-agent.mjs",
+    "sync:elevenlabs-entrega-tool": "node scripts/sync-elevenlabs-entrega-tool.mjs",
+    "sync:elevenlabs-open-capture": "node scripts/sync-elevenlabs-open-capture-tool.mjs",
+    "sync:elevenlabs-lookup": "node scripts/sync-elevenlabs-lookup-tool.mjs",
+    "sync:elevenlabs-webhooks": "node scripts/sync-elevenlabs-postventa-webhooks.mjs",
+    "grant:credits": "node scripts/grant-tenant-credits.mjs",
+    "grant:credits:prod": "powershell -NoProfile -ExecutionPolicy Bypass -File ./grant-credits-prod.ps1",
+    "promo:add-code": "node scripts/add-promo-code.mjs",
+    "import:kpi-taxonomy": "node scripts/import-kpi-to-taxonomy.mjs",
+    "optimize:home-images": "node scripts/optimize-home-images.mjs"
   },
   "keywords": [
     "inspection",
@@ -31,8 +50,10 @@
     "fastify": "^4.24.3",
     "nodemailer": "^6.9.0",
     "openai": "^6.16.0",
+    "pdf-parse": "^2.4.5",
     "pdfkit": "^0.17.2",
-    "sharp": "^0.32.6"
+    "sharp": "^0.32.6",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "prisma": "^6.0.0"

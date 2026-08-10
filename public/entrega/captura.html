@@ -1,0 +1,751 @@
+�<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <script>(function(){try{var t=localStorage.getItem("entrega-theme");document.documentElement.setAttribute("data-theme",t==="light"?"light":"dark");}catch(e){document.documentElement.setAttribute("data-theme","dark");}})();</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>Captura · Ainspecciona Recepción</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/entrega/assets/entrega.css" />
+  <style>
+    body { background: #0E1020; }
+    .cap { max-width: 480px; margin: 0 auto; min-height: 100vh; background: var(--bg); display: flex; flex-direction: column; }
+    .cap-head { background: linear-gradient(145deg, #5B5BD6, #7C3AED); color: #fff; padding: 18px 18px 22px; }
+    .cap-head .brand { padding: 0; color: #fff; }
+    .cap-head .logo { background: rgba(255,255,255,.18); }
+    .cap-head .brand-name, .cap-head .brand-sub { color: #fff; }
+    .cap-body { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+    .cap-note { font-size: 12.5px; color: var(--muted); }
+    .cap-note.err { color: #B91C1C; }
+    .field label { font-size: 12px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 6px; }
+    .field select,
+    #unitSel.cap-select {
+      width: 100%;
+      min-height: 46px;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      background: var(--surface);
+      color: var(--text);
+      appearance: auto;
+      -webkit-appearance: menulist;
+      cursor: pointer;
+      pointer-events: auto;
+    }
+    .btn-primary { width: 100%; padding: 15px 16px; border: none; border-radius: 14px; background: linear-gradient(145deg, var(--primary), var(--primary-600)); color: #fff; font-size: 15.5px; font-weight: 800; font-family: inherit; cursor: pointer; box-shadow: 0 6px 16px rgba(99,102,241,.32); }
+    .btn-primary:disabled { opacity: .6; cursor: default; }
+    .btn-secondary { width: 100%; padding: 14px 16px; border: 2px solid var(--green); border-radius: 14px; background: var(--surface); color: var(--green); font-size: 15px; font-weight: 800; font-family: inherit; cursor: pointer; margin-top: 8px; }
+    .btn-ghost { background: none; border: 1px solid var(--border); border-radius: 10px; padding: 9px 14px; font-family: inherit; font-size: 13px; font-weight: 700; color: var(--muted); cursor: pointer; }
+    .agent-pill { display:inline-flex; align-items:center; gap:7px; font-size:12px; font-weight:700; padding:6px 11px; border-radius:999px; background:var(--primary-tint); color:var(--primary-700); }
+    .agent-dot { width:8px; height:8px; border-radius:50%; background:#94A3B8; }
+    .agent-dot.live { background:#22C55E; box-shadow:0 0 0 4px rgba(34,197,94,.18); animation:livePulse 1.6s infinite; }
+    @keyframes livePulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+    .finding { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:10px 12px; box-shadow:var(--shadow); display:flex; gap:10px; align-items:center; }
+    .finding .f-desc { font-weight:700; font-size:13.5px; }
+    .finding .f-meta { font-size:11.5px; color:var(--muted); margin-top:3px; }
+    .f-thumb { position:relative; width:56px; height:56px; flex:0 0 56px; border-radius:9px; overflow:hidden; background:#E5E7EB; }
+    .f-thumb img { width:100%; height:100%; object-fit:cover; }
+    .count-pill { display:inline-flex; align-items:center; gap:6px; background:var(--primary-tint); color:var(--primary-700); font-weight:700; font-size:12px; padding:5px 11px; border-radius:999px; }
+    .ph-target { position:absolute; width:26px; height:26px; transform:translate(-50%,-50%); pointer-events:none; filter:drop-shadow(0 1px 2px rgba(0,0,0,.55)); }
+    .photo-overlay { position:fixed; inset:0; background:rgba(8,10,22,.94); z-index:50; display:none; flex-direction:column; padding:18px; overflow:auto; }
+    .photo-overlay.open { display:flex; }
+    .po-title { color:#fff; font-size:16px; font-weight:800; }
+    .po-sub { color:#C7CBD9; font-size:12.5px; margin-top:3px; }
+    .po-mid { flex:1; display:flex; flex-direction:column; gap:14px; justify-content:center; min-height:0; padding:12px 0; }
+    .po-take { width:100%; max-width:220px; margin:0 auto; aspect-ratio:1; border-radius:24px; border:2px dashed rgba(255,255,255,.4); background:rgba(255,255,255,.06); color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; cursor:pointer; font-weight:700; }
+    .po-take input { display:none; }
+    .photo-frame { position:relative; max-width:100%; border-radius:14px; overflow:hidden; margin:0 auto; }
+    .photo-frame img { display:block; max-width:100%; max-height:50vh; object-fit:contain; margin:0 auto; }
+    .po-hint { color:#C7CBD9; font-size:12px; text-align:center; }
+    .spinner { width:34px; height:34px; border-radius:50%; border:3px solid rgba(255,255,255,.25); border-top-color:#fff; animation:spin 1s linear infinite; margin:0 auto; }
+    @keyframes spin { to { transform:rotate(360deg) } }
+    .card-box { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:14px; box-shadow:var(--shadow); }
+    .verify-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:10px 12px; box-shadow:var(--shadow); display:flex; gap:10px; align-items:center; cursor:pointer; transition:border-color .15s, box-shadow .15s; }
+    .verify-card:active { border-color:#22C55E; box-shadow:0 0 0 3px rgba(34,197,94,.15); }
+    .verify-card .f-desc { font-weight:700; font-size:13.5px; }
+    .verify-card .f-meta { font-size:11.5px; color:var(--muted); margin-top:3px; }
+    .verify-badge { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; padding:4px 9px; border-radius:999px; background:#DCFCE7; color:#15803D; }
+    .verify-empty { text-align:center; padding:24px 12px; color:var(--muted); font-size:13px; }
+    .verify-empty.ok { color:#15803D; }
+    .ph-target.green circle { stroke:#22C55E; fill:#22C55E; }
+  </style>
+</head>
+<body>
+  <div class="cap">
+    <div class="cap-head">
+      <div class="brand"><div class="logo">Ai</div><div><div class="brand-name">Ainspecciona</div><div class="brand-sub">Captura en terreno</div></div></div>
+    </div>
+
+    <div class="cap-body" id="formView">
+      <div class="field"><label>Proyecto</label><div class="project-chip static" id="projLabel">Proyecto Demo</div></div>
+      <div class="field"><label for="unitSel">Departamento / Unidad</label>
+        <select id="unitSel" class="cap-select" title="Seleccionar departamento">
+          <optgroup label="Piso 3">
+            <option value="301" selected>Depto 301</option>
+            <option value="302">Depto 302</option>
+            <option value="303">Depto 303</option>
+            <option value="304">Depto 304</option>
+            <option value="305">Depto 305</option>
+            <option value="306">Depto 306</option>
+            <option value="307">Depto 307</option>
+            <option value="308">Depto 308</option>
+          </optgroup>
+        </select>
+      </div>
+      <button class="btn-primary" id="startBtn">Iniciar inspección</button>
+      <button class="btn-secondary" id="verifyBtn">Verificar cierres</button>
+      <div class="cap-note" id="formNote">El asistente te guía: zona �  hallazgo �  foto. Marca el defecto con cinta.</div>
+    </div>
+
+    <div class="cap-body" id="captureView" style="display:none">
+      <div class="flex between" style="align-items:flex-start">
+        <div>
+          <div class="card-title" id="unitTitle" style="margin:0"></div>
+          <div class="cap-note" id="unitSub"></div>
+        </div>
+        <button class="btn-ghost" id="endBtn">Terminar</button>
+      </div>
+
+      <div class="card-box">
+        <div class="flex between" style="gap:8px;align-items:center;flex-wrap:wrap">
+          <span class="agent-pill"><span class="agent-dot" id="agentDot"></span><span id="agentState">Inactivo</span></span>
+          <button type="button" class="btn-ghost" id="reconnectBtn" style="display:none;padding:6px 12px;font-size:12px;">Reconectar voz</button>
+        </div>
+        <div class="cap-note" style="margin-top:10px">Responde al asistente. Tras cada hallazgo se abre la cámara.</div>
+      </div>
+
+      <div>
+        <div class="flex between">
+          <div class="card-title" style="margin:0;font-size:13px">Hallazgos <span class="count-pill" id="count">0</span></div>
+          <button class="link" style="background:none;border:none" id="refreshBtn">Actualizar</button>
+        </div>
+        <div id="findingList" class="grid" style="gap:10px;margin-top:10px"></div>
+      </div>
+    </div>
+
+    <div class="cap-body" id="verifyView" style="display:none">
+      <div class="flex between" style="align-items:flex-start">
+        <div>
+          <div class="card-title" id="verifyTitle" style="margin:0"></div>
+          <div class="cap-note" id="verifySub"></div>
+        </div>
+        <button class="btn-ghost" id="verifyEndBtn">Volver</button>
+      </div>
+
+      <div class="card-box">
+        <div class="flex between" style="gap:8px;align-items:center;flex-wrap:wrap">
+          <span class="verify-badge">�S Verificación ITO</span>
+          <span class="count-pill" id="openCount">0 abiertos</span>
+        </div>
+        <div class="cap-note" style="margin-top:10px">Toca un hallazgo abierto, fotografía la corrección y confirma la mira verde.</div>
+      </div>
+
+      <div>
+        <div class="flex between">
+          <div class="card-title" style="margin:0;font-size:13px">Pendientes de cierre</div>
+          <button class="link" style="background:none;border:none" id="verifyRefreshBtn">Actualizar</button>
+        </div>
+        <div id="openList" class="grid" style="gap:10px;margin-top:10px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Overlay: tomar foto (obligatoria por hallazgo) -->
+  <div class="photo-overlay" id="photoOverlay">
+    <div><div class="po-title" id="photoTitle">Foto del hallazgo</div><div class="po-sub" id="photoSub"></div></div>
+    <div class="po-mid" id="photoMid">
+      <label class="po-take">
+        �x� <span id="photoTakeLabel">Tomar foto</span>
+        <input type="file" accept="image/*" capture="environment" id="photoInput" />
+      </label>
+      <div class="po-hint" id="photoHint">Marca el defecto con cinta antes de fotografiar.</div>
+    </div>
+  </div>
+
+  <!-- Overlay: confirmar mira -->
+  <div class="photo-overlay" id="targetOverlay">
+    <div><div class="po-title" id="targetTitle">Confirma la mira</div><div class="po-sub" id="targetSub"></div></div>
+    <div class="po-mid" id="targetMid"></div>
+    <button class="btn-primary" id="targetDone" style="margin-top:12px">Confirmar foto</button>
+  </div>
+
+  <script src="/entrega/assets/entrega-app.js"></script>
+  <script src="/entrega/assets/entrega-elevenlabs.js"></script>
+  <script>
+    (async function () {
+      const E = window.Entrega;
+      const seed = await E.loadSeed();
+      let project = E.getProject(seed, E.ENTREGA_PROJECT_ID || E.currentProjectId());
+      if (!project) {
+        document.querySelector(".cap-body").innerHTML =
+          '<div class="cap-note err">No se pudo cargar el proyecto. Recarga la página.</div>';
+        return;
+      }
+      E.setProject(project.id);
+      let agentCfg = null;
+      let activeFinding = null;
+      let activeRecinto = "";
+      let photoMode = "r0"; // "r0" | "cierre"
+      let photoWaitResolve = null;
+      const photoQueue = [];
+      let photoQueueBusy = false;
+
+      const unitSel = document.getElementById("unitSel");
+      const projLabel = document.getElementById("projLabel");
+      if (projLabel) projLabel.textContent = `${project.building || "Edificio A"} / ${project.name || "Proyecto Demo"}`;
+
+      const fromUrl = E.qs("u", "");
+      try {
+        unitSel.innerHTML = E.capturaUnitOptionsHtml(seed, project, fromUrl || "301");
+        const refs = E.unitsForUnitSelector(project, seed).map((u) => u.ref);
+        const def =
+          fromUrl && refs.includes(fromUrl) ? fromUrl : refs.includes("301") ? "301" : refs[0] || "301";
+        unitSel.value = def;
+      } catch (err) {
+        console.error("[captura] unit selector", err);
+      }
+
+      unitSel.addEventListener("change", () => {
+        const url = new URL(location.href);
+        url.searchParams.set("u", unitSel.value);
+        history.replaceState(null, "", url.toString());
+        if (document.getElementById("captureView").style.display !== "none") refreshFindings();
+        if (document.getElementById("verifyView").style.display !== "none") refreshOpenFindings();
+      });
+
+      function unitRef() { return `${project.id}:${unitSel.value}`; }
+
+      document.getElementById("startBtn").addEventListener("click", startInspection);
+      document.getElementById("verifyBtn").addEventListener("click", startVerification);
+      document.getElementById("endBtn").addEventListener("click", endInspection);
+      document.getElementById("verifyEndBtn").addEventListener("click", endVerification);
+      document.getElementById("refreshBtn").addEventListener("click", refreshFindings);
+      document.getElementById("verifyRefreshBtn").addEventListener("click", refreshOpenFindings);
+      document.getElementById("reconnectBtn")?.addEventListener("click", () => startAgent().catch(() => {}));
+      document.getElementById("photoInput").addEventListener("change", onPhotoTaken);
+
+      if (E.qs("mode", "") === "verificacion") {
+        setTimeout(() => startVerification().catch(() => {}), 0);
+      }
+
+      async function startVerification() {
+        document.getElementById("verifyTitle").textContent = `${project.name} · Depto ${unitSel.value}`;
+        document.getElementById("verifySub").textContent = `${project.building || ""}${project.comuna ? " · " + project.comuna : ""}`.trim();
+        document.getElementById("formView").style.display = "none";
+        document.getElementById("captureView").style.display = "none";
+        document.getElementById("verifyView").style.display = "flex";
+        const url = new URL(location.href);
+        url.searchParams.set("mode", "verificacion");
+        history.replaceState(null, "", url.toString());
+        await refreshOpenFindings();
+      }
+
+      async function endVerification() {
+        document.getElementById("verifyView").style.display = "none";
+        document.getElementById("formView").style.display = "flex";
+        const url = new URL(location.href);
+        url.searchParams.delete("mode");
+        history.replaceState(null, "", url.toString());
+      }
+
+      async function refreshOpenFindings() {
+        const listEl = document.getElementById("openList");
+        const countEl = document.getElementById("openCount");
+        try {
+          const r = await (window.Entrega && window.Entrega.entregaFetch ? window.Entrega.entregaFetch.bind(window.Entrega) : fetch)(`/api/entrega/units/${encodeURIComponent(unitRef())}/findings`, { cache: "no-store" });
+          const j = await r.json();
+          const all = (j && j.findings) || [];
+          const open = all.filter((f) => f.estado !== "cerrado");
+          countEl.textContent = `${open.length} abierto${open.length === 1 ? "" : "s"}`;
+          if (!open.length) {
+            listEl.innerHTML = `<div class="verify-empty ok">�S No hay hallazgos abiertos en este depto.</div>`;
+            return;
+          }
+          listEl.innerHTML = open.map((h) => openFindingCard(h)).join("");
+          listEl.querySelectorAll("[data-close-id]").forEach((el) => {
+            el.addEventListener("click", () => {
+              const id = el.getAttribute("data-close-id");
+              const finding = open.find((f) => f.id === id);
+              if (finding) closeFindingWizard(finding).catch((err) => console.error("[captura] close", err));
+            });
+          });
+        } catch {
+          listEl.innerHTML = `<div class="cap-note err">No se pudo cargar.</div>`;
+        }
+      }
+
+      function openFindingCard(h) {
+        const mira = h.target ? targetSvg(h.target.x * 100, h.target.y * 100) : "";
+        const thumb = h.fotoUrl
+          ? `<div class="f-thumb"><img src="${h.fotoUrl}" alt=""/>${mira}</div>`
+          : `<div class="f-thumb" style="display:grid;place-items:center;color:#9CA3AF;font-size:10px">R0</div>`;
+        return `<div class="verify-card" data-close-id="${h.id}" role="button" tabindex="0">${thumb}<div><div class="f-desc">${h.descripcion}</div><div class="f-meta">${h.recinto} · ${h.especialidad || ""}</div></div></div>`;
+      }
+
+      async function closeFindingWizard(finding) {
+        photoMode = "cierre";
+        activeFinding = finding;
+        activeRecinto = finding.recinto || "";
+        setPhotoOverlayCopy("cierre", finding);
+
+        const photo = await waitForPhoto();
+        if (!photo) return;
+
+        try {
+          const fd = new FormData();
+          fd.append("photo", photo.blob, "cierre.jpg");
+          const up = await (window.Entrega && window.Entrega.entregaFetch ? window.Entrega.entregaFetch.bind(window.Entrega) : fetch)(
+            `/api/entrega/units/${encodeURIComponent(unitRef())}/findings/${encodeURIComponent(finding.id)}/close-photo`,
+            { method: "POST", body: fd }
+          );
+          const uj = await up.json();
+          if (!uj.ok) throw new Error(uj.error || "upload");
+
+          const target = await adjustTarget(photo.dataUrl, uj.target, finding, "cierre");
+          if (!target || !Number.isFinite(target.x)) return;
+
+          const cl = await (window.Entrega && window.Entrega.entregaFetch ? window.Entrega.entregaFetch.bind(window.Entrega) : fetch)(
+            `/api/entrega/units/${encodeURIComponent(unitRef())}/findings/${encodeURIComponent(finding.id)}/close-target`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ x: target.x, y: target.y, cerradoPor: "Inspector ITO" })
+            }
+          );
+          const cj = await cl.json();
+          if (!cj.ok) throw new Error(cj.error || "close");
+        } catch (err) {
+          console.error("[captura] close wizard", err);
+          alert("No se pudo cerrar el hallazgo. Revisa la conexión e intenta de nuevo.");
+          return;
+        }
+
+        photoMode = "r0";
+        activeFinding = null;
+        await refreshOpenFindings();
+      }
+
+      function setPhotoOverlayCopy(mode, finding) {
+        const isClose = mode === "cierre";
+        document.getElementById("photoTitle").textContent = isClose ? "Foto de cierre" : "Foto del hallazgo";
+        document.getElementById("photoTakeLabel").textContent = isClose ? "Foto después" : "Tomar foto";
+        document.getElementById("photoHint").textContent = isClose
+          ? "Fotografía la corrección. Marca el punto con cinta verde si aplica."
+          : "Marca el defecto con cinta antes de fotografiar.";
+        document.getElementById("photoSub").textContent = `${finding.descripcion} · ${finding.recinto || ""}`;
+        document.getElementById("targetTitle").textContent = isClose ? "Confirma mira de cierre" : "Confirma la mira";
+        document.getElementById("targetDone").textContent = isClose ? "Cerrar hallazgo" : "Confirmar foto";
+      }
+
+      async function startInspection() {
+        document.getElementById("unitTitle").textContent = `${project.name} · Depto ${unitSel.value}`;
+        document.getElementById("unitSub").textContent = `${project.building || ""}${project.comuna ? " · " + project.comuna : ""}`.trim();
+        document.getElementById("formView").style.display = "none";
+        document.getElementById("verifyView").style.display = "none";
+        document.getElementById("captureView").style.display = "flex";
+        try {
+          const r = await (window.Entrega && window.Entrega.entregaFetch ? window.Entrega.entregaFetch.bind(window.Entrega) : fetch)("/api/entrega/public/elevenlabs-agent", { cache: "no-store" });
+          agentCfg = await r.json();
+        } catch { agentCfg = null; }
+        await refreshFindings();
+        await startAgent();
+      }
+
+      async function startAgent() {
+        if (!agentCfg?.enabled || !agentCfg.agentId) {
+          setAgentState(false, "Agente no configurado");
+          return;
+        }
+        setAgentState(false, "Conectando⬦");
+        try {
+          await window.EntregaVoice.start({
+            agentId: agentCfg.agentId,
+            dynamicVariables: {
+              unit_ref: unitRef(),
+              depto: unitSel.value,
+              project_id: project.id,
+              project_name: project.name,
+              recintos_validos: E.recintosForUnit(seed, project, unitSel.value).join(", "),
+            },
+            clientTools: { guardar_hallazgo: guardarHallazgo },
+            onConnect: () => setAgentState(true, "Escuchando"),
+            onDisconnect: () => setAgentState(false, "Desconectado"),
+            onError: (err) => {
+              console.error("[captura] agent error", err);
+              setAgentState(false, "Error de voz");
+            },
+          });
+        } catch (err) {
+          console.error("[captura] start agent", err);
+          setAgentState(false, "Micrófono bloqueado");
+        }
+      }
+
+      async function stopAgent() {
+        try { await window.EntregaVoice.stop(); } catch (e) {}
+        setAgentState(false, "Inactivo");
+      }
+
+      function setAgentState(live, text) {
+        document.getElementById("agentDot").className = "agent-dot" + (live ? " live" : "");
+        document.getElementById("agentState").textContent = text;
+        const rb = document.getElementById("reconnectBtn");
+        const inCapture = document.getElementById("captureView")?.style.display !== "none";
+        if (rb) {
+          rb.style.display = inCapture && !live && text !== "Conectando⬦" ? "inline-block" : "none";
+        }
+      }
+
+      async function endInspection() {
+        await stopAgent();
+        const rb = document.getElementById("reconnectBtn");
+        if (rb) rb.style.display = "none";
+        document.getElementById("captureView").style.display = "none";
+        document.getElementById("formView").style.display = "flex";
+      }
+
+      async function refreshFindings() {
+        try {
+          const r = await (window.Entrega && window.Entrega.entregaFetch ? window.Entrega.entregaFetch.bind(window.Entrega) : fetch)(`/api/entrega/units/${encodeURIComponent(unitRef())}/findings`, { cache: "no-store" });
+          const j = await r.json();
+          const list = (j && j.findings) || [];
+          document.getElementById("count").textContent = list.length;
+          document.getElementById("findingList").innerHTML = list.length
+            ? list.slice().reverse().map(findingCard).join("")
+            : `<div class="cap-note">Aún no hay hallazgos. Responde al asistente.</div>`;
+        } catch {
+          document.getElementById("findingList").innerHTML = `<div class="cap-note err">No se pudo cargar.</div>`;
+        }
+      }
+
+      function findingCard(h) {
+        const mira = h.target ? targetSvg(h.target.x * 100, h.target.y * 100) : "";
+        const thumb = h.fotoUrl
+          ? `<div class="f-thumb"><img src="${h.fotoUrl}" alt=""/>${mira}</div>`
+          : `<div class="f-thumb" style="display:grid;place-items:center;color:#9CA3AF;font-size:10px">Sin foto</div>`;
+        const estado = h.estado === "cerrado" ? " · cerrado" : "";
+        return `<div class="finding">${thumb}<div><div class="f-desc">${h.descripcion}</div><div class="f-meta">${h.recinto} · ${h.especialidad || ""}${estado}</div></div></div>`;
+      }
+
+      function targetSvg(x, y, color) {
+        const green = color === "green";
+        const cls = green ? "ph-target green" : "ph-target";
+        const stroke = green ? "#22C55E" : "#F97316";
+        return `<svg class="${cls}" viewBox="0 0 100 100" style="left:${x}%;top:${y}%"><circle cx="50" cy="50" r="30" fill="none" stroke="${stroke}" stroke-width="5"/><circle cx="50" cy="50" r="3" fill="${stroke}"/></svg>`;
+      }
+
+      // ---------- Client tool ----------
+      // Secuencia: zona + hallazgo → mapear a recinto del depto (o Sin asignar) → foto → responde al agente.
+
+      const RECINTO_SIN_ASIGNAR = "Sin asignar";
+
+      function normZona(s) {
+        return String(s || "")
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/[^a-z0-9\s]/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
+      }
+
+      function recintosUnidad() {
+        try {
+          return E.recintosForUnit(seed, project, unitSel.value) || [];
+        } catch (_) {
+          return [];
+        }
+      }
+
+      /** Empareja lo dicho con un recinto del departamento; si no hay match → Sin asignar. */
+      function resolverRecinto(zonaSaid) {
+        const raw = String(zonaSaid || "").trim();
+        const n = normZona(raw);
+        if (!n) return { recinto: RECINTO_SIN_ASIGNAR, matched: false, reason: "empty" };
+
+        const invalid = [
+          "sin recinto", "sin zona", "sin asignar", "desconocida", "desconocido",
+          "n a", "na", "no se", "ninguna", "null", "undefined"
+        ];
+        if (invalid.includes(n)) return { recinto: RECINTO_SIN_ASIGNAR, matched: false, reason: "invalid" };
+
+        const list = recintosUnidad();
+        if (!list.length) return { recinto: RECINTO_SIN_ASIGNAR, matched: false, reason: "no_catalog" };
+
+        // Exacto normalizado
+        for (const r of list) {
+          if (normZona(r) === n) return { recinto: r, matched: true, reason: "exact" };
+        }
+
+        // Contiene / contenido (ej. "living" → "Living Comedor Cocina", "baño suite" → "Baño Suite")
+        let best = null;
+        let bestScore = 0;
+        for (const r of list) {
+          const rn = normZona(r);
+          if (!rn) continue;
+          let score = 0;
+          if (rn.includes(n) || n.includes(rn)) score = Math.min(n.length, rn.length);
+          const tokens = n.split(" ").filter((t) => t.length > 2);
+          const hit = tokens.filter((t) => rn.includes(t)).length;
+          if (tokens.length && hit === tokens.length) score = Math.max(score, 10 + hit);
+          else if (hit > 0) score = Math.max(score, hit);
+          if (score > bestScore) {
+            bestScore = score;
+            best = r;
+          }
+        }
+        if (best && bestScore >= 3) return { recinto: best, matched: true, reason: "fuzzy" };
+
+        return { recinto: RECINTO_SIN_ASIGNAR, matched: false, reason: "no_match", said: raw };
+      }
+
+      async function guardarHallazgo(params) {
+        params = params || {};
+        const zonaSaid = (params.zona || params.recinto || "").trim();
+        const descripcion = (params.descripcion || params.hallazgo || "").trim();
+        const catalog = recintosUnidad();
+        const catalogTxt = catalog.join(", ") || "(sin catálogo)";
+
+        if (!descripcion) {
+          return "Falta el hallazgo. Pregunta: ¿Qué hallazgo? No abras la cámara todavía.";
+        }
+        if (!zonaSaid) {
+          return `Falta la zona. Pregunta ahora: ¿En qué zona? Opciones del departamento: ${catalogTxt}. No abras la cámara.`;
+        }
+
+        const resolved = resolverRecinto(zonaSaid);
+        if (!resolved.matched) {
+          return `La zona «${zonaSaid}» no corresponde a este departamento. Pregunta de nuevo ¿En qué zona? Debe ser una de: ${catalogTxt}. No abras la cámara ni pases al siguiente hallazgo.`;
+        }
+        const recinto = resolved.recinto;
+
+        let finding;
+        try {
+          const r = await (window.Entrega && window.Entrega.entregaFetch ? window.Entrega.entregaFetch.bind(window.Entrega) : fetch)("/api/entrega/agent/add-finding", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              unitRef: unitRef(),
+              recinto,
+              descripcion,
+              kpi: params.kpi,
+              especialidad: params.especialidad,
+              severidad: params.severidad,
+            }),
+          });
+          const j = await r.json();
+          if (!j.ok) throw new Error("add");
+          finding = j.finding;
+        } catch {
+          return "No pude registrar el hallazgo. Revisa la conexión.";
+        }
+
+        refreshFindings().catch(() => {});
+        const photoResult = await enqueuePhotoCapture(finding, recinto);
+        await refreshFindings().catch(() => {});
+
+        if (!photoResult || !photoResult.uploaded) {
+          return `Registré ${descripcion} en «${recinto}», pero aún falta la foto. Pide «Tomar foto» en pantalla. No pases al siguiente hasta que la foto esté lista.`;
+        }
+        return `Foto lista. ${descripcion} en «${recinto}» quedó registrado. ¿Siguiente zona o hallazgo?`;
+      }
+
+      function enqueuePhotoCapture(finding, recinto) {
+        return new Promise((resolve) => {
+          photoQueue.push({ finding, recinto, resolve });
+          processPhotoQueue().catch((err) => {
+            console.error("[captura] photo queue", err);
+            resolve({ uploaded: false });
+          });
+        });
+      }
+
+      async function processPhotoQueue() {
+        if (photoQueueBusy) return;
+        photoQueueBusy = true;
+        try {
+          while (photoQueue.length) {
+            const item = photoQueue.shift();
+            let result = { uploaded: false };
+            try {
+              result = await captureFindingPhoto(item.finding, item.recinto);
+            } catch (err) {
+              console.error("[captura] photo item", err);
+              result = { uploaded: false };
+            }
+            if (typeof item.resolve === "function") item.resolve(result || { uploaded: false });
+          }
+        } finally {
+          photoQueueBusy = false;
+        }
+      }
+
+      async function captureFindingPhoto(finding, recinto) {
+        activeFinding = finding;
+        activeRecinto = recinto;
+        photoMode = "r0";
+        setPhotoOverlayCopy("r0", finding);
+
+        const photo = await waitForPhoto();
+        if (!photo) {
+          refreshFindings().catch(() => {});
+          activeFinding = null;
+          return { uploaded: false };
+        }
+
+        try {
+          const fd = new FormData();
+          fd.append("photo", photo.blob, "foto.jpg");
+          const up = await (window.Entrega && window.Entrega.entregaFetch ? window.Entrega.entregaFetch.bind(window.Entrega) : fetch)(
+            `/api/entrega/units/${encodeURIComponent(unitRef())}/findings/${encodeURIComponent(finding.id)}/photo`,
+            { method: "POST", body: fd }
+          );
+          const uj = await up.json();
+          if (!uj.ok) throw new Error("upload");
+
+          const target = await adjustTarget(photo.dataUrl, uj.target, finding, "r0");
+          if (target && Number.isFinite(target.x)) {
+            await (window.Entrega && window.Entrega.entregaFetch ? window.Entrega.entregaFetch.bind(window.Entrega) : fetch)(
+              `/api/entrega/units/${encodeURIComponent(unitRef())}/findings/${encodeURIComponent(finding.id)}/target`,
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(target),
+              }
+            );
+          }
+          activeFinding = null;
+          await refreshFindings();
+          return { uploaded: true };
+        } catch (err) {
+          console.error("[captura] photo upload", err);
+          activeFinding = null;
+          await refreshFindings();
+          return { uploaded: false };
+        }
+      }
+
+      function waitForPhoto() {
+        return new Promise((resolve) => {
+          photoWaitResolve = resolve;
+          document.getElementById("photoInput").value = "";
+          document.getElementById("photoOverlay").classList.add("open");
+        });
+      }
+
+      function closePhotoOverlay(result) {
+        document.getElementById("photoOverlay").classList.remove("open");
+        if (photoWaitResolve) { photoWaitResolve(result); photoWaitResolve = null; }
+      }
+
+      async function onPhotoTaken(ev) {
+        const file = ev.target.files && ev.target.files[0];
+        ev.target.value = "";
+        if (!file || !activeFinding) { closePhotoOverlay(null); return; }
+        try {
+          const isClose = photoMode === "cierre";
+          const meta = {
+            fecha: formatNow(),
+            proyectoUnidad: `${project.name} · Depto ${unitSel.value}`,
+            recinto: activeRecinto,
+            sello: isClose ? "Cierre" : null
+          };
+          const dataUrl = await fileToStampedJpeg(file, 1280, 0.72, meta);
+          closePhotoOverlay({ dataUrl, blob: dataURLtoBlob(dataUrl) });
+        } catch {
+          closePhotoOverlay(null);
+        }
+      }
+
+      function adjustTarget(dataUrl, target, finding, mode) {
+        const isClose = mode === "cierre";
+        return new Promise((resolve) => {
+          const overlay = document.getElementById("targetOverlay");
+          const mid = document.getElementById("targetMid");
+          document.getElementById("targetSub").textContent = finding.descripcion;
+          let current = target && Number.isFinite(target.x) ? { ...target } : null;
+          overlay.classList.add("open");
+
+          function render() {
+            const mira = current ? targetSvg(current.x * 100, current.y * 100, isClose ? "green" : "orange") : "";
+            mid.innerHTML = `<div class="photo-frame" id="tgtFrame"><img src="${dataUrl}" alt=""/>${mira}</div>
+              <div class="po-hint">${current ? "Toca para ajustar la mira." : "Toca el punto en la foto."}</div>`;
+            document.getElementById("tgtFrame").onclick = (e) => {
+              const img = e.currentTarget.querySelector("img");
+              const rect = img.getBoundingClientRect();
+              current = {
+                x: Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width)),
+                y: Math.min(1, Math.max(0, (e.clientY - rect.top) / rect.height))
+              };
+              render();
+            };
+          }
+          render();
+          document.getElementById("targetDone").onclick = () => {
+            overlay.classList.remove("open");
+            resolve(current);
+          };
+        });
+      }
+
+      function formatNow() {
+        const d = new Date();
+        const p = (n) => String(n).padStart(2, "0");
+        return `${p(d.getDate())}-${p(d.getMonth() + 1)}-${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`;
+      }
+
+      function fileToStampedJpeg(file, maxSize, quality, meta) {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          const url = URL.createObjectURL(file);
+          img.onload = () => {
+            URL.revokeObjectURL(url);
+            let w = img.naturalWidth, h = img.naturalHeight;
+            const scale = Math.min(1, maxSize / Math.max(w, h));
+            w = Math.round(w * scale); h = Math.round(h * scale);
+            const canvas = document.createElement("canvas");
+            canvas.width = w; canvas.height = h;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, w, h);
+            drawSello(ctx, w, h, meta);
+            resolve(canvas.toDataURL("image/jpeg", quality));
+          };
+          img.onerror = reject;
+          img.src = url;
+        });
+      }
+
+      function drawSello(ctx, w, h, meta) {
+        const lines = [meta.fecha, meta.proyectoUnidad, meta.recinto, meta.sello].filter(Boolean);
+        const fsz = Math.max(12, Math.round(w * 0.026));
+        ctx.font = `600 ${fsz}px Inter, system-ui, sans-serif`;
+        const pad = Math.round(fsz * 0.7);
+        const lh = Math.round(fsz * 1.35);
+        let tw = 0;
+        lines.forEach((l) => { tw = Math.max(tw, ctx.measureText(l).width); });
+        const boxW = tw + pad * 2;
+        const boxH = lh * lines.length + pad;
+        const x = pad, y = h - boxH - pad;
+        ctx.fillStyle = "rgba(15,23,42,.62)";
+        ctx.fillRect(x, y, boxW, boxH);
+        ctx.fillStyle = "#fff";
+        ctx.textBaseline = "top";
+        lines.forEach((l, i) => ctx.fillText(l, x + pad, y + pad * 0.55 + i * lh));
+      }
+
+      function dataURLtoBlob(dataUrl) {
+        const parts = dataUrl.split(",");
+        const mime = parts[0].match(/:(.*?);/)[1];
+        const bin = atob(parts[1]);
+        const arr = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+        return new Blob([arr], { type: mime });
+      }
+    })();
+  </script>
+</body>
+</html>

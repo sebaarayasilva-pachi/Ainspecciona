@@ -1,8 +1,7 @@
 /**
  * Genera un PDF de comprobante de pago para Plan Business.
- * TODO: Integrar con SimpleFactura para emitir factura electrónica SII.
- * Una vez tengamos el RUT de la empresa (facturacion.rut), conectar con SimpleFactura
- * y enviar la factura electrónica por email en lugar de este comprobante.
+ * Pendiente: integrar SimpleFactura (u otro) para factura electrónica SII — cuando
+ * Android e iOS estén en producción (ver PLAN_TRABAJO.md). Hasta entonces: este PDF.
  */
 import PDFDocument from 'pdfkit';
 

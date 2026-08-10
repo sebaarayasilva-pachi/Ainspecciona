@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Captura · In &amp; Out</title>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/inout/assets/inout.css" />
+  <style>
+    .cap-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .cap-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .cap-row:last-child { border-bottom: none; }
+    .cap-meta { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    .cap-empty { color: var(--muted); font-size: 14px; margin: 0; }
+    .new-form { display: grid; gap: 10px; max-width: 560px; }
+    .new-form input, .new-form select {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      background: rgba(0,0,0,0.25);
+      color: var(--text);
+      font: inherit;
+    }
+    .new-form .row2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .new-form .checks {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 12px;
+      margin-top: 2px;
+    }
+    .new-form .checks label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+    }
+    .new-form .checks input { width: auto; margin: 0; }
+    @media (max-width: 560px) {
+      .new-form .row2, .new-form .checks { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body class="io-shell">
+  <div class="io-layout">
+    <div id="shell"></div>
+    <main class="io-main">
+      <h1>Captura</h1>
+      <p class="sub">
+        Desde tu cuenta: abre una propiedad (IN) o elige una apertura lista para cerrar (OUT).
+        No necesitas copiar links con token.
+      </p>
+
+      <div class="card">
+        <h2 style="margin:0 0 8px;font-size:16px">Nueva apertura (IN)</h2>
+        <p class="sub" style="margin-bottom:12px">
+          Indica la propiedad y sus características: con eso se arma el Photo Plan (mismas fotos en OUT).
+        </p>
+        <form class="new-form" id="newForm">
+          <div>
+            <label for="address">Dirección / unidad</label>
+            <input id="address" name="address" required placeholder="Ej. Av. Providencia 100, Dpto 1201" />
+          </div>
+          <div class="row2">
+            <div>
+              <label for="comuna">Comuna</label>
+              <input id="comuna" name="comuna" placeholder="Providencia" />
+            </div>
+            <div>
+              <label for="tenantName">Arrendatario</label>
+              <input id="tenantName" name="tenantName" placeholder="Nombre del ocupante" />
+            </div>
+          </div>
+          <div class="row2">
+            <div>
+              <label for="propertyType">Tipo</label>
+              <select id="propertyType" name="propertyType" required>
+                <option value="DEPARTMENT">Departamento</option>
+                <option value="HOUSE">Casa</option>
+              </select>
+            </div>
+            <div>
+              <label for="bedroomsCount">Dormitorios</label>
+              <select id="bedroomsCount" name="bedroomsCount" required>
+                <option value="0">0 (studio)</option>
+                <option value="1">1</option>
+                <option value="2" selected>2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+            </div>
+          </div>
+          <div class="row2">
+            <div>
+              <label for="bathroomsCount">Baños</label>
+              <select id="bathroomsCount" name="bathroomsCount" required>
+                <option value="1" selected>1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+              </select>
+            </div>
+            <div>
+              <label>&nbsp;</label>
+              <p class="sub" style="margin:8px 0 0;font-size:12px">Define cuántas fotos pide el plan.</p>
+            </div>
+          </div>
+          <div>
+            <label>Espacios adicionales</label>
+            <div class="checks">
+              <label><input type="checkbox" id="hasLaundry" /> Loggia / lavadero</label>
+              <label><input type="checkbox" id="hasPatio" /> Patio / terraza</label>
+              <label><input type="checkbox" id="hasParking" /> Estacionamiento</label>
+              <label id="wrapElevator"><input type="checkbox" id="hasElevator" /> Ascensor</label>
+              <label id="wrapGrille" hidden><input type="checkbox" id="hasEntranceGrille" /> Reja de entrada</label>
+            </div>
+          </div>
+          <div class="cap-actions">
+            <button type="submit" class="btn" id="btnNew">Iniciar captura IN</button>
+          </div>
+          <p id="newErr" class="err" hidden></p>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2 style="margin:0 0 8px;font-size:16px">Aperturas en curso</h2>
+        <p class="sub" style="margin-bottom:8px">IN iniciado: continúa la captura de línea base.</p>
+        <div id="listIn"></div>
+      </div>
+
+      <div class="card">
+        <h2 style="margin:0 0 8px;font-size:16px">Listas para cerrar (OUT)</h2>
+        <p class="sub" style="margin-bottom:8px">IN listo: elige cuál cerrar. Se abrirá la captura OUT con ghost overlay.</p>
+        <div id="listOutReady"></div>
+      </div>
+
+      <div class="card">
+        <h2 style="margin:0 0 8px;font-size:16px">OUT en curso</h2>
+        <p class="sub" style="margin-bottom:8px">Cierres ya iniciados: continúa la captura OUT.</p>
+        <div id="listOutProgress"></div>
+      </div>
+
+      <p class="disclaimer">
+        Herramienta de documentación y apoyo técnico. No constituye peritaje judicial ni determina responsabilidades legales.
+      </p>
+    </main>
+  </div>
+  <script src="/inout/portal/assets/inout-app.js?v=20260809-cap2"></script>
+  <script>
+    const Io = window.IoPortal;
+    if (!Io) {
+      document.body.innerHTML =
+        '<p style="padding:24px;font-family:sans-serif">No se pudo cargar In &amp; Out. <a href="/inout/portal/login">Entrar</a></p>';
+      throw new Error("IoPortal missing");
+    }
+
+    function visitByPhase(lease, phase) {
+      return (lease.visits || []).find((v) => String(v.phase).toUpperCase() === phase) || null;
+    }
+
+    function rowHtml(lease, actionHtml) {
+      const addr = lease.property?.address || "—";
+      const comuna = lease.property?.comuna || "";
+      const tenant = lease.tenantName || "—";
+      return (
+        '<div class="cap-row">' +
+        '<div>' +
+        "<strong>" +
+        Io.escapeHtml(addr) +
+        "</strong>" +
+        '<div class="cap-meta">' +
+        Io.escapeHtml(tenant) +
+        (comuna ? " · " + Io.escapeHtml(comuna) : "") +
+        ' · <span class="badge ' +
+        Io.badgeClass(lease.cycleStatus) +
+        '">' +
+        Io.escapeHtml(Io.statusLabel(lease.cycleStatus)) +
+        "</span></div>" +
+        "</div>" +
+        '<div class="cap-actions">' +
+        actionHtml +
+        "</div></div>"
+      );
+    }
+
+    function empty(el, text) {
+      el.innerHTML = '<p class="cap-empty">' + Io.escapeHtml(text) + "</p>";
+    }
+
+    async function openCapture(token) {
+      if (!token) throw new Error("Sin token de captura");
+      location.href = Io.captureRuntimeUrl(token);
+    }
+
+    async function continueIn(lease) {
+      const v = visitByPhase(lease, "IN");
+      if (!v?.captureToken) throw new Error("Esta apertura no tiene captura IN");
+      await openCapture(v.captureToken);
+    }
+
+    async function continueOut(lease) {
+      const v = visitByPhase(lease, "OUT");
+      if (v?.captureToken) {
+        await openCapture(v.captureToken);
+        return;
+      }
+      const res = await Io.ioFetch("/api/inout/leases/" + encodeURIComponent(lease.id) + "/start-out", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: "{}"
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok || !data.captureToken) {
+        throw new Error(data.message || data.error || "No se pudo iniciar OUT");
+      }
+      await openCapture(data.captureToken);
+    }
+
+    function bindButtons(root, handler) {
+      root.querySelectorAll("button[data-lease]").forEach((btn) => {
+        btn.onclick = async () => {
+          btn.disabled = true;
+          try {
+            const id = btn.getAttribute("data-lease");
+            const lease = (window.__ioLeases || []).find((l) => l.id === id);
+            if (!lease) throw new Error("Ciclo no encontrado");
+            await handler(lease);
+          } catch (e) {
+            alert(e.message || "Error");
+            btn.disabled = false;
+          }
+        };
+      });
+    }
+
+    function renderLists(leases) {
+      window.__ioLeases = leases;
+      const inProgress = leases.filter((l) =>
+        ["draft", "in_in_progress"].includes(String(l.cycleStatus || ""))
+      );
+      const outReady = leases.filter((l) =>
+        ["out_ready", "in_completed"].includes(String(l.cycleStatus || ""))
+      );
+      const outProgress = leases.filter((l) =>
+        ["out_in_progress"].includes(String(l.cycleStatus || ""))
+      );
+
+      const elIn = document.getElementById("listIn");
+      const elReady = document.getElementById("listOutReady");
+      const elOut = document.getElementById("listOutProgress");
+
+      if (!inProgress.length) empty(elIn, "No hay aperturas IN en curso.");
+      else {
+        elIn.innerHTML = inProgress
+          .map((l) =>
+            rowHtml(
+              l,
+              '<button type="button" class="btn" data-lease="' +
+                Io.escapeHtml(l.id) +
+                '">Continuar IN</button>' +
+                '<a class="btn secondary" href="' +
+                Io.appHref("/inout/portal/lease?id=" + encodeURIComponent(l.id)) +
+                '">Detalle</a>'
+            )
+          )
+          .join("");
+        bindButtons(elIn, continueIn);
+      }
+
+      if (!outReady.length) empty(elReady, "Ninguna apertura lista para OUT.");
+      else {
+        elReady.innerHTML = outReady
+          .map((l) =>
+            rowHtml(
+              l,
+              '<button type="button" class="btn" data-lease="' +
+                Io.escapeHtml(l.id) +
+                '">Cerrar (OUT)</button>' +
+                '<a class="btn secondary" href="' +
+                Io.appHref("/inout/portal/lease?id=" + encodeURIComponent(l.id)) +
+                '">Detalle</a>'
+            )
+          )
+          .join("");
+        bindButtons(elReady, continueOut);
+      }
+
+      if (!outProgress.length) empty(elOut, "No hay OUT en curso.");
+      else {
+        elOut.innerHTML = outProgress
+          .map((l) =>
+            rowHtml(
+              l,
+              '<button type="button" class="btn" data-lease="' +
+                Io.escapeHtml(l.id) +
+                '">Continuar OUT</button>' +
+                '<a class="btn secondary" href="' +
+                Io.appHref("/inout/portal/lease?id=" + encodeURIComponent(l.id)) +
+                '">Detalle</a>'
+            )
+          )
+          .join("");
+        bindButtons(elOut, continueOut);
+      }
+    }
+
+    async function load() {
+      const res = await Io.ioFetch("/api/inout/leases");
+      const data = await res.json();
+      renderLists(data.leases || []);
+    }
+
+    function syncTypeFlags() {
+      const isHouse = document.getElementById("propertyType").value === "HOUSE";
+      document.getElementById("wrapElevator").hidden = isHouse;
+      document.getElementById("wrapGrille").hidden = !isHouse;
+      if (isHouse) document.getElementById("hasElevator").checked = false;
+      else document.getElementById("hasEntranceGrille").checked = false;
+    }
+    document.getElementById("propertyType").onchange = syncTypeFlags;
+    syncTypeFlags();
+
+    document.getElementById("newForm").onsubmit = async (e) => {
+      e.preventDefault();
+      const err = document.getElementById("newErr");
+      const btn = document.getElementById("btnNew");
+      err.hidden = true;
+      btn.disabled = true;
+      try {
+        const address = document.getElementById("address").value.trim();
+        const comuna = document.getElementById("comuna").value.trim();
+        const tenantName = document.getElementById("tenantName").value.trim();
+        const propertyType = document.getElementById("propertyType").value;
+        const bedroomsCount = Number(document.getElementById("bedroomsCount").value);
+        const bathroomsCount = Number(document.getElementById("bathroomsCount").value);
+        const res = await Io.ioFetch("/api/inout/leases", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            address,
+            comuna: comuna || undefined,
+            tenantName: tenantName || undefined,
+            propertyType,
+            bedroomsCount,
+            bathroomsCount,
+            hasLaundry: document.getElementById("hasLaundry").checked,
+            hasPatio: document.getElementById("hasPatio").checked,
+            hasParking: document.getElementById("hasParking").checked,
+            hasElevator: propertyType === "DEPARTMENT" && document.getElementById("hasElevator").checked,
+            hasEntranceGrille: propertyType === "HOUSE" && document.getElementById("hasEntranceGrille").checked
+          })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok || !data.captureToken) {
+          throw new Error(data.message || data.error || "No se pudo crear la apertura");
+        }
+        location.href = Io.captureRuntimeUrl(data.captureToken);
+      } catch (ex) {
+        err.textContent = ex.message || "Error";
+        err.hidden = false;
+        btn.disabled = false;
+      }
+    };
+
+    (async function boot() {
+      try {
+        const me = await Io.ensureAuth();
+        if (!me) return;
+        const shell = document.getElementById("shell");
+        if (shell) shell.outerHTML = Io.renderShell("captura", me);
+        Io.bindShell();
+        await load();
+      } catch (err) {
+        console.error(err);
+        document.querySelector(".io-main")?.insertAdjacentHTML(
+          "afterbegin",
+          '<p class="err">Error al cargar captura. <a href="/inout/portal/login">Volver</a></p>'
+        );
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <script>(function(){try{var t=localStorage.getItem("entrega-theme");document.documentElement.setAttribute("data-theme",t==="light"?"light":"dark");}catch(e){document.documentElement.setAttribute("data-theme","dark");}})();</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Usuarios · Ainspecciona Recepción</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/entrega/assets/entrega.css" />
+  <style>
+    .users-grid { display: grid; grid-template-columns: minmax(280px, 360px) 1fr; gap: 18px; align-items: start; }
+    @media (max-width: 960px) { .users-grid { grid-template-columns: 1fr; } }
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+    .panel h2 { margin: 0 0 4px; font-size: 16px; font-weight: 800; }
+    .panel .hint { margin: 0 0 16px; font-size: 12px; color: var(--muted); line-height: 1.4; }
+    label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin: 0 0 6px; }
+    input, select {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 12px;
+      font-size: 14px;
+      font-family: inherit;
+      margin-bottom: 12px;
+      background: var(--surface);
+      color: var(--text);
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-tint);
+    }
+    .btn-primary {
+      width: 100%;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      background: linear-gradient(135deg, var(--primary), var(--primary-600));
+    }
+    .btn-primary:disabled { opacity: 0.65; cursor: wait; }
+    .msg { display: none; margin: 0 0 12px; padding: 10px 12px; border-radius: 10px; font-size: 13px; font-weight: 600; }
+    .msg.show { display: block; }
+    .msg.ok { background: #ECFDF5; color: #047857; }
+    .msg.err { background: #FEF2F2; color: #B91C1C; }
+    table.users { width: 100%; border-collapse: collapse; font-size: 13px; }
+    table.users th {
+      text-align: left;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    table.users td { padding: 12px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    table.users tr:last-child td { border-bottom: none; }
+    .role-pill {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .role-ADMIN { background: #EEF0FE; color: #4338CA; }
+    .role-EXECUTIVE { background: #ECFDF5; color: #047857; }
+    .role-INSPECTOR { background: #FFF7ED; color: #C2410C; }
+    .status-ACTIVE { color: #059669; font-weight: 700; font-size: 12px; }
+    .status-DISABLED { color: #9CA3AF; font-weight: 700; font-size: 12px; }
+    .row-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+    .row-actions button, .row-actions select {
+      width: auto;
+      margin: 0;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .row-actions select { padding: 5px 8px; }
+    .empty { padding: 24px 10px; color: var(--muted); font-size: 13px; }
+    .forbidden {
+      max-width: 480px;
+      margin: 40px auto;
+      text-align: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+    <div id="sidebar"></div>
+    <div class="main">
+      <header class="topbar">
+        <div class="titles">
+          <h1>Usuarios</h1>
+          <div class="crumb">Administración del tenant · roles y accesos</div>
+        </div>
+        <div class="spacer"></div>
+        <div id="dateChip"></div>
+      </header>
+      <div class="content" id="content"></div>
+    </div>
+  </div>
+
+  <script src="/entrega/assets/entrega-app.js"></script>
+  <script>
+    (async function () {
+      const E = window.Entrega;
+      const ROLE_LABELS = {
+        ADMIN: "Administrador",
+        EXECUTIVE: "Ejecutivo",
+        INSPECTOR: "Inspector"
+      };
+
+      const me = await E.ensureAuth();
+      if (!me) return;
+      const seed = await E.loadSeed();
+      const project = E.getProject(seed, E.currentProjectId());
+      document.getElementById("sidebar").innerHTML = E.renderSidebar("usuarios", project, seed);
+      document.getElementById("dateChip").innerHTML = E.dateChip(project);
+
+      const content = document.getElementById("content");
+      if (me.user.role !== "ADMIN") {
+        content.innerHTML =
+          '<div class="forbidden"><h2>Sin acceso</h2><p>Solo un <b>administrador</b> del tenant puede crear y gestionar usuarios.</p></div>';
+        return;
+      }
+
+      content.innerHTML = `
+        <div class="users-grid">
+          <div class="panel">
+            <h2>Nuevo usuario</h2>
+            <p class="hint">Crea accesos para tu inmobiliaria. El usuario podrá entrar en /entrega/login.</p>
+            <div class="msg" id="formMsg"></div>
+            <form id="createForm">
+              <label for="fullName">Nombre completo</label>
+              <input id="fullName" name="fullName" required placeholder="Nombre y apellido" />
+              <label for="email">Email</label>
+              <input id="email" name="email" type="email" required placeholder="nombre@inmobiliaria.cl" />
+              <label for="role">Rol</label>
+              <select id="role" name="role" required>
+                <option value="INSPECTOR">Inspector</option>
+                <option value="EXECUTIVE">Ejecutivo</option>
+                <option value="ADMIN">Administrador</option>
+              </select>
+              <label for="password">Clave temporal</label>
+              <input id="password" name="password" type="text" required minlength="8" placeholder="Mínimo 8 caracteres" autocomplete="new-password" />
+              <button class="btn-primary" type="submit" id="createBtn">Crear usuario</button>
+            </form>
+          </div>
+          <div class="panel">
+            <h2>Usuarios del tenant</h2>
+            <p class="hint" id="tenantHint">${E.escapeHtml ? E.escapeHtml(me.tenant.name) : me.tenant.name}</p>
+            <div class="msg" id="listMsg"></div>
+            <div id="usersTableWrap"><div class="empty">Cargando…</div></div>
+          </div>
+        </div>
+      `;
+
+      const formMsg = document.getElementById("formMsg");
+      const listMsg = document.getElementById("listMsg");
+      const wrap = document.getElementById("usersTableWrap");
+
+      function showMsg(el, type, text) {
+        el.className = "msg show " + type;
+        el.textContent = text;
+      }
+      function clearMsg(el) {
+        el.className = "msg";
+        el.textContent = "";
+      }
+
+      async function loadUsers() {
+        const res = await E.entregaFetch("/api/entrega/users");
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) {
+          wrap.innerHTML = '<div class="empty">No se pudo cargar la lista.</div>';
+          return;
+        }
+        if (!data.users.length) {
+          wrap.innerHTML = '<div class="empty">Aún no hay usuarios.</div>';
+          return;
+        }
+        const rows = data.users
+          .map((u) => {
+            const isSelf = u.id === me.user.id;
+            return `
+            <tr data-id="${u.id}">
+              <td>
+                <div style="font-weight:700">${escape(u.fullName)}</div>
+                <div style="font-size:12px;color:var(--muted)">${escape(u.email)}</div>
+              </td>
+              <td><span class="role-pill role-${u.role}">${ROLE_LABELS[u.role] || u.role}</span></td>
+              <td><span class="status-${u.status}">${u.status === "ACTIVE" ? "Activo" : "Desactivado"}</span></td>
+              <td>
+                <div class="row-actions">
+                  <select class="roleSel" ${isSelf ? "disabled" : ""} title="Cambiar rol">
+                    <option value="ADMIN" ${u.role === "ADMIN" ? "selected" : ""}>Administrador</option>
+                    <option value="EXECUTIVE" ${u.role === "EXECUTIVE" ? "selected" : ""}>Ejecutivo</option>
+                    <option value="INSPECTOR" ${u.role === "INSPECTOR" ? "selected" : ""}>Inspector</option>
+                  </select>
+                  <button type="button" class="toggleBtn" ${isSelf ? "disabled" : ""}>
+                    ${u.status === "ACTIVE" ? "Desactivar" : "Activar"}
+                  </button>
+                  <button type="button" class="resetBtn">Nueva clave</button>
+                </div>
+              </td>
+            </tr>`;
+          })
+          .join("");
+        wrap.innerHTML = `
+          <table class="users">
+            <thead><tr><th>Usuario</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>`;
+      }
+
+      function escape(s) {
+        return String(s || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      document.getElementById("createForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        clearMsg(formMsg);
+        const btn = document.getElementById("createBtn");
+        btn.disabled = true;
+        try {
+          const res = await E.entregaFetch("/api/entrega/users", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              fullName: document.getElementById("fullName").value.trim(),
+              email: document.getElementById("email").value.trim(),
+              role: document.getElementById("role").value,
+              password: document.getElementById("password").value
+            })
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || !data.ok) {
+            showMsg(formMsg, "err", data.message || "No se pudo crear el usuario.");
+            btn.disabled = false;
+            return;
+          }
+          showMsg(formMsg, "ok", "Usuario creado: " + data.user.email);
+          e.target.reset();
+          document.getElementById("role").value = "INSPECTOR";
+          await loadUsers();
+        } catch {
+          showMsg(formMsg, "err", "Error de red.");
+        }
+        btn.disabled = false;
+      });
+
+      wrap.addEventListener("change", async (e) => {
+        const sel = e.target.closest(".roleSel");
+        if (!sel) return;
+        const tr = sel.closest("tr");
+        const id = tr && tr.dataset.id;
+        if (!id) return;
+        clearMsg(listMsg);
+        const res = await E.entregaFetch("/api/entrega/users/" + encodeURIComponent(id), {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ role: sel.value })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) {
+          showMsg(listMsg, "err", data.message || "No se pudo cambiar el rol.");
+          await loadUsers();
+          return;
+        }
+        showMsg(listMsg, "ok", "Rol actualizado.");
+        await loadUsers();
+      });
+
+      wrap.addEventListener("click", async (e) => {
+        const toggle = e.target.closest(".toggleBtn");
+        const reset = e.target.closest(".resetBtn");
+        const tr = e.target.closest("tr");
+        const id = tr && tr.dataset.id;
+        if (!id) return;
+        clearMsg(listMsg);
+
+        if (toggle) {
+          const activating = toggle.textContent.trim() === "Activar";
+          const res = await E.entregaFetch("/api/entrega/users/" + encodeURIComponent(id), {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: activating ? "ACTIVE" : "DISABLED" })
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || !data.ok) {
+            showMsg(listMsg, "err", data.message || "No se pudo actualizar el estado.");
+          } else {
+            showMsg(listMsg, "ok", activating ? "Usuario activado." : "Usuario desactivado.");
+          }
+          await loadUsers();
+          return;
+        }
+
+        if (reset) {
+          const password = window.prompt("Nueva clave temporal (mín. 8 caracteres):");
+          if (!password) return;
+          const res = await E.entregaFetch("/api/entrega/users/" + encodeURIComponent(id), {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ password })
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || !data.ok) {
+            showMsg(listMsg, "err", data.message || "No se pudo actualizar la clave.");
+          } else {
+            showMsg(listMsg, "ok", "Clave actualizada.");
+          }
+        }
+      });
+
+      await loadUsers();
+    })();
+  </script>
+</body>
+</html>

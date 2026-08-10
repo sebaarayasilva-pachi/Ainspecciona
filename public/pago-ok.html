@@ -32,7 +32,7 @@
       const actions = document.getElementById('actions');
       const message = document.getElementById('message');
 
-      const creditPlans = ['credits-5', 'credits-10', 'credits-20', 'business'];
+      const creditPlans = ['credits-10', 'credits-50', 'credits-100', 'credits-5', 'credits-20', 'business'];
       if (paymentId && creditPlans.includes(plan)) {
         message.textContent = 'Verificando pago y acreditando créditos...';
         try {

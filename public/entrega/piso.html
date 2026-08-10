@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <script>(function(){try{var t=localStorage.getItem("entrega-theme");document.documentElement.setAttribute("data-theme",t==="light"?"light":"dark");}catch(e){document.documentElement.setAttribute("data-theme","dark");}})();</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pisos · Ainspecciona Recepción</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/entrega/assets/entrega.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    .plan-zone { cursor: pointer; }
+    .plan-zone .apt-fill { transition: fill-opacity .12s ease, stroke-width .12s ease; }
+    .plan-zone:hover .apt-fill { fill-opacity: 0.34; stroke-width: 2.4; }
+    .plan-zone.selected .apt-fill { fill-opacity: 0.42; stroke-width: 2.8; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div id="sidebar"></div>
+    <div class="main">
+      <header class="topbar">
+        <div class="titles">
+          <h1>Pisos</h1>
+          <div class="crumb" id="crumb">Proyecto · Pisos</div>
+        </div>
+        <div class="spacer"></div>
+        <div class="topbar-actions">
+          <div id="projSelector"></div>
+          <div class="topbar-floor">
+            <span class="topbar-floor-label" id="floorSelectorLabel">Piso</span>
+            <select class="select" id="floorSelector" aria-labelledby="floorSelectorLabel" title="Seleccionar piso (2 al 7)">
+              <option value="piso-2">Piso 2</option>
+              <option value="piso-3" selected>Piso 3</option>
+              <option value="piso-4">Piso 4</option>
+              <option value="piso-5">Piso 5</option>
+              <option value="piso-6">Piso 6</option>
+              <option value="piso-7">Piso 7</option>
+            </select>
+          </div>
+          <div id="dateChip"></div>
+        </div>
+      </header>
+      <div class="content" id="content"></div>
+    </div>
+  </div>
+
+  <script src="/entrega/assets/entrega-app.js"></script>
+  <script>
+    (async function () {
+      const E = window.Entrega;
+      const content = document.getElementById("content");
+      try {
+      if (!E) throw new Error("No se cargó entrega-app.js");
+      const seed = await E.loadSeed();
+      const kpiCatalog = await E.loadKpiCatalog(seed);
+      const project = E.getProject(seed, E.currentProjectId());
+      if (!project) throw new Error("Proyecto no encontrado");
+      E.setProject(project.id);
+
+      document.getElementById("sidebar").innerHTML = E.renderSidebar("pisos", project, seed);
+      document.getElementById("projSelector").innerHTML = E.projectSelector(seed, project);
+      document.getElementById("dateChip").innerHTML = E.dateChip(project);
+      E.bindProjectSelector();
+      E.ensureChartDefaults();
+
+      // Selector pisos 2 al 7
+      const pisoFloors = E.floorsForPisoSelector(project);
+      const defaultFloor = E.qs("f", "") || "piso-3";
+      const floorId = pisoFloors.some((f) => f.id === defaultFloor) ? defaultFloor : "piso-3";
+      const floorSel = document.getElementById("floorSelector");
+      floorSel.innerHTML = pisoFloors
+        .map((f) => `<option value="${f.id}" ${f.id === floorId ? "selected" : ""}>${f.name}</option>`)
+        .join("");
+      floorSel.addEventListener("change", () => {
+        location.href = `${E.withProject("/entrega/piso", project.id)}&f=${floorSel.value}`;
+      });
+
+      content.innerHTML = `<div class="card pad-lg"><p class="muted">Cargando piso…</p></div>`;
+      const findingsMap = await E.loadFloorFindingsMap(seed, project.id, floorId, project);
+      const detail = E.enrichFloorDetailWithFindings(project, floorId, findingsMap, seed, kpiCatalog);
+      document.getElementById("crumb").textContent = `${project.name} · ${detail ? detail.name : "Piso"}`;
+
+      if (!detail) {
+        content.innerHTML = `<div class="card pad-lg"><div class="card-title">Piso no disponible</div><p class="muted">Selecciona un piso entre <b>2</b> y <b>7</b>.</p></div>`;
+        return;
+      }
+
+      const m = detail.metrics;
+      const liveNote = detail._liveCierre
+        ? `<span class="status-live" style="margin-left:8px;font-size:11px">Cierre en vivo</span>`
+        : "";
+      content.innerHTML = `
+        <div class="kpi-row">
+          <div class="kpi with-donut"><div><div class="k-label">% Avance recepción</div><div class="k-value">${m.avanceRecepcion}%</div><div class="k-sub">${
+            detail._liveCierre
+              ? `${E.fmt(m.unidadesInspeccionadas ?? m.unidadesRecibidas ?? 0)} / ${E.fmt(m.unidadesTotales)} inspeccionados`
+              : `${E.fmt(m.hallazgosRecepcion ?? 0)} / ${E.fmt(m.hallazgosRecepcionTotal ?? m.observacionesTotales ?? 0)} hallazgos`
+          }</div></div></div>
+          <div class="kpi with-donut"><div><div class="k-label">% Avance cierre${liveNote}</div><div class="k-value">${
+            detail._liveCierre
+              ? (m.avanceCierreHallazgos ?? m.avanceCierre ?? 0)
+              : (m.avanceUnidadesRecibidas ?? Math.round((m.unidadesRecibidas / m.unidadesTotales) * 100))
+          }%</div><div class="k-sub">${
+            detail._liveCierre
+              ? `${E.fmt(m.hallazgosCerrados ?? 0)} / ${E.fmt(m.hallazgosTotales ?? 0)} hallazgos`
+              : `${m.unidadesRecibidas} / ${m.unidadesTotales} unid.`
+          }</div></div></div>
+          <div class="kpi"><div class="k-label">💬 Observaciones abiertas</div><div class="k-value">${m.observacionesAbiertas}</div><div class="k-sub">${detail._liveCierre ? `${m.hallazgosAbiertos || 0} de ${m.hallazgosTotales || 0} en el piso` : "Total en el piso"}</div></div>
+          <div class="kpi"><div class="k-label">🚩 Críticas</div><div class="k-value">${m.criticas}</div><div class="k-sub">${m.criticasPct}% del total</div></div>
+          <div class="kpi"><div class="k-label">🔧 OT activas</div><div class="k-value">${m.otActivas}</div><div class="k-sub">${detail._liveCierre ? `${m.otAbiertas || 0} hallazgos abiertos` : `${m.otAtrasadas || 0} atrasadas`}</div></div>
+          <div class="kpi"><div class="k-label">✅ Deptos listos</div><div class="k-value">${detail._liveCierre ? (m.unidadesListas ?? 0) : m.unidadesRecibidas}</div><div class="k-sub">${
+            detail._liveCierre
+              ? `de ${m.unidadesTotales} · ${m.unidadesInspeccionadas ?? m.unidadesRecibidas ?? 0} con captura`
+              : `de ${m.unidadesTotales} (${m.avanceUnidadesRecibidas ?? Math.round((m.unidadesRecibidas / m.unidadesTotales) * 100)}%)`
+          }</div></div>
+        </div>
+
+        <div class="layout-main-side">
+          <div class="grid" style="gap:16px">
+            <div class="card pad-lg">
+              <div class="card-title">Planta interactiva por piso <span class="hint">${detail.name} · toca una unidad</span></div>
+              <div class="plan-wrap" id="planWrap"></div>
+              <div class="legend">
+                ${legendDot("#22C55E", "Cerrado / Lista")}${legendDot("#FACC15", "Pendiente menor")}${legendDot("#F97316", "Pendiente intermedio")}${legendDot("#EF4444", "Crítico / Abierto")}${legendDot("#D1D5DB", "No inspeccionado")}
+              </div>
+            </div>
+            <div class="cols-3">
+              <div class="card"><div class="card-title">Hallazgos por KPI</div><div class="chart-box sm"><canvas id="chKpi"></canvas></div><div class="mt" id="kpiLegend"></div></div>
+              <div class="card"><div class="card-title">Observaciones por especialidad</div><div class="chart-box chart-box-esp"><canvas id="chEsp"></canvas></div></div>
+              <div class="card"><div class="card-title">Aperturas vs cierres</div><div class="chart-box sm"><canvas id="chLine"></canvas></div></div>
+            </div>
+            <div class="card pad-lg">
+              <div class="ai-summary"><div class="ai-ico">${E.svgIcon("kpi")}</div><div><div class="card-title" style="margin-bottom:6px">Resumen del piso generado por IA</div><p>${
+                detail._liveCierre
+                  ? `El ${detail.name} tiene ${m.unidadesRecibidas} de ${m.unidadesTotales} unidades con captura (${m.avanceRecepcion}% recepción) y ${m.hallazgosCerrados || 0} de ${m.hallazgosTotales || 0} hallazgos cerrados (${m.avanceCierreHallazgos ?? m.avanceCierre}% cierre).`
+                  : `El ${detail.name} presenta un avance de recepción del ${m.avanceRecepcion}% y un avance de cierre del ${m.avanceUnidadesRecibidas ?? m.avanceCierre}%.`
+              } ${m.observacionesAbiertas ? `Quedan ${m.observacionesAbiertas} observación${m.observacionesAbiertas > 1 ? "es" : ""} abierta${m.observacionesAbiertas > 1 ? "s" : ""}.` : "Sin observaciones abiertas en las unidades con datos."} ${
+                detail.units.some((u) => (u.criticas || 0) > 0)
+                  ? `Las unidades ${detail.units.slice().sort((a, b) => b.criticas - a.criticas).slice(0, 3).map((u) => u.ref).join(", ")} concentran la criticidad.`
+                  : "No hay críticas abiertas en este piso."
+              }</p></div></div>
+            </div>
+          </div>
+
+          <div class="card" id="sidePanel"></div>
+        </div>`;
+
+      // Planta interactiva (SVG esquemático). Reemplazable por el plano real.
+      renderPlan(detail.units, floorId);
+
+      // Charts desde hallazgos del piso (detail ya enriquecido)
+      const floorHallazgos = (detail.units || []).flatMap((u) => u._hallazgos || []);
+      const kpiChart = E.chartDataKpi({
+        hallazgos: floorHallazgos.length ? floorHallazgos : null,
+        seedItems: detail.charts.hallazgosPorKpi,
+        catalog: kpiCatalog,
+      });
+      E.donutChart(document.getElementById("chKpi"), kpiChart);
+      document.getElementById("kpiLegend").innerHTML = E.legendList(kpiChart, { total: kpiChart.reduce((a, b) => a + b.value, 0) });
+      const espChart = E.chartDataEsp({
+        hallazgos: floorHallazgos.length ? floorHallazgos : null,
+        seedItems: detail.charts.observacionesPorEspecialidad,
+        catalog: kpiCatalog,
+        limit: 10,
+      });
+      const espBox = document.querySelector("#especialidades .chart-box, .chart-box-esp") || document.getElementById("chEsp")?.parentElement;
+      if (espBox) espBox.style.height = Math.max(180, 28 + espChart.length * 28) + "px";
+      E.barChart(document.getElementById("chEsp"), espChart, { horizontal: true, catalog: kpiCatalog });
+      const floorTimeline = floorHallazgos.length ? E.hallazgosTimeline(floorHallazgos) : null;
+      E.lineChart(document.getElementById("chLine"), floorTimeline || detail.charts.aperturasVsCierres);
+
+      // Selecciona la unidad más crítica por defecto
+      const initial = detail.units.slice().sort((a, b) => b.criticas - a.criticas)[0];
+      selectUnit(initial.ref);
+
+      function renderPlan(units, floorId) {
+        // Plano real de planta con zonas clickeables por depto, coloreadas por estado
+        const pp = detail.planoPiso;
+        if (pp && pp.image && Array.isArray(pp.zones) && pp.zones.length) {
+          const byRef = {};
+          units.forEach((u) => (byRef[u.ref] = u));
+          const zonesSvg = pp.zones
+            .map((z) => {
+              const u = byRef[z.ref] || { estado: "no_inspeccionado", hallazgos: 0, avance: 0 };
+              const estado = E.estadoForUnitDisplay(u);
+              const color = E.STATE_COLORS[estado] || "#D1D5DB";
+              const empty = estado === "no_inspeccionado";
+              const fillOp = empty ? "0" : "0.20";
+              const stroke = empty ? "#CBD5E1" : color;
+              const strokeW = empty ? "1.1" : "1.6";
+              return `<g class="plan-zone" data-ref="${z.ref}" onclick="window.__selUnit('${z.ref}')">
+                <path class="apt-fill" d="${z.path}" transform="translate(${z.ox}, ${z.oy})" fill="${color}" fill-opacity="${fillOp}" stroke="${stroke}" stroke-width="${strokeW}" stroke-linejoin="round"/>
+                <text class="plan-label" x="${z.cx}" y="${z.cy - 2}" text-anchor="middle" font-size="15" font-weight="800" fill="var(--plan-ink)" paint-order="stroke" stroke="var(--surface)" stroke-width="2.6">${z.ref}</text>
+                <text x="${z.cx}" y="${z.cy + 11}" text-anchor="middle" font-size="8.5" font-weight="600" fill="var(--plan-muted)" paint-order="stroke" stroke="var(--surface)" stroke-width="2">${u.hallazgos} hallazgos · ${u.avance}% avance</text>
+                <title>Depto ${z.ref} — ${E.STATE_LABELS[estado] || "No inspeccionado"} · ${u.avance}% avance · ${u.hallazgos} hallazgos</title>
+              </g>`;
+            })
+            .join("");
+          document.getElementById("planWrap").innerHTML = `<svg viewBox="${pp.viewBox}" preserveAspectRatio="xMidYMid meet">
+            <image href="${pp.image}" x="${pp.imgX || 0}" y="${pp.imgY || 0}" width="${pp.imgW}" height="${pp.imgH}" preserveAspectRatio="none"/>
+            ${zonesSvg}
+          </svg>`;
+          return;
+        }
+
+        // Respaldo: planta vectorial (cada depto como plano de unidad), coloreado por estado
+        const cw = 176, ch = 300, gap = 14, padX = 26, padTop = 28;
+        const corridorH = 34;
+        const W = padX * 2 + cw * units.length + gap * (units.length - 1);
+        const H = padTop + ch + corridorH + 28;
+
+        function apt(u, x, y, flip) {
+          const estado = E.estadoForUnitDisplay(u);
+          const color = E.STATE_COLORS[estado] || "#D1D5DB";
+          const label = E.STATE_LABELS[estado] || "No inspeccionado";
+          // Muros interiores (esquema de planta): cocina+estar a la izq, dormitorios a la der, baño y terraza
+          const wx = (fx) => (flip ? x + cw - (fx - x) : fx);
+          const w1 = wx(x + cw * 0.5);
+          const walls = `<g stroke="var(--border)" stroke-width="1.5" fill="none" stroke-linejoin="round">
+              <line x1="${w1}" y1="${y + 10}" x2="${w1}" y2="${y + ch * 0.72}"/>
+              <line x1="${flip ? w1 : x + 8}" y1="${y + ch * 0.30}" x2="${flip ? x + cw - 8 : w1}" y2="${y + ch * 0.30}"/>
+              <line x1="${flip ? x + 8 : w1}" y1="${y + ch * 0.48}" x2="${flip ? w1 : x + cw - 8}" y2="${y + ch * 0.48}"/>
+              <line x1="${x + 8}" y1="${y + ch * 0.72}" x2="${x + cw - 8}" y2="${y + ch * 0.72}"/>
+              <rect x="${flip ? x + cw * 0.16 : x + cw * 0.34}" y="${y + ch * 0.33}" width="${cw * 0.16}" height="${ch * 0.12}" rx="2"/>
+            </g>`;
+          const crit = u.criticas ? `<text x="${x + cw / 2}" y="${y + ch - 18}" text-anchor="middle" font-size="13" font-weight="700" fill="var(--red)">${u.criticas} crítica${u.criticas > 1 ? "s" : ""}</text>` : "";
+          return `<g class="plan-zone" data-ref="${u.ref}" onclick="window.__selUnit('${u.ref}')">
+              <rect x="${x}" y="${y}" width="${cw}" height="${ch}" rx="12" fill="var(--surface)" stroke="var(--border)" stroke-width="1.8"/>
+              ${walls}
+              <rect class="apt-fill" x="${x}" y="${y}" width="${cw}" height="${ch}" rx="12" fill="${color}" fill-opacity="0.24" stroke="${color}" stroke-width="3"/>
+              <circle cx="${x + 20}" cy="${y + 20}" r="7" fill="${color}" stroke="var(--surface)" stroke-width="1.5"/>
+              <text class="plan-label" x="${x + cw / 2}" y="${y + ch / 2 - 10}" text-anchor="middle" font-size="34" font-weight="800" fill="var(--plan-ink)">${u.ref}</text>
+              <text x="${x + cw / 2}" y="${y + ch / 2 + 16}" text-anchor="middle" font-size="14" font-weight="600" fill="var(--plan-muted)">${u.hallazgos} hallazgos · ${u.avance}% avance</text>
+              ${crit}
+              <title>Depto ${u.ref} — ${label} · ${u.avance}% avance · ${u.hallazgos} hallazgos</title>
+            </g>`;
+        }
+
+        let g = "";
+        units.forEach((u, i) => { g += apt(u, padX + i * (cw + gap), padTop, i % 2 === 1); });
+        const corridorY = padTop + ch + 6;
+        const corridorW = cw * units.length + gap * (units.length - 1);
+        g += `<rect x="${padX}" y="${corridorY}" width="${corridorW}" height="${corridorH}" rx="8" fill="var(--surface-2)" stroke="var(--border)"/>
+              <text x="${padX + corridorW / 2}" y="${corridorY + corridorH / 2 + 5}" text-anchor="middle" font-size="14" font-weight="700" letter-spacing="2" fill="var(--muted)">PASILLO · CIRCULACIÓN COMÚN</text>`;
+        document.getElementById("planWrap").innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${g}</svg>`;
+      }
+
+      window.__selUnit = selectUnit;
+      async function selectUnit(ref) {
+        document.querySelectorAll(".plan-zone").forEach((z) => z.classList.toggle("selected", z.getAttribute("data-ref") === ref));
+        const u = detail.units.find((x) => x.ref === ref);
+        const hallazgos = (u && u._hallazgos) ? u._hallazgos.slice() : [];
+        const totalHall = hallazgos.length || u.hallazgos;
+        const abiertos = u.abiertos != null ? u.abiertos : hallazgos.filter((h) => h.estado !== "cerrado").length;
+        const sp = document.getElementById("sidePanel");
+        sp.innerHTML = `
+          <div class="flex between"><div class="card-title" style="margin:0">Unidad ${ref}</div><span class="badge ${u.estado}">${E.STATE_LABELS[u.estado]}</span></div>
+          <div class="flex between mt"><div><div class="muted" style="font-size:12px">Avance cierre</div><div class="k-value">${u.avance}%</div></div>
+            <div style="text-align:right;font-size:12px"><div>Hallazgos <b>${totalHall}</b> · Abiertos <b>${abiertos}</b></div><div>Críticos <b class="crit">${u.criticas}</b></div></div></div>
+          <div class="bar mt"><i style="width:${u.avance}%"></i></div>
+          <a class="btn block" style="margin-top:12px" href="${E.withProject("/entrega/captura", project.id)}&u=${ref}&mode=verificacion">Verificar cierres en celular</a>
+          <div class="card-title mt" style="margin-bottom:8px">Hallazgos ${hallazgos.length ? "(" + hallazgos.length + ")" : ""}</div>
+          ${hallazgos.length ? hallazgos.map(hRow).join("") : `<p class="muted" style="font-size:12px">Detalle de hallazgos disponible en la vista de la unidad.</p>`}
+          <div class="flex gap mt">
+            <a class="btn block" href="${E.withProject("/entrega/unidad", project.id)}&u=${ref}">Ir a la unidad</a>
+            <a class="btn primary block" href="${E.withProject("/entrega/captura", project.id)}&u=${ref}">Capturar</a>
+          </div>`;
+      }
+
+      function hRow(h) {
+        return `<div class="panel-row" style="gap:10px">
+          <div style="flex:1"><div style="font-weight:700;font-size:12.5px">${h.descripcion}</div>
+          <div class="muted" style="font-size:11px">${h.kpi} · ${h.especialidad}</div>
+          <span class="badge ${h.severidad}" style="margin-top:4px">${h.severidad}</span></div>
+          <div style="text-align:right;font-size:10.5px;color:#9AA1B2">Apert. ${fmtDate(h.apertura)}</div></div>`;
+      }
+      } catch (err) {
+        console.error("[piso]", err);
+        content.innerHTML = `<div class="card pad-lg"><div class="card-title">Error al cargar el piso</div><p class="muted">${E && E.escapeHtml ? E.escapeHtml(String(err.message || err)) : String(err)}</p></div>`;
+      }
+    })();
+
+    function legendDot(color, label) { return `<span><i class="dot" style="background:${color}"></i>${label}</span>`; }
+    function fmtDate(d) { if (!d) return "—"; const x = new Date(d); return x.toLocaleDateString("es-CL", { day: "2-digit", month: "2-digit" }); }
+  </script>
+</body>
+</html>

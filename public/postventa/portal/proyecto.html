@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <script>(function(){try{var t=localStorage.getItem("postventa-portal-theme");document.documentElement.setAttribute("data-theme",t==="light"?"light":"dark");}catch(e){document.documentElement.setAttribute("data-theme","dark");}})();</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Proyecto · Ainspecciona Postventa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/postventa/portal/assets/portal.css?v=20260726-chart1" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="app" id="app">
+    <div id="sidebar"></div>
+    <div class="main">
+      <header class="topbar">
+        <div class="titles">
+          <h1 id="projectTitle">Proyecto</h1>
+          <div class="crumb" id="projectCrumb">Dashboard de solicitudes</div>
+        </div>
+        <div class="spacer"></div>
+        <div class="date-chip" id="dateChip"></div>
+      </header>
+      <div class="content" id="content"><div class="empty">Cargando…</div></div>
+    </div>
+  </div>
+
+  <script src="/postventa/portal/assets/portal-app.js?v=20260806-sep1"></script>
+  <script>
+    (async function () {
+      const P = window.PvPortal;
+      const me = await P.ensureAuth();
+      if (!me) return;
+
+      const slug = P.qs("slug", "");
+      if (!slug) {
+        location.replace(P.appHref("/postventa/portal"));
+        return;
+      }
+
+      document.getElementById("dateChip").textContent = P.dateChip();
+
+      function ticketRow(t) {
+        const sev = t.analysisSeverity
+          ? `<span class="pill ${P.severityPillClass(t.analysisSeverity)}">${P.escapeHtml(t.analysisSeverity)}</span>`
+          : `<span class="muted">—</span>`;
+        const urgent = t.urgent ? ` <span class="pill bad">urgente</span>` : "";
+        return `<tr>
+          <td><a href="${P.appHref("/postventa/portal/ticket?id=" + encodeURIComponent(t.shortId))}">${P.escapeHtml(t.shortId)}</a>${urgent}<div class="muted" style="font-size:11px;margin-top:2px;">${P.escapeHtml((t.createdAt || "").slice(0, 10))}</div></td>
+          <td><span class="pill ${P.statusPillClass(t.status)}">${P.escapeHtml(t.statusLabel)}</span></td>
+          <td>${P.escapeHtml(t.assignedToName || "—")}</td>
+          <td>${P.escapeHtml(t.categoryLabel || "—")}</td>
+          <td>${P.escapeHtml(t.unitLabel || "—")}<div class="muted" style="font-size:11px;">${P.escapeHtml(t.ownerName || "")}</div></td>
+          <td>${sev}</td>
+          <td class="mono">${P.fmt(t.ageDays)}</td>
+        </tr>`;
+      }
+
+      async function load() {
+        const content = document.getElementById("content");
+        P.destroyChartsIn(content);
+
+        const res = await P.portalFetch("/api/postventa/portal/projects/" + encodeURIComponent(slug));
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          document.getElementById("sidebar").innerHTML = P.renderSidebar("proyecto", null);
+          content.innerHTML = `<div class="empty">${P.escapeHtml(data.message || "Proyecto no encontrado.")}</div>`;
+          return;
+        }
+
+        const project = data.project;
+        const k = data.kpis || {};
+        const charts = data.charts || {};
+        const tickets = P.applyStatusOverrides(data.tickets || []);
+
+        document.getElementById("sidebar").innerHTML = P.renderSidebar("proyecto", project);
+        document.getElementById("projectTitle").textContent = project.name;
+        document.getElementById("projectCrumb").textContent =
+          [project.comuna, project.address].filter(Boolean).join(" · ") || "Proyecto";
+
+        const aging = k.aging || {};
+        const OPS_KEYS = ["recibido", "asignada", "programado", "en_ejecucion", "terminado"];
+        const OPS_LABELS = {
+          recibido: "Recibida",
+          asignada: "Asignada",
+          programado: "Programada",
+          en_ejecucion: "En ejecución",
+          terminado: "Terminada"
+        };
+        const byStatus = charts.byStatus || [];
+        const ops =
+          charts.opsPipeline && charts.opsPipeline.length
+            ? charts.opsPipeline
+            : OPS_KEYS.map((key) => {
+                const row = byStatus.find((x) => x.key === key);
+                return {
+                  key,
+                  label: (row && row.label) || OPS_LABELS[key] || key,
+                  count: (row && row.count) || 0
+                };
+              });
+
+        const openPct = P.pctOf(k.open, k.total);
+        const urgentPct = P.pctOf(k.urgentOpen, k.open || k.total);
+        const queuePct = P.pctOf(k.classified, k.open || k.total);
+        const agingPct = P.pctOf(aging.over30, k.open || k.total);
+        const ageGauge = Math.max(0, Math.min(100, Math.round(((Number(k.avgOpenDays) || 0) / 30) * 100)));
+
+        content.innerHTML = `
+          <div class="kpi-row">
+            <div class="kpi with-gauge">
+              <div class="kpi-text"><div class="k-label">Solicitudes</div><div class="k-value">${P.fmt(k.total)}</div><div class="k-sub">${P.fmt(k.open)} abiertas</div></div>
+              ${P.miniGauge(openPct, "#A5F3FC")}
+            </div>
+            <div class="kpi with-gauge">
+              <div class="kpi-text"><div class="k-label">% Resolución</div><div class="k-value">${P.fmt(k.resolutionPct)}%</div><div class="k-sub">${P.fmt(k.closed)} terminadas</div></div>
+              ${P.miniGauge(k.resolutionPct, "#FFFFFF")}
+            </div>
+            <div class="kpi with-gauge">
+              <div class="kpi-text"><div class="k-label">Tiempo medio abierto</div><div class="k-value">${P.fmt(k.avgOpenDays)}</div><div class="k-sub">días (ref. 30d)</div></div>
+              ${P.miniGauge(ageGauge, "#67E8F9")}
+            </div>
+            <div class="kpi with-gauge">
+              <div class="kpi-text"><div class="k-label">Urgentes</div><div class="k-value crit">${P.fmt(k.urgentOpen)}</div><div class="k-sub">${urgentPct}% del backlog</div></div>
+              ${P.miniGauge(urgentPct, "#FB7185")}
+            </div>
+            <div class="kpi with-gauge">
+              <div class="kpi-text"><div class="k-label">Cola revisión</div><div class="k-value">${P.fmt(k.classified)}</div><div class="k-sub">${queuePct}% del backlog</div></div>
+              ${P.miniGauge(queuePct, "#22D3EE")}
+            </div>
+            <div class="kpi with-gauge">
+              <div class="kpi-text"><div class="k-label">Aging &gt;30d</div><div class="k-value">${P.fmt(aging.over30 || 0)}</div><div class="k-sub">&lt;7: ${P.fmt(aging.under7 || 0)} · 7–30: ${P.fmt(aging.d7to30 || 0)}</div></div>
+              ${P.miniGauge(agingPct, "#06B6D4")}
+            </div>
+          </div>
+
+          <div class="panel" style="margin-bottom:16px;">
+            <h2>Inspector de la obra</h2>
+            <p class="muted" style="margin:0 0 12px;font-size:13px;line-height:1.45;">
+              Los tickets clasificados se asignan automáticamente a este inspector. Debe ser un usuario registrado del portal.
+            </p>
+            <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;">
+              <label style="flex:1;min-width:220px;">
+                <span class="muted" style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Inspector asignado</span>
+                <select id="inspectorSelect" class="input" style="width:100%;padding:10px 12px;border-radius:10px;background:var(--surface-2,#111);border:1px solid var(--border,#333);color:inherit;">
+                  <option value="">— Sin inspector —</option>
+                </select>
+              </label>
+              <button type="button" class="btn primary" id="saveInspectorBtn">Guardar</button>
+            </div>
+            <div id="inspectorMsg" class="muted" style="margin-top:10px;font-size:12px;"></div>
+          </div>
+
+          <div class="panel chart-panel" style="margin-bottom:16px;">
+            <h2>Pipeline operativo</h2>
+            <div class="pc-stats" style="border-top:0;padding-top:0;grid-template-columns:repeat(5,1fr);">
+              ${ops.map((s) => `
+                <div>
+                  <b>${P.fmt(s.count)}</b>
+                  <span>${P.escapeHtml(s.label)}</span>
+                </div>`).join("")}
+            </div>
+            <div class="chart-box" style="margin-top:12px;min-height:200px;"><canvas id="chartOps"></canvas></div>
+          </div>
+
+          <div class="charts-grid">
+            <div class="panel chart-panel"><h2>Ingreso / captura</h2><div class="chart-box"><canvas id="chartStatus"></canvas></div></div>
+            <div class="panel chart-panel"><h2>Por categoría</h2><div class="chart-box"><canvas id="chartCat"></canvas></div></div>
+            <div class="panel chart-panel"><h2>Aperturas vs cierres · 14d</h2><div class="chart-box"><canvas id="chartTimeline"></canvas></div></div>
+            <div class="panel chart-panel"><h2>Aging backlog por etapa</h2><div class="chart-box"><canvas id="chartAging"></canvas></div></div>
+          </div>
+
+          <div class="panel">
+            <h2>Solicitudes</h2>
+            <div class="table-wrap">
+              ${tickets.length ? `
+              <table class="data">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Estado</th>
+                    <th>Inspector</th>
+                    <th>Categoría</th>
+                    <th>Unidad</th>
+                    <th>Severidad</th>
+                    <th>Días</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${tickets.map(ticketRow).join("")}
+                </tbody>
+              </table>` : `<div class="empty">Sin solicitudes en este proyecto.</div>`}
+            </div>
+          </div>`;
+
+        const INTAKE_COLORS = {
+          draft: "#71717A",
+          pending_evidence: "#FB923C",
+          evidence_received: "#FDE047",
+          pending_ai_analysis: "#22D3EE",
+          classified: "#67E8F9",
+          in_review: "#F4F4F5",
+          routed: "#A78BFA",
+          rejected: "#FB7185"
+        };
+        // Preferir charts.intake del API; fallback a byStatus filtrado
+        const status =
+          Array.isArray(charts.intake) && charts.intake.length
+            ? charts.intake.filter((x) => Number(x.count) > 0)
+            : [
+                "draft",
+                "pending_evidence",
+                "evidence_received",
+                "pending_ai_analysis",
+                "classified",
+                "in_review",
+                "routed",
+                "rejected"
+              ]
+                .map((key) => byStatus.find((x) => x.key === key))
+                .filter(Boolean)
+                .filter((x) => Number(x.count) > 0);
+        const intakeTotal = status.reduce((sum, x) => sum + (Number(x.count) || 0), 0);
+        const cats = charts.byCategory || [];
+        const agingByOps = charts.agingByOps || [
+          { key: "recibido", label: "Recibida", under7: 0, d7to30: 0, over30: 0 },
+          { key: "asignada", label: "Asignada", under7: 0, d7to30: 0, over30: 0 },
+          { key: "programado", label: "Programada", under7: 0, d7to30: 0, over30: 0 },
+          { key: "en_ejecucion", label: "En ejecución", under7: 0, d7to30: 0, over30: 0 },
+          { key: "terminado", label: "Terminada", under7: 0, d7to30: 0, over30: 0 }
+        ];
+        const timeline = charts.timeline || [];
+        const opsColors = ["#22D3EE", "#A78BFA", "#A5F3FC", "#67E8F9", "#FFFFFF"];
+
+        P.barChart(
+          document.getElementById("chartOps"),
+          ops.map((x) => x.label),
+          ops.map((x) => x.count),
+          opsColors
+        );
+
+        // Mantenedor: inspector de la obra
+        (async function bindInspector() {
+          const sel = document.getElementById("inspectorSelect");
+          const btn = document.getElementById("saveInspectorBtn");
+          const msg = document.getElementById("inspectorMsg");
+          if (!sel || !btn) return;
+          try {
+            const ur = await P.portalFetch("/api/postventa/portal/users");
+            const uj = await ur.json();
+            const users = (uj && uj.users) || [];
+            const currentId = project.defaultInspectorId || "";
+            sel.innerHTML =
+              `<option value="">— Sin inspector —</option>` +
+              users
+                .map(
+                  (u) =>
+                    `<option value="${P.escapeHtml(u.id)}"${u.id === currentId ? " selected" : ""}>${P.escapeHtml(u.fullName)} (${P.escapeHtml(u.email)})</option>`
+                )
+                .join("");
+            if (currentId && !users.some((u) => u.id === currentId) && project.defaultInspector) {
+              const di = project.defaultInspector;
+              sel.insertAdjacentHTML(
+                "beforeend",
+                `<option value="${P.escapeHtml(di.id)}" selected>${P.escapeHtml(di.fullName)} (inactivo?)</option>`
+              );
+            }
+          } catch (e) {
+            if (msg) msg.textContent = "No se pudieron cargar usuarios.";
+          }
+          btn.onclick = async () => {
+            btn.disabled = true;
+            if (msg) {
+              msg.textContent = "Guardando…";
+              msg.style.color = "";
+            }
+            try {
+              const res = await P.portalFetch(
+                "/api/postventa/portal/projects/" + encodeURIComponent(slug) + "/inspector",
+                {
+                  method: "PATCH",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ inspectorUserId: sel.value || null })
+                }
+              );
+              const data = await res.json();
+              if (!res.ok || !data.ok) throw new Error((data && data.message) || "No se pudo guardar");
+              if (msg) {
+                const extra =
+                  typeof data.backfilled === "number" && data.backfilled > 0
+                    ? ` · ${data.backfilled} ticket(s) asignado(s)`
+                    : "";
+                msg.textContent = data.project?.defaultInspector
+                  ? "Inspector guardado: " + data.project.defaultInspector.fullName + extra
+                  : "Obra sin inspector (los tickets quedarán en Recibida).";
+                msg.style.color = "#22C55E";
+              }
+            } catch (err) {
+              if (msg) {
+                msg.textContent = err.message || "Error al guardar";
+                msg.style.color = "#FB7185";
+              }
+            } finally {
+              btn.disabled = false;
+            }
+          };
+        })();
+
+        const statusEl = document.getElementById("chartStatus");
+        if (status.length && statusEl) {
+          P.donutChart(
+            statusEl,
+            status.map((x) => x.label + " (" + P.fmt(x.count) + ")"),
+            status.map((x) => x.count),
+            status.map((x) => INTAKE_COLORS[x.key] || "#22D3EE")
+          );
+          const panel = statusEl.closest(".chart-panel");
+          if (panel) {
+            const note = document.createElement("div");
+            note.className = "chart-note";
+            note.textContent =
+              P.fmt(intakeTotal) + " en ingreso/captura · " + P.fmt(k.total) + " totales del proyecto";
+            const box = panel.querySelector(".chart-box");
+            if (box) panel.insertBefore(note, box);
+            else panel.appendChild(note);
+          }
+        } else if (statusEl && statusEl.parentElement) {
+          statusEl.parentElement.innerHTML = `<div class="chart-empty">Sin solicitudes en ingreso/captura</div>`;
+        }
+        if (cats.length) {
+          P.barChart(
+            document.getElementById("chartCat"),
+            cats.map((x) => x.label),
+            cats.map((x) => x.count),
+            "#22D3EE"
+          );
+        }
+        if (timeline.length) {
+          P.lineChart(
+            document.getElementById("chartTimeline"),
+            timeline.map((x) => x.date.slice(5)),
+            timeline.map((x) => x.opened),
+            timeline.map((x) => x.closed)
+          );
+        }
+        P.stackedBarChart(
+          document.getElementById("chartAging"),
+          agingByOps.map((x) => x.label),
+          [
+            { label: "< 7 días", data: agingByOps.map((x) => x.under7 || 0), color: "#FFFFFF" },
+            { label: "7–30 días", data: agingByOps.map((x) => x.d7to30 || 0), color: "#67E8F9" },
+            { label: "> 30 días", data: agingByOps.map((x) => x.over30 || 0), color: "#22D3EE" }
+          ]
+        );
+      }
+
+      await P.bindLiveReload(load)();
+    })();
+  </script>
+</body>
+</html>

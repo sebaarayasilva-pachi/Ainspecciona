@@ -1,0 +1,18 @@
+{
+  "name": "Ainspecciona Ejecutivo",
+  "short_name": "Ainspecciona",
+  "description": "Inspecciones asignadas — ejecutivos",
+  "start_url": "/executive",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0b121b",
+  "theme_color": "#0b121b",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

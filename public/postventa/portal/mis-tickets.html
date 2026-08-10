@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <script>(function(){try{var t=localStorage.getItem("postventa-portal-theme");document.documentElement.setAttribute("data-theme",t==="light"?"light":"dark");}catch(e){document.documentElement.setAttribute("data-theme","dark");}})();</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mis tickets · Ainspecciona Postventa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/postventa/portal/assets/portal.css?v=20260728-ot1" />
+</head>
+<body>
+  <div class="app" id="app">
+    <div id="sidebar"></div>
+    <div class="main">
+      <header class="topbar">
+        <div class="titles">
+          <h1>Mis tickets</h1>
+          <div class="crumb" id="crumb">Cola del inspector</div>
+        </div>
+        <div class="spacer"></div>
+        <div class="date-chip" id="dateChip"></div>
+      </header>
+      <div class="content" id="content"><div class="empty">Cargando…</div></div>
+    </div>
+  </div>
+
+  <script src="/postventa/portal/assets/portal-app.js?v=20260806-sep1"></script>
+  <script>
+    (async function () {
+      const P = window.PvPortal;
+      const me = await P.ensureAuth();
+      if (!me) return;
+
+      document.getElementById("sidebar").innerHTML = P.renderSidebar("mis", null);
+      document.getElementById("dateChip").textContent = P.dateChip();
+      document.getElementById("crumb").textContent =
+        (me.user && me.user.fullName ? me.user.fullName + " · " : "") + "Asignados a ti";
+
+      function fmtSchedule(iso) {
+        if (!iso) return "—";
+        const d = new Date(iso);
+        if (!Number.isFinite(d.getTime())) return "—";
+        return d.toLocaleString("es-CL", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit"
+        });
+      }
+
+      function ticketRow(t) {
+        const urgent = t.urgent ? ` <span class="pill bad">urgente</span>` : "";
+        return `<tr>
+          <td><a href="${P.appHref("/postventa/portal/ticket?id=" + encodeURIComponent(t.shortId))}">${P.escapeHtml(t.shortId)}</a>${urgent}<div class="muted" style="font-size:11px;margin-top:2px;">${P.escapeHtml((t.createdAt || "").slice(0, 10))}</div></td>
+          <td><span class="pill ${P.statusPillClass(t.status)}">${P.escapeHtml(t.statusLabel)}</span></td>
+          <td>${P.escapeHtml(t.projectName || "—")}<div class="muted" style="font-size:11px;">${P.escapeHtml(t.unitLabel || "")}</div></td>
+          <td>${P.escapeHtml(t.categoryLabel || "—")}</td>
+          <td class="mono">${P.escapeHtml(fmtSchedule(t.scheduledAt))}</td>
+          <td class="mono">${P.fmt(t.ageDays)}</td>
+        </tr>`;
+      }
+
+      async function load() {
+        const content = document.getElementById("content");
+        const res = await P.portalFetch("/api/postventa/portal/my-tickets");
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          content.innerHTML = `<div class="empty">${P.escapeHtml(data.message || "No se pudo cargar la cola.")}</div>`;
+          return;
+        }
+
+        const k = data.kpis || {};
+        const tickets = P.applyStatusOverrides(data.tickets || []);
+
+        content.innerHTML = `
+          <div class="kpi-row">
+            <div class="kpi"><div class="k-label">Asignados</div><div class="k-value">${P.fmt(k.total)}</div><div class="k-sub">${P.fmt(k.open)} abiertos</div></div>
+            <div class="kpi"><div class="k-label">Asignada</div><div class="k-value">${P.fmt(k.asignada)}</div><div class="k-sub">por programar</div></div>
+            <div class="kpi"><div class="k-label">Programada</div><div class="k-value">${P.fmt(k.programado)}</div><div class="k-sub">con fecha</div></div>
+            <div class="kpi"><div class="k-label">En ejecución</div><div class="k-value">${P.fmt(k.en_ejecucion)}</div><div class="k-sub">en terreno</div></div>
+            <div class="kpi"><div class="k-label">Urgentes</div><div class="k-value crit">${P.fmt(k.urgentOpen)}</div><div class="k-sub">abiertos</div></div>
+          </div>
+          <div class="panel">
+            <h2>Cola</h2>
+            <p class="muted" style="margin:0 0 12px;font-size:13px;">
+              En terreno usa la app móvil:
+              <a href="/postventa/inspector" style="color:inherit;font-weight:700;">/postventa/inspector</a>
+            </p>
+            <div class="table-wrap">
+              ${tickets.length ? `
+              <table class="data">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Estado</th>
+                    <th>Proyecto / unidad</th>
+                    <th>Categoría</th>
+                    <th>Programada</th>
+                    <th>Días</th>
+                  </tr>
+                </thead>
+                <tbody>${tickets.map(ticketRow).join("")}</tbody>
+              </table>` : `<div class="empty">No tienes tickets asignados. Configura el inspector en el proyecto para recibir casos.</div>`}
+            </div>
+          </div>`;
+      }
+
+      await load();
+    })();
+  </script>
+</body>
+</html>

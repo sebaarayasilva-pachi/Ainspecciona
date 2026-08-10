@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Ainspecciona – Informe</title>
+  <meta name="ainspecciona-report-scoring" content="v3-admin-sync" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <style>
@@ -18,16 +19,23 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      max-width: 1143px;
+      width: 100%;
+      max-width: 100%;
       margin: 0 auto;
-      padding: 16px 24px;
+      padding: 12px 12px;
       display: flex;
-      gap: 12px;
+      gap: 8px;
       align-items: center;
-      justify-content: flex-end;
       flex-wrap: wrap;
       background: #0B1220;
       border-bottom: 1px solid #1e293b;
+    }
+    @media (min-width: 768px) {
+      .toolbar {
+        padding: 16px 24px;
+        gap: 12px;
+        max-width: 1143px;
+      }
     }
     .toolbtn {
       padding: 10px 14px;
@@ -38,6 +46,12 @@
       font-weight: 700;
       font-size: 13px;
       cursor: pointer;
+      min-height: 44px;
+    }
+    @media (min-width: 480px) {
+      .toolbtn {
+        min-height: unset;
+      }
     }
     .toolbtn:disabled {
       opacity: 0.7;
@@ -47,13 +61,73 @@
       font-size: 12px;
       color: #94a3b8;
     }
+    .toolbar__right {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-left: auto;
+    }
+    .report-admin-toolbar {
+      display: none;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .report-admin-toolbar.is-visible { display: flex; }
+    .report-admin-toolbar__label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #35d07f;
+      white-space: nowrap;
+    }
+    .toolbtn--accent {
+      border-color: #35d07f;
+      background: rgba(53, 208, 127, 0.12);
+    }
+    .toolbtn--outline {
+      background: transparent;
+    }
+    .report-reanalyze-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #35d07f;
+      cursor: pointer;
+      font-family: Inter, sans-serif;
+      user-select: none;
+    }
+    .report-reanalyze-label input {
+      width: 16px;
+      height: 16px;
+      accent-color: #35d07f;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .report-reanalyze-label.is-disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+    .report-reanalyze-label.is-disabled input { cursor: not-allowed; }
     .canvas {
       width: 100%;
-      overflow-x: auto;
-      padding: 24px 0 40px;
+      max-width: 100%;
+      overflow-x: hidden;
+      padding: 12px 8px 32px;
+      box-sizing: border-box;
     }
-    svg {
+    @media (min-width: 768px) {
+      .canvas {
+        padding: 24px 16px 40px;
+      }
+    }
+    #reportSvg {
       display: block;
+      width: 100%;
+      max-width: 1143px;
+      height: auto;
       margin: 0 auto;
       background: #0B1220;
     }
@@ -61,16 +135,22 @@
 </head>
 <body>
   <div class="toolbar">
-    <button id="reanalyzeBtn" class="toolbtn" type="button">Reanalizar con IA</button>
-    <button id="generateSummaryBtn" class="toolbtn" type="button">Generar resumen ejecutivo</button>
-    <button id="downloadPdfBtn" class="toolbtn" type="button">Descargar PDF</button>
-    <button id="approveBtn" class="toolbtn" type="button" style="display:none;background:linear-gradient(135deg,#059669,#10b981);border-color:#059669;">Aprobar informe</button>
-    <div id="reviewBadge" class="toolnote" style="display:none;"></div>
-    <div id="reanalyzeNote" class="toolnote"></div>
-    <div id="loadError" class="toolnote" style="color:#dc2626;font-weight:600;display:none;"></div>
+    <div id="reportAdminToolbar" class="report-admin-toolbar">
+      <span class="report-admin-toolbar__label">Corrección IA</span>
+      <button type="button" id="reanalyzeMarkPhotos" class="toolbtn toolbtn--outline">Marcar con foto</button>
+      <button type="button" id="reanalyzeClearAll" class="toolbtn toolbtn--outline">Quitar selección</button>
+      <button type="button" id="reanalyzeRun" class="toolbtn toolbtn--accent">Reanalizar seleccionados</button>
+      <button type="button" id="regenExecSummary" class="toolbtn toolbtn--outline">Regenerar resumen</button>
+      <span id="reanalyzeStatus" class="toolnote"></span>
+    </div>
+    <div class="toolbar__right">
+      <button id="downloadPdfBtn" class="toolbtn" type="button">Descargar PDF</button>
+      <div id="reviewBadge" class="toolnote" style="display:none;"></div>
+      <div id="loadError" class="toolnote" style="color:#dc2626;font-weight:600;display:none;"></div>
+    </div>
   </div>
   <div class="canvas">
-    <svg id="reportSvg" width="1143" height="2780" viewBox="0 0 1143 2780" xmlns="http://www.w3.org/2000/svg">
+    <svg id="reportSvg" viewBox="0 0 1143 2780" preserveAspectRatio="xMidYMin meet" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
           <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#000" flood-opacity="0.4"/>
@@ -107,7 +187,8 @@
         <rect x="28" y="0" width="1087" height="140" fill="url(#headerGrad)"/>
         <rect x="28" y="0" width="1087" height="4" fill="url(#headerAccent)" opacity="0.9"/>
         <rect x="28" y="136" width="1087" height="4" fill="url(#headerAccent)" opacity="0.15"/>
-        <image href="/assets/Logo 2 ainspecciona.png" x="28" y="-16" width="238" height="172" preserveAspectRatio="xMidYMid meet"/>
+        <image id="brandLogoTenant" href="" x="40" y="18" width="160" height="104" preserveAspectRatio="xMidYMid meet" opacity="0"/>
+        <image id="brandLogoAinspecciona" href="/assets/Logo 2 ainspecciona.png" x="28" y="-16" width="238" height="172" preserveAspectRatio="xMidYMid meet"/>
         <text x="571" y="58" font-size="24" fill="#F8FAFC" font-weight="800" text-anchor="middle" font-family="Inter,sans-serif">Informe Técnico del Inmueble</text>
         <text x="571" y="82" font-size="13" fill="#94a3b8" text-anchor="middle" font-family="Inter,sans-serif">Evaluación automatizada basada en evidencia fotográfica</text>
         <rect x="980" y="36" width="120" height="32" rx="16" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.2)"/>
@@ -139,13 +220,15 @@
 
       <text x="80" y="368" font-size="12" fill="#64748b">Basado exclusivamente en evidencia fotográfica disponible.</text>
 
-      <rect x="640" y="174" width="372" height="220" rx="14" fill="#334155" stroke="#475569"/>
+      <rect x="640" y="174" width="372" height="228" rx="14" fill="#334155" stroke="#475569"/>
       <text x="826" y="208" font-size="18" fill="#F8FAFC" font-weight="700" text-anchor="middle">Score Técnico del Inmueble (STI)</text>
       <path id="stiBaseArc" d="M756 318 A70 70 0 0 1 896 318" stroke="#475569" stroke-width="14" fill="none" stroke-linecap="round"/>
       <path id="stiArc" d="M756 318 A70 70 0 0 1 896 318" stroke="#E0B300" stroke-width="14" fill="none" stroke-linecap="round"/>
-      <text id="stiScore" x="826" y="322" font-size="18" fill="#F8FAFC" font-weight="700" text-anchor="middle">—</text>
-      <rect x="756" y="338" width="140" height="36" rx="8" fill="#1e293b" stroke="#475569"/>
-      <text id="stiLabel" x="826" y="362" font-size="14" fill="#F8FAFC" font-weight="700" text-anchor="middle">—</text>
+      <text id="stiScore" x="826" y="316" font-size="18" fill="#F8FAFC" font-weight="700" text-anchor="middle">—</text>
+      <g id="stiStars"></g>
+      <rect x="756" y="348" width="140" height="36" rx="8" fill="#1e293b" stroke="#475569"/>
+      <text id="stiLabel" x="826" y="372" font-size="14" fill="#F8FAFC" font-weight="700" text-anchor="middle">—</text>
+      <text x="826" y="392" font-size="11" fill="#94a3b8" font-weight="600" text-anchor="middle">Estado</text>
 
       <rect x="52" y="452" width="1040" height="250" rx="14" fill="#334155" filter="url(#shadowSmall)"/>
       <text x="80" y="478" font-size="14" fill="#F8FAFC" font-weight="700">KPIs técnicos clave (resumen)</text>
@@ -157,7 +240,7 @@
         <foreignObject id="execSummaryContent" x="80" y="764" width="984" height="150">
           <div xmlns="http://www.w3.org/1999/xhtml" id="execSummaryWrap" style="display:flex;flex-direction:column;min-height:120px;width:100%;">
             <div id="execSummaryText" style="font-size:12px;color:#94a3b8;line-height:1.6;font-family:Inter,sans-serif;white-space:normal;flex:1 1 auto;">
-              <span id="execSummaryPlaceholder" style="color:#64748b;">Cargando…</span>
+              <span id="execSummaryPlaceholder" style="color:#64748b;">Cargando informe (puede tardar unos segundos si se genera el resumen ejecutivo)…</span>
             </div>
           </div>
         </foreignObject>
@@ -257,18 +340,24 @@
       return { text: "OK", fill: "#86EFAC", bg: "#14532D", stroke: "#166534" };
     }
 
-    function starsFromScore(score) {
+    function starsFromScore(score, cfg) {
+      const yellowFrom = cfg?.badge?.yellowFrom ?? DEFAULT_SCORE_CONFIG.badge.yellowFrom;
+      const greenFrom = cfg?.badge?.greenFrom ?? DEFAULT_SCORE_CONFIG.badge.greenFrom;
       const n = clampScore(score);
-      if (n >= 90) return 5;
-      if (n >= 75) return 4;
-      if (n >= 60) return 3;
-      if (n >= 40) return 2;
+      if (n >= greenFrom) {
+        const topTier = greenFrom + Math.max(1, Math.round((100 - greenFrom) * 0.33));
+        return n >= topTier ? 5 : 4;
+      }
+      if (n >= yellowFrom) {
+        const midYellow = yellowFrom + Math.round((greenFrom - yellowFrom) * 0.5);
+        return n >= midYellow ? 3 : 2;
+      }
       return 1;
     }
 
     const STAR_PATH = "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z";
-    function renderStarIcons(parent, score, cx, starY) {
-      const filled = starsFromScore(score);
+    function renderStarIcons(parent, score, cx, starY, cfg) {
+      const filled = starsFromScore(score, cfg);
       const starSize = 14;
       const gap = 4;
       const totalW = 5 * starSize + 4 * gap;
@@ -357,6 +446,149 @@
       const el = document.createElementNS(svgNS, tag);
       Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
       return el;
+    }
+
+    let reportAdminMode = false;
+    const reportReanalyzeSelected = new Set();
+    let reportReanalyzeDefaultsApplied = false;
+    let lastSummarySlots = [];
+
+    let reportAdminVerified = null;
+
+    function getAdminHeaders() {
+      const u = localStorage.getItem("ainspectaAdminUser");
+      const p = localStorage.getItem("ainspectaAdminPass");
+      if (!u || !p) return null;
+      return { "x-admin-user": u, "x-admin-pass": p };
+    }
+
+    /**
+     * Modo corrección: solo si se entra explícitamente con ?corr=1 (botón
+     * "Corregir en informe" del panel admin) Y las credenciales de admin
+     * guardadas son válidas en el servidor. En la vista normal del informe
+     * (tenant/público) nunca se muestra la barra, aunque seas admin.
+     */
+    async function isReportAdminMode() {
+      if (reportAdminVerified != null) return reportAdminVerified;
+      const params = new URLSearchParams(window.location.search);
+      const corrRequested = params.get("corr") === "1" || params.get("admin") === "1";
+      if (!corrRequested) { reportAdminVerified = false; return false; }
+      const headers = getAdminHeaders();
+      if (!headers) { reportAdminVerified = false; return false; }
+      try {
+        const res = await fetch("/api/admin/score-config", { headers });
+        reportAdminVerified = res.ok;
+      } catch (e) {
+        reportAdminVerified = false;
+      }
+      return reportAdminVerified;
+    }
+
+    function slotHasPhoto(s) {
+      return !!(s?.photoId || s?.photoUrl);
+    }
+
+    function getSlotCode(s) {
+      return String(s?.slotCode || "").trim();
+    }
+
+    function showReportAdminToolbar() {
+      const bar = document.getElementById("reportAdminToolbar");
+      if (bar) bar.classList.add("is-visible");
+    }
+
+    function appendSlotReanalyzeCheckbox(container, x, y, slotCode, hasPhoto) {
+      if (!slotCode) return;
+      const fo = createSvg("foreignObject", { x: String(x), y: String(y), width: "128", height: "26" });
+      const div = document.createElement("div");
+      div.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
+      const checked = reportReanalyzeSelected.has(slotCode);
+      const label = document.createElement("label");
+      label.className = "report-reanalyze-label" + (hasPhoto ? "" : " is-disabled");
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.setAttribute("data-slot-code", slotCode);
+      if (!hasPhoto) input.disabled = true;
+      else {
+        input.checked = checked;
+        input.addEventListener("change", () => {
+          if (input.checked) reportReanalyzeSelected.add(slotCode);
+          else reportReanalyzeSelected.delete(slotCode);
+        });
+      }
+      const span = document.createElement("span");
+      span.textContent = "Reanalizar";
+      label.appendChild(input);
+      label.appendChild(span);
+      div.appendChild(label);
+      fo.appendChild(div);
+      container.appendChild(fo);
+    }
+
+    function refreshReportSlotCheckboxes() {
+      if (lastKpiGroups.length && lastScoreConfig) renderKpiSections(lastKpiGroups, lastScoreConfig);
+    }
+
+    async function runReportReanalyze() {
+      const caseId = getCaseIdFromPath();
+      const btn = document.getElementById("reanalyzeRun");
+      const statusEl = document.getElementById("reanalyzeStatus");
+      const selected = Array.from(reportReanalyzeSelected);
+      if (!caseId) return;
+      if (!selected.length) {
+        if (statusEl) {
+          statusEl.textContent = "Marca al menos un slot con foto.";
+          statusEl.style.color = "#f87171";
+        }
+        return;
+      }
+      const prev = btn ? btn.textContent : "";
+      if (btn) { btn.disabled = true; btn.textContent = "Iniciando…"; }
+      if (statusEl) { statusEl.textContent = ""; statusEl.style.color = "#94a3b8"; }
+      const slotsParam = "&slots=" + encodeURIComponent(selected.join(","));
+      try {
+        const res = await fetch(`/api/cases/${encodeURIComponent(caseId)}/reanalyze?force=1${slotsParam}`, { method: "POST", headers: getAdminHeaders() || {} });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data?.ok) {
+          throw new Error(data?.error || data?.message || "No se pudo iniciar el reanálisis");
+        }
+        const total = data.queued || 0;
+        if (total === 0) throw new Error("No hay fotos para reanalizar en los slots seleccionados");
+        if (btn) btn.textContent = `0/${total}…`;
+        await new Promise((resolve) => {
+          const intervalId = setInterval(async () => {
+            try {
+              const res2 = await fetch(`/api/cases/${encodeURIComponent(caseId)}/reanalyze-status`);
+              const st = await res2.json().catch(() => ({}));
+              if (!st.active || st.done) {
+                clearInterval(intervalId);
+                if (btn) { btn.disabled = false; btn.textContent = prev; }
+                const errCount = st.errors || 0;
+                if (statusEl) {
+                  statusEl.textContent = errCount > 0
+                    ? `Listo con ${errCount} error(es). Actualizando informe…`
+                    : `Reanálisis completado (${total} slot${total === 1 ? "" : "s"}). Actualizando…`;
+                  statusEl.style.color = errCount > 0 ? "#fbbf24" : "#35d07f";
+                }
+                executiveSummaryAutoTriggered = false;
+                await load();
+                if (reportAdminMode) {
+                  await generateExecutiveSummary({ auto: true, force: true });
+                }
+                resolve();
+              } else if (btn) {
+                btn.textContent = `${st.completed || 0}/${st.total || total}…`;
+              }
+            } catch (e) {}
+          }, 2000);
+        });
+      } catch (e) {
+        if (statusEl) {
+          statusEl.textContent = e?.message || String(e);
+          statusEl.style.color = "#f87171";
+        }
+        if (btn) { btn.disabled = false; btn.textContent = prev; }
+      }
     }
 
     function adjustExecutiveSummaryLayout() {
@@ -473,21 +705,21 @@
           const sev = isOmitted
             ? { text: "OMITIDA", fill: "#FDE68A", bg: "#78350F", stroke: "#92400E" }
             : severityLabel(s.severity);
-          const kpiCfg = scoreConfig?.kpis?.[g.key] || DEFAULT_SCORE_CONFIG.kpis[g.key] || {};
-          const sevKey = String(s.severity || "").toLowerCase();
-          const slotPenalty = Number(
-            s?.scorePenaltyApplied
-            ?? ((sevKey === "high")
-              ? Number(kpiCfg.high ?? 0)
-              : (sevKey === "medium")
-                ? Number(kpiCfg.medium ?? 0)
-                : (sevKey === "low")
-                  ? Number(kpiCfg.low ?? 0)
-                  : 0)
-          );
+          const slotPenalty = isOmitted ? 0 : (() => {
+            const fromApi = Number(s.scorePenaltyApplied);
+            if (Number.isFinite(fromApi) && fromApi >= 0) return fromApi;
+            return slotPenaltyFromSlot(s, g.key, scoreConfig);
+          })();
           const slotScore = isOmitted ? null : Math.max(0, 100 - slotPenalty);
           const sourceLabel = String(s.source || "").toUpperCase() === "OPENAI" ? "OpenAI" : "V1";
           const code = s.findingCode || s.slotCode || "";
+          const humanizeFindingCodeForTag = (c) => {
+            const u = String(c || "").toUpperCase();
+            if (u === "SEAL_FAILURE") return "Sellos / condensación";
+            if (u === "FLOOR_MOISTURE_JOINT_DAMAGE") return "Juntas / humedad en piso";
+            if (u === "COSMETIC_WEAR") return "Desgaste superficial";
+            return String(c || "");
+          };
           let evidenceUrl = s.photoId ? `/api/photos/${s.photoId}` : (s.photoUrl || null);
           if (evidenceUrl && !evidenceUrl.startsWith('/') && evidenceUrl.startsWith('https://storage.googleapis.com/')) {
             evidenceUrl = '/api/photo-proxy?url=' + encodeURIComponent(evidenceUrl);
@@ -585,7 +817,7 @@
           const headerText = `${s.groupTitle || "Área"} · ${s.title || s.slotCode || ""}`;
           const subHeaderText = isOmitted
             ? `${kpiTitle} · FOTO_OMITIDA`
-            : (code && String(code).toUpperCase() !== 'OK' && !isQualityIssueCode(code) ? `${kpiTitle} · ${code}` : kpiTitle);
+            : (code && String(code).toUpperCase() !== 'OK' && !isQualityIssueCode(code) ? `${kpiTitle} · ${humanizeFindingCodeForTag(code)}` : kpiTitle);
           const rightRailX = 72 + 1000 - 100;
           const rightRailCx = rightRailX + 42;
 
@@ -594,6 +826,12 @@
           const slotBorder = createSvg("rect", { x: 72, y: slotY, width: 1000, height: slotMinH, rx: 12, fill: "none", stroke: "#334155" });
           container.appendChild(slotCard);
           container.appendChild(slotBorder);
+
+          if (reportAdminMode) {
+            const slotCode = getSlotCode(s);
+            const hasPhoto = !!evidenceUrl && !isOmitted;
+            appendSlotReanalyzeCheckbox(container, 84, slotY + 10, slotCode, hasPhoto);
+          }
 
           // Thumbnail
           container.appendChild(createSvg("rect", { x: 92, y: slotY + 28, width: 80, height: 80, rx: 12, fill: "#475569", stroke: "#64748b" }));
@@ -642,7 +880,9 @@
             });
             contentY += descLines.length * 16;
             if (!hasOpenAiDescription) {
-              container.appendChild(createSvg("text", { x: 196, y: contentY + 4, fill: "#64748b", "font-size": 11, "font-style": "italic" })).textContent = "Análisis por IA no disponible para este slot. Use «Reanalizar con IA» para generar descripción.";
+              container.appendChild(createSvg("text", { x: 196, y: contentY + 4, fill: "#64748b", "font-size": 11, "font-style": "italic" })).textContent = reportAdminMode
+                ? "Análisis por IA no disponible para este slot. Marca «Reanalizar» arriba a la izquierda del slot."
+                : "Análisis por IA no disponible para este slot.";
               contentY += 18;
             }
             contentY += 12;
@@ -669,10 +909,17 @@
               .trim();
             return out;
           };
+          const parsedAi = s.analysisDebug?.openai?.parsed;
+          const isSlotMismatchNoPenalty =
+            parsedAi && parsedAi.matches_slot === false && !s.severity;
           const isOkState = isOmitted || String(s.findingCode || "").toUpperCase() === "OK" || !s.severity;
-          const hallazgoMain = isOkState
-            ? "Conclusión: no se observan hallazgos relevantes en esta evidencia."
-            : cleanConclusionStyle(removeRetakePhrases(kpiAnalysis || s.message || desc || "Sin observaciones."));
+          const hallazgoMain = isOmitted
+            ? ""
+            : isSlotMismatchNoPenalty
+              ? cleanConclusionStyle(removeRetakePhrases(s.message || kpiAnalysis || desc || "Sin observaciones."))
+              : isOkState
+                ? "Conclusión: no se observan hallazgos relevantes en esta evidencia."
+                : cleanConclusionStyle(removeRetakePhrases(kpiAnalysis || s.message || desc || "Sin observaciones."));
           const rawFindings = Array.isArray(signals) && signals.length > 0
             ? signals.slice(0, 5).map((sig) => String(sig).trim()).filter(Boolean)
             : [];
@@ -687,7 +934,7 @@
               .replace(/\bsello_silicona_deteriorado\b/gi, "sello de silicona deteriorado");
             out = out.replace(/^[A-Z][A-Z0-9_]*\s*[-–:]\s*/, "").trim();
             out = out.replace(/\s+[A-Z][A-Z0-9_]*\s*[-–:]\s*/g, " ");
-            out = out.replace(/\b(?:COSMETIC_WEAR|POSSIBLE_HUMIDITY_STAIN|ACTIVE_LEAK_SUSPECTED|SEAL_FAILURE|HUMIDITY_SIGNS|WATER_STAIN_PATTERN|POSSIBLE_PIPE_LEAK|PIPE_CORROSION|ELECTRICAL_EXPOSED_WIRING|ELECTRICAL_OVERHEAT_MARKS|ELECTRICAL_PANEL_RISK|STRUCTURAL_CRACK_SUSPECTED|MATERIAL_DETACHMENT|MOLD_SUSPECTED|MOLD_POSSIBLE|LIVING_WALLS|LIVING_CEILING|LIVING_FLOOR|BEDROOM_\d+_\w+|BATHROOM_\d+_\w+|KITCHEN_\w+)\b/gi, "");
+            out = out.replace(/\b(?:COSMETIC_WEAR|FLOOR_MOISTURE_JOINT_DAMAGE|POSSIBLE_HUMIDITY_STAIN|ACTIVE_LEAK_SUSPECTED|SEAL_FAILURE|HUMIDITY_SIGNS|WATER_STAIN_PATTERN|POSSIBLE_PIPE_LEAK|PIPE_CORROSION|ELECTRICAL_EXPOSED_WIRING|ELECTRICAL_OVERHEAT_MARKS|ELECTRICAL_PANEL_RISK|STRUCTURAL_CRACK_SUSPECTED|MATERIAL_DETACHMENT|MOLD_SUSPECTED|MOLD_POSSIBLE|LIVING_WALLS|LIVING_CEILING|LIVING_FLOOR|BEDROOM_\d+_\w+|BATHROOM_\d+_\w+|KITCHEN_\w+)\b/gi, "");
             out = out.replace(/\bde\s+en\b/gi, "en").replace(/\bde\s+la\b/gi, "la").replace(/\s+/g, " ").trim();
             return out || "Sin observaciones.";
           };
@@ -721,7 +968,7 @@
           contentY += fiLine * 15 + 14;
 
           // Criterios evaluados (tags - pills con texto completo). Excluir IMAGE_QUALITY_ISSUE.
-          const tags = [kpiTitle, code && String(code).toUpperCase() !== "OK" && !isQualityIssueCode(code) ? code : ""].filter(Boolean).slice(0, 3);
+          const tags = [kpiTitle, code && String(code).toUpperCase() !== "OK" && !isQualityIssueCode(code) ? humanizeFindingCodeForTag(code) : ""].filter(Boolean).slice(0, 3);
           container.appendChild(createSvg("text", { x: 196, y: contentY + 10, fill: "#F8FAFC", "font-size": 12, "font-weight": 700 })).textContent = "Criterios";
           const tagGap = 10;
           let tagOffsetX = 272;
@@ -734,20 +981,18 @@
             tagOffsetX += tagW + tagGap;
           });
 
-          // Right rail: severidad, score, estrellas
+          // Right rail: severidad, score
           container.appendChild(createSvg("rect", { x: rightRailX, y: slotY + 28, width: 84, height: 26, rx: 13, fill: sev.bg, stroke: sev.stroke || "#166534" }));
           container.appendChild(createSvg("text", { x: rightRailCx, y: slotY + 46, "text-anchor": "middle", fill: sev.fill, "font-size": isOmitted ? 10 : 12, "font-weight": 800 })).textContent = isOmitted ? "OMITIDA" : sev.text;
           container.appendChild(createSvg("text", { x: rightRailCx, y: slotY + 88, "text-anchor": "middle", fill: "#F8FAFC", "font-size": isOmitted ? 16 : 24, "font-weight": 800 })).textContent = isOmitted ? "Foto omitida" : (slotScore == null ? "—" : `${slotScore}/100`);
           if (slotScore == null) {
             container.appendChild(createSvg("text", { x: rightRailCx, y: slotY + 108, "text-anchor": "middle", fill: "#94a3b8", "font-size": 12, "font-weight": 700 })).textContent = isOmitted ? "Sin descuento" : "Sin puntaje";
-          } else {
-            renderStarIcons(container, slotScore, rightRailCx, slotY + 100);
           }
-          container.appendChild(createSvg("text", { x: rightRailCx, y: slotY + 128, "text-anchor": "middle", fill: "#94a3b8", "font-size": 11, "font-weight": 600 })).textContent = "Estado";
+          container.appendChild(createSvg("text", { x: rightRailCx, y: slotY + (slotScore == null ? 128 : 110), "text-anchor": "middle", fill: "#94a3b8", "font-size": 11, "font-weight": 600 })).textContent = "Estado";
 
           // Altura dinámica del slot según contenido real.
           const contentBottomY = contentY + 42;
-          const rightRailBottomY = slotY + 140;
+          const rightRailBottomY = slotY + (slotScore == null ? 140 : 122);
           const dynamicSlotH = Math.max(slotMinH, contentBottomY - slotY, rightRailBottomY - slotY);
           slotCard.setAttribute("height", String(dynamicSlotH));
           slotBorder.setAttribute("height", String(dynamicSlotH));
@@ -772,8 +1017,8 @@
 
       const newHeight = currentY + 490;
       const svg = document.getElementById("reportSvg");
-      svg.setAttribute("height", String(newHeight));
       svg.setAttribute("viewBox", `0 0 1143 ${newHeight}`);
+      svg.removeAttribute("height");
       document.getElementById("bgRect").setAttribute("height", String(newHeight));
       document.getElementById("pageCard").setAttribute("height", String(newHeight - 140));
     }
@@ -830,9 +1075,11 @@
         LAUNDRY_WALLS_FLOOR: "HUMEDAD",
         ELECTRICAL_PANEL: "ELECTRICIDAD",
         PUERTA_ENTRADA: "PUERTAS_HERRAJES",
-        ELEVATOR: "ELECTRICIDAD",
+        ASCENSOR_CERTIFICADO_INSPECCION: "DOCUMENTOS_CUMPLIMIENTO",
+        ASCENSOR_CABINA: "DOCUMENTOS_CUMPLIMIENTO",
+        ELEVATOR: "DOCUMENTOS_CUMPLIMIENTO",
         ESTACIONAMIENTO: "PISOS",
-        CERTIFICADO_VERDE: "ELECTRICIDAD"
+        CERTIFICADO_VERDE: "DOCUMENTOS_CUMPLIMIENTO"
       },
       messages: {
         MUROS_PINTURA: {
@@ -881,16 +1128,49 @@
         YELLOW: "Se recomienda revisar y monitorear el estado observado.",
         RED: "Se recomienda una revisión técnica detallada del hallazgo."
       },
-      badge: { yellowFrom: 60, greenFrom: 85 }
+      badge: { yellowFrom: 60, greenFrom: 86 }
     };
 
-    async function loadScoreConfig() {
+    function mergeScoreConfig(base, extra) {
+      if (!extra || !extra.kpis) return base;
+      return {
+        ...base,
+        ...extra,
+        kpis: { ...(base.kpis || {}), ...(extra.kpis || {}) },
+        badge: { ...(base.badge || {}), ...(extra.badge || {}) },
+        kpiWeights: { ...(base.kpiWeights || {}), ...(extra.kpiWeights || {}) },
+        messages: { ...(base.messages || {}), ...(extra.messages || {}) },
+        recommendations: { ...(base.recommendations || {}), ...(extra.recommendations || {}) }
+      };
+    }
+
+    /** Config de scoring: inyectada en HTML (admin) → summary → /api/public/score-config. */
+    async function resolveScoreConfig(summary) {
+      if (window.__AINSPECTA_SCORE_CONFIG__?.kpis) {
+        return mergeScoreConfig(DEFAULT_SCORE_CONFIG, window.__AINSPECTA_SCORE_CONFIG__);
+      }
+      if (summary?.scoreConfig?.kpis) {
+        return mergeScoreConfig(DEFAULT_SCORE_CONFIG, summary.scoreConfig);
+      }
       try {
-        const res = await fetch("/api/admin/score-config");
+        const res = await fetch("/api/public/score-config");
         const data = await res.json();
-        if (res.ok && data?.config?.kpis) return data.config;
-      } catch {}
+        if (res.ok && data?.config?.kpis) {
+          return mergeScoreConfig(DEFAULT_SCORE_CONFIG, data.config);
+        }
+      } catch (_) {}
       return DEFAULT_SCORE_CONFIG;
+    }
+
+    function slotPenaltyFromSlot(s, kpiKey, scoreConfig) {
+      const fromApi = Number(s?.scorePenaltyApplied);
+      if (Number.isFinite(fromApi) && fromApi >= 0) return fromApi;
+      const kpiCfg = scoreConfig?.kpis?.[kpiKey] || DEFAULT_SCORE_CONFIG.kpis[kpiKey] || {};
+      const sevKey = String(s.severity || "").toLowerCase();
+      if (sevKey === "high") return Number(kpiCfg.high ?? 0);
+      if (sevKey === "medium") return Number(kpiCfg.medium ?? 0);
+      if (sevKey === "low") return Number(kpiCfg.low ?? 0);
+      return 0;
     }
 
     function baseMessageFor(slot, cfg) {
@@ -922,10 +1202,23 @@
     }
 
     function classifyKpi(slot, cfg) {
-      const mapKey = String(cfg?.slotKpiMap?.[slot.slotCode] || "").toUpperCase();
+      const rawCode = String(slot.slotCode || "");
+      const codeUpper = rawCode.toUpperCase();
+      let mapKey = String(cfg?.slotKpiMap?.[codeUpper] || cfg?.slotKpiMap?.[rawCode] || "").toUpperCase();
+      if (!mapKey && cfg?.slotKpiMap) {
+        const bathMatch = codeUpper.match(/^BATHROOM_\d+_(.+)$/);
+        if (bathMatch) {
+          const suffix = bathMatch[1];
+          mapKey = String(
+            cfg.slotKpiMap[`BATHROOM_1_${suffix}`]
+            || cfg.slotKpiMap[`BATHROOM_2_${suffix}`]
+            || ""
+          ).toUpperCase();
+        }
+      }
       if (mapKey) return mapKey;
 
-      const code = String(slot.slotCode || "").toLowerCase();
+      const code = rawCode.toLowerCase();
       const title = String(slot.title || "").toLowerCase();
       const msg = String(slot.message || "").toLowerCase();
 
@@ -935,8 +1228,8 @@
       if (msg && ["humedad", "moho", "filtr", "water", "mold"].some((w) => msg.includes(w))) return "HUMEDAD";
       if (hasAny(["muros", "pintura", "pared", "cielo", "paint"])) return "MUROS_PINTURA";
       if (hasAny(["piso", "pisos", "floor"])) return "PISOS";
+      if (code.includes("_outlets") || code.includes("_switches") || hasAny(["electrical", "tablero", "enchufe", "interruptor"])) return "ELECTRICIDAD";
       if (hasAny(["wc", "lavamanos", "lavaplatos", "grifer", "ducha", "tina", "sanitario", "sifon", "cañer", "baño", "baño"])) return "SANITARIOS";
-      if (hasAny(["electrical", "tablero", "enchufe", "interruptor"])) return "ELECTRICIDAD";
       if (hasAny(["ventana", "vidrio", "marco", "cerramiento"])) return "VENTANAS_CERRAMIENTOS";
       if (hasAny(["puerta", "cerradura", "bisagra", "manilla", "herraje"])) return "PUERTAS_HERRAJES";
       if (hasAny(["mueble", "mobiliario", "closet", "clóset", "clósets", "gabinete", "cajon", "alacena"])) return "MOBILIARIO_FIJO";
@@ -989,16 +1282,11 @@
         if (!items.length) {
           return { key, title: kpiLabel(key), score: null, badge: "GRAY" };
         }
-        const penalties = items.map((s) => {
-          const sev = String(s.severity || "").toLowerCase();
-          const kpiCfg = cfg?.kpis?.[key] || DEFAULT_SCORE_CONFIG.kpis[key];
-          if (sev === "high") return Number(kpiCfg.high ?? 0);
-          if (sev === "medium") return Number(kpiCfg.medium ?? 0);
-          if (sev === "low") return Number(kpiCfg.low ?? 0);
-          return 0;
-        });
-        const totalPenalty = penalties.reduce((a, b) => a + b, 0);
-        const inverted = Math.max(0, Math.min(100, 100 - totalPenalty));
+        const penalties = items.map((s) => slotPenaltyFromSlot(s, key, cfg));
+        const avgPenalty = penalties.length
+          ? penalties.reduce((a, b) => a + b, 0) / penalties.length
+          : 0;
+        const inverted = Math.max(0, Math.min(100, Math.round(100 - avgPenalty)));
         return { key, title: kpiLabel(key), score: inverted, badge: kpiBadgeFromScore(inverted, cfg) };
       });
     }
@@ -1006,6 +1294,29 @@
     function getTenantIdFromQuery() {
       const params = new URLSearchParams(window.location.search);
       return params.get("tenantId") || null;
+    }
+
+    /** Co-branding: logo del tenant a la izquierda + logo Ainspecciona. */
+    function applyReportBrandLogos(tenant) {
+      const tenantLogo = document.getElementById("brandLogoTenant");
+      const brandLogo = document.getElementById("brandLogoAinspecciona");
+      if (!tenantLogo || !brandLogo) return;
+      const logoUrl = tenant && tenant.logoUrl ? String(tenant.logoUrl).trim() : "";
+      if (logoUrl) {
+        tenantLogo.setAttribute("href", logoUrl);
+        tenantLogo.setAttribute("opacity", "1");
+        brandLogo.setAttribute("x", "210");
+        brandLogo.setAttribute("y", "8");
+        brandLogo.setAttribute("width", "170");
+        brandLogo.setAttribute("height", "120");
+      } else {
+        tenantLogo.setAttribute("href", "");
+        tenantLogo.setAttribute("opacity", "0");
+        brandLogo.setAttribute("x", "28");
+        brandLogo.setAttribute("y", "-16");
+        brandLogo.setAttribute("width", "238");
+        brandLogo.setAttribute("height", "172");
+      }
     }
 
     function showLoadError(msg, execMsg) {
@@ -1061,6 +1372,8 @@
       const property = c.property || {};
       const owner = property.owner || {};
 
+      applyReportBrandLogos(summary.tenant || null);
+
       setText("propertyAddress", property.address);
       setText("propertyRol", property.rol);
       const op = String(property.operationType || "").toUpperCase() === "ARRENDO" ? "ARRIENDO" : property.operationType;
@@ -1070,7 +1383,7 @@
       setText("analysisDate", formatDate(c.createdAt));
       setText("headerDate", formatDate(c.createdAt));
 
-      const scoreConfig = await loadScoreConfig();
+      const scoreConfig = await resolveScoreConfig(summary);
       const score = clampScore(summary.score);
       setText("stiScore", `${Math.round(score)} / 100`);
       setText("stiLabel", badgeLabel(summary.badge));
@@ -1084,8 +1397,25 @@
       if (stiBaseArc) stiBaseArc.setAttribute("d", fullArc);
       if (stiArc) stiArc.setAttribute("d", fullArc);
       applyArcProgress(stiArc, score);
+      const stiStars = document.getElementById("stiStars");
+      if (stiStars) {
+        stiStars.innerHTML = "";
+        renderStarIcons(stiStars, score, 826, 328, scoreConfig);
+      }
 
       const slots = summary.slots || [];
+      lastSummarySlots = slots;
+      reportAdminMode = await isReportAdminMode();
+      if (reportAdminMode) {
+        showReportAdminToolbar();
+        if (!reportReanalyzeDefaultsApplied) {
+          slots.forEach((s) => {
+            const code = getSlotCode(s);
+            if (code && slotHasPhoto(s) && !s.omitted) reportReanalyzeSelected.add(code);
+          });
+          reportReanalyzeDefaultsApplied = true;
+        }
+      }
       const kpiOrder = [
         "MUROS_PINTURA",
         "HUMEDAD",
@@ -1109,26 +1439,27 @@
       });
       renderKpiSummary(kpis);
 
-      const execSummary = summary.case?.executiveSummary;
+      const execSummary = String(summary.case?.executiveSummary || '').trim();
       const execSummaryText = document.getElementById("execSummaryText");
       const execSummaryPlaceholder = document.getElementById("execSummaryPlaceholder");
       const execSummaryFooter = document.getElementById("execSummaryFooter");
-      const genBtn = document.getElementById("generateSummaryBtn");
+      const stiScore = Math.round(clampScore(summary.score ?? 0));
+      const execStale = execSummary && isExecutiveSummaryStale(execSummary, stiScore);
       if (execSummaryText) {
         if (execSummaryPlaceholder) execSummaryPlaceholder.remove();
-        if (execSummary) {
+        if (execSummary && !execStale) {
           execSummaryText.innerHTML = formatExecSummary(execSummary);
           execSummaryText.style.color = "#94a3b8";
-          if (genBtn) genBtn.textContent = "Regenerar resumen ejecutivo";
           if (execSummaryFooter) execSummaryFooter.style.display = "";
         } else {
-          execSummaryText.innerHTML = "No hay resumen ejecutivo. Generando automáticamente...";
+          execSummaryText.innerHTML = execStale
+            ? "El resumen no coincide con el puntaje actual. Regenerando..."
+            : "No hay resumen ejecutivo. Generando automáticamente...";
           execSummaryText.style.color = "#64748b";
-          if (genBtn) genBtn.textContent = "Generar resumen ejecutivo";
           if (execSummaryFooter) execSummaryFooter.style.display = "none";
           if (!executiveSummaryAutoTriggered) {
             executiveSummaryAutoTriggered = true;
-            generateExecutiveSummary({ auto: true }).catch(() => {});
+            generateExecutiveSummary({ auto: true, force: !!execStale }).catch(() => {});
           }
         }
       }
@@ -1152,84 +1483,49 @@
       renderKpiSections(kpiGroups, scoreConfig);
     }
 
-    async function reanalyzeCase() {
-      const caseId = getCaseIdFromPath();
-      if (!caseId) return;
-      const btn = document.getElementById("reanalyzeBtn");
-      const note = document.getElementById("reanalyzeNote");
-      if (btn) {
-        btn.disabled = true;
-        btn.textContent = "Reanalizando...";
-      }
-      if (note) note.textContent = "Iniciando reanálisis...";
-
-      const res = await fetch(`/api/cases/${encodeURIComponent(caseId)}/reanalyze?force=1`, { method: "POST" });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data?.ok) {
-        if (note) note.textContent = data?.error ? `Error: ${data.error}` : "No se pudo iniciar el reanálisis.";
-        if (btn) { btn.disabled = false; btn.textContent = "Reanalizar con IA"; }
-        return;
-      }
-
-      const total = data.queued || 0;
-      if (total === 0) {
-        if (note) note.textContent = "No hay fotos para reanalizar.";
-        if (btn) { btn.disabled = false; btn.textContent = "Reanalizar con IA"; }
-        return;
-      }
-
-      if (note) note.textContent = `Analizando foto 0 de ${total}...`;
-      pollReanalyzeStatus(caseId, total, btn, note);
-    }
-
-    function pollReanalyzeStatus(caseId, total, btn, note) {
-      const interval = setInterval(async () => {
-        try {
-          const res = await fetch(`/api/cases/${encodeURIComponent(caseId)}/reanalyze-status`);
-          const st = await res.json().catch(() => ({}));
-          if (!st.active) {
-            clearInterval(interval);
-            if (note) { note.style.color = "#22c55e"; note.textContent = `✓ Reanálisis completo (${total} fotos). Recargando...`; }
-            if (btn) { btn.disabled = false; btn.textContent = "Reanalizar con IA"; }
-            setTimeout(() => location.reload(), 1500);
-            return;
-          }
-          const completed = st.completed || 0;
-          const errCount = st.errors || 0;
-          if (st.done) {
-            clearInterval(interval);
-            const errMsg = errCount > 0 ? ` (${errCount} con error)` : "";
-            if (note) { note.style.color = "#22c55e"; note.textContent = `✓ Listo — ${completed} de ${st.total} fotos analizadas${errMsg}. Recargando...`; }
-            if (btn) { btn.disabled = false; btn.textContent = "Reanalizar con IA"; }
-            setTimeout(() => location.reload(), 1500);
-          } else {
-            if (note) note.textContent = `Analizando foto ${completed + 1} de ${st.total}...`;
-          }
-        } catch (e) {}
-      }, 2000);
-    }
-
     let executiveSummaryAutoTriggered = false;
     let lastKpiGroups = [];
     let lastScoreConfig = null;
 
-    async function generateExecutiveSummary({ auto = false } = {}) {
+    function extractStiMentionedInExecutiveSummary(text) {
+      const t = String(text || "");
+      const patterns = [
+        /(?:score|puntaje|sti)[^\d]{0,40}(\d{1,3})\s*(?:\/\s*100|sobre\s*100)/i,
+        /(\d{1,3})\s*\/\s*100/,
+        /(\d{1,3})\s+sobre\s+100/i
+      ];
+      for (let i = 0; i < patterns.length; i++) {
+        const m = t.match(patterns[i]);
+        if (m) {
+          const n = Number(m[1]);
+          if (Number.isFinite(n) && n >= 0 && n <= 100) return Math.round(n);
+        }
+      }
+      return null;
+    }
+
+    function isExecutiveSummaryStale(text, currentScore) {
+      const mentioned = extractStiMentionedInExecutiveSummary(text);
+      if (mentioned == null) return false;
+      return mentioned !== Math.round(clampScore(currentScore));
+    }
+
+    async function generateExecutiveSummary({ auto = false, force = false } = {}) {
       const caseId = getCaseIdFromPath();
       if (!caseId) return;
-      const btn = document.getElementById("generateSummaryBtn");
       const execSummaryText = document.getElementById("execSummaryText");
-      if (btn && !auto) {
-        btn.disabled = true;
-        btn.textContent = "Generando…";
-      }
       if (auto && execSummaryText) {
         execSummaryText.style.color = "#64748b";
         execSummaryText.innerHTML = "Generando resumen ejecutivo automáticamente...";
       }
       const tenantId = getTenantIdFromQuery();
-      const url = `/api/cases/${encodeURIComponent(caseId)}/executive-summary${tenantId ? "?tenantId=" + encodeURIComponent(tenantId) : ""}`;
+      const qs = new URLSearchParams();
+      if (tenantId) qs.set("tenantId", tenantId);
+      if (force) qs.set("force", "1");
+      const q = qs.toString();
+      const url = `/api/cases/${encodeURIComponent(caseId)}/executive-summary${q ? "?" + q : ""}`;
       try {
-        const res = await fetch(url, { method: "POST" });
+        const res = await fetch(url, { method: "POST", headers: (force && getAdminHeaders()) || {} });
         const data = await res.json().catch(() => ({}));
         if (res.ok && data?.ok && data?.executiveSummary) {
           const execSummaryFooter = document.getElementById("execSummaryFooter");
@@ -1238,37 +1534,57 @@
             execSummaryText.style.color = "#94a3b8";
           }
           if (execSummaryFooter) execSummaryFooter.style.display = "";
-          if (btn) btn.textContent = "Regenerar resumen ejecutivo";
           adjustExecutiveSummaryLayout();
           if (lastKpiGroups.length && lastScoreConfig) renderKpiSections(lastKpiGroups, lastScoreConfig);
         } else {
+          const errHint = data?.message
+            || (data?.error === 'OPENAI_NOT_CONFIGURED' ? 'OpenAI no está configurado en el servidor (OPENAI_API_KEY).'
+              : data?.error === 'OPENAI_QUOTA_EXCEEDED' ? 'Cuota de OpenAI agotada. Revisa billing en platform.openai.com.'
+              : (data?.message || data?.error || 'Error desconocido'));
           if (auto && execSummaryText) {
-            execSummaryText.innerHTML = "No fue posible generar automáticamente el resumen ejecutivo.";
+            execSummaryText.innerHTML = `No fue posible generar el resumen ejecutivo. ${errHint}`;
             execSummaryText.style.color = "#64748b";
           }
-          if (btn) btn.textContent = data?.error === "OPENAI_NOT_CONFIGURED" ? "IA no configurada" : "Error. Reintentar";
         }
       } catch (err) {
         if (auto && execSummaryText) {
-          execSummaryText.innerHTML = "No fue posible generar automáticamente el resumen ejecutivo.";
+          execSummaryText.innerHTML = "No fue posible generar el resumen ejecutivo. Error de conexión.";
           execSummaryText.style.color = "#64748b";
-        }
-        if (btn) btn.textContent = "Error. Reintentar";
-      } finally {
-        if (btn) {
-          btn.disabled = false;
-          if (btn.textContent.includes("Generando")) btn.textContent = document.getElementById("execSummaryText")?.innerHTML?.includes("No hay resumen") ? "Generar resumen ejecutivo" : "Regenerar resumen ejecutivo";
         }
       }
     }
 
     load().catch(() => {});
 
-    const reBtn = document.getElementById("reanalyzeBtn");
-    if (reBtn) reBtn.addEventListener("click", () => reanalyzeCase().catch(() => {}));
-
-    const genSummaryBtn = document.getElementById("generateSummaryBtn");
-    if (genSummaryBtn) genSummaryBtn.addEventListener("click", () => generateExecutiveSummary().catch(() => {}));
+    document.getElementById("reanalyzeMarkPhotos")?.addEventListener("click", () => {
+      lastSummarySlots.forEach((s) => {
+        const code = getSlotCode(s);
+        if (code && slotHasPhoto(s) && !s.omitted) reportReanalyzeSelected.add(code);
+      });
+      refreshReportSlotCheckboxes();
+      const statusEl = document.getElementById("reanalyzeStatus");
+      if (statusEl) { statusEl.textContent = ""; statusEl.style.color = "#94a3b8"; }
+    });
+    document.getElementById("reanalyzeClearAll")?.addEventListener("click", () => {
+      reportReanalyzeSelected.clear();
+      refreshReportSlotCheckboxes();
+      const statusEl = document.getElementById("reanalyzeStatus");
+      if (statusEl) { statusEl.textContent = ""; statusEl.style.color = "#94a3b8"; }
+    });
+    document.getElementById("reanalyzeRun")?.addEventListener("click", () => {
+      void runReportReanalyze();
+    });
+    document.getElementById("regenExecSummary")?.addEventListener("click", () => {
+      const btn = document.getElementById("regenExecSummary");
+      if (!btn) return;
+      btn.disabled = true;
+      const prev = btn.textContent;
+      btn.textContent = "Generando…";
+      generateExecutiveSummary({ auto: false, force: true }).finally(() => {
+        btn.disabled = false;
+        btn.textContent = prev;
+      });
+    });
 
     const pdfBtn = document.getElementById("downloadPdfBtn");
     if (pdfBtn) {
@@ -1299,9 +1615,7 @@
       });
     }
 
-    // --- Review / Approval flow ---
-    const isReviewer = new URLSearchParams(window.location.search).get("reviewer") === "1";
-    const approveBtn = document.getElementById("approveBtn");
+    // --- Estado de revisión (solo lectura; aprobar desde panel admin) ---
     const reviewBadge = document.getElementById("reviewBadge");
 
     async function checkReviewStatus() {
@@ -1317,48 +1631,16 @@
             reviewBadge.style.color = "#22c55e";
             reviewBadge.innerHTML = `&#10003; Informe aprobado`;
           }
-          if (approveBtn) approveBtn.style.display = "none";
-        } else if (data.reviewStatus === "pending_review" && isReviewer) {
-          if (approveBtn) approveBtn.style.display = "";
+        } else if (data.reviewStatus === "pending_review") {
           if (reviewBadge) {
             reviewBadge.style.display = "";
             reviewBadge.style.color = "#f59e0b";
-            reviewBadge.textContent = "Pendiente de aprobación";
+            reviewBadge.textContent = "Pendiente de aprobación (usa el panel admin para aprobar)";
           }
-        } else if (isReviewer && !data.reviewStatus) {
-          if (approveBtn) approveBtn.style.display = "";
         }
       } catch (e) {}
     }
 
-    async function approveCase() {
-      const caseId = getCaseIdFromPath();
-      if (!caseId) return;
-      if (!confirm("¿Aprobar este informe y enviarlo al cliente por email?")) return;
-      if (approveBtn) { approveBtn.disabled = true; approveBtn.textContent = "Aprobando..."; }
-      try {
-        const res = await fetch(`/api/cases/${encodeURIComponent(caseId)}/approve`, { method: "POST" });
-        const data = await res.json().catch(() => ({}));
-        if (res.ok && data?.ok) {
-          if (approveBtn) approveBtn.style.display = "none";
-          if (reviewBadge) {
-            reviewBadge.style.display = "";
-            reviewBadge.style.color = "#22c55e";
-            reviewBadge.innerHTML = data.emailSent
-              ? "&#10003; Informe aprobado y enviado al cliente"
-              : "&#10003; Informe aprobado (email no configurado)";
-          }
-        } else {
-          if (approveBtn) approveBtn.textContent = "Error. Reintentar";
-        }
-      } catch (e) {
-        if (approveBtn) approveBtn.textContent = "Error. Reintentar";
-      } finally {
-        if (approveBtn) approveBtn.disabled = false;
-      }
-    }
-
-    if (approveBtn) approveBtn.addEventListener("click", () => approveCase().catch(() => {}));
     checkReviewStatus().catch(() => {});
   </script>
 </body>

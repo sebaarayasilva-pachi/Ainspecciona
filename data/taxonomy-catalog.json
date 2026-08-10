@@ -1,0 +1,4610 @@
+{
+  "version": 2,
+  "updatedAt": "2026-07-07T14:24:03.800Z",
+  "kpis": [
+    "TERMINACIONES",
+    "SANITARIOS",
+    "ELECTRICIDAD",
+    "HUMEDAD",
+    "PISOS",
+    "VENTANAS_CERRAMIENTOS",
+    "PUERTAS_HERRAJES",
+    "MOBILIARIO_FIJO",
+    "ESTRUCTURA",
+    "GAS",
+    "FACHADAS_EXTERIORES",
+    "CLIMATIZACION",
+    "IMPERMEABILIZACION",
+    "DOCUMENTOS_CUMPLIMIENTO",
+    "AREAS_COMUNES",
+    "OTROS"
+  ],
+  "miradas": [
+    {
+      "id": "EJECUCION_OBRA",
+      "label": "Ejecución de obra (Entrega / Postventa)"
+    },
+    {
+      "id": "DETERIORO_USO",
+      "label": "Deterioro en el tiempo (Ainspecciona / Property-chk)"
+    }
+  ],
+  "entries": [
+    {
+      "id": "terminaciones.pintura_muro",
+      "kpi": "TERMINACIONES",
+      "subfamilia": "pintura_muro",
+      "label": "Pintura en muros y cielos",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasAinspecciona": "MUROS_PINTURA",
+      "aliasPostventa": "pintura_muros_cielos",
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasEntregaEspecialidades": "Pintor, Yesero",
+      "notasEjecucion": "Defecto de aplicación, adherencia o terminación en obra nueva.",
+      "notasDeterioro": "Desgaste por uso, rayados o manchas; considerar antigüedad del inmueble.",
+      "status": "draft"
+    },
+    {
+      "id": "terminaciones.guardapolvo",
+      "kpi": "TERMINACIONES",
+      "subfamilia": "guardapolvo",
+      "label": "Guardapolvo / zócalo",
+      "miradas": [
+        "EJECUCION_OBRA"
+      ],
+      "aliasAinspecciona": "",
+      "aliasPostventa": "",
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasEntregaEspecialidades": "Instalador de guardapolvos, Carpintero terminaciones",
+      "notasEjecucion": "Faltante, mal cortado o despegado en entrega.",
+      "notasDeterioro": "",
+      "status": "draft"
+    },
+    {
+      "id": "humedad.filtracion",
+      "kpi": "HUMEDAD",
+      "subfamilia": "filtracion",
+      "label": "Filtración / humedad",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasAinspecciona": "HUMEDAD",
+      "aliasPostventa": "humedad_filtracion",
+      "aliasEntregaKpi": "Instalaciones Sanitarias",
+      "aliasEntregaEspecialidades": "Gasfiter, Impermeabilizador",
+      "notasEjecucion": "Filtración por mala ejecución de sellos, impermeabilización o instalación.",
+      "notasDeterioro": "Humedad por falta de mantenimiento, condensación o uso prolongado.",
+      "status": "draft"
+    },
+    {
+      "id": "sanitarios.griferia_filtracion",
+      "kpi": "SANITARIOS",
+      "subfamilia": "griferia_filtracion",
+      "label": "Grifería y filtraciones sanitarias",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasAinspecciona": "SANITARIOS",
+      "aliasPostventa": "sanitarios",
+      "aliasEntregaKpi": "Instalaciones Sanitarias",
+      "aliasEntregaEspecialidades": "Gasfiter",
+      "notasEjecucion": "Goteo, mala conexión o instalación defectuosa en entrega.",
+      "notasDeterioro": "Desgaste de empaquetaduras o grifería por uso.",
+      "status": "draft"
+    },
+    {
+      "id": "electricidad.instalacion_visible",
+      "kpi": "ELECTRICIDAD",
+      "subfamilia": "instalacion_visible",
+      "label": "Instalación eléctrica visible",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasAinspecciona": "ELECTRICIDAD",
+      "aliasPostventa": "electricidad_visible",
+      "aliasEntregaKpi": "Instalaciones Eléctricas",
+      "aliasEntregaEspecialidades": "Electricista",
+      "notasEjecucion": "Enchufe suelto, cableado mal terminado, placa mal fijada.",
+      "notasDeterioro": "Desgaste por uso; evaluar si es mantenimiento del propietario.",
+      "status": "draft"
+    },
+    {
+      "id": "pisos.revestimiento",
+      "kpi": "PISOS",
+      "subfamilia": "revestimiento",
+      "label": "Pisos y revestimientos",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasAinspecciona": "PISOS",
+      "aliasPostventa": "pisos",
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasEntregaEspecialidades": "Instalador de cerámica, Instalador de porcelanato, Instalador de piso flotante",
+      "notasEjecucion": "Trizadura, hueco, desnivel o mala colocación en entrega.",
+      "notasDeterioro": "Rayado o desgaste por tránsito y antigüedad.",
+      "status": "draft"
+    },
+    {
+      "id": "ventanas.sello_cerramiento",
+      "kpi": "VENTANAS_CERRAMIENTOS",
+      "subfamilia": "sello_cerramiento",
+      "label": "Ventanas, sellos y cerramientos",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasAinspecciona": "VENTANAS_CERRAMIENTOS",
+      "aliasPostventa": "ventanas_sellos",
+      "aliasEntregaKpi": "Ventanas y Cerramientos",
+      "aliasEntregaEspecialidades": "Aluminiero, Sellador de juntas y silicona",
+      "notasEjecucion": "Sello deficiente, marco mal instalado, filtración en entrega.",
+      "notasDeterioro": "Degradación de sellos por sol y tiempo.",
+      "status": "draft"
+    },
+    {
+      "id": "puertas.cerradura_herraje",
+      "kpi": "PUERTAS_HERRAJES",
+      "subfamilia": "cerradura_herraje",
+      "label": "Puertas, cerraduras y herrajes",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasAinspecciona": "PUERTAS_HERRAJES",
+      "aliasPostventa": "puertas_cerraduras",
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasEntregaEspecialidades": "Instalador de quincallería, Carpintero terminaciones",
+      "notasEjecucion": "Puerta desajustada, cerradura mal instalada en entrega.",
+      "notasDeterioro": "Desgaste mecánico por uso.",
+      "status": "draft"
+    },
+    {
+      "id": "mobiliario.fijo_cocina",
+      "kpi": "MOBILIARIO_FIJO",
+      "subfamilia": "fijo_cocina",
+      "label": "Mobiliario fijo y cocina",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasAinspecciona": "MOBILIARIO_FIJO",
+      "aliasPostventa": "muebles_closets_cocina",
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasEntregaEspecialidades": "Mueblista, Instalador de cubiertas",
+      "notasEjecucion": "Rayado en cubierta, mueble mal anclado, acabado defectuoso.",
+      "notasDeterioro": "Desgaste normal de superficies por uso.",
+      "status": "draft"
+    },
+    {
+      "id": "impermeabilizacion.terraza",
+      "kpi": "IMPERMEABILIZACION",
+      "subfamilia": "terraza",
+      "label": "Impermeabilización",
+      "miradas": [
+        "EJECUCION_OBRA"
+      ],
+      "aliasAinspecciona": "",
+      "aliasPostventa": "impermeabilizacion",
+      "aliasEntregaKpi": "Fachadas y Terminaciones Exteriores",
+      "aliasEntregaEspecialidades": "Impermeabilizador",
+      "notasEjecucion": "Falla de membrana o detalle constructivo en entrega.",
+      "notasDeterioro": "",
+      "status": "draft"
+    },
+    {
+      "id": "kpi_excel.cielos_y_muros.cielos_sectores_hundidos_o_desnivelados",
+      "kpi": "TERMINACIONES",
+      "subfamilia": "cielos_sectores_hundidos_o_desnivelados",
+      "label": "Sectores hundidos o desnivelados.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pintura_muros_cielos",
+      "aliasAinspecciona": "MUROS_PINTURA",
+      "aliasEntregaEspecialidades": "YESERO, PINTOR",
+      "notasEjecucion": "estructura mal nivelada o instalacion deficiente · nivelacion y reposicion parcial o total",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "CIELOS Y MUROS",
+      "item": "CIELOS",
+      "hallazgo": "Sectores hundidos o desnivelados.",
+      "requerimiento": "nivelacion y reposicion parcial o total",
+      "especialidades": [
+        "YESERO",
+        "PINTOR"
+      ],
+      "causa": "estructura mal nivelada o instalacion deficiente",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.cielos_y_muros.cielos_efecto_visual_de_olas_en_placas",
+      "kpi": "TERMINACIONES",
+      "subfamilia": "cielos_efecto_visual_de_olas_en_placas",
+      "label": "Efecto visual de ‘olas’ en placas.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pintura_muros_cielos",
+      "aliasAinspecciona": "MUROS_PINTURA",
+      "aliasEntregaEspecialidades": "YESERO, PINTOR",
+      "notasEjecucion": "estructura mal nivelada o instalacion deficiente · nivelacion y reposicion parcial o total",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "CIELOS Y MUROS",
+      "item": "CIELOS",
+      "hallazgo": "Efecto visual de ‘olas’ en placas.",
+      "requerimiento": "nivelacion y reposicion parcial o total",
+      "especialidades": [
+        "YESERO",
+        "PINTOR"
+      ],
+      "causa": "estructura mal nivelada o instalacion deficiente",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.cielos_y_muros.cielos_placas_descolgadas_o_infladas",
+      "kpi": "TERMINACIONES",
+      "subfamilia": "cielos_placas_descolgadas_o_infladas",
+      "label": "Placas descolgadas o infladas.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pintura_muros_cielos",
+      "aliasAinspecciona": "MUROS_PINTURA",
+      "aliasEntregaEspecialidades": "YESERO, PINTOR",
+      "notasEjecucion": "humedad o fijaciones insuficientes · reposicion y correccion de fijaciones",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "CIELOS Y MUROS",
+      "item": "CIELOS",
+      "hallazgo": "Placas descolgadas o infladas.",
+      "requerimiento": "reposicion y correccion de fijaciones",
+      "especialidades": [
+        "YESERO",
+        "PINTOR"
+      ],
+      "causa": "humedad o fijaciones insuficientes",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.cielos_y_muros.cielos_tornillos_visibles_o_sobresalidos",
+      "kpi": "TERMINACIONES",
+      "subfamilia": "cielos_tornillos_visibles_o_sobresalidos",
+      "label": "Tornillos visibles o sobresalidos.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pintura_muros_cielos",
+      "aliasAinspecciona": "MUROS_PINTURA",
+      "aliasEntregaEspecialidades": "CARPINTERO",
+      "notasEjecucion": "humedad o fijaciones insuficientes · reposicion y correccion de fijaciones",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "CIELOS Y MUROS",
+      "item": "CIELOS",
+      "hallazgo": "Tornillos visibles o sobresalidos.",
+      "requerimiento": "reposicion y correccion de fijaciones",
+      "especialidades": [
+        "CARPINTERO"
+      ],
+      "causa": "humedad o fijaciones insuficientes",
+      "criticidad": "Baja",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.cielos_y_muros.cielos_manchas_amarillas_cafe_o_presencia_de_hongos",
+      "kpi": "TERMINACIONES",
+      "subfamilia": "cielos_manchas_amarillas_cafe_o_presencia_de_hongos",
+      "label": "Manchas amarillas, café o presencia de hongos.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pintura_muros_cielos",
+      "aliasAinspecciona": "MUROS_PINTURA",
+      "aliasEntregaEspecialidades": "GASFITER, YESERO, PINTOR",
+      "notasEjecucion": "filtraciones, condensacion o fugas sanitarias · diagnostico y reparacion definitiva",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "CIELOS Y MUROS",
+      "item": "CIELOS",
+      "hallazgo": "Manchas amarillas, café o presencia de hongos.",
+      "requerimiento": "diagnostico y reparacion definitiva",
+      "especialidades": [
+        "GASFITER",
+        "YESERO",
+        "PINTOR"
+      ],
+      "causa": "filtraciones, condensacion o fugas sanitarias",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        3,
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.cielos_y_muros.cielos_pintura_descascarada",
+      "kpi": "TERMINACIONES",
+      "subfamilia": "cielos_pintura_descascarada",
+      "label": "Pintura descascarada.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pintura_muros_cielos",
+      "aliasAinspecciona": "MUROS_PINTURA",
+      "aliasEntregaEspecialidades": "GASFITER, YESERO, PINTOR",
+      "notasEjecucion": "filtraciones, condensacion o fugas sanitarias · diagnostico y reparacion definitiva",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "CIELOS Y MUROS",
+      "item": "CIELOS",
+      "hallazgo": "Pintura descascarada.",
+      "requerimiento": "diagnostico y reparacion definitiva",
+      "especialidades": [
+        "GASFITER",
+        "YESERO",
+        "PINTOR"
+      ],
+      "causa": "filtraciones, condensacion o fugas sanitarias",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.cielos_y_muros.muros_fisuras_verticales_horizontales_o_diagonales",
+      "kpi": "TERMINACIONES",
+      "subfamilia": "muros_fisuras_verticales_horizontales_o_diagonales",
+      "label": "Fisuras verticales, horizontales o diagonales.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pintura_muros_cielos",
+      "aliasAinspecciona": "MUROS_PINTURA",
+      "aliasEntregaEspecialidades": "YESERO, PINTOR",
+      "notasEjecucion": "retraccion de materiales  o movimientos menores · evaluacion tecnica y reparacion",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "CIELOS Y MUROS",
+      "item": "MUROS",
+      "hallazgo": "Fisuras verticales, horizontales o diagonales.",
+      "requerimiento": "evaluacion tecnica y reparacion",
+      "especialidades": [
+        "YESERO",
+        "PINTOR"
+      ],
+      "causa": "retraccion de materiales  o movimientos menores",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        3,
+        10
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.cielos_y_muros.muros_separaciones_en_encuentros_de_materiales",
+      "kpi": "TERMINACIONES",
+      "subfamilia": "muros_separaciones_en_encuentros_de_materiales",
+      "label": "Separaciones en encuentros de materiales.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pintura_muros_cielos",
+      "aliasAinspecciona": "MUROS_PINTURA",
+      "aliasEntregaEspecialidades": "YESERO, PINTOR",
+      "notasEjecucion": "retraccion de materiales  o movimientos menores · evaluacion tecnica y reparacion",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "CIELOS Y MUROS",
+      "item": "MUROS",
+      "hallazgo": "Separaciones en encuentros de materiales.",
+      "requerimiento": "evaluacion tecnica y reparacion",
+      "especialidades": [
+        "YESERO",
+        "PINTOR"
+      ],
+      "causa": "retraccion de materiales  o movimientos menores",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.cielos_y_muros.muros_muros_inclinados_o_fuera_de_plomo",
+      "kpi": "TERMINACIONES",
+      "subfamilia": "muros_muros_inclinados_o_fuera_de_plomo",
+      "label": "Muros inclinados o fuera de plomo.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pintura_muros_cielos",
+      "aliasAinspecciona": "MUROS_PINTURA",
+      "aliasEntregaEspecialidades": "",
+      "notasEjecucion": "errores constructivos · regularizacion del muro",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "CIELOS Y MUROS",
+      "item": "MUROS",
+      "hallazgo": "Muros inclinados o fuera de plomo.",
+      "requerimiento": "regularizacion del muro",
+      "especialidades": [],
+      "causa": "errores constructivos",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.cielos_y_muros.muros_dificultad_para_instalar_muebles",
+      "kpi": "TERMINACIONES",
+      "subfamilia": "muros_dificultad_para_instalar_muebles",
+      "label": "Dificultad para instalar muebles.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pintura_muros_cielos",
+      "aliasAinspecciona": "MUROS_PINTURA",
+      "aliasEntregaEspecialidades": "",
+      "notasEjecucion": "errores constructivos · regularizacion del muro",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "CIELOS Y MUROS",
+      "item": "MUROS",
+      "hallazgo": "Dificultad para instalar muebles.",
+      "requerimiento": "regularizacion del muro",
+      "especialidades": [],
+      "causa": "errores constructivos",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.cielos_y_muros.muros_juntas_visibles",
+      "kpi": "TERMINACIONES",
+      "subfamilia": "muros_juntas_visibles",
+      "label": "Juntas visibles.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pintura_muros_cielos",
+      "aliasAinspecciona": "MUROS_PINTURA",
+      "aliasEntregaEspecialidades": "YESERO, PINTOR",
+      "notasEjecucion": "error constructivo · correccion de terminaciones y pintura",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "CIELOS Y MUROS",
+      "item": "MUROS",
+      "hallazgo": "Juntas visibles.",
+      "requerimiento": "correccion de terminaciones y pintura",
+      "especialidades": [
+        "YESERO",
+        "PINTOR"
+      ],
+      "causa": "error constructivo",
+      "criticidad": "Baja",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.cielos_y_muros.muros_empastes_mal_lijados",
+      "kpi": "TERMINACIONES",
+      "subfamilia": "muros_empastes_mal_lijados",
+      "label": "Empastes mal lijados.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pintura_muros_cielos",
+      "aliasAinspecciona": "MUROS_PINTURA",
+      "aliasEntregaEspecialidades": "YESERO, PINTOR",
+      "notasEjecucion": "error constructivo · correccion de terminaciones y pintura",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "CIELOS Y MUROS",
+      "item": "MUROS",
+      "hallazgo": "Empastes mal lijados.",
+      "requerimiento": "correccion de terminaciones y pintura",
+      "especialidades": [
+        "YESERO",
+        "PINTOR"
+      ],
+      "causa": "error constructivo",
+      "criticidad": "Baja",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.cielos_y_muros.muros_texturas_irregulares",
+      "kpi": "TERMINACIONES",
+      "subfamilia": "muros_texturas_irregulares",
+      "label": "Texturas irregulares.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pintura_muros_cielos",
+      "aliasAinspecciona": "MUROS_PINTURA",
+      "aliasEntregaEspecialidades": "YESERO, PINTOR",
+      "notasEjecucion": "error constructivo · correccion de terminaciones y pintura",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "CIELOS Y MUROS",
+      "item": "MUROS",
+      "hallazgo": "Texturas irregulares.",
+      "requerimiento": "correccion de terminaciones y pintura",
+      "especialidades": [
+        "YESERO",
+        "PINTOR"
+      ],
+      "causa": "error constructivo",
+      "criticidad": "Baja",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.cielos_y_muros.muros_papel_mural_despegado",
+      "kpi": "TERMINACIONES",
+      "subfamilia": "muros_papel_mural_despegado",
+      "label": "Papel mural despegado",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pintura_muros_cielos",
+      "aliasAinspecciona": "MUROS_PINTURA",
+      "aliasEntregaEspecialidades": "Papelero",
+      "notasEjecucion": "Reposición y corrección de la causa · Error de instalación o humedad",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "CIELOS Y MUROS",
+      "item": "MUROS",
+      "hallazgo": "Papel mural despegado",
+      "requerimiento": "Error de instalación o humedad",
+      "especialidades": [
+        "Papelero"
+      ],
+      "causa": "Reposición y corrección de la causa",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.cielos_y_muros.muros_palmetas_sueltas",
+      "kpi": "TERMINACIONES",
+      "subfamilia": "muros_palmetas_sueltas",
+      "label": "Palmetas   sueltas",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pintura_muros_cielos",
+      "aliasAinspecciona": "MUROS_PINTURA",
+      "aliasEntregaEspecialidades": "Ceramista",
+      "notasEjecucion": "Reposición de revestimientos · Error de instalación",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "CIELOS Y MUROS",
+      "item": "MUROS",
+      "hallazgo": "Palmetas   sueltas",
+      "requerimiento": "Error de instalación",
+      "especialidades": [
+        "Ceramista"
+      ],
+      "causa": "Reposición de revestimientos",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.cielos_y_muros.muros_papel_inflado",
+      "kpi": "TERMINACIONES",
+      "subfamilia": "muros_papel_inflado",
+      "label": "Papel inflado",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pintura_muros_cielos",
+      "aliasAinspecciona": "MUROS_PINTURA",
+      "aliasEntregaEspecialidades": "Papelero",
+      "notasEjecucion": "Reparación y corrección del origen · Humedad o instalación deficiente",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "CIELOS Y MUROS",
+      "item": "MUROS",
+      "hallazgo": "Papel inflado",
+      "requerimiento": "Humedad o instalación deficiente",
+      "especialidades": [
+        "Papelero"
+      ],
+      "causa": "Reparación y corrección del origen",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.cielos_y_muros.muros_pintura_inflada",
+      "kpi": "TERMINACIONES",
+      "subfamilia": "muros_pintura_inflada",
+      "label": "Pintura inflada",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pintura_muros_cielos",
+      "aliasAinspecciona": "MUROS_PINTURA",
+      "aliasEntregaEspecialidades": "pintor",
+      "notasEjecucion": "Diagnóstico del origen y reparación definitiva · Humedad o filtraciones ocultas",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "CIELOS Y MUROS",
+      "item": "MUROS",
+      "hallazgo": "Pintura inflada",
+      "requerimiento": "Humedad o filtraciones ocultas",
+      "especialidades": [
+        "pintor"
+      ],
+      "causa": "Diagnóstico del origen y reparación definitiva",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.cielos_y_muros.muros_diferencias_de_tono_en_pintura",
+      "kpi": "TERMINACIONES",
+      "subfamilia": "muros_diferencias_de_tono_en_pintura",
+      "label": "Diferencias de tono en pintura",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pintura_muros_cielos",
+      "aliasAinspecciona": "MUROS_PINTURA",
+      "aliasEntregaEspecialidades": "pintor",
+      "notasEjecucion": "Regularización de pintura · Deficiente terminación o aplicación irregular",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "CIELOS Y MUROS",
+      "item": "MUROS",
+      "hallazgo": "Diferencias de tono en pintura",
+      "requerimiento": "Deficiente terminación o aplicación irregular",
+      "especialidades": [
+        "pintor"
+      ],
+      "causa": "Regularización de pintura",
+      "criticidad": "Baja",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.cielos_y_muros.muros_pintura_descascarada",
+      "kpi": "TERMINACIONES",
+      "subfamilia": "muros_pintura_descascarada",
+      "label": "Pintura descascarada",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pintura_muros_cielos",
+      "aliasAinspecciona": "MUROS_PINTURA",
+      "aliasEntregaEspecialidades": "pintor",
+      "notasEjecucion": "Reparación y repintado posterior al diagnóstico · Deficiente terminación o humedad",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "CIELOS Y MUROS",
+      "item": "MUROS",
+      "hallazgo": "Pintura descascarada",
+      "requerimiento": "Deficiente terminación o humedad",
+      "especialidades": [
+        "pintor"
+      ],
+      "causa": "Reparación y repintado posterior al diagnóstico",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.cielos_y_muros.muros_marcas_de_rodillo_visibles",
+      "kpi": "TERMINACIONES",
+      "subfamilia": "muros_marcas_de_rodillo_visibles",
+      "label": "Marcas de rodillo visibles",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pintura_muros_cielos",
+      "aliasAinspecciona": "MUROS_PINTURA",
+      "aliasEntregaEspecialidades": "pintor",
+      "notasEjecucion": "Regularización y repintado · Deficiente terminación de pintura",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "CIELOS Y MUROS",
+      "item": "MUROS",
+      "hallazgo": "Marcas de rodillo visibles",
+      "requerimiento": "Deficiente terminación de pintura",
+      "especialidades": [
+        "pintor"
+      ],
+      "causa": "Regularización y repintado",
+      "criticidad": "Baja",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.cielos_y_muros.muros_hongos_en_superficies_pintadas",
+      "kpi": "TERMINACIONES",
+      "subfamilia": "muros_hongos_en_superficies_pintadas",
+      "label": "Hongos en superficies pintadas",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pintura_muros_cielos",
+      "aliasAinspecciona": "MUROS_PINTURA",
+      "aliasEntregaEspecialidades": "gasfiter, pintor",
+      "notasEjecucion": "Tratamiento antihumedad y evaluación técnica · Exceso de humedad o filtraciones",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "CIELOS Y MUROS",
+      "item": "MUROS",
+      "hallazgo": "Hongos en superficies pintadas",
+      "requerimiento": "Exceso de humedad o filtraciones",
+      "especialidades": [
+        "gasfiter",
+        "pintor"
+      ],
+      "causa": "Tratamiento antihumedad y evaluación técnica",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.cielos_y_muros.muros_manchas_negras_en_muros_o_cielos",
+      "kpi": "TERMINACIONES",
+      "subfamilia": "muros_manchas_negras_en_muros_o_cielos",
+      "label": "Manchas negras en muros o cielos",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pintura_muros_cielos",
+      "aliasAinspecciona": "MUROS_PINTURA",
+      "aliasEntregaEspecialidades": "pintor",
+      "notasEjecucion": "Tratamiento antihumedad y evaluación técnica · Humedad, condensación o terminación deficiente",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "CIELOS Y MUROS",
+      "item": "MUROS",
+      "hallazgo": "Manchas negras en muros o cielos",
+      "requerimiento": "Humedad, condensación o terminación deficiente",
+      "especialidades": [
+        "pintor"
+      ],
+      "causa": "Tratamiento antihumedad y evaluación técnica",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.puertas_y_ventanas.puerta_puerta_roza_el_piso",
+      "kpi": "PUERTAS_HERRAJES",
+      "subfamilia": "puerta_puerta_roza_el_piso",
+      "label": "Puerta roza el piso.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "puertas_cerraduras",
+      "aliasAinspecciona": "PUERTAS_HERRAJES",
+      "aliasEntregaEspecialidades": "CARPINTERO",
+      "notasEjecucion": "error de instalacion · regulacion de puertas",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PUERTAS Y VENTANAS",
+      "item": "PUERTA",
+      "hallazgo": "Puerta roza el piso.",
+      "requerimiento": "regulacion de puertas",
+      "especialidades": [
+        "CARPINTERO"
+      ],
+      "causa": "error de instalacion",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.puertas_y_ventanas.puerta_dificultad_para_cerrar",
+      "kpi": "PUERTAS_HERRAJES",
+      "subfamilia": "puerta_dificultad_para_cerrar",
+      "label": "Dificultad para cerrar.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "puertas_cerraduras",
+      "aliasAinspecciona": "PUERTAS_HERRAJES",
+      "aliasEntregaEspecialidades": "CARPINTERO",
+      "notasEjecucion": "error de instalacion · regulacion de puertas",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PUERTAS Y VENTANAS",
+      "item": "PUERTA",
+      "hallazgo": "Dificultad para cerrar.",
+      "requerimiento": "regulacion de puertas",
+      "especialidades": [
+        "CARPINTERO"
+      ],
+      "causa": "error de instalacion",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.puertas_y_ventanas.puerta_hoja_desalineada",
+      "kpi": "PUERTAS_HERRAJES",
+      "subfamilia": "puerta_hoja_desalineada",
+      "label": "Hoja desalineada.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "puertas_cerraduras",
+      "aliasAinspecciona": "PUERTAS_HERRAJES",
+      "aliasEntregaEspecialidades": "CARPINTERO",
+      "notasEjecucion": "error de instalacion · regulacion de puertas",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PUERTAS Y VENTANAS",
+      "item": "PUERTA",
+      "hallazgo": "Hoja desalineada.",
+      "requerimiento": "regulacion de puertas",
+      "especialidades": [
+        "CARPINTERO"
+      ],
+      "causa": "error de instalacion",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.puertas_y_ventanas.puerta_apertura_involuntaria",
+      "kpi": "PUERTAS_HERRAJES",
+      "subfamilia": "puerta_apertura_involuntaria",
+      "label": "Apertura involuntaria.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "puertas_cerraduras",
+      "aliasAinspecciona": "PUERTAS_HERRAJES",
+      "aliasEntregaEspecialidades": "CARPINTERO",
+      "notasEjecucion": "error de instalacion · regulacion de puertas",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PUERTAS Y VENTANAS",
+      "item": "PUERTA",
+      "hallazgo": "Apertura involuntaria.",
+      "requerimiento": "regulacion de puertas",
+      "especialidades": [
+        "CARPINTERO"
+      ],
+      "causa": "error de instalacion",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.puertas_y_ventanas.puerta_pestillo_no_engancha",
+      "kpi": "PUERTAS_HERRAJES",
+      "subfamilia": "puerta_pestillo_no_engancha",
+      "label": "Pestillo no engancha.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "puertas_cerraduras",
+      "aliasAinspecciona": "PUERTAS_HERRAJES",
+      "aliasEntregaEspecialidades": "CARPINTERO",
+      "notasEjecucion": "falla de accesorio · mal funcionamiento",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PUERTAS Y VENTANAS",
+      "item": "PUERTA",
+      "hallazgo": "Pestillo no engancha.",
+      "requerimiento": "mal funcionamiento",
+      "especialidades": [
+        "CARPINTERO"
+      ],
+      "causa": "falla de accesorio",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.puertas_y_ventanas.puerta_cerradura_trabada",
+      "kpi": "PUERTAS_HERRAJES",
+      "subfamilia": "puerta_cerradura_trabada",
+      "label": "Cerradura trabada.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "puertas_cerraduras",
+      "aliasAinspecciona": "PUERTAS_HERRAJES",
+      "aliasEntregaEspecialidades": "CARPINTERO",
+      "notasEjecucion": "falla de accesorio · mal funcionamiento",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PUERTAS Y VENTANAS",
+      "item": "PUERTA",
+      "hallazgo": "Cerradura trabada.",
+      "requerimiento": "mal funcionamiento",
+      "especialidades": [
+        "CARPINTERO"
+      ],
+      "causa": "falla de accesorio",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.puertas_y_ventanas.puerta_dificultad_para_girar_llave",
+      "kpi": "PUERTAS_HERRAJES",
+      "subfamilia": "puerta_dificultad_para_girar_llave",
+      "label": "Dificultad para girar llave.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "puertas_cerraduras",
+      "aliasAinspecciona": "PUERTAS_HERRAJES",
+      "aliasEntregaEspecialidades": "CARPINTERO",
+      "notasEjecucion": "falla de accesorio · mal funcionamiento",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PUERTAS Y VENTANAS",
+      "item": "PUERTA",
+      "hallazgo": "Dificultad para girar llave.",
+      "requerimiento": "mal funcionamiento",
+      "especialidades": [
+        "CARPINTERO"
+      ],
+      "causa": "falla de accesorio",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.puertas_y_ventanas.puerta_rayaduras",
+      "kpi": "PUERTAS_HERRAJES",
+      "subfamilia": "puerta_rayaduras",
+      "label": "Rayaduras.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "puertas_cerraduras",
+      "aliasAinspecciona": "PUERTAS_HERRAJES",
+      "aliasEntregaEspecialidades": "CARPINTERO",
+      "notasEjecucion": "deficiencia de material · deficiente terminacion",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PUERTAS Y VENTANAS",
+      "item": "PUERTA",
+      "hallazgo": "Rayaduras.",
+      "requerimiento": "deficiente terminacion",
+      "especialidades": [
+        "CARPINTERO"
+      ],
+      "causa": "deficiencia de material",
+      "criticidad": "Baja",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.puertas_y_ventanas.puerta_golpes",
+      "kpi": "PUERTAS_HERRAJES",
+      "subfamilia": "puerta_golpes",
+      "label": "Golpes.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "puertas_cerraduras",
+      "aliasAinspecciona": "PUERTAS_HERRAJES",
+      "aliasEntregaEspecialidades": "CARPINTERO",
+      "notasEjecucion": "deterioro de material · deficiente terminacion",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PUERTAS Y VENTANAS",
+      "item": "PUERTA",
+      "hallazgo": "Golpes.",
+      "requerimiento": "deficiente terminacion",
+      "especialidades": [
+        "CARPINTERO"
+      ],
+      "causa": "deterioro de material",
+      "criticidad": "Baja",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.puertas_y_ventanas.puerta_desprendimiento_de_enchape",
+      "kpi": "PUERTAS_HERRAJES",
+      "subfamilia": "puerta_desprendimiento_de_enchape",
+      "label": "Desprendimiento de enchape.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "puertas_cerraduras",
+      "aliasAinspecciona": "PUERTAS_HERRAJES",
+      "aliasEntregaEspecialidades": "CARPINTERO",
+      "notasEjecucion": "deficiencia de material o instalacion · deficiente terminacion",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PUERTAS Y VENTANAS",
+      "item": "PUERTA",
+      "hallazgo": "Desprendimiento de enchape.",
+      "requerimiento": "deficiente terminacion",
+      "especialidades": [
+        "CARPINTERO"
+      ],
+      "causa": "deficiencia de material o instalacion",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.puertas_y_ventanas.puerta_hinchamiento_por_humedad",
+      "kpi": "PUERTAS_HERRAJES",
+      "subfamilia": "puerta_hinchamiento_por_humedad",
+      "label": "Hinchamiento por humedad.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "puertas_cerraduras",
+      "aliasAinspecciona": "PUERTAS_HERRAJES",
+      "aliasEntregaEspecialidades": "CARPINTERO",
+      "notasEjecucion": "deficiencia de material o filtracion · deficiente terminacion",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PUERTAS Y VENTANAS",
+      "item": "PUERTA",
+      "hallazgo": "Hinchamiento por humedad.",
+      "requerimiento": "deficiente terminacion",
+      "especialidades": [
+        "CARPINTERO"
+      ],
+      "causa": "deficiencia de material o filtracion",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.puertas_y_ventanas.puerta_manillas_sueltas",
+      "kpi": "PUERTAS_HERRAJES",
+      "subfamilia": "puerta_manillas_sueltas",
+      "label": "Manillas sueltas.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "puertas_cerraduras",
+      "aliasAinspecciona": "PUERTAS_HERRAJES",
+      "aliasEntregaEspecialidades": "CARPINTERO",
+      "notasEjecucion": "deficiente instalacion o falla de quincalleria · mal funcionamiento",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PUERTAS Y VENTANAS",
+      "item": "PUERTA",
+      "hallazgo": "Manillas sueltas.",
+      "requerimiento": "mal funcionamiento",
+      "especialidades": [
+        "CARPINTERO"
+      ],
+      "causa": "deficiente instalacion o falla de quincalleria",
+      "criticidad": "Baja",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.puertas_y_ventanas.puerta_bisagras_con_juego",
+      "kpi": "PUERTAS_HERRAJES",
+      "subfamilia": "puerta_bisagras_con_juego",
+      "label": "Bisagras con juego.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "puertas_cerraduras",
+      "aliasAinspecciona": "PUERTAS_HERRAJES",
+      "aliasEntregaEspecialidades": "CARPINTERO",
+      "notasEjecucion": "deficiente instalacion o falla de quincalleria · mal funcionamiento",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PUERTAS Y VENTANAS",
+      "item": "PUERTA",
+      "hallazgo": "Bisagras con juego.",
+      "requerimiento": "mal funcionamiento",
+      "especialidades": [
+        "CARPINTERO"
+      ],
+      "causa": "deficiente instalacion o falla de quincalleria",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.puertas_y_ventanas.puerta_quincalleria_oxidada",
+      "kpi": "PUERTAS_HERRAJES",
+      "subfamilia": "puerta_quincalleria_oxidada",
+      "label": "Quincallería oxidada.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "puertas_cerraduras",
+      "aliasAinspecciona": "PUERTAS_HERRAJES",
+      "aliasEntregaEspecialidades": "CARPINTERO",
+      "notasEjecucion": "falla de material · mal funcionamiento",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PUERTAS Y VENTANAS",
+      "item": "PUERTA",
+      "hallazgo": "Quincallería oxidada.",
+      "requerimiento": "mal funcionamiento",
+      "especialidades": [
+        "CARPINTERO"
+      ],
+      "causa": "falla de material",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.puertas_y_ventanas.ventanas_ingreso_de_agua_lluvia",
+      "kpi": "VENTANAS_CERRAMIENTOS",
+      "subfamilia": "ventanas_ingreso_de_agua_lluvia",
+      "label": "Ingreso de agua lluvia.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "ventanas_sellos",
+      "aliasAinspecciona": "VENTANAS_CERRAMIENTOS",
+      "aliasEntregaEspecialidades": "VENTANERO",
+      "notasEjecucion": "falla de instalacion y hermeticidad · filtracion",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PUERTAS Y VENTANAS",
+      "item": "VENTANAS",
+      "hallazgo": "Ingreso de agua lluvia.",
+      "requerimiento": "filtracion",
+      "especialidades": [
+        "VENTANERO"
+      ],
+      "causa": "falla de instalacion y hermeticidad",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.puertas_y_ventanas.ventanas_goteos",
+      "kpi": "VENTANAS_CERRAMIENTOS",
+      "subfamilia": "ventanas_goteos",
+      "label": "Goteos.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "ventanas_sellos",
+      "aliasAinspecciona": "VENTANAS_CERRAMIENTOS",
+      "aliasEntregaEspecialidades": "VENTANERO",
+      "notasEjecucion": "falla de instalacion y hermeticidad · filtracion",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PUERTAS Y VENTANAS",
+      "item": "VENTANAS",
+      "hallazgo": "Goteos.",
+      "requerimiento": "filtracion",
+      "especialidades": [
+        "VENTANERO"
+      ],
+      "causa": "falla de instalacion y hermeticidad",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.puertas_y_ventanas.ventanas_dano_en_muros_interiores",
+      "kpi": "VENTANAS_CERRAMIENTOS",
+      "subfamilia": "ventanas_dano_en_muros_interiores",
+      "label": "Daño en muros interiores.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "ventanas_sellos",
+      "aliasAinspecciona": "VENTANAS_CERRAMIENTOS",
+      "aliasEntregaEspecialidades": "VENTANERO",
+      "notasEjecucion": "falla de instalacion y hermeticidad · filtracion",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PUERTAS Y VENTANAS",
+      "item": "VENTANAS",
+      "hallazgo": "Daño en muros interiores.",
+      "requerimiento": "filtracion",
+      "especialidades": [
+        "VENTANERO"
+      ],
+      "causa": "falla de instalacion y hermeticidad",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.puertas_y_ventanas.ventanas_sellos_deteriorados",
+      "kpi": "VENTANAS_CERRAMIENTOS",
+      "subfamilia": "ventanas_sellos_deteriorados",
+      "label": "Sellos deteriorados.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "ventanas_sellos",
+      "aliasAinspecciona": "VENTANAS_CERRAMIENTOS",
+      "aliasEntregaEspecialidades": "VENTANERO",
+      "notasEjecucion": "falla de instalacion y hermeticidad · filtracion",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PUERTAS Y VENTANAS",
+      "item": "VENTANAS",
+      "hallazgo": "Sellos deteriorados.",
+      "requerimiento": "filtracion",
+      "especialidades": [
+        "VENTANERO"
+      ],
+      "causa": "falla de instalacion y hermeticidad",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.puertas_y_ventanas.ventanas_corrientes_de_aire",
+      "kpi": "VENTANAS_CERRAMIENTOS",
+      "subfamilia": "ventanas_corrientes_de_aire",
+      "label": "Corrientes de aire.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "ventanas_sellos",
+      "aliasAinspecciona": "VENTANAS_CERRAMIENTOS",
+      "aliasEntregaEspecialidades": "VENTANERO",
+      "notasEjecucion": "error de constructivo o instalacion · filtracion",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PUERTAS Y VENTANAS",
+      "item": "VENTANAS",
+      "hallazgo": "Corrientes de aire.",
+      "requerimiento": "filtracion",
+      "especialidades": [
+        "VENTANERO"
+      ],
+      "causa": "error de constructivo o instalacion",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.puertas_y_ventanas.ventanas_perdida_termica",
+      "kpi": "VENTANAS_CERRAMIENTOS",
+      "subfamilia": "ventanas_perdida_termica",
+      "label": "Pérdida térmica.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "ventanas_sellos",
+      "aliasAinspecciona": "VENTANAS_CERRAMIENTOS",
+      "aliasEntregaEspecialidades": "VENTANERO",
+      "notasEjecucion": "error de constructivo o instalacion · filtracion",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PUERTAS Y VENTANAS",
+      "item": "VENTANAS",
+      "hallazgo": "Pérdida térmica.",
+      "requerimiento": "filtracion",
+      "especialidades": [
+        "VENTANERO"
+      ],
+      "causa": "error de constructivo o instalacion",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.puertas_y_ventanas.ventanas_deficiente_hermeticidad",
+      "kpi": "VENTANAS_CERRAMIENTOS",
+      "subfamilia": "ventanas_deficiente_hermeticidad",
+      "label": "Deficiente hermeticidad.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "ventanas_sellos",
+      "aliasAinspecciona": "VENTANAS_CERRAMIENTOS",
+      "aliasEntregaEspecialidades": "VENTANERO",
+      "notasEjecucion": "error de constructivo o instalacion · filtracion",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PUERTAS Y VENTANAS",
+      "item": "VENTANAS",
+      "hallazgo": "Deficiente hermeticidad.",
+      "requerimiento": "filtracion",
+      "especialidades": [
+        "VENTANERO"
+      ],
+      "causa": "error de constructivo o instalacion",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.puertas_y_ventanas.ventanas_ventanas_trabadas",
+      "kpi": "VENTANAS_CERRAMIENTOS",
+      "subfamilia": "ventanas_ventanas_trabadas",
+      "label": "Ventanas trabadas.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "ventanas_sellos",
+      "aliasAinspecciona": "VENTANAS_CERRAMIENTOS",
+      "aliasEntregaEspecialidades": "VENTANERO",
+      "notasEjecucion": "error de instalacion o accesorios trabados · deficiente instalacion no funciona",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PUERTAS Y VENTANAS",
+      "item": "VENTANAS",
+      "hallazgo": "Ventanas trabadas.",
+      "requerimiento": "deficiente instalacion no funciona",
+      "especialidades": [
+        "VENTANERO"
+      ],
+      "causa": "error de instalacion o accesorios trabados",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.puertas_y_ventanas.ventanas_correderas_duras",
+      "kpi": "VENTANAS_CERRAMIENTOS",
+      "subfamilia": "ventanas_correderas_duras",
+      "label": "Correderas duras.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "ventanas_sellos",
+      "aliasAinspecciona": "VENTANAS_CERRAMIENTOS",
+      "aliasEntregaEspecialidades": "VENTANERO",
+      "notasEjecucion": "error de instalacion o accesorios trabados · deficiente instalacion no funciona",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PUERTAS Y VENTANAS",
+      "item": "VENTANAS",
+      "hallazgo": "Correderas duras.",
+      "requerimiento": "deficiente instalacion no funciona",
+      "especialidades": [
+        "VENTANERO"
+      ],
+      "causa": "error de instalacion o accesorios trabados",
+      "criticidad": "Baja",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.puertas_y_ventanas.ventanas_hojas_desalineadas",
+      "kpi": "VENTANAS_CERRAMIENTOS",
+      "subfamilia": "ventanas_hojas_desalineadas",
+      "label": "Hojas desalineadas.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "ventanas_sellos",
+      "aliasAinspecciona": "VENTANAS_CERRAMIENTOS",
+      "aliasEntregaEspecialidades": "VENTANERO",
+      "notasEjecucion": "error de instalacion o accesorios trabados · deficiente instalacion no funciona",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PUERTAS Y VENTANAS",
+      "item": "VENTANAS",
+      "hallazgo": "Hojas desalineadas.",
+      "requerimiento": "deficiente instalacion no funciona",
+      "especialidades": [
+        "VENTANERO"
+      ],
+      "causa": "error de instalacion o accesorios trabados",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.puertas_y_ventanas.ventanas_rayaduras",
+      "kpi": "VENTANAS_CERRAMIENTOS",
+      "subfamilia": "ventanas_rayaduras",
+      "label": "Rayaduras.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "ventanas_sellos",
+      "aliasAinspecciona": "VENTANAS_CERRAMIENTOS",
+      "aliasEntregaEspecialidades": "VENTANERO",
+      "notasEjecucion": "error de instalacion · vidrios dañados",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PUERTAS Y VENTANAS",
+      "item": "VENTANAS",
+      "hallazgo": "Rayaduras.",
+      "requerimiento": "vidrios dañados",
+      "especialidades": [
+        "VENTANERO"
+      ],
+      "causa": "error de instalacion",
+      "criticidad": "Baja",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.puertas_y_ventanas.ventanas_trizaduras",
+      "kpi": "VENTANAS_CERRAMIENTOS",
+      "subfamilia": "ventanas_trizaduras",
+      "label": "Trizaduras.",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "ventanas_sellos",
+      "aliasAinspecciona": "VENTANAS_CERRAMIENTOS",
+      "aliasEntregaEspecialidades": "VENTANERO",
+      "notasEjecucion": "error de instalacion · vidrios dañados",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PUERTAS Y VENTANAS",
+      "item": "VENTANAS",
+      "hallazgo": "Trizaduras.",
+      "requerimiento": "vidrios dañados",
+      "especialidades": [
+        "VENTANERO"
+      ],
+      "causa": "error de instalacion",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.puertas_y_ventanas.ventanas_condensacion_interior_en_termopanel",
+      "kpi": "VENTANAS_CERRAMIENTOS",
+      "subfamilia": "ventanas_condensacion_interior_en_termopanel",
+      "label": "Condensación interior en termopanel",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "ventanas_sellos",
+      "aliasAinspecciona": "VENTANAS_CERRAMIENTOS",
+      "aliasEntregaEspecialidades": "VENTANERO",
+      "notasEjecucion": "problema de fabricacion o instalacion · vidrios dañados",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PUERTAS Y VENTANAS",
+      "item": "VENTANAS",
+      "hallazgo": "Condensación interior en termopanel",
+      "requerimiento": "vidrios dañados",
+      "especialidades": [
+        "VENTANERO"
+      ],
+      "causa": "problema de fabricacion o instalacion",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.pisos.pisos_sonido_hueco_al_caminar_sobre_ceramicas_o_porcelanatos",
+      "kpi": "PISOS",
+      "subfamilia": "pisos_sonido_hueco_al_caminar_sobre_ceramicas_o_porcelanatos",
+      "label": "Sonido hueco al caminar sobre cerámicas o porcelanatos",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pisos",
+      "aliasAinspecciona": "PISOS",
+      "aliasEntregaEspecialidades": "Instalador Ceramica",
+      "notasEjecucion": "Reposición de palmetas afectadas · Error de instalación o deficiencia en la adherencia",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PISOS",
+      "item": "PISOS",
+      "hallazgo": "Sonido hueco al caminar sobre cerámicas o porcelanatos",
+      "requerimiento": "Error de instalación o deficiencia en la adherencia",
+      "especialidades": [
+        "Instalador Ceramica"
+      ],
+      "causa": "Reposición de palmetas afectadas",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.pisos.pisos_movimiento_de_palmetas",
+      "kpi": "PISOS",
+      "subfamilia": "pisos_movimiento_de_palmetas",
+      "label": "Movimiento de palmetas",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pisos",
+      "aliasAinspecciona": "PISOS",
+      "aliasEntregaEspecialidades": "Instalador Ceramica",
+      "notasEjecucion": "Reposición de cerámicas o porcelanatos · Error de instalación",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PISOS",
+      "item": "PISOS",
+      "hallazgo": "Movimiento de palmetas",
+      "requerimiento": "Error de instalación",
+      "especialidades": [
+        "Instalador Ceramica"
+      ],
+      "causa": "Reposición de cerámicas o porcelanatos",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.pisos.pisos_frague_agrietado",
+      "kpi": "PISOS",
+      "subfamilia": "pisos_frague_agrietado",
+      "label": "Fragüe agrietado",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pisos",
+      "aliasAinspecciona": "PISOS",
+      "aliasEntregaEspecialidades": "Instalador Ceramica",
+      "notasEjecucion": "Reparación de juntas y reposición de fragüe · Error de instalación o movimientos del revestimiento",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PISOS",
+      "item": "PISOS",
+      "hallazgo": "Fragüe agrietado",
+      "requerimiento": "Error de instalación o movimientos del revestimiento",
+      "especialidades": [
+        "Instalador Ceramica"
+      ],
+      "causa": "Reparación de juntas y reposición de fragüe",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.pisos.pisos_diferencias_de_nivel_en_pisos",
+      "kpi": "PISOS",
+      "subfamilia": "pisos_diferencias_de_nivel_en_pisos",
+      "label": "Diferencias de nivel en pisos",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pisos",
+      "aliasAinspecciona": "PISOS",
+      "aliasEntregaEspecialidades": "Instalador Ceramica",
+      "notasEjecucion": "Corrección de desniveles · Error de instalación",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PISOS",
+      "item": "PISOS",
+      "hallazgo": "Diferencias de nivel en pisos",
+      "requerimiento": "Error de instalación",
+      "especialidades": [
+        "Instalador Ceramica"
+      ],
+      "causa": "Corrección de desniveles",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.pisos.pisos_rayaduras_en_pisos",
+      "kpi": "PISOS",
+      "subfamilia": "pisos_rayaduras_en_pisos",
+      "label": "Rayaduras en pisos",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pisos",
+      "aliasAinspecciona": "PISOS",
+      "aliasEntregaEspecialidades": "Instalador pisos",
+      "notasEjecucion": "",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PISOS",
+      "item": "PISOS",
+      "hallazgo": "Rayaduras en pisos",
+      "requerimiento": "",
+      "especialidades": [
+        "Instalador pisos"
+      ],
+      "causa": "",
+      "criticidad": "Media",
+      "garantiaAnios": [],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.pisos.pisos_golpes_o_impactos_en_pisos",
+      "kpi": "PISOS",
+      "subfamilia": "pisos_golpes_o_impactos_en_pisos",
+      "label": "Golpes o impactos en pisos",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pisos",
+      "aliasAinspecciona": "PISOS",
+      "aliasEntregaEspecialidades": "Instalador pisos",
+      "notasEjecucion": "Reparación localizada o reposición · Deterioro por manipulación o instalación",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PISOS",
+      "item": "PISOS",
+      "hallazgo": "Golpes o impactos en pisos",
+      "requerimiento": "Deterioro por manipulación o instalación",
+      "especialidades": [
+        "Instalador pisos"
+      ],
+      "causa": "Reparación localizada o reposición",
+      "criticidad": "Baja",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.pisos.pisos_manchas_permanentes",
+      "kpi": "PISOS",
+      "subfamilia": "pisos_manchas_permanentes",
+      "label": "Manchas permanentes",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pisos",
+      "aliasAinspecciona": "PISOS",
+      "aliasEntregaEspecialidades": "Instalador pisos",
+      "notasEjecucion": "Evaluación y reposición si corresponde · Deficiencia del material o contaminación superficial",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PISOS",
+      "item": "PISOS",
+      "hallazgo": "Manchas permanentes",
+      "requerimiento": "Deficiencia del material o contaminación superficial",
+      "especialidades": [
+        "Instalador pisos"
+      ],
+      "causa": "Evaluación y reposición si corresponde",
+      "criticidad": "Baja",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.pisos.pisos_olor_a_humedad_en_pisos",
+      "kpi": "PISOS",
+      "subfamilia": "pisos_olor_a_humedad_en_pisos",
+      "label": "Olor a humedad en pisos",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pisos",
+      "aliasAinspecciona": "PISOS",
+      "aliasEntregaEspecialidades": "Instalador Ceramica",
+      "notasEjecucion": "",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PISOS",
+      "item": "PISOS",
+      "hallazgo": "Olor a humedad en pisos",
+      "requerimiento": "",
+      "especialidades": [
+        "Instalador Ceramica"
+      ],
+      "causa": "",
+      "criticidad": "Media",
+      "garantiaAnios": [],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.pisos.pisos_separacion_entre_elementos_de_piso",
+      "kpi": "PISOS",
+      "subfamilia": "pisos_separacion_entre_elementos_de_piso",
+      "label": "Separación entre elementos de piso",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pisos",
+      "aliasAinspecciona": "PISOS",
+      "aliasEntregaEspecialidades": "Instalador pisos",
+      "notasEjecucion": "Regularización y reinstalación · Error de instalación o movimientos del material",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PISOS",
+      "item": "PISOS",
+      "hallazgo": "Separación entre elementos de piso",
+      "requerimiento": "Error de instalación o movimientos del material",
+      "especialidades": [
+        "Instalador pisos"
+      ],
+      "causa": "Regularización y reinstalación",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.pisos.pisos_crujidos_al_transitar",
+      "kpi": "PISOS",
+      "subfamilia": "pisos_crujidos_al_transitar",
+      "label": "Crujidos al transitar",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pisos",
+      "aliasAinspecciona": "PISOS",
+      "aliasEntregaEspecialidades": "Instalador pisos",
+      "notasEjecucion": "Corrección de apoyo y nivelación · Error de instalación o base deficiente",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PISOS",
+      "item": "PISOS",
+      "hallazgo": "Crujidos al transitar",
+      "requerimiento": "Error de instalación o base deficiente",
+      "especialidades": [
+        "Instalador pisos"
+      ],
+      "causa": "Corrección de apoyo y nivelación",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.pisos.pisos_hundimientos_localizados",
+      "kpi": "PISOS",
+      "subfamilia": "pisos_hundimientos_localizados",
+      "label": "Hundimientos localizados",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pisos",
+      "aliasAinspecciona": "PISOS",
+      "aliasEntregaEspecialidades": "Instalador pisos",
+      "notasEjecucion": "Corrección de desniveles y reparación de base · Base deficiente o error constructivo",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PISOS",
+      "item": "PISOS",
+      "hallazgo": "Hundimientos localizados",
+      "requerimiento": "Base deficiente o error constructivo",
+      "especialidades": [
+        "Instalador pisos"
+      ],
+      "causa": "Corrección de desniveles y reparación de base",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.pisos.pisos_levantamiento_de_uniones",
+      "kpi": "PISOS",
+      "subfamilia": "pisos_levantamiento_de_uniones",
+      "label": "Levantamiento de uniones",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pisos",
+      "aliasAinspecciona": "PISOS",
+      "aliasEntregaEspecialidades": "Instalador pisos",
+      "notasEjecucion": "Reinstalación y corrección de uniones · Error de instalación o movimientos del material",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PISOS",
+      "item": "PISOS",
+      "hallazgo": "Levantamiento de uniones",
+      "requerimiento": "Error de instalación o movimientos del material",
+      "especialidades": [
+        "Instalador pisos"
+      ],
+      "causa": "Reinstalación y corrección de uniones",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.pisos.pisos_deshilachado_de_alfombra",
+      "kpi": "PISOS",
+      "subfamilia": "pisos_deshilachado_de_alfombra",
+      "label": "Deshilachado de Alfombra",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pisos",
+      "aliasAinspecciona": "PISOS",
+      "aliasEntregaEspecialidades": "Instalador pisos",
+      "notasEjecucion": "",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PISOS",
+      "item": "PISOS",
+      "hallazgo": "Deshilachado de Alfombra",
+      "requerimiento": "",
+      "especialidades": [
+        "Instalador pisos"
+      ],
+      "causa": "",
+      "criticidad": "Media",
+      "garantiaAnios": [],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.pisos.pisos_uniones_de_alfombra",
+      "kpi": "PISOS",
+      "subfamilia": "pisos_uniones_de_alfombra",
+      "label": "uniones de alfombra",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pisos",
+      "aliasAinspecciona": "PISOS",
+      "aliasEntregaEspecialidades": "Instalador pisos",
+      "notasEjecucion": "",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PISOS",
+      "item": "PISOS",
+      "hallazgo": "uniones de alfombra",
+      "requerimiento": "",
+      "especialidades": [
+        "Instalador pisos"
+      ],
+      "causa": "",
+      "criticidad": "Media",
+      "garantiaAnios": [],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.pisos.pisos_falta_cubrejunta",
+      "kpi": "PISOS",
+      "subfamilia": "pisos_falta_cubrejunta",
+      "label": "falta cubrejunta",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pisos",
+      "aliasAinspecciona": "PISOS",
+      "aliasEntregaEspecialidades": "Instalador pisos",
+      "notasEjecucion": "",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PISOS",
+      "item": "PISOS",
+      "hallazgo": "falta cubrejunta",
+      "requerimiento": "",
+      "especialidades": [
+        "Instalador pisos"
+      ],
+      "causa": "",
+      "criticidad": "Media",
+      "garantiaAnios": [],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.pisos.pisos_pendientes_no_deseadas",
+      "kpi": "PISOS",
+      "subfamilia": "pisos_pendientes_no_deseadas",
+      "label": "Pendientes no deseadas",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pisos",
+      "aliasAinspecciona": "PISOS",
+      "aliasEntregaEspecialidades": "Albañil",
+      "notasEjecucion": "Regularización del nivel de piso · Error constructivo",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PISOS",
+      "item": "PISOS",
+      "hallazgo": "Pendientes no deseadas",
+      "requerimiento": "Error constructivo",
+      "especialidades": [
+        "Albañil"
+      ],
+      "causa": "Regularización del nivel de piso",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.pisos.pisos_perdida_de_brillo",
+      "kpi": "PISOS",
+      "subfamilia": "pisos_perdida_de_brillo",
+      "label": "Pérdida de brillo",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pisos",
+      "aliasAinspecciona": "PISOS",
+      "aliasEntregaEspecialidades": "Instalador pisos",
+      "notasEjecucion": "Tratamiento superficial o reposición · Deficiencia de material o terminación",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PISOS",
+      "item": "PISOS",
+      "hallazgo": "Pérdida de brillo",
+      "requerimiento": "Deficiencia de material o terminación",
+      "especialidades": [
+        "Instalador pisos"
+      ],
+      "causa": "Tratamiento superficial o reposición",
+      "criticidad": "Baja",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.pisos.pisos_hinchamiento_de_piso_laminado_o_flotante",
+      "kpi": "PISOS",
+      "subfamilia": "pisos_hinchamiento_de_piso_laminado_o_flotante",
+      "label": "Hinchamiento de piso laminado o flotante",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pisos",
+      "aliasAinspecciona": "PISOS",
+      "aliasEntregaEspecialidades": "Instalador pisos",
+      "notasEjecucion": "Diagnóstico de origen y reposición · Exceso de humedad o filtración",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "PISOS",
+      "item": "PISOS",
+      "hallazgo": "Hinchamiento de piso laminado o flotante",
+      "requerimiento": "Exceso de humedad o filtración",
+      "especialidades": [
+        "Instalador pisos"
+      ],
+      "causa": "Diagnóstico de origen y reposición",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        3
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_sanitarias.filtraciones_sifon_mal_ajustado",
+      "kpi": "SANITARIOS",
+      "subfamilia": "filtraciones_sifon_mal_ajustado",
+      "label": "Sifón mal ajustado",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Sanitarias",
+      "aliasPostventa": "sanitarios",
+      "aliasAinspecciona": "SANITARIOS",
+      "aliasEntregaEspecialidades": "Gasfiter",
+      "notasEjecucion": "fuga de agua en alguna union o tuberia · se observa humedad en artefactos",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES SANITARIAS",
+      "item": "FILTRACIONES",
+      "hallazgo": "Sifón mal ajustado",
+      "requerimiento": "se observa humedad en artefactos",
+      "especialidades": [
+        "Gasfiter"
+      ],
+      "causa": "fuga de agua en alguna union o tuberia",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_sanitarias.filtraciones_flexible_defectuoso",
+      "kpi": "SANITARIOS",
+      "subfamilia": "filtraciones_flexible_defectuoso",
+      "label": "Flexible defectuoso",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Sanitarias",
+      "aliasPostventa": "sanitarios",
+      "aliasAinspecciona": "SANITARIOS",
+      "aliasEntregaEspecialidades": "Gasfiter",
+      "notasEjecucion": "conexiones defectuosas o flexible mal instalado · artefacto con mal funcionamiento",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES SANITARIAS",
+      "item": "FILTRACIONES",
+      "hallazgo": "Flexible defectuoso",
+      "requerimiento": "artefacto con mal funcionamiento",
+      "especialidades": [
+        "Gasfiter"
+      ],
+      "causa": "conexiones defectuosas o flexible mal instalado",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_sanitarias.filtraciones_sellos_deteriorados",
+      "kpi": "SANITARIOS",
+      "subfamilia": "filtraciones_sellos_deteriorados",
+      "label": "Sellos deteriorados",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Sanitarias",
+      "aliasPostventa": "sanitarios",
+      "aliasAinspecciona": "SANITARIOS",
+      "aliasEntregaEspecialidades": "Gasfiter",
+      "notasEjecucion": "alta de instalacion fina7 falta de mantencion · desprendimeinto de material",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES SANITARIAS",
+      "item": "FILTRACIONES",
+      "hallazgo": "Sellos deteriorados",
+      "requerimiento": "desprendimeinto de material",
+      "especialidades": [
+        "Gasfiter"
+      ],
+      "causa": "alta de instalacion fina7 falta de mantencion",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_sanitarias.presion_de_agua_aireador_tapado",
+      "kpi": "SANITARIOS",
+      "subfamilia": "presion_de_agua_aireador_tapado",
+      "label": "Aireador tapado",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Sanitarias",
+      "aliasPostventa": "sanitarios",
+      "aliasAinspecciona": "SANITARIOS",
+      "aliasEntregaEspecialidades": "Gasfiter",
+      "notasEjecucion": "aireador con sarro · bajo caudal, cambio de artefacto",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES SANITARIAS",
+      "item": "PRESION DE AGUA",
+      "hallazgo": "Aireador tapado",
+      "requerimiento": "bajo caudal, cambio de artefacto",
+      "especialidades": [
+        "Gasfiter"
+      ],
+      "causa": "aireador con sarro",
+      "criticidad": "Baja",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_sanitarias.presion_de_agua_sarro",
+      "kpi": "SANITARIOS",
+      "subfamilia": "presion_de_agua_sarro",
+      "label": "Sarro",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Sanitarias",
+      "aliasPostventa": "sanitarios",
+      "aliasAinspecciona": "SANITARIOS",
+      "aliasEntregaEspecialidades": "Gasfiter",
+      "notasEjecucion": "agua con excesivo material calcareo verificar mantencion · bajo caudal, cambio de artefacto",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES SANITARIAS",
+      "item": "PRESION DE AGUA",
+      "hallazgo": "Sarro",
+      "requerimiento": "bajo caudal, cambio de artefacto",
+      "especialidades": [
+        "Gasfiter"
+      ],
+      "causa": "agua con excesivo material calcareo verificar mantencion",
+      "criticidad": "Baja",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_sanitarias.presion_de_agua_problema_general_de_presion",
+      "kpi": "SANITARIOS",
+      "subfamilia": "presion_de_agua_problema_general_de_presion",
+      "label": "Problema general de presión",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Sanitarias",
+      "aliasPostventa": "sanitarios",
+      "aliasAinspecciona": "SANITARIOS",
+      "aliasEntregaEspecialidades": "Gasfiter",
+      "notasEjecucion": "agua con excesivo material calcareo · bajo caudal, cambio de artefacto",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES SANITARIAS",
+      "item": "PRESION DE AGUA",
+      "hallazgo": "Problema general de presión",
+      "requerimiento": "bajo caudal, cambio de artefacto",
+      "especialidades": [
+        "Gasfiter"
+      ],
+      "causa": "agua con excesivo material calcareo",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_sanitarias.filtraciones_fuga_de_agua_bajo_lavamanos",
+      "kpi": "SANITARIOS",
+      "subfamilia": "filtraciones_fuga_de_agua_bajo_lavamanos",
+      "label": "Fuga de agua bajo lavamanos",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Sanitarias",
+      "aliasPostventa": "sanitarios",
+      "aliasAinspecciona": "SANITARIOS",
+      "aliasEntregaEspecialidades": "Gasfiter",
+      "notasEjecucion": "Revisar conexiones y reemplazar sellos · Conexiones mal ajustadas o sellos deteriorados",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES SANITARIAS",
+      "item": "FILTRACIONES",
+      "hallazgo": "Fuga de agua bajo lavamanos",
+      "requerimiento": "Conexiones mal ajustadas o sellos deteriorados",
+      "especialidades": [
+        "Gasfiter"
+      ],
+      "causa": "Revisar conexiones y reemplazar sellos",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_sanitarias.filtraciones_fuga_en_lavaplatos",
+      "kpi": "SANITARIOS",
+      "subfamilia": "filtraciones_fuga_en_lavaplatos",
+      "label": "Fuga en lavaplatos",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Sanitarias",
+      "aliasPostventa": "sanitarios",
+      "aliasAinspecciona": "SANITARIOS",
+      "aliasEntregaEspecialidades": "Gasfiter",
+      "notasEjecucion": "Ajustar conexiones y reemplazar elementos defectuosos · Flexibles dañados o uniones sueltas",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES SANITARIAS",
+      "item": "FILTRACIONES",
+      "hallazgo": "Fuga en lavaplatos",
+      "requerimiento": "Flexibles dañados o uniones sueltas",
+      "especialidades": [
+        "Gasfiter"
+      ],
+      "causa": "Ajustar conexiones y reemplazar elementos defectuosos",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_sanitarias.presion_de_agua_baja_presion_de_agua",
+      "kpi": "SANITARIOS",
+      "subfamilia": "presion_de_agua_baja_presion_de_agua",
+      "label": "Baja presión de agua",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Sanitarias",
+      "aliasPostventa": "sanitarios",
+      "aliasAinspecciona": "SANITARIOS",
+      "aliasEntregaEspecialidades": "Gasfiter",
+      "notasEjecucion": "Limpiar aireadores y revisar llaves de paso · Aireadores obstruidos o válvulas cerradas",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES SANITARIAS",
+      "item": "PRESION DE AGUA",
+      "hallazgo": "Baja presión de agua",
+      "requerimiento": "Aireadores obstruidos o válvulas cerradas",
+      "especialidades": [
+        "Gasfiter"
+      ],
+      "causa": "Limpiar aireadores y revisar llaves de paso",
+      "criticidad": "Baja",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_sanitarias.artefactos_inodoro_con_descarga_deficiente",
+      "kpi": "SANITARIOS",
+      "subfamilia": "artefactos_inodoro_con_descarga_deficiente",
+      "label": "Inodoro con descarga deficiente",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Sanitarias",
+      "aliasPostventa": "sanitarios",
+      "aliasAinspecciona": "SANITARIOS",
+      "aliasEntregaEspecialidades": "Gasfiter",
+      "notasEjecucion": "Ajustar mecanismo y revisar evacuación · Obstrucción parcial o mala regulación",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES SANITARIAS",
+      "item": "ARTEFACTOS",
+      "hallazgo": "Inodoro con descarga deficiente",
+      "requerimiento": "Obstrucción parcial o mala regulación",
+      "especialidades": [
+        "Gasfiter"
+      ],
+      "causa": "Ajustar mecanismo y revisar evacuación",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_sanitarias.filtraciones_malos_olores_en_banos",
+      "kpi": "SANITARIOS",
+      "subfamilia": "filtraciones_malos_olores_en_banos",
+      "label": "Malos olores en baños",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Sanitarias",
+      "aliasPostventa": "sanitarios",
+      "aliasAinspecciona": "SANITARIOS",
+      "aliasEntregaEspecialidades": "Gasfiter",
+      "notasEjecucion": "Revisar sellos hidráulicos y ventilación · Problemas de ventilación o sifones",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES SANITARIAS",
+      "item": "FILTRACIONES",
+      "hallazgo": "Malos olores en baños",
+      "requerimiento": "Problemas de ventilación o sifones",
+      "especialidades": [
+        "Gasfiter"
+      ],
+      "causa": "Revisar sellos hidráulicos y ventilación",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_sanitarias.artefactos_rebalse_de_ducha",
+      "kpi": "SANITARIOS",
+      "subfamilia": "artefactos_rebalse_de_ducha",
+      "label": "Rebalse de ducha",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Sanitarias",
+      "aliasPostventa": "sanitarios",
+      "aliasAinspecciona": "SANITARIOS",
+      "aliasEntregaEspecialidades": "Gasfiter",
+      "notasEjecucion": "Limpiar desagüe y verificar pendientes · Acumulación de residuos",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES SANITARIAS",
+      "item": "ARTEFACTOS",
+      "hallazgo": "Rebalse de ducha",
+      "requerimiento": "Acumulación de residuos",
+      "especialidades": [
+        "Gasfiter"
+      ],
+      "causa": "Limpiar desagüe y verificar pendientes",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_sanitarias.filtraciones_filtracion_en_muro_de_bano",
+      "kpi": "SANITARIOS",
+      "subfamilia": "filtraciones_filtracion_en_muro_de_bano",
+      "label": "Filtración en muro de baño",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Sanitarias",
+      "aliasPostventa": "sanitarios",
+      "aliasAinspecciona": "SANITARIOS",
+      "aliasEntregaEspecialidades": "Gasfiter",
+      "notasEjecucion": "Inspección técnica y reparación localizada · Fuga en cañería o sellos defectuosos",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES SANITARIAS",
+      "item": "FILTRACIONES",
+      "hallazgo": "Filtración en muro de baño",
+      "requerimiento": "Fuga en cañería o sellos defectuosos",
+      "especialidades": [
+        "Gasfiter"
+      ],
+      "causa": "Inspección técnica y reparación localizada",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_sanitarias.filtraciones_goteo_en_llaves",
+      "kpi": "SANITARIOS",
+      "subfamilia": "filtraciones_goteo_en_llaves",
+      "label": "Goteo en llaves",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Sanitarias",
+      "aliasPostventa": "sanitarios",
+      "aliasAinspecciona": "SANITARIOS",
+      "aliasEntregaEspecialidades": "Gasfiter",
+      "notasEjecucion": "Reemplazar mecanismo · Cartucho o cierre desgastado",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES SANITARIAS",
+      "item": "FILTRACIONES",
+      "hallazgo": "Goteo en llaves",
+      "requerimiento": "Cartucho o cierre desgastado",
+      "especialidades": [
+        "Gasfiter"
+      ],
+      "causa": "Reemplazar mecanismo",
+      "criticidad": "Baja",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_sanitarias.filtraciones_ruido_en_tuberias",
+      "kpi": "SANITARIOS",
+      "subfamilia": "filtraciones_ruido_en_tuberias",
+      "label": "Ruido en tuberías",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Sanitarias",
+      "aliasPostventa": "sanitarios",
+      "aliasAinspecciona": "SANITARIOS",
+      "aliasEntregaEspecialidades": "Gasfiter",
+      "notasEjecucion": "Purgar sistema y revisar soportes · Aire o fijaciones deficientes",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES SANITARIAS",
+      "item": "FILTRACIONES",
+      "hallazgo": "Ruido en tuberías",
+      "requerimiento": "Aire o fijaciones deficientes",
+      "especialidades": [
+        "Gasfiter"
+      ],
+      "causa": "Purgar sistema y revisar soportes",
+      "criticidad": "Baja",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_sanitarias.artefactos_llaves_de_paso_defectuosas",
+      "kpi": "SANITARIOS",
+      "subfamilia": "artefactos_llaves_de_paso_defectuosas",
+      "label": "Llaves de paso defectuosas",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Sanitarias",
+      "aliasPostventa": "sanitarios",
+      "aliasAinspecciona": "SANITARIOS",
+      "aliasEntregaEspecialidades": "Gasfiter",
+      "notasEjecucion": "Reemplazar válvula · Desgaste o falla de componente",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES SANITARIAS",
+      "item": "ARTEFACTOS",
+      "hallazgo": "Llaves de paso defectuosas",
+      "requerimiento": "Desgaste o falla de componente",
+      "especialidades": [
+        "Gasfiter"
+      ],
+      "causa": "Reemplazar válvula",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_sanitarias.artefactos_retorno_de_agua",
+      "kpi": "SANITARIOS",
+      "subfamilia": "artefactos_retorno_de_agua",
+      "label": "Retorno de agua",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Sanitarias",
+      "aliasPostventa": "sanitarios",
+      "aliasAinspecciona": "SANITARIOS",
+      "aliasEntregaEspecialidades": "Gasfiter",
+      "notasEjecucion": "limpieza de la tuberia (destapar) · No evacua el agua",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES SANITARIAS",
+      "item": "ARTEFACTOS",
+      "hallazgo": "Retorno de agua",
+      "requerimiento": "No evacua el agua",
+      "especialidades": [
+        "Gasfiter"
+      ],
+      "causa": "limpieza de la tuberia (destapar)",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_sanitarias.artefactos_wc_suelto",
+      "kpi": "SANITARIOS",
+      "subfamilia": "artefactos_wc_suelto",
+      "label": "WC suelto",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Sanitarias",
+      "aliasPostventa": "sanitarios",
+      "aliasAinspecciona": "SANITARIOS",
+      "aliasEntregaEspecialidades": "Gasfiter",
+      "notasEjecucion": "corte de sellos o anclajes · Artefacto suelto",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES SANITARIAS",
+      "item": "ARTEFACTOS",
+      "hallazgo": "WC suelto",
+      "requerimiento": "Artefacto suelto",
+      "especialidades": [
+        "Gasfiter"
+      ],
+      "causa": "corte de sellos o anclajes",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_electricas.artefactos_enchufes_sueltos",
+      "kpi": "ELECTRICIDAD",
+      "subfamilia": "artefactos_enchufes_sueltos",
+      "label": "Enchufes sueltos",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Eléctricas",
+      "aliasPostventa": "electricidad_visible",
+      "aliasAinspecciona": "ELECTRICIDAD",
+      "aliasEntregaEspecialidades": "Electrico",
+      "notasEjecucion": "Reinstalar y fijar correctamente · Fijaciones deficientes",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES ELECTRICAS",
+      "item": "ARTEFACTOS",
+      "hallazgo": "Enchufes sueltos",
+      "requerimiento": "Fijaciones deficientes",
+      "especialidades": [
+        "Electrico"
+      ],
+      "causa": "Reinstalar y fijar correctamente",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_electricas.artefactos_enchufes_sin_energia",
+      "kpi": "ELECTRICIDAD",
+      "subfamilia": "artefactos_enchufes_sin_energia",
+      "label": "Enchufes sin energía",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Eléctricas",
+      "aliasPostventa": "electricidad_visible",
+      "aliasAinspecciona": "ELECTRICIDAD",
+      "aliasEntregaEspecialidades": "Electrico",
+      "notasEjecucion": "Revisar alimentación y conexiones · Circuito desenergizado",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES ELECTRICAS",
+      "item": "ARTEFACTOS",
+      "hallazgo": "Enchufes sin energía",
+      "requerimiento": "Circuito desenergizado",
+      "especialidades": [
+        "Electrico"
+      ],
+      "causa": "Revisar alimentación y conexiones",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_electricas.sistema_polaridad_invertida",
+      "kpi": "ELECTRICIDAD",
+      "subfamilia": "sistema_polaridad_invertida",
+      "label": "Polaridad invertida",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Eléctricas",
+      "aliasPostventa": "electricidad_visible",
+      "aliasAinspecciona": "ELECTRICIDAD",
+      "aliasEntregaEspecialidades": "Electrico",
+      "notasEjecucion": "Corregir conexiones · Error de cableado",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES ELECTRICAS",
+      "item": "SISTEMA",
+      "hallazgo": "Polaridad invertida",
+      "requerimiento": "Error de cableado",
+      "especialidades": [
+        "Electrico"
+      ],
+      "causa": "Corregir conexiones",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_electricas.sistema_chispazos_al_conectar_equipos",
+      "kpi": "ELECTRICIDAD",
+      "subfamilia": "sistema_chispazos_al_conectar_equipos",
+      "label": "Chispazos al conectar equipos",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Eléctricas",
+      "aliasPostventa": "electricidad_visible",
+      "aliasAinspecciona": "ELECTRICIDAD",
+      "aliasEntregaEspecialidades": "Electrico",
+      "notasEjecucion": "Reemplazar enchufe y revisar circuito · Contactos defectuosos",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES ELECTRICAS",
+      "item": "SISTEMA",
+      "hallazgo": "Chispazos al conectar equipos",
+      "requerimiento": "Contactos defectuosos",
+      "especialidades": [
+        "Electrico"
+      ],
+      "causa": "Reemplazar enchufe y revisar circuito",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_electricas.sistema_sobrecalentamiento",
+      "kpi": "ELECTRICIDAD",
+      "subfamilia": "sistema_sobrecalentamiento",
+      "label": "Sobrecalentamiento",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Eléctricas",
+      "aliasPostventa": "electricidad_visible",
+      "aliasAinspecciona": "ELECTRICIDAD",
+      "aliasEntregaEspecialidades": "Electrico",
+      "notasEjecucion": "Corregir instalación · Sobrecarga o mala conexión",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES ELECTRICAS",
+      "item": "SISTEMA",
+      "hallazgo": "Sobrecalentamiento",
+      "requerimiento": "Sobrecarga o mala conexión",
+      "especialidades": [
+        "Electrico"
+      ],
+      "causa": "Corregir instalación",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_electricas.sistema_falta_de_tierra",
+      "kpi": "ELECTRICIDAD",
+      "subfamilia": "sistema_falta_de_tierra",
+      "label": "Falta de tierra",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Eléctricas",
+      "aliasPostventa": "electricidad_visible",
+      "aliasAinspecciona": "ELECTRICIDAD",
+      "aliasEntregaEspecialidades": "Electrico",
+      "notasEjecucion": "Regularizar puesta a tierra · Ausencia de conductor de protección",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES ELECTRICAS",
+      "item": "SISTEMA",
+      "hallazgo": "Falta de tierra",
+      "requerimiento": "Ausencia de conductor de protección",
+      "especialidades": [
+        "Electrico"
+      ],
+      "causa": "Regularizar puesta a tierra",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_electricas.artefactos_interruptores_que_no_accionan",
+      "kpi": "ELECTRICIDAD",
+      "subfamilia": "artefactos_interruptores_que_no_accionan",
+      "label": "Interruptores que no accionan",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Eléctricas",
+      "aliasPostventa": "electricidad_visible",
+      "aliasAinspecciona": "ELECTRICIDAD",
+      "aliasEntregaEspecialidades": "Electrico",
+      "notasEjecucion": "Reemplazar interruptor · Mecanismo defectuoso",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES ELECTRICAS",
+      "item": "ARTEFACTOS",
+      "hallazgo": "Interruptores que no accionan",
+      "requerimiento": "Mecanismo defectuoso",
+      "especialidades": [
+        "Electrico"
+      ],
+      "causa": "Reemplazar interruptor",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_electricas.sistema_encendidos_intermitentes",
+      "kpi": "ELECTRICIDAD",
+      "subfamilia": "sistema_encendidos_intermitentes",
+      "label": "Encendidos intermitentes",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Eléctricas",
+      "aliasPostventa": "electricidad_visible",
+      "aliasAinspecciona": "ELECTRICIDAD",
+      "aliasEntregaEspecialidades": "Electrico",
+      "notasEjecucion": "Ajustar conexiones · Falso contacto",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES ELECTRICAS",
+      "item": "SISTEMA",
+      "hallazgo": "Encendidos intermitentes",
+      "requerimiento": "Falso contacto",
+      "especialidades": [
+        "Electrico"
+      ],
+      "causa": "Ajustar conexiones",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_electricas.sistema_chisporroteo",
+      "kpi": "ELECTRICIDAD",
+      "subfamilia": "sistema_chisporroteo",
+      "label": "Chisporroteo",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Eléctricas",
+      "aliasPostventa": "electricidad_visible",
+      "aliasAinspecciona": "ELECTRICIDAD",
+      "aliasEntregaEspecialidades": "Electrico",
+      "notasEjecucion": "Sustituir interruptor · Desgaste interno",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES ELECTRICAS",
+      "item": "SISTEMA",
+      "hallazgo": "Chisporroteo",
+      "requerimiento": "Desgaste interno",
+      "especialidades": [
+        "Electrico"
+      ],
+      "causa": "Sustituir interruptor",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_electricas.sistema_parpadeo_de_luces",
+      "kpi": "ELECTRICIDAD",
+      "subfamilia": "sistema_parpadeo_de_luces",
+      "label": "Parpadeo de luces",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Eléctricas",
+      "aliasPostventa": "electricidad_visible",
+      "aliasAinspecciona": "ELECTRICIDAD",
+      "aliasEntregaEspecialidades": "Electrico",
+      "notasEjecucion": "Revisar circuito · Mal contacto",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES ELECTRICAS",
+      "item": "SISTEMA",
+      "hallazgo": "Parpadeo de luces",
+      "requerimiento": "Mal contacto",
+      "especialidades": [
+        "Electrico"
+      ],
+      "causa": "Revisar circuito",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_electricas.artefactos_luces_que_no_encienden",
+      "kpi": "ELECTRICIDAD",
+      "subfamilia": "artefactos_luces_que_no_encienden",
+      "label": "Luces que no encienden",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Eléctricas",
+      "aliasPostventa": "electricidad_visible",
+      "aliasAinspecciona": "ELECTRICIDAD",
+      "aliasEntregaEspecialidades": "Electrico",
+      "notasEjecucion": "Verificar componentes · Falla de alimentación",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES ELECTRICAS",
+      "item": "ARTEFACTOS",
+      "hallazgo": "Luces que no encienden",
+      "requerimiento": "Falla de alimentación",
+      "especialidades": [
+        "Electrico"
+      ],
+      "causa": "Verificar componentes",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_electricas.artefactos_transformadores_defectuosos",
+      "kpi": "ELECTRICIDAD",
+      "subfamilia": "artefactos_transformadores_defectuosos",
+      "label": "Transformadores defectuosos",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Eléctricas",
+      "aliasPostventa": "electricidad_visible",
+      "aliasAinspecciona": "ELECTRICIDAD",
+      "aliasEntregaEspecialidades": "Electrico",
+      "notasEjecucion": "Reemplazar transformador · Falla interna",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES ELECTRICAS",
+      "item": "ARTEFACTOS",
+      "hallazgo": "Transformadores defectuosos",
+      "requerimiento": "Falla interna",
+      "especialidades": [
+        "Electrico"
+      ],
+      "causa": "Reemplazar transformador",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_electricas.artefactos_sensores_defectuosos",
+      "kpi": "ELECTRICIDAD",
+      "subfamilia": "artefactos_sensores_defectuosos",
+      "label": "Sensores defectuosos",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Eléctricas",
+      "aliasPostventa": "electricidad_visible",
+      "aliasAinspecciona": "ELECTRICIDAD",
+      "aliasEntregaEspecialidades": "Electrico",
+      "notasEjecucion": "Regular o reemplazar · Falla electrónica",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES ELECTRICAS",
+      "item": "ARTEFACTOS",
+      "hallazgo": "Sensores defectuosos",
+      "requerimiento": "Falla electrónica",
+      "especialidades": [
+        "Electrico"
+      ],
+      "causa": "Regular o reemplazar",
+      "criticidad": "Baja",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_electricas.sistema_automaticos_mal_rotulados",
+      "kpi": "ELECTRICIDAD",
+      "subfamilia": "sistema_automaticos_mal_rotulados",
+      "label": "Automáticos mal rotulados",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Eléctricas",
+      "aliasPostventa": "electricidad_visible",
+      "aliasAinspecciona": "ELECTRICIDAD",
+      "aliasEntregaEspecialidades": "Electrico",
+      "notasEjecucion": "Actualizar rotulación · Identificación incorrecta",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES ELECTRICAS",
+      "item": "SISTEMA",
+      "hallazgo": "Automáticos mal rotulados",
+      "requerimiento": "Identificación incorrecta",
+      "especialidades": [
+        "Electrico"
+      ],
+      "causa": "Actualizar rotulación",
+      "criticidad": "Baja",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_electricas.artefactos_diferencial_defectuoso",
+      "kpi": "ELECTRICIDAD",
+      "subfamilia": "artefactos_diferencial_defectuoso",
+      "label": "Diferencial defectuoso",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Eléctricas",
+      "aliasPostventa": "electricidad_visible",
+      "aliasAinspecciona": "ELECTRICIDAD",
+      "aliasEntregaEspecialidades": "Electrico",
+      "notasEjecucion": "Reemplazar diferencial · Falla del dispositivo",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES ELECTRICAS",
+      "item": "ARTEFACTOS",
+      "hallazgo": "Diferencial defectuoso",
+      "requerimiento": "Falla del dispositivo",
+      "especialidades": [
+        "Electrico"
+      ],
+      "causa": "Reemplazar diferencial",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_electricas.sistema_cableado_desordenado",
+      "kpi": "ELECTRICIDAD",
+      "subfamilia": "sistema_cableado_desordenado",
+      "label": "Cableado desordenado",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Eléctricas",
+      "aliasPostventa": "electricidad_visible",
+      "aliasAinspecciona": "ELECTRICIDAD",
+      "aliasEntregaEspecialidades": "Electrico",
+      "notasEjecucion": "Ordenar conductores · Deficiencias de montaje",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES ELECTRICAS",
+      "item": "SISTEMA",
+      "hallazgo": "Cableado desordenado",
+      "requerimiento": "Deficiencias de montaje",
+      "especialidades": [
+        "Electrico"
+      ],
+      "causa": "Ordenar conductores",
+      "criticidad": "Baja",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_electricas.sistema_sobrecalentamiento_en_tablero",
+      "kpi": "ELECTRICIDAD",
+      "subfamilia": "sistema_sobrecalentamiento_en_tablero",
+      "label": "Sobrecalentamiento en tablero",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Eléctricas",
+      "aliasPostventa": "electricidad_visible",
+      "aliasAinspecciona": "ELECTRICIDAD",
+      "aliasEntregaEspecialidades": "Electrico",
+      "notasEjecucion": "Corregir instalación · Sobrecarga",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES ELECTRICAS",
+      "item": "SISTEMA",
+      "hallazgo": "Sobrecalentamiento en tablero",
+      "requerimiento": "Sobrecarga",
+      "especialidades": [
+        "Electrico"
+      ],
+      "causa": "Corregir instalación",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_electricas.sistema_conductores_expuestos",
+      "kpi": "ELECTRICIDAD",
+      "subfamilia": "sistema_conductores_expuestos",
+      "label": "Conductores expuestos",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Eléctricas",
+      "aliasPostventa": "electricidad_visible",
+      "aliasAinspecciona": "ELECTRICIDAD",
+      "aliasEntregaEspecialidades": "Electrico",
+      "notasEjecucion": "Proteger conductores · Canalización incompleta",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES ELECTRICAS",
+      "item": "SISTEMA",
+      "hallazgo": "Conductores expuestos",
+      "requerimiento": "Canalización incompleta",
+      "especialidades": [
+        "Electrico"
+      ],
+      "causa": "Proteger conductores",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_electricas.sistema_empalmes_deficientes",
+      "kpi": "ELECTRICIDAD",
+      "subfamilia": "sistema_empalmes_deficientes",
+      "label": "Empalmes deficientes",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Eléctricas",
+      "aliasPostventa": "electricidad_visible",
+      "aliasAinspecciona": "ELECTRICIDAD",
+      "aliasEntregaEspecialidades": "Electrico",
+      "notasEjecucion": "Rehacer empalmes · Uniones inadecuadas",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES ELECTRICAS",
+      "item": "SISTEMA",
+      "hallazgo": "Empalmes deficientes",
+      "requerimiento": "Uniones inadecuadas",
+      "especialidades": [
+        "Electrico"
+      ],
+      "causa": "Rehacer empalmes",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_electricas.sistema_cableado_suelto",
+      "kpi": "ELECTRICIDAD",
+      "subfamilia": "sistema_cableado_suelto",
+      "label": "Cableado suelto",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Eléctricas",
+      "aliasPostventa": "electricidad_visible",
+      "aliasAinspecciona": "ELECTRICIDAD",
+      "aliasEntregaEspecialidades": "Electrico",
+      "notasEjecucion": "Asegurar conductores · Falta de fijación",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES ELECTRICAS",
+      "item": "SISTEMA",
+      "hallazgo": "Cableado suelto",
+      "requerimiento": "Falta de fijación",
+      "especialidades": [
+        "Electrico"
+      ],
+      "causa": "Asegurar conductores",
+      "criticidad": "Media",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.instalaciones_electricas.sistema_aislacion_danada",
+      "kpi": "ELECTRICIDAD",
+      "subfamilia": "sistema_aislacion_danada",
+      "label": "Aislación dañada",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Instalaciones Eléctricas",
+      "aliasPostventa": "electricidad_visible",
+      "aliasAinspecciona": "ELECTRICIDAD",
+      "aliasEntregaEspecialidades": "Electrico",
+      "notasEjecucion": "Reemplazar conductores · Desgaste o roce",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "INSTALACIONES ELECTRICAS",
+      "item": "SISTEMA",
+      "hallazgo": "Aislación dañada",
+      "requerimiento": "Desgaste o roce",
+      "especialidades": [
+        "Electrico"
+      ],
+      "causa": "Reemplazar conductores",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        5
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.elementos_estructurales.estructura_fisuras_estructurales_en_muros_de_hormigon",
+      "kpi": "ESTRUCTURA",
+      "subfamilia": "estructura_fisuras_estructurales_en_muros_de_hormigon",
+      "label": "Fisuras estructurales en muros de hormigón",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Estructura Visible",
+      "aliasPostventa": "otros",
+      "aliasAinspecciona": "",
+      "aliasEntregaEspecialidades": "estructural",
+      "notasEjecucion": "Evaluación por ingeniero estructural · Movimientos estructurales o defectos constructivos",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "ELEMENTOS ESTRUCTURALES",
+      "item": "ESTRUCTURA",
+      "hallazgo": "Fisuras estructurales en muros de hormigón",
+      "requerimiento": "Movimientos estructurales o defectos constructivos",
+      "especialidades": [
+        "estructural"
+      ],
+      "causa": "Evaluación por ingeniero estructural",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        10
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.elementos_estructurales.estructura_grietas_en_vigas_pilares_o_losas",
+      "kpi": "ESTRUCTURA",
+      "subfamilia": "estructura_grietas_en_vigas_pilares_o_losas",
+      "label": "Grietas en vigas, pilares o losas",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Estructura Visible",
+      "aliasPostventa": "otros",
+      "aliasAinspecciona": "",
+      "aliasEntregaEspecialidades": "estructural",
+      "notasEjecucion": "Inspección estructural especializada · Problemas de diseño, ejecución o asentamientos",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "ELEMENTOS ESTRUCTURALES",
+      "item": "ESTRUCTURA",
+      "hallazgo": "Grietas en vigas, pilares o losas",
+      "requerimiento": "Problemas de diseño, ejecución o asentamientos",
+      "especialidades": [
+        "estructural"
+      ],
+      "causa": "Inspección estructural especializada",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        10
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.elementos_estructurales.estructura_asentamiento_diferencial_de_fundaciones",
+      "kpi": "ESTRUCTURA",
+      "subfamilia": "estructura_asentamiento_diferencial_de_fundaciones",
+      "label": "Asentamiento diferencial de fundaciones",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Estructura Visible",
+      "aliasPostventa": "otros",
+      "aliasAinspecciona": "",
+      "aliasEntregaEspecialidades": "estructural",
+      "notasEjecucion": "Estudio técnico y reparación especializada · Deficiencias del terreno o fundaciones",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "ELEMENTOS ESTRUCTURALES",
+      "item": "ESTRUCTURA",
+      "hallazgo": "Asentamiento diferencial de fundaciones",
+      "requerimiento": "Deficiencias del terreno o fundaciones",
+      "especialidades": [
+        "estructural"
+      ],
+      "causa": "Estudio técnico y reparación especializada",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        10
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.elementos_estructurales.estructura_deformacion_de_losas",
+      "kpi": "ESTRUCTURA",
+      "subfamilia": "estructura_deformacion_de_losas",
+      "label": "Deformación de losas",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Estructura Visible",
+      "aliasPostventa": "otros",
+      "aliasAinspecciona": "",
+      "aliasEntregaEspecialidades": "estructural",
+      "notasEjecucion": "Evaluación estructural inmediata · Deficiencia estructural o sobrecarga",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "ELEMENTOS ESTRUCTURALES",
+      "item": "ESTRUCTURA",
+      "hallazgo": "Deformación de losas",
+      "requerimiento": "Deficiencia estructural o sobrecarga",
+      "especialidades": [
+        "estructural"
+      ],
+      "causa": "Evaluación estructural inmediata",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        10
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.elementos_estructurales.estructura_muros_con_desplazamiento_o_inclinacion",
+      "kpi": "ESTRUCTURA",
+      "subfamilia": "estructura_muros_con_desplazamiento_o_inclinacion",
+      "label": "Muros con desplazamiento o inclinación",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Estructura Visible",
+      "aliasPostventa": "otros",
+      "aliasAinspecciona": "",
+      "aliasEntregaEspecialidades": "estructural",
+      "notasEjecucion": "Diagnóstico estructural · Fallas estructurales o asentamientos",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "ELEMENTOS ESTRUCTURALES",
+      "item": "ESTRUCTURA",
+      "hallazgo": "Muros con desplazamiento o inclinación",
+      "requerimiento": "Fallas estructurales o asentamientos",
+      "especialidades": [
+        "estructural"
+      ],
+      "causa": "Diagnóstico estructural",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        10
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.elementos_estructurales.estructura_separacion_entre_elementos_estructurales_y_tabiqueria",
+      "kpi": "ESTRUCTURA",
+      "subfamilia": "estructura_separacion_entre_elementos_estructurales_y_tabiqueria",
+      "label": "Separación entre elementos estructurales y tabiquería",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Estructura Visible",
+      "aliasPostventa": "otros",
+      "aliasAinspecciona": "",
+      "aliasEntregaEspecialidades": "estructural",
+      "notasEjecucion": "Evaluación técnica especializada · Movimientos diferenciales excesivos",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "ELEMENTOS ESTRUCTURALES",
+      "item": "ESTRUCTURA",
+      "hallazgo": "Separación entre elementos estructurales y tabiquería",
+      "requerimiento": "Movimientos diferenciales excesivos",
+      "especialidades": [
+        "estructural"
+      ],
+      "causa": "Evaluación técnica especializada",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        10
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.elementos_estructurales.estructura_filtraciones_recurrentes_en_cubiertas",
+      "kpi": "ESTRUCTURA",
+      "subfamilia": "estructura_filtraciones_recurrentes_en_cubiertas",
+      "label": "Filtraciones recurrentes en cubiertas",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Estructura Visible",
+      "aliasPostventa": "otros",
+      "aliasAinspecciona": "",
+      "aliasEntregaEspecialidades": "estructural",
+      "notasEjecucion": "Diagnóstico integral y reparación definitiva · Deficiencia constructiva de impermeabilización",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "ELEMENTOS ESTRUCTURALES",
+      "item": "ESTRUCTURA",
+      "hallazgo": "Filtraciones recurrentes en cubiertas",
+      "requerimiento": "Deficiencia constructiva de impermeabilización",
+      "especialidades": [
+        "estructural"
+      ],
+      "causa": "Diagnóstico integral y reparación definitiva",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        10
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.elementos_estructurales.estructura_filtraciones_en_subterraneos_o_fundaciones",
+      "kpi": "ESTRUCTURA",
+      "subfamilia": "estructura_filtraciones_en_subterraneos_o_fundaciones",
+      "label": "Filtraciones en subterráneos o fundaciones",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Estructura Visible",
+      "aliasPostventa": "otros",
+      "aliasAinspecciona": "",
+      "aliasEntregaEspecialidades": "estructural",
+      "notasEjecucion": "Evaluación técnica y reparación especializada · Fallas de impermeabilización de origen",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "ELEMENTOS ESTRUCTURALES",
+      "item": "ESTRUCTURA",
+      "hallazgo": "Filtraciones en subterráneos o fundaciones",
+      "requerimiento": "Fallas de impermeabilización de origen",
+      "especialidades": [
+        "estructural"
+      ],
+      "causa": "Evaluación técnica y reparación especializada",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        10
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.elementos_estructurales.estructura_deterioro_prematuro_de_estructuras_de_techumbre",
+      "kpi": "ESTRUCTURA",
+      "subfamilia": "estructura_deterioro_prematuro_de_estructuras_de_techumbre",
+      "label": "Deterioro prematuro de estructuras de techumbre",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Estructura Visible",
+      "aliasPostventa": "otros",
+      "aliasAinspecciona": "",
+      "aliasEntregaEspecialidades": "estructural",
+      "notasEjecucion": "Inspección estructural y reparación · Deficiencias de diseño o protección",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "ELEMENTOS ESTRUCTURALES",
+      "item": "ESTRUCTURA",
+      "hallazgo": "Deterioro prematuro de estructuras de techumbre",
+      "requerimiento": "Deficiencias de diseño o protección",
+      "especialidades": [
+        "estructural"
+      ],
+      "causa": "Inspección estructural y reparación",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        10
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.elementos_estructurales.estructura_corrosion_de_elementos_estructurales_metalicos",
+      "kpi": "ESTRUCTURA",
+      "subfamilia": "estructura_corrosion_de_elementos_estructurales_metalicos",
+      "label": "Corrosión de elementos estructurales metálicos",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Estructura Visible",
+      "aliasPostventa": "otros",
+      "aliasAinspecciona": "",
+      "aliasEntregaEspecialidades": "estructural",
+      "notasEjecucion": "Evaluación estructural y recuperación · Protección anticorrosiva insuficiente",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "ELEMENTOS ESTRUCTURALES",
+      "item": "ESTRUCTURA",
+      "hallazgo": "Corrosión de elementos estructurales metálicos",
+      "requerimiento": "Protección anticorrosiva insuficiente",
+      "especialidades": [
+        "estructural"
+      ],
+      "causa": "Evaluación estructural y recuperación",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        10
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.elementos_estructurales.estructura_desprendimiento_de_revestimientos_por_movimientos_estructural",
+      "kpi": "ESTRUCTURA",
+      "subfamilia": "estructura_desprendimiento_de_revestimientos_por_movimientos_estructural",
+      "label": "Desprendimiento de revestimientos por movimientos estructurales",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Estructura Visible",
+      "aliasPostventa": "otros",
+      "aliasAinspecciona": "",
+      "aliasEntregaEspecialidades": "estructural",
+      "notasEjecucion": "Identificar causa estructural antes de reparar · Movimientos estructurales persistentes",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "ELEMENTOS ESTRUCTURALES",
+      "item": "ESTRUCTURA",
+      "hallazgo": "Desprendimiento de revestimientos por movimientos estructurales",
+      "requerimiento": "Movimientos estructurales persistentes",
+      "especialidades": [
+        "estructural"
+      ],
+      "causa": "Identificar causa estructural antes de reparar",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        10
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.elementos_estructurales.estructura_humedad_ascendente_generalizada",
+      "kpi": "ESTRUCTURA",
+      "subfamilia": "estructura_humedad_ascendente_generalizada",
+      "label": "Humedad ascendente generalizada",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Estructura Visible",
+      "aliasPostventa": "otros",
+      "aliasAinspecciona": "",
+      "aliasEntregaEspecialidades": "estructural",
+      "notasEjecucion": "Diagnóstico técnico y reparación definitiva · Deficiencia de barreras impermeables",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "ELEMENTOS ESTRUCTURALES",
+      "item": "ESTRUCTURA",
+      "hallazgo": "Humedad ascendente generalizada",
+      "requerimiento": "Deficiencia de barreras impermeables",
+      "especialidades": [
+        "estructural"
+      ],
+      "causa": "Diagnóstico técnico y reparación definitiva",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        10
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.elementos_estructurales.estructura_fisuras_reiterativas_reparadas_anteriormente",
+      "kpi": "ESTRUCTURA",
+      "subfamilia": "estructura_fisuras_reiterativas_reparadas_anteriormente",
+      "label": "Fisuras reiterativas reparadas anteriormente",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Estructura Visible",
+      "aliasPostventa": "otros",
+      "aliasAinspecciona": "",
+      "aliasEntregaEspecialidades": "estructural",
+      "notasEjecucion": "Estudio especializado · Problema estructural no resuelto",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "ELEMENTOS ESTRUCTURALES",
+      "item": "ESTRUCTURA",
+      "hallazgo": "Fisuras reiterativas reparadas anteriormente",
+      "requerimiento": "Problema estructural no resuelto",
+      "especialidades": [
+        "estructural"
+      ],
+      "causa": "Estudio especializado",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        10
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.elementos_estructurales.estructura_deformacion_de_techumbres",
+      "kpi": "ESTRUCTURA",
+      "subfamilia": "estructura_deformacion_de_techumbres",
+      "label": "Deformación de techumbres",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Estructura Visible",
+      "aliasPostventa": "otros",
+      "aliasAinspecciona": "",
+      "aliasEntregaEspecialidades": "estructural",
+      "notasEjecucion": "Inspección estructural · Deficiencias estructurales o constructivas",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "ELEMENTOS ESTRUCTURALES",
+      "item": "ESTRUCTURA",
+      "hallazgo": "Deformación de techumbres",
+      "requerimiento": "Deficiencias estructurales o constructivas",
+      "especialidades": [
+        "estructural"
+      ],
+      "causa": "Inspección estructural",
+      "criticidad": "Alta",
+      "garantiaAnios": [
+        10
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    },
+    {
+      "id": "kpi_excel.elementos_estructurales.estructura_problemas_de_estabilidad_en_muros_de_contencion",
+      "kpi": "ESTRUCTURA",
+      "subfamilia": "estructura_problemas_de_estabilidad_en_muros_de_contencion",
+      "label": "Problemas de estabilidad en muros de contención",
+      "miradas": [
+        "EJECUCION_OBRA",
+        "DETERIORO_USO"
+      ],
+      "aliasEntregaKpi": "Estructura Visible",
+      "aliasPostventa": "otros",
+      "aliasAinspecciona": "",
+      "aliasEntregaEspecialidades": "estructural",
+      "notasEjecucion": "Evaluación geotécnica y estructural · Deficiencia de diseño o construcción",
+      "notasDeterioro": "",
+      "status": "approved",
+      "source": "KPI.xlsx",
+      "kpiGroup": "ELEMENTOS ESTRUCTURALES",
+      "item": "ESTRUCTURA",
+      "hallazgo": "Problemas de estabilidad en muros de contención",
+      "requerimiento": "Deficiencia de diseño o construcción",
+      "especialidades": [
+        "estructural"
+      ],
+      "causa": "Evaluación geotécnica y estructural",
+      "criticidad": "Crítica",
+      "garantiaAnios": [
+        10
+      ],
+      "miradasProducto": {
+        "entrega": true,
+        "postventa": true,
+        "propertychk": true,
+        "ainspecciona": true
+      }
+    }
+  ],
+  "sourceKpiFile": "public/KPI.xlsx",
+  "kpiGroups": [
+    {
+      "label": "CIELOS Y MUROS",
+      "kpiCanonical": "TERMINACIONES",
+      "kpi": "TERMINACIONES",
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pintura_muros_cielos",
+      "aliasAinspecciona": "MUROS_PINTURA"
+    },
+    {
+      "label": "ELEMENTOS ESTRUCTURALES",
+      "kpiCanonical": "ESTRUCTURA",
+      "kpi": "ESTRUCTURA",
+      "aliasEntregaKpi": "Estructura Visible",
+      "aliasPostventa": "otros",
+      "aliasAinspecciona": ""
+    },
+    {
+      "label": "INSTALACIONES ELECTRICAS",
+      "kpiCanonical": "ELECTRICIDAD",
+      "kpi": "ELECTRICIDAD",
+      "aliasEntregaKpi": "Instalaciones Eléctricas",
+      "aliasPostventa": "electricidad_visible",
+      "aliasAinspecciona": "ELECTRICIDAD"
+    },
+    {
+      "label": "INSTALACIONES SANITARIAS",
+      "kpiCanonical": "SANITARIOS",
+      "kpi": "SANITARIOS",
+      "aliasEntregaKpi": "Instalaciones Sanitarias",
+      "aliasPostventa": "sanitarios",
+      "aliasAinspecciona": "SANITARIOS"
+    },
+    {
+      "label": "PISOS",
+      "kpiCanonical": "PISOS",
+      "kpi": "PISOS",
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": "pisos",
+      "aliasAinspecciona": "PISOS"
+    },
+    {
+      "label": "PUERTAS Y VENTANAS",
+      "kpiCanonical": "TERMINACIONES",
+      "kpi": null,
+      "aliasEntregaKpi": "Terminaciones",
+      "aliasPostventa": null,
+      "aliasAinspecciona": null
+    }
+  ]
+}

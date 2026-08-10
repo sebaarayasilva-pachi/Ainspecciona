@@ -5,6 +5,7 @@ import multipart from '@fastify/multipart';
 import staticPlugin from '@fastify/static';
 import cookie from '@fastify/cookie';
 import crypto from 'node:crypto';
+import { Readable } from 'node:stream';
 import path from 'node:path';
 import fs from 'node:fs';
 import OpenAI from 'openai';
@@ -13,21 +14,88 @@ import sharp from 'sharp';
 import { PrismaClient } from '@prisma/client';
 
 import { createStorage } from './src/storage/storage.js';
+import { deleteAinspeccionaCase } from './src/admin/deleteWithKbCleanup.js';
 import { registerCaptureRoutes } from './src/routes/capture.js';
+import { registerWhatsAppRoutes } from './src/routes/whatsapp.js';
+import { registerPostventaAgentRoutes } from './src/postventa/routes/agent.js';
+import { registerPostventaPublicRoutes } from './src/postventa/routes/public.js';
+import { registerPostventaCaptureRoutes } from './src/postventa/routes/capture.js';
+import { registerPostventaTicketRoutes } from './src/postventa/routes/tickets.js';
+import { registerPostventaAdminRoutes } from './src/postventa/routes/admin.js';
+import { registerPostventaPortalRoutes } from './src/postventa/routes/portal.js';
+import { getPvPortalSession as getPvPortalSessionAuth } from './src/postventa/auth/portalAuth.js';
+import { registerAintelligenceAdminRoutes } from './src/aintelligence/routes/admin.js';
+import { registerTaxonomyAdminRoutes } from './src/aintelligence/routes/taxonomyAdmin.js';
+import { registerEntregaRoutes } from './src/entrega/routes.js';
+import { getEntregaSession as getEntregaSessionAuth } from './src/entrega/auth.js';
+import { registerInOutRoutes, getIoSession as getIoSessionAuth } from './src/inout/routes.js';
+import { ensureToctocTenants } from './src/demo/ensureToctocTenants.js';
+import { registerScanRoutes } from './src/scan/routes.js';
+import { registerPlatformRoutes } from './src/platform/routes.js';
+import { ensurePlatformSchema } from './src/platform/ensurePlatformSchema.js';
+import { ensurePlatformDemo } from './src/platform/seed/ensurePlatformDemo.js';
+import { registerReviewCenterRoutes } from './src/routes/reviewCenter.js';
+import { registerReviewAssistantRoutes } from './src/routes/reviewAssistant.js';
+import { createPostventaAnalysisQueue } from './src/postventa/analysis/analyzeTicket.js';
+import {
+  clampDays,
+  queryFunnelBusiness,
+  queryInspectionsDaily,
+  queryInspectionsHeatmap,
+  queryInspectionAddresses,
+  aggregateGeo
+} from './src/admin/dashboardAnalytics.js';
+import { queryAnalysisAccuracyDaily, recordReportCorrection, recordReportAccuracyOnComplete, recordPropertyCheckAccuracyOnAnalyze } from './src/aintelligence/metrics/analysisAccuracy.js';
 import { getCaseSummary } from './src/routes/caseSummary.js';
+import { ensureExecutiveSummary, isExecutiveSummaryStale } from './src/routes/executiveSummary.js';
 import { generateReportPdf } from './src/pdf/reportPdf.js';
 import { generateCertificateImage } from './src/pdf/certificateImage.js';
-import { DEFAULT_SCORE_CONFIG, normalizeScoreConfig, classifyKpiFromSlot } from './src/scoring/scoringV2_2.js';
+import { DEFAULT_SCORE_CONFIG, normalizeScoreConfig, classifyKpiFromSlot, formatAiFindingExamplesBlock } from './src/scoring/scoringV2_2.js';
+import { getKbPromptBlock } from './src/aintelligence/kb/promptBlock.js';
 import {
   sendInspectionLinkEmail,
   sendBusinessMagicLinkEmail,
   sendPasswordResetEmail,
   sendReviewNotificationEmail,
+  sendBusinessReportReviewerNotificationEmail,
+  sendExecutiveReportReadyEmail,
   sendApprovedReportEmail,
   sendExecutiveInvitationEmail,
-  sendExecutiveCaptureInviteEmail
+  sendExecutiveCaptureInviteEmail,
+  sendPeerReferralWelcomeEmail,
+  sendSimplefacturaDtePdfEmail,
+  sendContactFormEmail
 } from './src/email.js';
 import { generateBusinessReceiptPdf } from './src/pdf/receiptPdf.js';
+import { emitBoletaElectronica, fetchDtePdfBuffer, isSimpleFacturaConfigured } from './src/simplefactura.js';
+import { runPropertyCheckPhotoBatchAnalysisV0 } from './src/propertyCheck/propertyCheckAnalyzeV0.js';
+import { generatePropertyCheckExecutiveSummaryV0 } from './src/propertyCheck/propertyCheckExecutiveSummaryV0.js';
+import {
+  verifyPropertyCheckIngressSecret,
+  handlePropertyCheckFeedbackV0,
+  handlePropertyCheckFeedbackBatchV0
+} from './src/propertyCheck/propertyCheckFeedbackV0.js';
+import {
+  combinedTextHasAffirmativeDefectMention,
+  windowAnalysisSuggestsSealIssue,
+  pisosAnalysisSuggestsJointMoistureDamage
+} from './src/analysis/defectMentionFromText.js';
+import {
+  electricAnalysisPromptPreamble,
+  correctWallElectricMatchesSlotFalsePositive,
+  electricPanelInferiorWearLikelyDirtOnly,
+  wallSwitchAvCoaxialFalsePositive,
+  scrubWallSwitchAvFalsePositiveNarrative,
+  scrubElectricPanelInferiorDirtNarrative
+} from './src/analysis/electricSlotAnalysis.js';
+import {
+  isDocumentComplianceSlot,
+  documentAnalysisPromptPreamble,
+  applyDocumentComplianceAnalysisRules
+} from './src/analysis/documentSlotAnalysis.js';
+
+const DEFAULT_EXECUTIVE_APP_STORE_URL =
+  'https://apps.apple.com/cl/app/ainspecciona-capture/id6763187024';
 
 // Cloud Run + Cloud SQL: normalizar DATABASE_URL para usar socket Unix (no TCP).
 // Formato correcto: mysql://USER:PASS@localhost/DB?socket=/cloudsql/PROJECT:REGION:INSTANCE
@@ -48,6 +116,8 @@ const __dirname = path.dirname(__filename);
 
 const fastify = Fastify({
   logger: true,
+  // Fotos de cierre (base64) y adjuntos; default Fastify es 1MB → "Request body is too large"
+  bodyLimit: 5 * 1024 * 1024,
   trustProxy: process.env.NODE_ENV === 'production' || !!process.env.TRUST_PROXY
 });
 const prisma = new PrismaClient();
@@ -58,10 +128,29 @@ const CORS_ALLOWED_ORIGINS = new Set([
   'http://localhost:19006',
   'http://127.0.0.1:8081',
   'http://127.0.0.1:19006',
+  // PropScan (Vite preview)
+  'http://localhost:4173',
+  'http://127.0.0.1:4173',
   'https://ainspecciona.com',
   'https://www.ainspecciona.com',
-  'https://ainspecciona.web.app'
+  'https://ainspecciona.web.app',
+  // PropScan / Property-check (Firebase Hosting)
+  'https://property-chk.web.app',
+  'https://property-chk.firebaseapp.com'
 ]);
+
+/** Vite elige 5173, 5174, … si el anterior está ocupado: en local aceptamos cualquier puerto. */
+function isLocalDevBrowserOrigin(origin) {
+  if (process.env.NODE_ENV === 'production') return false;
+  try {
+    const u = new URL(origin);
+    const host = u.hostname;
+    if (host !== 'localhost' && host !== '127.0.0.1') return false;
+    return u.protocol === 'http:' || u.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
 
 await fastify.register(cors, {
   origin(origin, cb) {
@@ -69,11 +158,43 @@ await fastify.register(cors, {
       cb(null, true);
       return;
     }
+    if (isLocalDevBrowserOrigin(origin)) {
+      cb(null, true);
+      return;
+    }
     cb(null, false);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-session-token', 'x-admin-user', 'x-admin-pass']
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'x-session-token',
+    'x-platform-session',
+    'x-postventa-session',
+    'x-entrega-session',
+    'x-admin-user',
+    'x-admin-pass',
+    'x-propertycheck-secret',
+    'x-postventa-agent-secret',
+    'x-inout-session',
+    'X-WhatsApp-Test-Secret'
+  ]
+});
+
+// Raw body para verificación X-Hub-Signature-256 del webhook WhatsApp (Cloud API / 360dialog)
+fastify.addHook('preParsing', async (request, reply, payload) => {
+  const url = request.url.split('?')[0];
+  if (url !== '/api/whatsapp/webhook' || request.method !== 'POST') {
+    return payload;
+  }
+  const chunks = [];
+  for await (const chunk of payload) {
+    chunks.push(chunk);
+  }
+  const raw = Buffer.concat(chunks);
+  request.rawBody = raw;
+  return Readable.from(raw);
 });
 
 const PORT = Number(process.env.PORT || 3000);
@@ -237,6 +358,18 @@ async function saveScoreConfigToDb(nextConfig) {
   return normalized;
 }
 
+async function applyScoreConfigUpdate(nextConfig) {
+  scoreConfig = await saveScoreConfigToDb(nextConfig);
+  scoreConfigRuntimeCache.config = scoreConfig;
+  scoreConfigRuntimeCache.updatedAt = new Date();
+  scoreConfigRuntimeCache.fetchedAt = Date.now();
+  reportHtmlTemplateCache = null;
+  try {
+    saveScoreConfig(scoreConfig);
+  } catch (_) {}
+  return scoreConfig;
+}
+
 async function getRuntimeScoreConfig({ force = false } = {}) {
   const CACHE_TTL_MS = 5000;
   const nowTs = Date.now();
@@ -259,12 +392,35 @@ async function getRuntimeScoreConfig({ force = false } = {}) {
 const TENANT_SESSION_COOKIE = 'tenant_session';
 const EXEC_SESSION_COOKIE = 'exec_session';
 const STARTER_TENANT_NAME = 'Ainspecta Starter';
+/** Precio publicado del plan Starter (checkout MP / DTE). */
+const STARTER_PRICE_CLP = Number(process.env.STARTER_PRICE_CLP || 14990);
+
+/** Tenant interno Starter (1 pago = 1 caso). Creado por seed; si falta en BD, se crea aquí (p. ej. prod sin seed). */
+async function ensureStarterTenant() {
+  let t = await prisma.tenant.findFirst({ where: { name: STARTER_TENANT_NAME } });
+  if (t) return t;
+  try {
+    return await prisma.tenant.create({
+      data: {
+        name: STARTER_TENANT_NAME,
+        legalName: 'Ainspecta Starter',
+        status: 'ACTIVE',
+      },
+    });
+  } catch (err) {
+    t = await prisma.tenant.findFirst({ where: { name: STARTER_TENANT_NAME } });
+    if (t) return t;
+    throw err;
+  }
+}
 const REVIEWER_EMAIL = process.env.REVIEWER_EMAIL || 'paulo.yanez@ainspecciona.com';
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 7; // 7 días
 const TRIAL_DURATION_DAYS = Number(process.env.TRIAL_DURATION_DAYS || 14);
 const TRIAL_INITIAL_REAL_INSPECTIONS = Number(process.env.TRIAL_INITIAL_REAL_INSPECTIONS || 1);
 const PARTNER_TRIAL_DURATION_DAYS = Number(process.env.PARTNER_TRIAL_DURATION_DAYS || 30);
 const PARTNER_TRIAL_BONUS_CREDITS = Number(process.env.PARTNER_TRIAL_BONUS_CREDITS || 1);
+const PEER_TRIAL_BONUS_CREDITS = Number(process.env.PEER_TRIAL_BONUS_CREDITS || 1);
+const PEER_REF_CODE_ALPHABET = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ';
 /** Mínimo de caracteres para clave de corredora vía admin (ej. 2 en .env para testers que usan "12") */
 const ADMIN_TENANT_PASSWORD_MIN_LEN = Math.max(1, Math.min(128, Number(process.env.ADMIN_TENANT_PASSWORD_MIN_LEN || 6)));
 const FREE_EMAIL_DOMAINS = new Set([
@@ -317,6 +473,17 @@ function getPublicWebBase(req) {
   const proto = rawProto || (req.protocol === 'http' ? 'http' : 'https');
   if (host) return `${proto}://${host}`;
   return 'https://ainspecciona.com';
+}
+
+/** Base del API para webhooks de MP (Cloud Run). PUBLIC_URL suele ser el front (Firebase); las notificaciones deben ir al backend. */
+function getMercadoPagoWebhookBase(req) {
+  const explicit = String(process.env.MERCADOPAGO_WEBHOOK_BASE_URL || process.env.API_PUBLIC_BASE_URL || '').trim().replace(/\/$/, '');
+  if (explicit) return explicit;
+  return getPublicWebBase(req);
+}
+
+function getMercadoPagoWebhookUrl(req) {
+  return `${getMercadoPagoWebhookBase(req)}/api/mercadopago/webhook`;
 }
 
 /**
@@ -616,10 +783,7 @@ async function updateHubspotTrialProperties({ email, trialStatus, trialEndsAt, t
 }
 
 async function hasStarterHistoryForIdentity({ rutNorm, emailDomain }) {
-  const starterTenant = await prisma.tenant.findFirst({
-    where: { name: STARTER_TENANT_NAME },
-    select: { id: true }
-  });
+  const starterTenant = await ensureStarterTenant();
   if (!starterTenant?.id) return false;
   const whereOr = [];
   if (rutNorm) {
@@ -756,6 +920,29 @@ async function ensureReviewColumns() {
   }
 }
 
+/** Columnas de Case añadidas en migraciones recientes; en entornos sin `migrate deploy` pueden faltar. */
+async function ensureCaseExtraColumns() {
+  const cols = [
+    {
+      name: 'executiveReportNotifiedAt',
+      sql: 'ALTER TABLE `Case` ADD COLUMN `executiveReportNotifiedAt` DATETIME(3) NULL'
+    },
+    {
+      name: 'hasEntranceGrille',
+      sql: 'ALTER TABLE `Case` ADD COLUMN `hasEntranceGrille` BOOLEAN NOT NULL DEFAULT false'
+    }
+  ];
+  for (const col of cols) {
+    try {
+      await prisma.$executeRawUnsafe(col.sql);
+      fastify.log.info(`Added column Case.${col.name}`);
+    } catch (err) {
+      if (String(err?.message || '').includes('Duplicate column')) continue;
+      fastify.log.warn(err, `ensure-column-case-${col.name}`);
+    }
+  }
+}
+
 async function ensurePageViewTable() {
   const sql = `CREATE TABLE IF NOT EXISTS \`PageView\` (
     \`id\` VARCHAR(191) NOT NULL,
@@ -820,6 +1007,113 @@ async function ensureTrialColumns() {
   }
 }
 
+async function ensurePromoTables() {
+  try {
+    await prisma.$executeRawUnsafe(`CREATE TABLE IF NOT EXISTS \`PromoCode\` (
+      \`id\` VARCHAR(191) NOT NULL,
+      \`code\` VARCHAR(64) NOT NULL,
+      \`active\` BOOLEAN NOT NULL DEFAULT true,
+      \`credits\` INTEGER NOT NULL DEFAULT 1,
+      \`label\` VARCHAR(191) NULL,
+      \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+      UNIQUE INDEX \`PromoCode_code_key\`(\`code\`),
+      PRIMARY KEY (\`id\`)
+    ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`);
+  } catch (err) {
+    fastify.log.warn(err, 'ensure-promo-code-table');
+  }
+  try {
+    await prisma.$executeRawUnsafe(`CREATE TABLE IF NOT EXISTS \`PromoRedemption\` (
+      \`id\` VARCHAR(191) NOT NULL,
+      \`promoCodeId\` VARCHAR(191) NOT NULL,
+      \`tenantId\` VARCHAR(191) NOT NULL,
+      \`rutNorm\` VARCHAR(32) NOT NULL,
+      \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+      UNIQUE INDEX \`PromoRedemption_tenantId_key\`(\`tenantId\`),
+      UNIQUE INDEX \`PromoRedemption_rutNorm_key\`(\`rutNorm\`),
+      INDEX \`PromoRedemption_promoCodeId_idx\`(\`promoCodeId\`),
+      PRIMARY KEY (\`id\`)
+    ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`);
+  } catch (err) {
+    fastify.log.warn(err, 'ensure-promo-redemption-table');
+  }
+}
+
+async function ensureMagicLinkTokenTable() {
+  try {
+    await prisma.$executeRawUnsafe(`CREATE TABLE IF NOT EXISTS \`MagicLinkToken\` (
+      \`id\` VARCHAR(191) NOT NULL,
+      \`tenantId\` VARCHAR(191) NOT NULL,
+      \`token\` VARCHAR(191) NOT NULL,
+      \`expiresAt\` DATETIME(3) NOT NULL,
+      \`usedAt\` DATETIME(3) NULL,
+      \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+      UNIQUE INDEX \`MagicLinkToken_token_key\`(\`token\`),
+      INDEX \`MagicLinkToken_tenantId_idx\`(\`tenantId\`),
+      INDEX \`MagicLinkToken_expiresAt_idx\`(\`expiresAt\`),
+      INDEX \`MagicLinkToken_token_idx\`(\`token\`),
+      PRIMARY KEY (\`id\`)
+    ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`);
+  } catch (err) {
+    fastify.log.warn(err, 'ensure-magic-link-token-table');
+  }
+}
+
+async function ensurePeerReferralUniqueIndex() {
+  try {
+    await prisma.$executeRawUnsafe(
+      'CREATE UNIQUE INDEX `Tenant_peerReferralCode_key` ON `Tenant`(`peerReferralCode`)'
+    );
+    fastify.log.info('Added unique index Tenant.peerReferralCode');
+  } catch (err) {
+    if (String(err?.message || '').includes('Duplicate key name') || String(err?.message || '').includes('exists')) return;
+    fastify.log.warn(err, 'ensure-peer-referral-code-index');
+  }
+}
+
+async function ensurePeerReferralAttributionTable() {
+  const sql = `CREATE TABLE IF NOT EXISTS \`PeerReferralAttribution\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`referrerTenantId\` VARCHAR(191) NOT NULL,
+    \`referredTenantId\` VARCHAR(191) NOT NULL,
+    \`peerCodeUsed\` VARCHAR(32) NOT NULL,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    UNIQUE INDEX \`PeerReferralAttribution_referredTenantId_key\`(\`referredTenantId\`),
+    INDEX \`PeerReferralAttribution_referrerTenantId_idx\`(\`referrerTenantId\`),
+    PRIMARY KEY (\`id\`)
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`;
+  try {
+    await prisma.$executeRawUnsafe(sql);
+  } catch (err) {
+    fastify.log.warn(err, 'ensure-peer-referral-attribution-table');
+  }
+  const fks = [
+    `ALTER TABLE \`PeerReferralAttribution\` ADD CONSTRAINT \`PeerReferralAttribution_referrerTenantId_fkey\` FOREIGN KEY (\`referrerTenantId\`) REFERENCES \`Tenant\`(\`id\`) ON DELETE CASCADE ON UPDATE CASCADE`,
+    `ALTER TABLE \`PeerReferralAttribution\` ADD CONSTRAINT \`PeerReferralAttribution_referredTenantId_fkey\` FOREIGN KEY (\`referredTenantId\`) REFERENCES \`Tenant\`(\`id\`) ON DELETE CASCADE ON UPDATE CASCADE`
+  ];
+  for (const fk of fks) {
+    try {
+      await prisma.$executeRawUnsafe(fk);
+    } catch (err) {
+      if (String(err?.message || '').includes('Duplicate') || String(err?.message || '').includes('already exists')) continue;
+      fastify.log.warn(err, 'ensure-peer-referral-fk');
+    }
+  }
+}
+
+async function ensurePeerReferralProgramSchema() {
+  try {
+    await prisma.$executeRawUnsafe('ALTER TABLE `Tenant` ADD COLUMN `peerReferralCode` VARCHAR(32) NULL');
+    fastify.log.info('Added column Tenant.peerReferralCode');
+  } catch (err) {
+    if (!String(err?.message || '').includes('Duplicate column')) {
+      fastify.log.warn(err, 'ensure-peer-referral-column');
+    }
+  }
+  await ensurePeerReferralAttributionTable();
+  await ensurePeerReferralUniqueIndex();
+}
+
 function verifyPassword(password, stored) {
   if (!stored || !password) return false;
   const parts = String(stored).split('$');
@@ -836,11 +1130,96 @@ function normalizeRut(value) {
     .toUpperCase();
 }
 
+/**
+ * Payer en Checkout Pro: solo email.
+ * MP recomienda pruebas en incógnito y usuario comprador de prueba; prellenar nombre/RUT en la preferencia
+ * a veces deja el método como «UNDEFINED SOURCE» y el botón Pagar deshabilitado en Sandbox.
+ */
+function buildMercadoPagoPayerPreference({ email }) {
+  return {
+    email: String(email || '').trim().toLowerCase()
+  };
+}
+
+/** Servicio digital Chile: sin envío + locale. Sin `binary_mode`: si está en true, Checkout Pro suele mostrar solo tarjeta y oculta pagar con cuenta Mercado Pago. */
+function mercadoPagoCheckoutProDigitalPreferenceExtras() {
+  return {
+    shipments: { mode: 'not_specified' },
+    locale: 'es-CL',
+    // Evita que MP devuelva excluded_* con { id: "" }, que en checkout puede dejar medios rotos
+    payment_methods: {
+      excluded_payment_methods: [],
+      excluded_payment_types: []
+    }
+  };
+}
+
 function normalizePartnerCode(value) {
   return String(value || '')
     .trim()
     .toUpperCase()
     .replace(/\s+/g, '');
+}
+
+async function peerReferralCodeIsTakenTx(tx, code) {
+  const [partner, t] = await Promise.all([
+    tx.referralPartner.findFirst({ where: { code, active: true }, select: { id: true } }),
+    tx.tenant.findFirst({ where: { peerReferralCode: code }, select: { id: true } })
+  ]);
+  return !!(partner || t);
+}
+
+async function generateUniquePeerReferralCodeTx(tx) {
+  for (let attempt = 0; attempt < 40; attempt++) {
+    let c = '';
+    const bytes = crypto.randomBytes(10);
+    for (let i = 0; i < 8; i++) c += PEER_REF_CODE_ALPHABET[bytes[i] % PEER_REF_CODE_ALPHABET.length];
+    if (!(await peerReferralCodeIsTakenTx(tx, c))) return c;
+  }
+  throw new Error('PEER_REF_CODE_GENERATION_FAILED');
+}
+
+/**
+ * Asigna peerReferralCode al crear el tenant (o en el primer request que lo necesite):
+ * tenant ACTIVE sin código. Idempotente; sin colisión con códigos partner.
+ * @returns {{ code: string | null, assigned: boolean }}
+ */
+async function ensureTenantPeerReferralCodeInTx(tx, tenantId) {
+  const row = await tx.tenant.findUnique({
+    where: { id: tenantId },
+    select: { peerReferralCode: true, status: true }
+  });
+  if (!row || row.peerReferralCode) {
+    return { code: row?.peerReferralCode || null, assigned: false };
+  }
+  if (row.status !== 'ACTIVE') {
+    return { code: null, assigned: false };
+  }
+  const code = await generateUniquePeerReferralCodeTx(tx);
+  await tx.tenant.update({ where: { id: tenantId }, data: { peerReferralCode: code } });
+  return { code, assigned: true };
+}
+
+async function ensureTenantPeerReferralCode(tenantId) {
+  return prisma.$transaction((tx) => ensureTenantPeerReferralCodeInTx(tx, tenantId));
+}
+
+async function notifyPeerReferralWelcomeIfNew(req, { assigned, code, email, tenantName }) {
+  if (!assigned || !code || !email) return;
+  if (String(process.env.PEER_REFERRAL_WELCOME_EMAIL || '1').trim() === '0') return;
+  const dashboardUrl = `${getEmailWebBase(req)}/tenant.html`;
+  const webBase = getPublicWebBase(req);
+  const inviteUrl = `${webBase}/?ref=${encodeURIComponent(code)}`;
+  const result = await sendPeerReferralWelcomeEmail(
+    email.trim().toLowerCase(),
+    tenantName || '',
+    dashboardUrl,
+    inviteUrl,
+    code
+  );
+  if (!result.ok && !result.skipped) {
+    req.log?.warn?.({ result, tenantEmail: email }, 'peer-referral-welcome-email-failed');
+  }
 }
 
 /** Comisión partner (15% por defecto) sobre monto facturado en CLP; idempotente por mercadopagoPaymentId */
@@ -871,11 +1250,13 @@ async function maybeRecordPartnerCommission(log, { tenantId, mercadopagoPaymentI
     if (gross <= 0 && plan) {
       const BUSINESS_PRICE_CLP = Number(process.env.BUSINESS_PRICE_CLP || 39990);
       const PLAN_GROSS_CLP = {
-        starter: 15000,
+        starter: STARTER_PRICE_CLP,
         business: BUSINESS_PRICE_CLP,
-        corporate: 1300000,
+        corporate: 1199000,
+        'credits-10': 139990,
+        'credits-50': 649500,
+        'credits-100': 1199000,
         'credits-5': 64950,
-        'credits-10': 119900,
         'credits-20': 219800
       };
       gross = PLAN_GROSS_CLP[plan] || 0;
@@ -903,6 +1284,272 @@ async function maybeRecordPartnerCommission(log, { tenantId, mercadopagoPaymentI
   } catch (err) {
     if (String(err?.message || '').includes('Unique constraint')) return;
     log?.warn?.({ err, tenantId, mercadopagoPaymentId }, 'partner-commission-accrual-failed');
+  }
+}
+
+const AMBASSADOR_COMMISSION_RATE = Math.min(
+  1,
+  Math.max(0, Number(process.env.AMBASSADOR_COMMISSION_RATE || 0.3))
+);
+
+function mpPaymentNetReceivedClp(payment) {
+  const n = payment?.transaction_details?.net_received_amount;
+  if (n != null && Number.isFinite(Number(n))) return Math.round(Number(n));
+  const t = payment?.transaction_details?.total_paid_amount;
+  if (t != null && Number.isFinite(Number(t))) return Math.round(Number(t));
+  const ta = payment?.transaction_amount;
+  if (ta != null && Number.isFinite(Number(ta))) return Math.round(Number(ta));
+  return 0;
+}
+
+function accreditedAtFromMpPayment(payment) {
+  const raw = payment?.date_approved || payment?.money_release_date || payment?.date_last_updated || payment?.date_created;
+  if (raw) {
+    const d = new Date(raw);
+    if (!Number.isNaN(d.getTime())) return d;
+  }
+  return new Date();
+}
+
+function yearMonthUtcFromDate(d) {
+  const y = d.getUTCFullYear();
+  const m = d.getUTCMonth() + 1;
+  return `${y}-${String(m).padStart(2, '0')}`;
+}
+
+/** Pagos desde checkout con tenant (dashboard / panel), no Starter público sin tenant. */
+function isDashboardMercadoPagoContext({ tenantId, plan, extRef, source }) {
+  if (!tenantId) return false;
+  const p = String(plan || '').toLowerCase();
+  if (p === 'starter') return String(extRef || '').includes('tenant:');
+  if (source === 'SUBSCRIPTION') return true;
+  return true;
+}
+
+/**
+ * Comisión embajador: 30% del neto MP acreditado; solo checkout dashboard; ventana 3 meses calendario desde primer acreditado.
+ */
+async function maybeRecordAmbassadorCommission(log, { tenantId, mercadopagoPaymentId, payment, plan, source, extRef }) {
+  const paymentIdStr = String(mercadopagoPaymentId || '').trim();
+  if (!tenantId || !paymentIdStr || !payment) return;
+  if (!isDashboardMercadoPagoContext({ tenantId, plan, extRef: extRef ?? payment.external_reference, source })) {
+    return;
+  }
+
+  try {
+    const net = mpPaymentNetReceivedClp(payment);
+    if (net <= 0) return;
+
+    const accreditedAt = accreditedAtFromMpPayment(payment);
+    const yearMonth = yearMonthUtcFromDate(accreditedAt);
+
+    await prisma.$transaction(async (tx) => {
+      const attr = await tx.ambassadorReferralAttribution.findUnique({
+        where: { referredTenantId: tenantId }
+      });
+      if (!attr) return;
+
+      const existing = await tx.ambassadorCommissionLine.findUnique({
+        where: { mercadopagoPaymentId: paymentIdStr }
+      });
+      if (existing) return;
+
+      const now = new Date();
+      if (attr.commissionUntil && now > attr.commissionUntil) return;
+
+      let firstAcc = attr.firstAccreditedAt;
+      let until = attr.commissionUntil;
+      if (!firstAcc) {
+        firstAcc = accreditedAt;
+        const y = firstAcc.getUTCFullYear();
+        const m = firstAcc.getUTCMonth();
+        until = new Date(Date.UTC(y, m + 3, 0, 23, 59, 59, 999));
+      }
+
+      const commission = Math.round(net * AMBASSADOR_COMMISSION_RATE);
+
+      await tx.ambassadorCommissionLine.create({
+        data: {
+          attributionId: attr.id,
+          mercadopagoPaymentId: paymentIdStr,
+          kind: 'PAYMENT',
+          netAmountClp: net,
+          accreditedAt,
+          yearMonth,
+          plan: plan ? String(plan).slice(0, 64) : null,
+          commissionClp: commission
+        }
+      });
+
+      if (!attr.firstAccreditedAt) {
+        await tx.ambassadorReferralAttribution.update({
+          where: { id: attr.id },
+          data: {
+            firstAccreditedAt: firstAcc,
+            commissionUntil: until
+          }
+        });
+      }
+    });
+
+    log?.info?.({ tenantId, paymentIdStr, yearMonth }, 'ambassador-commission-accrued');
+  } catch (err) {
+    if (String(err?.code || '') === 'P2002') return;
+    log?.warn?.({ err, tenantId, mercadopagoPaymentId }, 'ambassador-commission-failed');
+  }
+}
+
+/** Devolución: resta del mes calendario (mismo id MP o línea refund:* idempotente). */
+async function maybeRecordAmbassadorRefund(log, payment) {
+  const paymentIdStr = String(payment?.id || '').trim();
+  if (!paymentIdStr || payment?.status !== 'refunded') return;
+
+  try {
+    const origLine = await prisma.ambassadorCommissionLine.findUnique({
+      where: { mercadopagoPaymentId: paymentIdStr },
+      include: { attribution: true }
+    });
+    if (!origLine || origLine.kind !== 'PAYMENT') return;
+
+    const refundKey = `refund:${paymentIdStr}`;
+    const existing = await prisma.ambassadorCommissionLine.findUnique({
+      where: { mercadopagoPaymentId: refundKey }
+    });
+    if (existing) return;
+
+    const refundAccredited = accreditedAtFromMpPayment(payment);
+    const yearMonth = yearMonthUtcFromDate(refundAccredited);
+    const negNet = -origLine.netAmountClp;
+    const negComm = -origLine.commissionClp;
+
+    await prisma.$transaction(async (tx) => {
+      await tx.ambassadorCommissionLine.create({
+        data: {
+          attributionId: origLine.attributionId,
+          mercadopagoPaymentId: refundKey,
+          kind: 'REFUND',
+          netAmountClp: negNet,
+          accreditedAt: refundAccredited,
+          yearMonth,
+          plan: origLine.plan,
+          commissionClp: negComm
+        }
+      });
+    });
+    log?.info?.({ paymentIdStr, yearMonth }, 'ambassador-commission-refund');
+  } catch (err) {
+    log?.warn?.({ err, paymentId: payment?.id }, 'ambassador-refund-failed');
+  }
+}
+
+const SF_LINE_BUSINESS = 'Plan Business Ainspecciona (suscripción / créditos)';
+const SF_LINE_STARTER = 'Inspección Starter Ainspecciona (1 crédito)';
+
+/** Datos tributarios para Case/Tenant (SimpleFactura). Opcional `tipoDte` 33 o 39. */
+function buildFacturacionJsonFromForm(body, contactEmailFallback) {
+  if (!body?.necesitaFactura) return null;
+  const razon = String(body.facturaRazonSocial || '').trim();
+  if (!razon) return null;
+  const out = {
+    razonSocial: razon,
+    rut: body.facturaRut ? String(body.facturaRut).trim() : null,
+    direccion: body.facturaDireccion ? String(body.facturaDireccion).trim() : null,
+    comuna: body.facturaComuna ? String(body.facturaComuna).trim() : null,
+    ciudad: body.facturaCiudad ? String(body.facturaCiudad).trim() : null,
+    giro: body.facturaGiro ? String(body.facturaGiro).trim() : null,
+    email: String(body.facturaEmail || contactEmailFallback || '')
+      .trim()
+      .toLowerCase()
+  };
+  const td = body.facturaTipoDte ?? body.tipoDte;
+  if (td !== undefined && td !== null && String(td).trim() !== '') {
+    const n = Number(td);
+    if (!Number.isNaN(n)) out.tipoDte = n;
+  }
+  return out;
+}
+
+/**
+ * Boleta/factura DTE (SimpleFactura) tras pago MP; idempotente por mercadopagoPaymentId.
+ * `billingTenantId` = tenant emisor en BD (Business o tenant Starter compartido).
+ * Boleta 39 / factura 33: `facturacionJson.tipoDte` o env `SIMPLEFACTURA_TIPO_DTE` / `SIMPLEFACTURA_STARTER_TIPO_DTE`.
+ * @returns {{ dtePdfBuffer: Buffer | null, folio: number | null }}
+ */
+async function maybeEmitSimpleFacturaForPayment(log, {
+  billingTenantId,
+  mercadopagoPaymentId,
+  payment,
+  facturacionJson,
+  lineDescription,
+  fallbackMontoClp,
+  tipoDteDefault
+}) {
+  if (!isSimpleFacturaConfigured()) return { dtePdfBuffer: null, folio: null };
+  if (!facturacionJson || typeof facturacionJson !== 'object') return { dtePdfBuffer: null, folio: null };
+  const paymentIdStr = String(mercadopagoPaymentId);
+  const tipoDteForRow = Number(
+    facturacionJson?.tipoDte ?? facturacionJson?.tipoDTE ?? tipoDteDefault
+  );
+  try {
+    await prisma.simpleFacturaEmission.create({
+      data: {
+        tenantId: billingTenantId,
+        mercadopagoPaymentId: paymentIdStr,
+        tipoDte: tipoDteForRow,
+        status: 'PROCESSING'
+      }
+    });
+  } catch (e) {
+    if (String(e?.code) === 'P2002') return { dtePdfBuffer: null, folio: null };
+    throw e;
+  }
+  const monto = Number(
+    payment?.transaction_amount ?? payment?.transaction_details?.total_paid_amount ?? fallbackMontoClp
+  );
+  const montoR = Math.round(monto);
+  try {
+    const result = await emitBoletaElectronica({
+      log,
+      facturacion: facturacionJson,
+      montoTotalClp: montoR,
+      lineDescription,
+      tipoDteDefault
+    });
+    await prisma.simpleFacturaEmission.updateMany({
+      where: { mercadopagoPaymentId: paymentIdStr },
+      data: {
+        status: 'SUCCESS',
+        tipoDte: result.tipoDte ?? tipoDteForRow,
+        folio: result.folio ?? undefined,
+        responseJson: result.raw ?? undefined
+      }
+    });
+    let dtePdfBuffer = null;
+    if (result.folio != null) {
+      try {
+        dtePdfBuffer = await fetchDtePdfBuffer({
+          log,
+          facturacion: facturacionJson,
+          montoTotalClp: montoR,
+          folio: result.folio,
+          tipoDte: result.tipoDte ?? tipoDteForRow,
+          lineDescription
+        });
+      } catch (pdfErr) {
+        log?.warn?.({ err: pdfErr, tenantId: billingTenantId, paymentId: paymentIdStr }, 'simplefactura-pdf-fetch-failed');
+      }
+    }
+    return { dtePdfBuffer, folio: result.folio ?? null };
+  } catch (err) {
+    log?.warn?.({ err, tenantId: billingTenantId, paymentId: paymentIdStr }, 'simplefactura-emission-failed');
+    await prisma.simpleFacturaEmission.updateMany({
+      where: { mercadopagoPaymentId: paymentIdStr },
+      data: {
+        status: 'FAILED',
+        errorMessage: String(err?.message || err).slice(0, 2000)
+      }
+    });
+    return { dtePdfBuffer: null, folio: null };
   }
 }
 
@@ -980,6 +1627,97 @@ function computeProgressFromSlots(slots) {
   return { uploaded, analyzed, omitted, rejected, total, pct };
 }
 
+function isCaseReportFullyEmittedFromSlots(slots) {
+  if (!Array.isArray(slots) || !slots.length) return false;
+  return slots.every((s) => {
+    const st = String(s.status || '').toUpperCase();
+    return st === 'ANALYZED' || st === 'NOT_CAPTURABLE';
+  });
+}
+
+/** Caso DONE, tenant Business, slots listos. Flujo: (1) si aún no aprobado → pending_review + mail a revisor; (2) si approved → mail al ejecutivo (idempotente). */
+async function maybeNotifyExecutiveReportReady(caseId) {
+  if (!caseId) return;
+  try {
+    const c = await prisma.case.findUnique({
+      where: { id: caseId },
+      select: {
+        id: true,
+        status: true,
+        shortId: true,
+        executiveReportNotifiedAt: true,
+        reviewStatus: true,
+        assignedUserId: true,
+        tenant: { select: { name: true } },
+        assignedUser: { select: { email: true, fullName: true } },
+        slots: { select: { status: true } },
+        property: { select: { address: true } }
+      }
+    });
+    if (!c || c.status !== 'DONE') return;
+    if (!c.tenant || c.tenant.name === STARTER_TENANT_NAME) return;
+    if (c.executiveReportNotifiedAt) return;
+    if (!c.assignedUserId || !c.assignedUser?.email) return;
+    if (!isCaseReportFullyEmittedFromSlots(c.slots)) return;
+
+    const shortId = c.shortId || c.id;
+    const base =
+      String(process.env.PUBLIC_URL || process.env.BASE_URL || process.env.WEB_APP_ORIGIN || 'https://ainspecciona.com')
+        .trim()
+        .replace(/\/$/, '') || 'https://ainspecciona.com';
+    const reportUrl = `${base}/cases/${encodeURIComponent(shortId)}/report`;
+
+    const review = String(c.reviewStatus || '').toLowerCase();
+
+    if (review === 'approved') {
+      const mail = await sendExecutiveReportReadyEmail(c.assignedUser.email, {
+        fullName: c.assignedUser.fullName || '',
+        shortId,
+        address: c.property?.address || '',
+        reportUrl
+      });
+      if (!mail.ok || mail.skipped) {
+        if (!mail.skipped) fastify.log.warn({ caseId, err: mail.error }, 'executive-report-ready-email-failed');
+        return;
+      }
+      const updated = await prisma.case.updateMany({
+        where: { id: c.id, executiveReportNotifiedAt: null },
+        data: { executiveReportNotifiedAt: new Date() }
+      });
+      if (updated.count) {
+        fastify.log.info({ caseId: c.id, email: c.assignedUser.email }, 'executive-report-ready-email-sent');
+      }
+      return;
+    }
+
+    if (review === 'pending_review') return;
+
+    const updatedPending = await prisma.case.updateMany({
+      where: { id: c.id, reviewStatus: null },
+      data: { reviewStatus: 'pending_review' }
+    });
+    if (!updatedPending.count) return;
+
+    const mailRv = await sendBusinessReportReviewerNotificationEmail(REVIEWER_EMAIL, reportUrl, shortId, {
+      address: c.property?.address || '',
+      executiveName: c.assignedUser.fullName || c.assignedUser.email || ''
+    });
+    if (!mailRv.ok || mailRv.skipped) {
+      if (!mailRv.skipped) {
+        await prisma.case.updateMany({
+          where: { id: c.id, reviewStatus: 'pending_review' },
+          data: { reviewStatus: null }
+        });
+        fastify.log.warn({ caseId, err: mailRv.error }, 'business-review-request-email-failed');
+      }
+    } else {
+      fastify.log.info({ caseId: c.id, to: REVIEWER_EMAIL }, 'business-review-request-email-sent');
+    }
+  } catch (err) {
+    fastify.log.warn({ err: err?.message, caseId }, 'maybeNotifyExecutiveReportReady');
+  }
+}
+
 async function createActivationForUser({ prismaClient, userId }) {
   const token = crypto.randomUUID();
   const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);
@@ -999,7 +1737,9 @@ function safeExtFromMime(mime) {
     'image/jpg': 'jpg',
     'image/png': 'png',
     'image/webp': 'webp',
-    'image/gif': 'gif'
+    'image/gif': 'gif',
+    'image/heic': 'heic',
+    'image/heif': 'heif'
   };
   return map[String(mime || '').toLowerCase()] || null;
 }
@@ -1068,6 +1808,7 @@ function slotGroupTitleFromCode(slotCode = '') {
   if (code.startsWith('LIVING_')) return { groupKey: 'LIVING', groupTitle: 'Living' };
   if (code.startsWith('ELECTRICAL_')) return { groupKey: 'ELECTRICAL', groupTitle: 'Electricidad' };
   if (code.startsWith('PUERTA_') || code.startsWith('DOOR_')) return { groupKey: 'DOORS', groupTitle: 'Puertas' };
+  if (code.startsWith('REJA_')) return { groupKey: 'ENTRADA', groupTitle: 'Entrada' };
   if (code.startsWith('ELEVATOR') || code.startsWith('ASCENSOR')) return { groupKey: 'ELEVATOR', groupTitle: 'Ascensor' };
   if (code.startsWith('CERTIFICADO')) return { groupKey: 'CERTIFICADO', groupTitle: 'Certificado verde' };
   if (code.startsWith('ESTACIONAMIENTO') || code.startsWith('PARKING')) return { groupKey: 'PARKING', groupTitle: 'Estacionamiento' };
@@ -1086,18 +1827,43 @@ function buildPhotoPlanV1(input) {
   const plan = [];
   const bathCount = Math.max(1, Number(input.bathroomsCount || 1));
   const bedCount = Math.max(0, Number(input.bedroomsCount || 0));
+  const propType = String(input.propertyType || 'DEPARTMENT').toUpperCase();
+  const isDept = propType === 'DEPARTMENT';
+  const isHouse = propType === 'HOUSE';
 
-  // ——— Recorrido físico: documento primero, luego entrada → tablero → cocina → loggia → living → dormitorios+baños ———
+  // ——— Recorrido: certificados (1° verde, 2° ascensor), entrada, tablero, cocina… ———
 
-  if (input.hasGreenCertificate) {
+  if (input.hasGreenCertificate && isDept) {
     plan.push({ slotCode: 'CERTIFICADO_VERDE', title: 'Certificado verde', instructions: buildInstruction({
-      indicaciones: '', donde: 'Documento de certificado verde o certificación energética.', que: 'Fotografía legible del certificado vigente.'
+      indicaciones: 'Foto frontal del documento, sin reflejos fuertes.',
+      donde: 'Certificado verde o certificación energética del departamento.',
+      que: 'Que el documento sea legible y que las fechas visibles indiquen vigencia.'
     }), required: false });
+  }
+
+  if (isDept && input.hasElevator) {
+    plan.push({
+      slotCode: 'ASCENSOR_CERTIFICADO_INSPECCION',
+      title: 'Ascensor – Certificado de inspección',
+      instructions: buildInstruction({
+        indicaciones: 'Segunda foto del recorrido. Enfoca el certificado o placa; evita reflejos y desenfoque.',
+        donde: 'Certificado o placa de inspección del ascensor (hall, marco de cabina o cartelera del edificio).',
+        que: 'Verificar que el certificado sea legible y que esté vigente (fechas de inspección y/o vencimiento visibles).'
+      }),
+      required: true
+    });
   }
 
   plan.push({ slotCode: 'PUERTA_ENTRADA', title: 'Puerta de entrada', instructions: buildInstruction({
     indicaciones: '', donde: 'Puerta de entrada principal, interior y marco.', que: 'Estado de puerta, bisagras, herrajes y marco.'
   }), required: true });
+
+  if (isHouse && input.hasEntranceGrille) {
+    plan.push({ slotCode: 'REJA_ENTRADA', title: 'Reja de entrada', instructions: buildInstruction({
+      indicaciones: '', donde: 'Reja o cerramiento metálico del acceso (peatonal o vehicular) en la entrada.',
+      que: 'Fijación, óxido, deformaciones o estado general de seguridad aparente.'
+    }), required: false });
+  }
 
   plan.push({ slotCode: 'ELECTRICAL_PANEL', title: 'Tablero eléctrico', instructions: buildInstruction({
     indicaciones: '', donde: 'Tablero frontal, sin manipular.', que: 'Estado visual del tablero.'
@@ -1231,6 +1997,7 @@ async function queueOpenAiSlotAnalysis({ slotId }) {
   const maxAttempts = 3;
   const retryDelayMs = 2000;
   let lastError;
+  let kbBlockCache = null; // se calcula una vez aunque haya reintentos
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
     const client = new OpenAI({ apiKey });
@@ -1249,7 +2016,8 @@ async function queueOpenAiSlotAnalysis({ slotId }) {
       ELECTRICIDAD: 'instalación eléctrica visible',
       VENTANAS_CERRAMIENTOS: 'ventanas y cerramientos',
       PUERTAS_HERRAJES: 'puertas y herrajes',
-      MOBILIARIO_FIJO: 'mobiliario fijo'
+      MOBILIARIO_FIJO: 'mobiliario fijo',
+      DOCUMENTOS_CUMPLIMIENTO: 'vigencia y legibilidad de certificados o documentos regulatorios'
     };
     const criteriaDesc = kpiCriteriaDesc[String(kpiKey || '').toUpperCase()] || 'el criterio evaluado';
     const areaInfo = slotGroupTitleFromCode(slot.slotCode);
@@ -1268,11 +2036,29 @@ async function queueOpenAiSlotAnalysis({ slotId }) {
       'Redacta como un profesional: lenguaje claro, objetivo y técnico.',
       'Entrega el resultado en formato estructurado.'
     ].join('\n');
+    const findingExamplesBlock = formatAiFindingExamplesBlock(kpiKey, activeScoreConfig);
     let resolvedPrompt = String(promptTemplate)
       .replace(/\{\{SLOT_CODE\}\}/g, areaDesc)
       .replace(/\{\{AREA_DESCRIPTION\}\}/g, areaDesc)
       .replace(/\{\{CRITERIA_DESCRIPTION\}\}/g, criteriaDesc);
-    const prompt = resolvedPrompt;
+    if (findingExamplesBlock) resolvedPrompt += findingExamplesBlock;
+    // KB unificada (RAG): criterios aprendidos de revisiones ITO
+    if (kbBlockCache === null) {
+      kbBlockCache = await getKbPromptBlock({
+        prisma,
+        text: `${areaDesc}. ${criteriaDesc}`,
+        kpiKey,
+        sources: ['AINSPECTA', 'PROPERTYCHECK'],
+        log: fastify.log
+      });
+    }
+    if (kbBlockCache) resolvedPrompt += `\n${kbBlockCache}`;
+    const docPre = isDocumentComplianceSlot(slotCodeUpper)
+      ? documentAnalysisPromptPreamble(slotCodeUpper)
+      : '';
+    const electricPre =
+      String(kpiKey || '').toUpperCase() === 'ELECTRICIDAD' ? electricAnalysisPromptPreamble(slotCodeUpper) : '';
+    const prompt = docPre + electricPre + resolvedPrompt;
     const outputFormat = [
       '',
       'Formato de salida (JSON válido):',
@@ -1289,7 +2075,11 @@ async function queueOpenAiSlotAnalysis({ slotId }) {
       '  "match_confidence": 0.0,',
       '  "match_reason": "Justificación breve de correspondencia al slot",',
       '  "confidence": 0.0',
-      '}'
+      '}',
+      '',
+      'Reglas obligatorias:',
+      '- Si la imagen NO muestra el área o elemento solicitado en el slot (p.ej. cocina/muro lavaplatos y se ve living u otra habitación), pon matches_slot=false, proposed_severity="none", signals_detected=[] y details=[]. Explica en description y kpi_analysis por qué no corresponde. No inventes daños ni severidad del KPI sobre una zona que no está en el encuadre.',
+      '- En slots de INTERRUPTORES o ENCHUFES de pared: NO marques matches_slot=false solo porque no se ve tablero eléctrico o interruptor diferencial; eso no aplica a ese ítem.'
     ].join('\n');
 
     const response = await client.responses.create({
@@ -1406,42 +2196,93 @@ async function queueOpenAiSlotAnalysis({ slotId }) {
     };
     kpiAnalysis = removeRetakePhrases(kpiAnalysis);
     description = removeRetakePhrases(description);
-    const details = Array.isArray(parsed.details) ? parsed.details : [];
+    let details = Array.isArray(parsed.details) ? [...parsed.details] : [];
+    if (String(kpiKey || '').toUpperCase() === 'SANITARIOS') {
+      const blobInterv = `${description} ${kpiAnalysis} ${signals.join(' ')}`.toLowerCase();
+      const claimsNonStandard = /\bintervenc(i[oó]n|ion)\s+no\s+est(aá)ndar/i.test(blobInterv);
+      const strongPlumbingIntervention =
+        /\b(cinta\s+aislant|huincha|contrahuinch|tefl[oó]n\s+.{0,24}(excesiv|abundant|desorden)|empalme\s+.{0,32}(abiert|r[uú]stic|visible)|soldadur\w*.{0,20}(irregular|deficient|fr[ií]a)|abrazadera\w*.{0,20}(improv|pl[aá]stic|m[uú]ltiple)|rosca\w*.{0,20}destroz|pvc\w*.{0,40}(metal|flexible)|manguera\s+per\b|\bperico\b|uni[oó]n\s+mixta|relleno\s+con\s+masilla)/i.test(blobInterv);
+      if (claimsNonStandard && !strongPlumbingIntervention) {
+        signals = signals.filter((sig) => !/\bintervenc(i[oó]n|ion)\s+no\s+est(aá)ndar/i.test(String(sig || '')));
+        details = details.filter((d) => !/\bintervenc(i[oó]n|ion)\s+no\s+est(aá)ndar/i.test(String(d?.signal || '')));
+        const scrubInterventionClaim = (t) => {
+          let s = String(t || '');
+          s = s.replace(/\s*,\s*y\s+una\s+intervenc(i[oó]n|ion)\s+no\s+est(aá)ndar(\s+visible)?\b/gi, '');
+          s = s.replace(/\s*y\s+una\s+intervenc(i[oó]n|ion)\s+no\s+est(aá)ndar(\s+visible)?\b/gi, '');
+          s = s.replace(/\bintervenc(i[oó]n|ion)\s+no\s+est(aá)ndar(\s+visible)?\b/gi, '');
+          return s.replace(/\s{2,}/g, ' ').replace(/\s+([,.])/g, '$1').replace(/,\s*\./g, '.').trim();
+        };
+        description = scrubInterventionClaim(description);
+        kpiAnalysis = scrubInterventionClaim(kpiAnalysis);
+      }
+    }
     const proposedSeverityRaw = String(parsed.proposed_severity || '').trim().toLowerCase();
     const proposedSeverity = ['low', 'medium', 'high'].includes(proposedSeverityRaw) ? proposedSeverityRaw : null;
     const severityReason = String(parsed.severity_reason || '').trim() || 'Sin fundamento de severidad.';
-    const matchesSlot = typeof parsed.matches_slot === 'boolean' ? parsed.matches_slot : true;
+    let matchesSlot = typeof parsed.matches_slot === 'boolean' ? parsed.matches_slot : true;
     const matchConfidence = Math.max(0, Math.min(1, Number(parsed.match_confidence ?? 0.7)));
     const matchReason = String(parsed.match_reason || '').trim() || 'No se entregó justificación de correspondencia.';
     const confidence = Math.max(0, Math.min(1, Number(parsed.confidence ?? 0.7)));
     const extentText = details.map((d) => String(d?.extent || '').toLowerCase());
     const hasWide = extentText.some((t) => t.includes('extend') || t.includes('general') || t.includes('ampl'));
     let analysisLower = `${description} ${kpiAnalysis}`.toLowerCase();
-    let analysisSaysNoIssue = [
-      "sin observaciones",
-      "sin hallazgos relevantes",
-      "no se observan",
-      "no se identifican",
-      "no se detectan",
-      "sin señales",
-      "sin señales evidentes",
-      "condiciones adecuadas",
-      "condición adecuada",
-      "sin daños",
-      "sin deterioros",
-      "sin anomalías",
-      "sin signos",
-      "no presenta señales"
-    ].some((t) => analysisLower.includes(t));
+    // Frases que indican ausencia de problemas. Evitar subcadenas sueltas como "no se observan"
+    // (coincide con "No se observan piezas trizadas..." y anula severidad pese a rayones/desgaste).
+    const favorableNoIssuePhrases = [
+      'sin observaciones',
+      'sin hallazgos relevantes',
+      'no se observan hallazgos',
+      'no se observan hallazgos relevantes',
+      'no se observan problemas',
+      'no se observan problemas relevantes',
+      'no se observan anomalías',
+      'no se observan anomalias',
+      'no se observan señales relevantes',
+      'no se observan daños relevantes',
+      'no se identifican hallazgos',
+      'no se identifican hallazgos relevantes',
+      'no se identifican problemas',
+      'no se detectan hallazgos',
+      'no se detectan hallazgos relevantes',
+      'no se detectan problemas',
+      'sin señales',
+      'sin señales evidentes',
+      'condiciones adecuadas',
+      'condición adecuada',
+      'sin daños',
+      'sin deterioros',
+      'sin anomalías',
+      'sin anomalias',
+      'sin signos',
+      'no presenta señales'
+    ];
+    let analysisSaysNoIssue = favorableNoIssuePhrases.some((p) => analysisLower.includes(p));
+    // Si la narración niega hallazgos, no dejar que signals_detected contradictorios fuercen severidad (ej. "no hallazgos" + señal "desgaste").
     if (analysisSaysNoIssue && signals.length) {
       signals.length = 0;
     }
-    const issueKeywords = [
-      "corros", "óxido", "oxido", "mancha", "grieta", "fisura", "filtr", "humedad",
-      "moho", "salitre", "descascar", "desprend", "deform", "desaline", "daño", "dano",
-      "golpe", "quiebre", "trizad", "rot", "rayon", "rayón", "desgaste"
-    ];
-    let hasRealDefect = issueKeywords.some((k) => analysisLower.includes(k) || signals.some((sig) => sig.toLowerCase().includes(k)));
+    const signalsLower = signals.map((sig) => String(sig || '').toLowerCase());
+    let hasRealDefect = combinedTextHasAffirmativeDefectMention(
+      String(description || '').toLowerCase(),
+      String(kpiAnalysis || '').toLowerCase(),
+      signalsLower
+    );
+    const kpiLowerOnly = String(kpiAnalysis || '').toLowerCase();
+    const kpiConcludesNoRelevantFindings = favorableNoIssuePhrases.some((p) => kpiLowerOnly.includes(p));
+    if (kpiConcludesNoRelevantFindings && signals.length === 0) {
+      hasRealDefect = false;
+    }
+    if (hasRealDefect) {
+      analysisSaysNoIssue = false;
+    }
+    // Si el KPI concluye explícitamente sin hallazgos relevantes, esa narrativa prima sobre la descripción
+    // (menciones técnicas de sellos, condensación, etc. suelen disparar regex sin ser un defecto afirmado).
+    const kpiConclusionContradictsItself = /\b(excepto|salvo|a excepci[oó]n de|pero\s+s[ií]\s+hay|sin embargo[,]?\s+(?:s[ií]|hay|se observa))\b/i.test(kpiLowerOnly);
+    if (kpiConcludesNoRelevantFindings && !kpiConclusionContradictsItself) {
+      analysisSaysNoIssue = true;
+      signals.length = 0;
+      hasRealDefect = false;
+    }
 
     // Sin reglas específicas por KPI/slot: solo coherencia genérica.
     if (analysisSaysNoIssue) {
@@ -1458,11 +2299,23 @@ async function queueOpenAiSlotAnalysis({ slotId }) {
         : 'No se observan problemas en el área evaluada.';
     }
     if (kpiAnalysis.length < 120) {
-      const extra = signals.length
-        ? 'Se aprecian detalles puntuales visibles en el encuadre que ameritan registro en el informe técnico.'
+      const defectPaddingContext =
+        signals.length > 0 ||
+        hasRealDefect ||
+        !!proposedSeverity;
+      const extra = defectPaddingContext
+        ? 'Se aprecian detalles en el encuadre que conviene describir con precisión (ubicación y extensión) en coherencia con lo observado.'
         : 'Las superficies se ven uniformes y sin evidencias claras de deterioro.';
       kpiAnalysis = `${kpiAnalysis} ${extra}`.trim();
     }
+    matchesSlot = correctWallElectricMatchesSlotFalsePositive({
+      kpiKey,
+      slotCode: slotCodeUpper,
+      matchesSlot,
+      description,
+      kpiAnalysis,
+      matchReason
+    });
     const severityRank = { none: 0, low: 1, medium: 2, high: 3 };
     const normalizeSeverity = (value) => {
       const s = String(value || '').toLowerCase();
@@ -1492,17 +2345,197 @@ async function queueOpenAiSlotAnalysis({ slotId }) {
       return severityRank[proposed] >= severityRank[minimum] ? proposed : minimum;
     })();
     let finalSeverity = chosenSeverity;
-    const severitySource = analysisSaysNoIssue && finalSeverity === null
+    let severitySource = analysisSaysNoIssue && finalSeverity === null
       ? 'forced_ok'
       : (finalSeverity && proposedSeverity && finalSeverity === proposedSeverity ? 'ai_proposed' : (finalSeverity ? 'rule_guardrail' : 'none'));
-    const hasSignals = !!finalSeverity;
-    const analysisCode = hasSignals ? 'COSMETIC_WEAR' : 'OK';
+    let hasSignals = !!finalSeverity;
+    let analysisCode = hasSignals ? 'COSMETIC_WEAR' : 'OK';
+    if (hasSignals && String(kpiKey || '').toUpperCase() === 'VENTANAS_CERRAMIENTOS') {
+      const fullLower = `${description} ${kpiAnalysis}`.toLowerCase();
+      if (windowAnalysisSuggestsSealIssue(fullLower)) {
+        analysisCode = 'SEAL_FAILURE';
+      }
+    }
+    if (hasSignals && String(kpiKey || '').toUpperCase() === 'PISOS') {
+      const fullLower = `${description} ${kpiAnalysis}`.toLowerCase();
+      const detailsSig = (details || []).map((d) => String(d?.signal || '').toLowerCase()).join(' ');
+      const sigJoined = [...signalsLower, detailsSig].filter(Boolean).join(' ');
+      if (pisosAnalysisSuggestsJointMoistureDamage(fullLower, sigJoined)) {
+        analysisCode = 'FLOOR_MOISTURE_JOINT_DAMAGE';
+        if (finalSeverity === 'low') finalSeverity = 'medium';
+        severitySource = 'rule_floor_joint_moisture';
+      }
+    }
+    if (hasSignals && String(kpiKey || '').toUpperCase() === 'MOBILIARIO_FIJO') {
+      const fullLower = `${description} ${kpiAnalysis}`.toLowerCase();
+      const sigDetailLower = [
+        ...signalsLower,
+        ...(details || []).map((d) => String(d?.signal || '').toLowerCase())
+      ].join(' ');
+      const blob = `${fullLower} ${sigDetailLower}`;
+      const hasStrongMisalignEvidence =
+        /\b(hoja\s+(?:torcida|descuadrada)|folios?\s+sobresal|bisagra(?:s)?\s+.{0,40}despeg|desajuste\s+obvio|no\s+cierra\s+en\s+el\s+marco|hueco\s+evidente|puerta\s+ca[ií]da|fuera\s+de\s+cuadro)\b/i.test(blob) ||
+        /\b(desalineaci[oó]n|desalineamiento)\s+(marcad[oa]|evidente|importante|clar[oa]|sever[oa])\b/i.test(blob) ||
+        /\b(sever\w*|marcad\w*|evident\w*)\s+(?:desaline|descuadre)/i.test(blob);
+      if ((finalSeverity === 'medium' || finalSeverity === 'high') && !hasStrongMisalignEvidence) {
+        const weakMisalignOnly =
+          /\b(liger[oa]|leve)\s+desaline/i.test(blob) ||
+          /\bdesaline\w*\s+(liger[oa]|leve)\b/i.test(blob) ||
+          /\bpuertas?\s+desalinead\w*\b/i.test(blob);
+        if (weakMisalignOnly) {
+          finalSeverity = 'low';
+          severitySource = 'rule_mobiliario_weak_misalign_cap';
+        }
+      }
+    }
+    if (hasSignals && String(kpiKey || '').toUpperCase() === 'SANITARIOS') {
+      const fullLower = `${description} ${kpiAnalysis}`.toLowerCase();
+      const sigDetailLower = [
+        ...signalsLower,
+        ...(details || []).map((d) => String(d?.signal || '').toLowerCase())
+      ].join(' ');
+      const blob = `${fullLower} ${sigDetailLower}`;
+      const weakHumidityLanguage =
+        /\b(humedad|húmedo|húmeda|humedos|mojados?)\b/i.test(blob);
+      const explicitActiveLeak =
+        /\b(filtraci[oó]n\s+activa|fuga\s+activa|goteo\s+activo|goteando)\b/i.test(blob);
+      const strongMoistureEvidence =
+        /\b(gotas?|charco|efloresc|ampollas?\s+(?:en|de)|\binflad[ao]s?|moho\s+filament|brillo\s+[^\n]{0,16}mojad|pel[ií]cula\s+de\s+agua|capilaridad\s+clara|pintura\s+[^\n]{0,24}inflad|aureola\s+húmeda)\b/i.test(blob);
+      if (weakHumidityLanguage && !strongMoistureEvidence && !explicitActiveLeak && (finalSeverity === 'medium' || finalSeverity === 'high')) {
+        finalSeverity = 'low';
+        severitySource = 'rule_sanitarios_humedad_evidence_cap';
+      }
+      const negatesOxide = /\b(sin\s+óxido|sin\s+oxido|sin\s+corrosi[oó]n|no\s+hay\s+óxido|no\s+hay\s+oxido|no\s+se\s+observa\s+óxido|no\s+se\s+observa\s+oxido|ausencia\s+de\s+óxido|ausencia\s+de\s+oxido)\b/i.test(blob);
+      const blobOxideRule = String(blob)
+        .replace(/\b(posible|podr[ií]a\s+ser|aparente|al\s+parecer|compatible\s+con)\s+[^.;]{0,140}?\b(óxido|oxido|corrosi[oó]n)\b/gi, ' ')
+        .replace(/\bcorrosi[oó]n\s*\/\s*(óxido|oxido)\b/gi, ' ');
+      const strongFerrousOxide =
+        !negatesOxide &&
+        (/\b(oxidaci[oó]n|oxidacion|oxidado|oxidada|oxidados|oxidadas|óxido\s+laminar|oxido\s+laminar|manchas?\s+rojiz|tonos?\s+cobriz|p[eé]rdida\s+.{0,36}(cromad|del\s+cromad)|desconchad[oa].{0,28}cromad|metal\s+.{0,20}(oxid|corroi))\b/i.test(blobOxideRule) ||
+          /\b(óxido|oxido)\s+(visible|evidente|marcad[oa]|laminar)\b/i.test(blobOxideRule) ||
+          /\bcorrosi[oó]n\s+visible\b/i.test(blobOxideRule) ||
+          /\b(rust\s+stain|rust\s+on|oxidation\s+on)\b/i.test(blobOxideRule) ||
+          (/\bcorrosi[oó]n\b/i.test(blobOxideRule) &&
+            /\b(marcad[oa]|sever[oa]|importante|grave|conexiones?\s+corro[ií]d|corroi\w*\s+visible|visiblemente\s+corro)\b/i.test(blobOxideRule)));
+      const grimeOrPaintOnlyNarrative =
+        /\b(sarro|mineralizaci|cañer[ií]a[s]?\s+pintad|pintura\s+sobre|suciedad\s+acumulad|acumulaci[oó]n\s+de\s+(polvo|suciedad)|capa\s+mate|superficie\s+mate)\b/i.test(blob) &&
+        !strongFerrousOxide;
+      const wetSanitaryContext =
+        /\b(tina|ducha|plato\s+de\s+ducha|mampara|bañera|wc|inodoro|lavamanos|lavabo|pileta|grifer[ií]a|desagüe|desague|drenaje|rejilla|sif[oó]n|cano\s+desag|conexiones?\s+visibles|baño|sanitario|porcelana|acr[ií]lico|ducha\s+tina)\b/i.test(blob);
+      if (
+        strongFerrousOxide &&
+        wetSanitaryContext &&
+        !grimeOrPaintOnlyNarrative &&
+        (finalSeverity === 'medium' || finalSeverity === 'low')
+      ) {
+        finalSeverity = 'high';
+        severitySource = 'rule_sanitarios_oxide_corrosion_min_high';
+      }
+    }
+    if (String(kpiKey || '').toUpperCase() === 'DOCUMENTOS_CUMPLIMIENTO') {
+      const docApplied = applyDocumentComplianceAnalysisRules({
+        slotCode: slotCodeUpper,
+        kpiKey,
+        matchesSlot,
+        description,
+        kpiAnalysis,
+        signals,
+        details,
+        proposedSeverity,
+        finalSeverity,
+        analysisSaysNoIssue,
+        hasRealDefect
+      });
+      matchesSlot = docApplied.matchesSlot;
+      description = docApplied.description;
+      kpiAnalysis = docApplied.kpiAnalysis;
+      signals = docApplied.signals;
+      details = docApplied.details;
+      finalSeverity = docApplied.finalSeverity;
+      analysisSaysNoIssue = docApplied.analysisSaysNoIssue;
+      hasRealDefect = docApplied.hasRealDefect;
+      if (docApplied.analysisCode) {
+        analysisCode = docApplied.analysisCode;
+        hasSignals = docApplied.finalSeverity != null;
+        severitySource = docApplied.severitySource || severitySource;
+      }
+    }
+
+    if (hasSignals && electricPanelInferiorWearLikelyDirtOnly({
+      slotCodeUpper,
+      kpiKey,
+      description,
+      kpiAnalysis,
+      signals,
+      details
+    })) {
+      const scrubbed = scrubElectricPanelInferiorDirtNarrative(description, kpiAnalysis);
+      description = scrubbed.description;
+      kpiAnalysis = scrubbed.kpiAnalysis;
+      signals = signals.filter((sig) => {
+        const s = String(sig || '').toLowerCase();
+        if (!/\b(desgaste|desgastad|deterioro)/i.test(s)) return true;
+        if (/\b(inferior|fondo|base|bajo|parte\s+baja|riel)/i.test(s)) return false;
+        return true;
+      });
+      details = details.filter((d) => {
+        const s = String(d?.signal || '').toLowerCase();
+        if (!/\b(desgaste|desgastad|deterioro)/i.test(s)) return true;
+        if (/\b(inferior|fondo|base|bajo|parte\s+baja|riel)/i.test(s)) return false;
+        return true;
+      });
+      finalSeverity = null;
+      analysisCode = 'OK';
+      hasSignals = false;
+      severitySource = 'rule_electric_panel_inferior_dirt_not_wear';
+    }
+    if (hasSignals && wallSwitchAvCoaxialFalsePositive({
+      slotCodeUpper,
+      kpiKey,
+      description,
+      kpiAnalysis,
+      signals,
+      details
+    })) {
+      const scrubbed = scrubWallSwitchAvFalsePositiveNarrative(description, kpiAnalysis);
+      description = scrubbed.description;
+      kpiAnalysis = scrubbed.kpiAnalysis;
+      signals = signals.filter((sig) => {
+        const s = String(sig || '').toLowerCase();
+        return !/\b(interruptor(?:es)?\s+sin\s+tapa|sin\s+tapa|mecanismos?\s+expuest|desgaste\s+visible)\b/i.test(s);
+      });
+      details = details.filter((d) => {
+        const s = String(d?.signal || '').toLowerCase();
+        return !/\b(interruptor(?:es)?\s+sin\s+tapa|sin\s+tapa|mecanismos?\s+expuest|desgaste\s+visible)\b/i.test(s);
+      });
+      finalSeverity = null;
+      analysisCode = 'OK';
+      hasSignals = false;
+      severitySource = 'rule_wall_switch_av_not_missing_cover';
+    }
     let message = hasSignals
       ? (kpiAnalysis || `Se detecta: ${signals.join(', ')}.`)
-      : 'Conclusión: no se observan hallazgos relevantes en esta evidencia.';
-    const scorePenaltyApplied = hasSignals && kpiKey && activeScoreConfig?.kpis?.[kpiKey]
+      : ((severitySource === 'rule_electric_panel_inferior_dirt_not_wear' || severitySource === 'rule_wall_switch_av_not_missing_cover') && String(kpiAnalysis || '').trim().length >= 50
+        ? kpiAnalysis
+        : 'Conclusión: no se observan hallazgos relevantes en esta evidencia.');
+    let scorePenaltyApplied = hasSignals && kpiKey && activeScoreConfig?.kpis?.[kpiKey]
       ? Number(activeScoreConfig.kpis[kpiKey][String(finalSeverity).toLowerCase()] ?? 0)
       : 0;
+
+    // Foto no corresponde al slot: el segundo análisis lo detecta; no debe afectar puntaje.
+    if (!matchesSlot) {
+      finalSeverity = null;
+      analysisCode = 'OK';
+      signals.length = 0;
+      hasSignals = false;
+      scorePenaltyApplied = 0;
+      severitySource = 'slot_mismatch_no_penalty';
+      const mergedNarrative = [kpiAnalysis, matchReason].map((x) => String(x || '').trim()).filter(Boolean).join(' ').trim();
+      message =
+        mergedNarrative.length >= 40
+          ? `${mergedNarrative} No se aplica descuento al puntaje porque la evidencia no corresponde al elemento solicitado.`
+          : `La imagen no corresponde al área solicitada para esta evidencia. No se aplica descuento al puntaje. ${matchReason || ''}`.trim();
+    }
 
     const prevMessage = slot.analysisMessage || null;
     const nextDebug = {
@@ -1516,6 +2549,7 @@ async function queueOpenAiSlotAnalysis({ slotId }) {
           description,
           kpi_analysis: kpiAnalysis,
           signals_detected: signals,
+          details,
           proposed_severity: proposedSeverityRaw || 'none',
           severity_reason: severityReason,
           final_severity: finalSeverity || null,
@@ -1545,6 +2579,8 @@ async function queueOpenAiSlotAnalysis({ slotId }) {
         status: 'ANALYZED'
       }
     });
+
+    await maybeNotifyExecutiveReportReady(slot.caseId);
 
     // La aprobación se dispara manualmente al terminar la inspección (botón "Terminar").
       return;
@@ -1578,6 +2614,7 @@ async function validateSlotMatchWithOpenAI({ buffer, mimeType = 'image/jpeg', sl
     'ELECTRICAL_PANEL',
     'ENTRY_DOOR',
     'ELEVATOR',
+    'INSPECTION_CERTIFICATE',
     'PARKING',
     'CERTIFICATE',
     'OTHER'
@@ -1602,7 +2639,7 @@ async function validateSlotMatchWithOpenAI({ buffer, mimeType = 'image/jpeg', sl
     if (c.endsWith('_CLOSET')) return 'CLOSET';
     if (c === 'ELECTRICAL_PANEL') return 'ELECTRICAL_PANEL';
     if (c === 'PUERTA_ENTRADA' || c === 'DOOR_ENTRY') return 'ENTRY_DOOR';
-    if (c === 'ELEVATOR') return 'ELEVATOR';
+    if (c === 'ELEVATOR' || c.startsWith('ASCENSOR')) return 'INSPECTION_CERTIFICATE';
     if (c === 'ESTACIONAMIENTO' || c === 'PARKING') return 'PARKING';
     if (c === 'CERTIFICADO_VERDE' || c === 'GREEN_CERTIFICATE') return 'CERTIFICATE';
     return 'OTHER';
@@ -1795,10 +2832,33 @@ fastify.register(multipart, {
   limits: { fileSize: 8 * 1024 * 1024 }
 });
 fastify.register(cookie);
+// Antes de @fastify/static: si no, /whatsapp-test puede caer en el estático y devolver 404.
+// Centro de revisión ITO (la auth la exige la API /api/admin/review/*)
+fastify.get('/review', (req, reply) => {
+  const filePath = path.join(__dirname, 'public', 'review.html');
+  if (!fs.existsSync(filePath)) {
+    return reply.code(404).type('text/plain').send('review.html not found');
+  }
+  return reply
+    .header('Cache-Control', 'no-store, no-cache, must-revalidate')
+    .type('text/html; charset=utf-8')
+    .send(fs.readFileSync(filePath, 'utf8'));
+});
+
+fastify.get('/whatsapp-test', (req, reply) => {
+  const filePath = path.join(__dirname, 'public', 'whatsapp-test.html');
+  if (!fs.existsSync(filePath)) {
+    return reply.code(404).type('text/plain').send('whatsapp-test.html not found');
+  }
+  return reply
+    .header('Cache-Control', 'no-store, no-cache, must-revalidate')
+    .type('text/html; charset=utf-8')
+    .send(fs.readFileSync(filePath, 'utf8'));
+});
 fastify.register(staticPlugin, {
   root: path.join(__dirname, 'public'),
   prefix: '/',
-  index: 'corredores.html'
+  index: 'index.html'
 });
 fastify.register(staticPlugin, {
   root: path.join(process.cwd(), process.env.UPLOAD_DIR || 'uploads'),
@@ -1807,32 +2867,431 @@ fastify.register(staticPlugin, {
 });
 
 fastify.get('/favicon.ico', (req, reply) => reply.redirect(302, '/icons/icon.svg'));
+// Local: no hay public/index.html; en Firebase Hosting `/` → corredores.html
+fastify.get('/', (req, reply) => reply.sendFile('corredores.html'));
 fastify.get('/index.html', (req, reply) => reply.redirect(302, '/'));
 
 // Health check ligero para Cloud Run (sin DB) - responde rápido al arranque
 fastify.get('/health', (req, reply) => reply.send({ ok: true, status: 'up' }));
+
+/** Stub API v0: calendario unificado (cupos vacíos hasta persistencia + reglas). */
+fastify.get('/api/v0/tenants/:tenantId/calendar/unified', (req, reply) => {
+  const { tenantId } = req.params;
+  const q = req.query || {};
+  return reply.send({
+    ok: true,
+    tenantId: String(tenantId),
+    from: q.from != null ? String(q.from) : null,
+    to: q.to != null ? String(q.to) : null,
+    slots: []
+  });
+});
+
+/**
+ * PropertyCheck → Ainspecciona: análisis on-demand de evidencias (solo fotos por URL).
+ * Auth: header `x-propertycheck-secret` = `PROPERTYCHECK_INGRESS_SECRET` en .env
+ */
+fastify.post('/api/v0/tenants/:tenantId/propertycheck/analyze', async (req, reply) => {
+  const expected = String(process.env.PROPERTYCHECK_INGRESS_SECRET || '').trim();
+  const provided = String(req.headers['x-propertycheck-secret'] || '').trim();
+  if (!expected || provided !== expected) {
+    req.log.warn({ url: req.url }, 'propertycheck-analyze-unauthorized');
+    return reply.code(401).send({
+      kind: 'error',
+      ok: false,
+      code: 'UNAUTHORIZED',
+      message: 'Falta o es inválido x-propertycheck-secret (PROPERTYCHECK_INGRESS_SECRET en servidor).'
+    });
+  }
+
+  const { tenantId } = req.params;
+  const tenant = await prisma.tenant.findUnique({ where: { id: String(tenantId) }, select: { id: true } });
+  if (!tenant) {
+    return reply.code(404).send({
+      kind: 'error',
+      ok: false,
+      code: 'TENANT_NOT_FOUND',
+      message: 'Tenant no encontrado.'
+    });
+  }
+
+  if (!process.env.OPENAI_API_KEY) {
+    return reply.code(400).send({
+      kind: 'error',
+      ok: false,
+      code: 'OPENAI_NOT_CONFIGURED',
+      message: 'OPENAI_API_KEY no configurada en el servidor.'
+    });
+  }
+
+  const body = req.body || {};
+  const out = await runPropertyCheckPhotoBatchAnalysisV0({
+    body,
+    getRuntimeScoreConfig,
+    prisma,
+    log: req.log
+  });
+
+  if (out.kind === 'error') {
+    const status = out.code === 'VALIDATION' ? 400 : out.code === 'UNAUTHORIZED' ? 401 : 502;
+    return reply.code(status).send(out);
+  }
+
+  if (prisma && out.analysis?.byCapture?.length) {
+    recordPropertyCheckAccuracyOnAnalyze(prisma, {
+      tenantId,
+      externalInspectionId: out.externalInspectionId,
+      slotsTotal: out.analysis.byCapture.length
+    }).catch((err) => req.log.warn({ err: err?.message }, 'analysis-accuracy-metric-pc-analyze'));
+  }
+
+  return reply.send(out);
+});
+
+/**
+ * PropertyCheck → resumen ejecutivo (OpenAI, mismo criterio que /api/cases/:caseId/executive-summary).
+ */
+fastify.post('/api/v0/tenants/:tenantId/propertycheck/executive-summary', async (req, reply) => {
+  const expected = String(process.env.PROPERTYCHECK_INGRESS_SECRET || '').trim();
+  const provided = String(req.headers['x-propertycheck-secret'] || '').trim();
+  if (!expected || provided !== expected) {
+    return reply.code(401).send({
+      kind: 'error',
+      ok: false,
+      code: 'UNAUTHORIZED',
+      message: 'Falta o es inválido x-propertycheck-secret (PROPERTYCHECK_INGRESS_SECRET en servidor).',
+    });
+  }
+
+  const { tenantId } = req.params;
+  const tenant = await prisma.tenant.findUnique({ where: { id: String(tenantId) }, select: { id: true } });
+  if (!tenant) {
+    return reply.code(404).send({
+      kind: 'error',
+      ok: false,
+      code: 'TENANT_NOT_FOUND',
+      message: 'Tenant no encontrado.',
+    });
+  }
+
+  const out = await generatePropertyCheckExecutiveSummaryV0({
+    body: req.body || {},
+    log: req.log,
+  });
+
+  if (out.kind === 'error') {
+    const status =
+      out.code === 'VALIDATION'
+        ? 400
+        : out.code === 'UNAUTHORIZED'
+          ? 401
+          : out.code === 'OPENAI_NOT_CONFIGURED'
+            ? 400
+            : 502;
+    return reply.code(status).send(out);
+  }
+  return reply.send(out);
+});
+
+/**
+ * PropertyCheck → Aintelligence Ingest: feedback de correcciones de hallazgos.
+ * Auth: header `x-propertycheck-secret` = `PROPERTYCHECK_INGRESS_SECRET` en .env
+ * Contrato: docs/aintelligence/PROPERTYCHECK_FEEDBACK_CONTRACT.md
+ */
+fastify.post('/api/v0/tenants/:tenantId/propertycheck/feedback', async (req, reply) => {
+  const auth = verifyPropertyCheckIngressSecret(req.headers);
+  if (!auth.ok) {
+    req.log.warn({ url: req.url }, 'propertycheck-feedback-unauthorized');
+    return reply.code(401).send({ kind: 'error', ok: false, ...auth });
+  }
+
+  if (!prisma) {
+    return reply.code(503).send({
+      kind: 'error',
+      ok: false,
+      code: 'DATABASE_NOT_CONFIGURED',
+      message: 'Base de datos no configurada.'
+    });
+  }
+
+  const idempotencyKey = String(req.headers['idempotency-key'] || '').trim() || undefined;
+  const out = await handlePropertyCheckFeedbackV0({
+    prisma,
+    storage,
+    tenantId: req.params.tenantId,
+    body: req.body || {},
+    idempotencyKey,
+    log: req.log
+  });
+
+  return reply.code(out.httpStatus).send(out.body);
+});
+
+/**
+ * PropertyCheck → Aintelligence Ingest: feedback en lote (máx. 20 items).
+ */
+fastify.post('/api/v0/tenants/:tenantId/propertycheck/feedback/batch', async (req, reply) => {
+  const auth = verifyPropertyCheckIngressSecret(req.headers);
+  if (!auth.ok) {
+    req.log.warn({ url: req.url }, 'propertycheck-feedback-batch-unauthorized');
+    return reply.code(401).send({ kind: 'error', ok: false, ...auth });
+  }
+
+  if (!prisma) {
+    return reply.code(503).send({
+      kind: 'error',
+      ok: false,
+      code: 'DATABASE_NOT_CONFIGURED',
+      message: 'Base de datos no configurada.'
+    });
+  }
+
+  const out = await handlePropertyCheckFeedbackBatchV0({
+    prisma,
+    storage,
+    tenantId: req.params.tenantId,
+    body: req.body || {},
+    log: req.log
+  });
+
+  return reply.code(out.httpStatus).send(out.body);
+});
+
 fastify.get('/formulario', (req, reply) => reply.sendFile('formulario.html'));
-fastify.get('/cases/:caseId/report', (req, reply) => reply.sendFile('report.html'));
-fastify.get('/cases/:caseId/certificate', (req, reply) => reply.sendFile('certificate.html'));
-fastify.get('/admin', (req, reply) => reply.sendFile('admin.html'));
+const REPORT_HTML_PATH = path.join(__dirname, 'public', 'report.html');
+let reportHtmlTemplateCache = null;
+
+async function sendReportHtml(reply) {
+  if (!reportHtmlTemplateCache) {
+    reportHtmlTemplateCache = fs.readFileSync(REPORT_HTML_PATH, 'utf8');
+  }
+  const runtime = await getRuntimeScoreConfig();
+  const cfg = runtime.config || {};
+  const inject = `<script>window.__AINSPECTA_SCORE_CONFIG__=${JSON.stringify({
+    kpis: cfg.kpis,
+    badge: cfg.badge,
+    kpiWeights: cfg.kpiWeights,
+    messages: cfg.messages,
+    recommendations: cfg.recommendations,
+    slotKpiMap: cfg.slotKpiMap
+  })};</script>`;
+  const html = reportHtmlTemplateCache.replace('</head>', `${inject}\n</head>`);
+  return reply
+    .header('Cache-Control', 'no-store, no-cache, must-revalidate')
+    .header('X-Report-Scoring', 'v3-admin-sync')
+    .type('text/html; charset=utf-8')
+    .send(html);
+}
+
+fastify.get('/cases/:caseId/report', async (req, reply) => {
+  try {
+    return await sendReportHtml(reply);
+  } catch (err) {
+    fastify.log.warn({ err: err?.message }, 'report-html-inject-fallback');
+    return reply
+      .header('Cache-Control', 'no-store, no-cache, must-revalidate')
+      .sendFile('report.html');
+  }
+});
+fastify.get('/cases/:caseId/certificate', (req, reply) =>
+  reply.header('Cache-Control', 'no-store, no-cache, must-revalidate').sendFile('certificate.html'));
+fastify.get('/admin', (req, reply) =>
+  reply.header('Cache-Control', 'no-store, no-cache, must-revalidate').sendFile('admin.html'));
 fastify.get('/activate', (req, reply) => reply.sendFile('activate.html'));
-/** Enlaces para pantalla post-activación ejecutivo (Play Store, panel web). Sin secretos. */
+/** Enlaces post-activación ejecutivo (Play Store, App Store, panel web). Sin secretos. */
 fastify.get('/api/public/executive-app', (req, reply) => {
   const playStoreUrl = String(process.env.EXECUTIVE_PLAY_STORE_URL || '').trim() || null;
+  const appStoreEnv = String(process.env.EXECUTIVE_APP_STORE_URL || '').trim();
+  const appStoreUrl = appStoreEnv || DEFAULT_EXECUTIVE_APP_STORE_URL;
+  const base = getPublicWebBase(req);
   return reply.send({
     ok: true,
     playStoreUrl,
-    executiveWebUrl: `${getPublicWebBase(req)}/executive`
+    appStoreUrl,
+    executiveWebUrl: `${base}/executive`,
+    iosPwaGuideUrl: `${base}/executive-instalar-ios`,
+    googlePlayBadgeUrl: `${base}/icons/logo-google-play.png`,
+    appStoreBadgeUrl: `${base}/icons/logo-app-store.png`,
+    appleIosPwaBadgeUrl: `${base}/assets/apple-ios-pwa-badge.svg`
+  });
+});
+/** Widget ElevenLabs (solo home): agent ID público vía env ELEVENLABS_AGENT_ID. */
+fastify.get('/api/public/elevenlabs-agent', (req, reply) => {
+  const agentId = String(process.env.ELEVENLABS_AGENT_ID || '').trim();
+  if (!agentId) {
+    return reply.send({ ok: true, enabled: false, agentId: null });
+  }
+  const variant = String(process.env.ELEVENLABS_WIDGET_VARIANT || 'expanded').trim() || 'expanded';
+  return reply.send({
+    ok: true,
+    enabled: true,
+    agentId,
+    variant,
+    dismissible: process.env.ELEVENLABS_WIDGET_DISMISSIBLE !== '0'
+  });
+});
+
+/** KPIs de scoring (solo lectura, sin auth) para reporte público y certificados. */
+fastify.get('/api/public/score-config', async (req, reply) => {
+  const runtime = await getRuntimeScoreConfig();
+  const cfg = runtime.config || {};
+  return reply.send({
+    ok: true,
+    updatedAt: runtime.updatedAt ? runtime.updatedAt.toISOString() : null,
+    config: {
+      kpis: cfg.kpis,
+      badge: cfg.badge,
+      kpiWeights: cfg.kpiWeights,
+      messages: cfg.messages,
+      recommendations: cfg.recommendations
+    }
   });
 });
 fastify.get('/install', (req, reply) => reply.redirect('/executive'));
-fastify.get('/login', (req, reply) => reply.redirect(302, '/'));
+// /login, /app, /control → registerPlatformRoutes
 fastify.get('/tenant', (req, reply) => reply.sendFile('tenant.html'));
 fastify.get('/tenant/comprar-creditos', (req, reply) => reply.header('Cache-Control', 'no-store, no-cache, must-revalidate').sendFile('tenant-comprar-creditos.html'));
+fastify.get('/executive-instalar-ios', (req, reply) =>
+  reply.header('Cache-Control', 'no-store, no-cache, must-revalidate').sendFile('executive-instalar-ios.html')
+);
 fastify.get('/executive', (req, reply) => reply.sendFile('executive.html'));
 fastify.get('/precios', (req, reply) => reply.header('Cache-Control', 'no-store, no-cache, must-revalidate').sendFile('precios.html'));
+// Landing pública / link para compartir (asistente + captura)
+fastify.get('/postventa/captura', (req, reply) =>
+  reply.header('Cache-Control', 'no-store, no-cache, must-revalidate').sendFile('postventa/captura.html')
+);
+fastify.get('/postventa_prueba', (req, reply) =>
+  reply.header('Cache-Control', 'no-store, no-cache, must-revalidate').sendFile('postventa/prueba.html')
+);
+// --- Portal Postventa inmobiliaria ---
+// Dashboard canónico: /postventa. Captura pública: /postventa/captura.
+// /postventa/portal/* se mantiene como alias (redirect).
+const pvPortalNoStore = (reply, file) =>
+  reply.header('Cache-Control', 'no-store, no-cache, must-revalidate').sendFile(file);
+function pvRedirectLegacyPublicLanding(req, reply) {
+  // Compat: links viejos /postventa?start=1|tenant=… → captura pública
+  const q = req.query || {};
+  if (q.start === '1' || q.iniciar === '1' || q.tenant) {
+    const params = new URLSearchParams();
+    for (const [k, v] of Object.entries(q)) {
+      if (v == null || v === '') continue;
+      params.set(k, Array.isArray(v) ? String(v[0]) : String(v));
+    }
+    const qs = params.toString();
+    return reply.redirect(302, qs ? `/postventa/captura?${qs}` : '/postventa/captura');
+  }
+  return null;
+}
+function pvPortalAliasRedirect(req, reply) {
+  const path = String(req.url || '/postventa/portal').split('?')[0];
+  const rest = path === '/postventa/portal' ? '' : path.slice('/postventa/portal'.length);
+  const qs = req.url && req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
+  return reply.redirect(302, `/postventa${rest || ''}${qs}`);
+}
+// HTML del portal: sin guard de servidor.
+// Firebase solo reenvía la cookie __session a Cloud Run; la sesión real viaja
+// en sessionStorage + header x-postventa-session (ensureAuth en el cliente).
+// Un guard aquí provocaba bucle login → /postventa → login ("bloqueado").
+fastify.get('/postventa', (req, reply) => {
+  if (pvRedirectLegacyPublicLanding(req, reply)) return;
+  return pvPortalNoStore(reply, 'postventa/portal/overview.html');
+});
+fastify.get('/postventa/', (req, reply) => {
+  if (pvRedirectLegacyPublicLanding(req, reply)) return;
+  return pvPortalNoStore(reply, 'postventa/portal/overview.html');
+});
+fastify.get('/postventa/login', (req, reply) =>
+  pvPortalNoStore(reply, 'postventa/portal/login.html')
+);
+fastify.get('/postventa/overview', (req, reply) =>
+  pvPortalNoStore(reply, 'postventa/portal/overview.html')
+);
+fastify.get('/postventa/proyecto', (req, reply) =>
+  pvPortalNoStore(reply, 'postventa/portal/proyecto.html')
+);
+fastify.get('/postventa/ticket', (req, reply) =>
+  pvPortalNoStore(reply, 'postventa/portal/ticket.html')
+);
+fastify.get('/postventa/mis-tickets', (req, reply) =>
+  pvPortalNoStore(reply, 'postventa/portal/mis-tickets.html')
+);
+fastify.get('/postventa/configuracion', (req, reply) =>
+  pvPortalNoStore(reply, 'postventa/portal/configuracion.html')
+);
+// Alias legacy /postventa/portal/*
+fastify.get('/postventa/portal', (req, reply) => pvPortalAliasRedirect(req, reply));
+fastify.get('/postventa/portal/login', (req, reply) => pvPortalAliasRedirect(req, reply));
+fastify.get('/postventa/portal/overview', (req, reply) => pvPortalAliasRedirect(req, reply));
+fastify.get('/postventa/portal/proyecto', (req, reply) => pvPortalAliasRedirect(req, reply));
+fastify.get('/postventa/portal/ticket', (req, reply) => pvPortalAliasRedirect(req, reply));
+fastify.get('/postventa/portal/mis-tickets', (req, reply) => pvPortalAliasRedirect(req, reply));
+fastify.get('/postventa/portal/configuracion', (req, reply) => pvPortalAliasRedirect(req, reply));
+// --- Ainspecciona Entrega (recepción técnica constructora → inmobiliaria) ---
+const entregaNoStore = (reply, file) =>
+  reply.header('Cache-Control', 'no-store, no-cache, must-revalidate').sendFile(file);
+async function entregaPageGuard(req, reply) {
+  const session = await getEntregaSessionAuth(prisma, req);
+  if (!session) {
+    const next = encodeURIComponent(req.url || '/entrega');
+    return reply.redirect(302, `/entrega/login?next=${next}`);
+  }
+}
+fastify.get('/entrega/login', (req, reply) => entregaNoStore(reply, 'entrega/login.html'));
+fastify.get('/entrega', { preHandler: entregaPageGuard }, (req, reply) => entregaNoStore(reply, 'entrega/overview.html'));
+fastify.get('/entrega/proyecto', { preHandler: entregaPageGuard }, (req, reply) => entregaNoStore(reply, 'entrega/proyecto.html'));
+fastify.get('/entrega/piso', { preHandler: entregaPageGuard }, (req, reply) => entregaNoStore(reply, 'entrega/piso.html'));
+fastify.get('/entrega/unidad', { preHandler: entregaPageGuard }, (req, reply) => entregaNoStore(reply, 'entrega/unidad.html'));
+fastify.get('/entrega/captura', { preHandler: entregaPageGuard }, (req, reply) => entregaNoStore(reply, 'entrega/captura.html'));
+fastify.get('/entrega/ot', { preHandler: entregaPageGuard }, (req, reply) => entregaNoStore(reply, 'entrega/ot.html'));
+fastify.get('/entrega/reportes', { preHandler: entregaPageGuard }, (req, reply) => entregaNoStore(reply, 'entrega/reportes.html'));
+fastify.get('/entrega/usuarios', { preHandler: entregaPageGuard }, (req, reply) => entregaNoStore(reply, 'entrega/usuarios.html'));
+// --- Ainspecciona In & Out (arriendos IN/OUT) ---
+const inoutNoStore = (reply, file) =>
+  reply.header('Cache-Control', 'no-store, no-cache, must-revalidate').sendFile(file);
+async function inoutPageGuard(req, reply) {
+  const session = await getIoSessionAuth(prisma, req);
+  if (!session) {
+    const next = encodeURIComponent(req.url || '/inout/portal');
+    return reply.redirect(302, `/inout/portal/login?next=${next}`);
+  }
+}
+fastify.get('/inout', (req, reply) => inoutNoStore(reply, 'inout/index.html'));
+fastify.get('/inout/portal/login', (req, reply) => inoutNoStore(reply, 'inout/portal/login.html'));
+fastify.get('/inout/portal', { preHandler: inoutPageGuard }, (req, reply) => inoutNoStore(reply, 'inout/portal/overview.html'));
+fastify.get('/inout/portal/overview', { preHandler: inoutPageGuard }, (req, reply) => inoutNoStore(reply, 'inout/portal/overview.html'));
+fastify.get('/inout/portal/lease', { preHandler: inoutPageGuard }, (req, reply) => inoutNoStore(reply, 'inout/portal/lease.html'));
+fastify.get('/inout/portal/report', { preHandler: inoutPageGuard }, (req, reply) => inoutNoStore(reply, 'inout/portal/report.html'));
+// Hub autenticado: listar aperturas / elegir OUT (runtime técnico sigue en /inout/capture/:token)
+fastify.get('/inout/captura', { preHandler: inoutPageGuard }, (req, reply) =>
+  inoutNoStore(reply, 'inout/captura.html')
+);
+fastify.get('/inout/captura/', { preHandler: inoutPageGuard }, (req, reply) =>
+  inoutNoStore(reply, 'inout/captura.html')
+);
+fastify.get('/inout/capture/:token', (req, reply) => inoutNoStore(reply, 'inout/capture.html'));
+// /toctoc → página estática con accesos demo (sin hub/SSO)
+fastify.get('/toctoc', (req, reply) =>
+  reply.header('Cache-Control', 'no-store, no-cache, must-revalidate').sendFile('toctoc/index.html')
+);
+fastify.get('/toctoc/', (req, reply) =>
+  reply.header('Cache-Control', 'no-store, no-cache, must-revalidate').sendFile('toctoc/index.html')
+);
+// Ainspecciona Scan — viewer público
+fastify.get('/scan/s/:publicId', (req, reply) =>
+  reply.header('Cache-Control', 'no-store, no-cache, must-revalidate').sendFile('scan/viewer.html')
+);
+fastify.get('/scan', (req, reply) =>
+  reply.header('Cache-Control', 'no-store, no-cache, must-revalidate').sendFile('scan/index.html')
+);
+fastify.get('/scan/', (req, reply) =>
+  reply.header('Cache-Control', 'no-store, no-cache, must-revalidate').sendFile('scan/index.html')
+);
 fastify.get('/demo', (req, reply) => reply.header('Cache-Control', 'no-store, no-cache, must-revalidate').sendFile('demo.html'));
-fastify.get('/pago', (req, reply) => reply.sendFile('pago.html'));
+fastify.get('/pago', (req, reply) => {
+  const plan = String(req.query?.plan || '').toLowerCase();
+  if (plan === 'starter') return reply.redirect(302, '/inspeccionar');
+  return reply.sendFile('pago.html');
+});
 fastify.get('/pago/ok', (req, reply) => reply.sendFile('pago-ok.html'));
 fastify.get('/pago/error', (req, reply) => reply.sendFile('pago-error.html'));
 fastify.get('/pago/pendiente', (req, reply) => reply.sendFile('pago-pendiente.html'));
@@ -1875,6 +3334,271 @@ fastify.get('/auth/verify', async (req, reply) => {
   }
 });
 
+/**
+ * Canje en un solo campo: código promo (ej. IRE2026) o código Rewards (peer).
+ * - Promo: créditos del código (típicamente 1) al nuevo tenant.
+ * - Peer: 2 créditos al nuevo (1 bienvenida + 1 bonus) y +1 al invitante.
+ * Body: razonSocial, rut, email, telefono?, contactNombre, contactApellido, promoCode, password
+ */
+fastify.post('/api/promo/redeem', async (req, reply) => {
+  try {
+    const {
+      razonSocial, rut, email, telefono, contactNombre, contactApellido, promoCode, password
+    } = req.body || {};
+    const razon = String(razonSocial || '').trim();
+    const rutVal = rut ? String(rut).trim() : '';
+    const emailVal = email ? String(email).trim().toLowerCase() : '';
+    const codeNorm = normalizePartnerCode(promoCode);
+    const contactFirst = String(contactNombre || '').trim();
+    const contactLast = String(contactApellido || '').trim();
+    const passwordRaw = String(password || '').trim();
+
+    if (!razon || !rutVal || !emailVal || !contactFirst || !contactLast || !codeNorm || !passwordRaw) {
+      return reply.code(400).send({
+        ok: false,
+        error: 'MISSING_FIELDS',
+        message: 'Faltan datos: razón social, RUT, email, contacto, código y clave de acceso.'
+      });
+    }
+
+    const pwdCheck = validatePasswordStrength(passwordRaw);
+    if (!pwdCheck.ok) {
+      return reply.code(400).send({ ok: false, error: 'WEAK_PASSWORD', message: pwdCheck.msg });
+    }
+
+    const rutNorm = normalizeRut(rutVal);
+    if (!rutNorm || rutNorm.length < 7) {
+      return reply.code(400).send({ ok: false, error: 'INVALID_RUT', message: 'RUT inválido.' });
+    }
+
+    const promo = await prisma.promoCode.findUnique({ where: { code: codeNorm } });
+    const peerReferrer = (!promo || !promo.active)
+      ? await prisma.tenant.findFirst({
+          where: { peerReferralCode: codeNorm, status: 'ACTIVE' },
+          select: { id: true, name: true, email: true, rut: true, peerReferralCode: true }
+        })
+      : null;
+
+    const channel = promo && promo.active ? 'promo' : peerReferrer ? 'peer' : null;
+    if (!channel) {
+      return reply.code(400).send({
+        ok: false,
+        error: 'PROMO_CODE_INVALID',
+        message: 'Código inválido o inactivo. Usa un código promo o de referido Rewards.'
+      });
+    }
+
+    const welcomeCredits = channel === 'promo'
+      ? Math.max(1, Number(promo.credits) || 1)
+      : Math.max(1, TRIAL_INITIAL_REAL_INSPECTIONS);
+    const referredBonus = channel === 'peer' ? Math.max(0, PEER_TRIAL_BONUS_CREDITS) : 0;
+    const creditsToGrant = welcomeCredits + referredBonus;
+    const referrerBonus = channel === 'peer' ? Math.max(1, PEER_TRIAL_BONUS_CREDITS || 1) : 0;
+    const passwordHash = hashPassword(passwordRaw);
+
+    const priorByRut = await prisma.promoRedemption.findUnique({ where: { rutNorm } });
+    if (priorByRut) {
+      return reply.code(409).send({
+        ok: false,
+        error: 'PROMO_ALREADY_REDEEMED',
+        message: 'Este RUT ya canjeó una inspección promo o de referido.'
+      });
+    }
+
+    let tenant = await prisma.tenant.findFirst({
+      where: {
+        OR: [{ rut: rutVal }, { rut: rutNorm }, { email: emailVal }]
+      }
+    });
+
+    if (tenant) {
+      const priorTenant = await prisma.promoRedemption.findUnique({ where: { tenantId: tenant.id } });
+      const priorPeer = await prisma.peerReferralAttribution.findUnique({
+        where: { referredTenantId: tenant.id }
+      });
+      if (priorTenant || priorPeer) {
+        return reply.code(409).send({
+          ok: false,
+          error: 'PROMO_ALREADY_REDEEMED',
+          message: 'Esta cuenta ya canjeó una inspección promo o de referido.'
+        });
+      }
+      if (tenant.passwordHash) {
+        return reply.code(409).send({
+          ok: false,
+          error: 'ACCOUNT_EXISTS',
+          message: 'Ya existe una cuenta con este email o RUT. Inicia sesión en Ingreso corredores.'
+        });
+      }
+    }
+
+    if (channel === 'peer' && peerReferrer) {
+      const sameEmail = peerReferrer.email && peerReferrer.email.toLowerCase() === emailVal;
+      const sameRut = peerReferrer.rut && normalizeRut(peerReferrer.rut) === rutNorm;
+      if (sameEmail || sameRut || (tenant && tenant.id === peerReferrer.id)) {
+        return reply.code(400).send({
+          ok: false,
+          error: 'SELF_REFERRAL',
+          message: 'No puedes usar tu propio código de referido.'
+        });
+      }
+    }
+
+    const result = await prisma.$transaction(async (tx) => {
+      let t = tenant;
+      if (!t) {
+        t = await tx.tenant.create({
+          data: {
+            name: razon,
+            legalName: razon,
+            rut: rutNorm,
+            email: emailVal,
+            phone: telefono ? String(telefono).trim() || null : null,
+            passwordHash,
+            trialSource: channel === 'peer' ? 'peer_referral' : 'promo_code',
+            trialAutoCharge: false,
+            facturacionJson: {
+              contactNombre: contactFirst,
+              contactApellido: contactLast,
+              promoCode: codeNorm,
+              redeemChannel: channel
+            }
+          }
+        });
+      } else {
+        t = await tx.tenant.update({
+          where: { id: t.id },
+          data: {
+            rut: rutNorm || t.rut,
+            email: emailVal || t.email,
+            phone: telefono ? String(telefono).trim() || null : t.phone,
+            passwordHash,
+            trialSource: t.trialSource || (channel === 'peer' ? 'peer_referral' : 'promo_code'),
+            trialAutoCharge: false
+          }
+        });
+      }
+
+      await tx.tenantCredit.upsert({
+        where: { tenantId: t.id },
+        create: { tenantId: t.id, balance: creditsToGrant },
+        update: { balance: { increment: creditsToGrant } }
+      });
+      await tx.creditTransaction.create({
+        data: {
+          tenantId: t.id,
+          amount: creditsToGrant,
+          type: 'ADJUSTMENT',
+          description: channel === 'peer'
+            ? `Referido ${codeNorm}: +${welcomeCredits} bienvenida + ${referredBonus} bonus`
+            : `Promo ${codeNorm}: +${creditsToGrant} inspección(es) gratis`
+        }
+      });
+
+      if (channel === 'promo') {
+        await tx.promoRedemption.create({
+          data: {
+            promoCodeId: promo.id,
+            tenantId: t.id,
+            rutNorm
+          }
+        });
+      } else {
+        await tx.peerReferralAttribution.create({
+          data: {
+            referrerTenantId: peerReferrer.id,
+            referredTenantId: t.id,
+            peerCodeUsed: codeNorm
+          }
+        });
+        if (referrerBonus > 0) {
+          await tx.tenantCredit.upsert({
+            where: { tenantId: peerReferrer.id },
+            create: { tenantId: peerReferrer.id, balance: referrerBonus },
+            update: { balance: { increment: referrerBonus } }
+          });
+          await tx.creditTransaction.create({
+            data: {
+              tenantId: peerReferrer.id,
+              amount: referrerBonus,
+              type: 'ADJUSTMENT',
+              description: 'Bono Ainspecciona Rewards — referido activó su cuenta'
+            }
+          });
+        }
+      }
+
+      const peerEnsure = await ensureTenantPeerReferralCodeInTx(tx, t.id);
+      return { tenant: t, creditsToGrant, channel, peerEnsure };
+    });
+
+    if (result.peerEnsure?.assigned && result.tenant.email) {
+      await notifyPeerReferralWelcomeIfNew(req, {
+        assigned: true,
+        code: result.peerEnsure.code,
+        email: result.tenant.email,
+        tenantName: result.tenant.name
+      });
+    }
+
+    try {
+      await syncCorporateContactInHubspot({
+        email: emailVal,
+        firstName: contactFirst,
+        lastName: contactLast,
+        phone: telefono ? String(telefono).trim() : '',
+        companyName: razon,
+        companyRut: rutVal
+      });
+    } catch (hubspotErr) {
+      req.log.warn({ err: hubspotErr }, 'promo-redeem-hubspot');
+    }
+
+    const sessionToken = await createTenantSession(result.tenant.id);
+    reply.setCookie(TENANT_SESSION_COOKIE, sessionToken, sessionCookieOpts(req));
+
+    req.log.info(
+      {
+        tenantId: result.tenant.id,
+        code: codeNorm,
+        channel: result.channel,
+        credits: result.creditsToGrant,
+        referrerBonus: channel === 'peer' ? referrerBonus : 0
+      },
+      'promo-redeem-ok'
+    );
+
+    const msg = result.channel === 'peer'
+      ? `Listo: tienes ${result.creditsToGrant} créditos (bienvenida + referido). Ya estás en tu panel.`
+      : `Listo: tienes ${result.creditsToGrant} inspección(es) gratis. Ya estás en tu panel. Para más, compra créditos ahí.`;
+
+    return reply.send({
+      ok: true,
+      tenantId: result.tenant.id,
+      creditsGranted: result.creditsToGrant,
+      channel: result.channel,
+      token: sessionToken,
+      tenant: { id: result.tenant.id, name: result.tenant.name },
+      redirectUrl: `/tenant?t=${encodeURIComponent(sessionToken)}`,
+      message: msg
+    });
+  } catch (err) {
+    if (String(err?.code) === 'P2002') {
+      return reply.code(409).send({
+        ok: false,
+        error: 'PROMO_ALREADY_REDEEMED',
+        message: 'Este RUT o cuenta ya canjeó una inspección promo o de referido.'
+      });
+    }
+    req.log.error({ err }, 'promo-redeem-error');
+    return reply.code(500).send({
+      ok: false,
+      error: 'PROMO_REDEEM_FAILED',
+      message: err?.message || 'No se pudo canjear el código.'
+    });
+  }
+});
+
 // Evaluar elegibilidad de free trial corporativo
 fastify.post('/api/business/trial/eligibility', async (req, reply) => {
   try {
@@ -1894,44 +3618,132 @@ fastify.post('/api/business/trial/eligibility', async (req, reply) => {
   }
 });
 
-// Validar código de partner (influencer / embajador / alianza) para trial extendido
+// Validar código ref. unificado: partner (tabla ReferralPartner) o peer (Tenant.peerReferralCode, ACTIVE)
 fastify.post('/api/business/trial/partner-code', async (req, reply) => {
   try {
     const code = normalizePartnerCode(req.body?.code);
-    if (!code) {
-      return reply.send({
-        ok: true,
-        valid: false,
-        durationDays: TRIAL_DURATION_DAYS,
-        extraCredits: 0,
-        totalTrialCredits: TRIAL_INITIAL_REAL_INSPECTIONS
-      });
-    }
+    const empty = {
+      ok: true,
+      valid: false,
+      channel: null,
+      durationDays: TRIAL_DURATION_DAYS,
+      extraCredits: 0,
+      totalTrialCredits: TRIAL_INITIAL_REAL_INSPECTIONS
+    };
+    if (!code) return reply.send(empty);
+
     const partner = await prisma.referralPartner.findFirst({
       where: { code, active: true },
       select: { id: true, name: true, type: true }
     });
-    if (!partner) {
+    if (partner) {
       return reply.send({
         ok: true,
-        valid: false,
+        valid: true,
+        channel: 'partner',
+        partnerName: partner.name,
+        partnerType: partner.type,
+        durationDays: PARTNER_TRIAL_DURATION_DAYS,
+        extraCredits: PARTNER_TRIAL_BONUS_CREDITS,
+        totalTrialCredits: TRIAL_INITIAL_REAL_INSPECTIONS + PARTNER_TRIAL_BONUS_CREDITS
+      });
+    }
+
+    const peerTenant = await prisma.tenant.findFirst({
+      where: { peerReferralCode: code, status: 'ACTIVE' },
+      select: { id: true, name: true, legalName: true }
+    });
+    if (peerTenant) {
+      const label = (peerTenant.legalName || peerTenant.name || '').trim() || 'Corredora';
+      return reply.send({
+        ok: true,
+        valid: true,
+        channel: 'peer',
+        peerReferrerLabel: label,
+        durationDays: TRIAL_DURATION_DAYS,
+        extraCredits: PEER_TRIAL_BONUS_CREDITS,
+        totalTrialCredits: TRIAL_INITIAL_REAL_INSPECTIONS + PEER_TRIAL_BONUS_CREDITS
+      });
+    }
+
+    const ambassador = await prisma.ambassador.findFirst({
+      where: { code: code.toLowerCase() },
+      select: { id: true, fullName: true, code: true }
+    });
+    if (ambassador) {
+      return reply.send({
+        ok: true,
+        valid: true,
+        channel: 'ambassador',
+        ambassadorName: ambassador.fullName,
         durationDays: TRIAL_DURATION_DAYS,
         extraCredits: 0,
         totalTrialCredits: TRIAL_INITIAL_REAL_INSPECTIONS
       });
     }
-    return reply.send({
-      ok: true,
-      valid: true,
-      partnerName: partner.name,
-      partnerType: partner.type,
-      durationDays: PARTNER_TRIAL_DURATION_DAYS,
-      extraCredits: PARTNER_TRIAL_BONUS_CREDITS,
-      totalTrialCredits: TRIAL_INITIAL_REAL_INSPECTIONS + PARTNER_TRIAL_BONUS_CREDITS
-    });
+
+    return reply.send(empty);
   } catch (err) {
     req.log.warn({ err }, 'trial-partner-code-error');
     return reply.code(500).send({ ok: false, error: 'PARTNER_CODE_CHECK_FAILED' });
+  }
+});
+
+// Formulario público de contacto → email a contacto@ainspecciona.com
+const contactFormHits = new Map();
+function contactFormRateLimitOk(ip) {
+  const now = Date.now();
+  const windowMs = 10 * 60 * 1000;
+  const recent = (contactFormHits.get(ip) || []).filter((t) => now - t < windowMs);
+  if (recent.length >= 5) return false;
+  recent.push(now);
+  contactFormHits.set(ip, recent);
+  if (contactFormHits.size > 5000) contactFormHits.clear();
+  return true;
+}
+
+fastify.post('/api/contacto', async (req, reply) => {
+  try {
+    const ip = req.ip || req.socket?.remoteAddress || 'unknown';
+    if (!contactFormRateLimitOk(ip)) {
+      return reply.code(429).send({ ok: false, error: 'Demasiados envíos. Intenta de nuevo en unos minutos.' });
+    }
+
+    const { name, email, company, message, website } = req.body || {};
+    // Honeypot: campo oculto que solo llenan bots
+    if (String(website || '').trim()) {
+      return reply.send({ ok: true });
+    }
+
+    const nameVal = String(name || '').trim().slice(0, 120);
+    const emailVal = String(email || '').trim().toLowerCase().slice(0, 200);
+    const companyVal = String(company || '').trim().slice(0, 160);
+    const messageVal = String(message || '').trim().slice(0, 4000);
+
+    if (!nameVal || !messageVal) {
+      return reply.code(400).send({ ok: false, error: 'Nombre y mensaje son obligatorios.' });
+    }
+    if (!emailVal || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+      return reply.code(400).send({ ok: false, error: 'Ingresa un email válido.' });
+    }
+
+    const result = await sendContactFormEmail({
+      name: nameVal,
+      email: emailVal,
+      company: companyVal,
+      message: messageVal
+    });
+
+    if (!result.ok) {
+      fastify.log.error({ result, email: emailVal }, 'contact-form-email-failed');
+      return reply.code(502).send({ ok: false, error: 'No pudimos enviar tu mensaje. Escríbenos a contacto@ainspecciona.com.' });
+    }
+
+    fastify.log.info({ email: emailVal, name: nameVal }, 'contact-form-sent');
+    return reply.send({ ok: true });
+  } catch (err) {
+    fastify.log.error({ err }, 'contact-form-error');
+    return reply.code(500).send({ ok: false, error: 'Error inesperado. Escríbenos a contacto@ainspecciona.com.' });
   }
 });
 
@@ -2009,6 +3821,16 @@ fastify.post('/api/business/activate', async (req, reply) => {
       });
       tenant = await prisma.tenant.findUnique({ where: { id: tenant.id } });
       fastify.log.info({ tenantId: tenant.id }, 'business-tenant-found');
+    }
+
+    const peerEnsureActivate = await ensureTenantPeerReferralCode(tenant.id);
+    if (peerEnsureActivate.assigned && tenant.email) {
+      await notifyPeerReferralWelcomeIfNew(req, {
+        assigned: true,
+        code: peerEnsureActivate.code,
+        email: tenant.email,
+        tenantName: tenant.name
+      });
     }
 
     try {
@@ -2094,9 +3916,7 @@ fastify.post('/api/business/activate', async (req, reply) => {
     }
 
     const isTest = accessToken.startsWith('TEST-');
-    const proto = (req.headers['x-forwarded-proto'] || 'http').toString().split(',')[0].trim();
-    const host = (req.headers['x-forwarded-host'] || req.headers.host || 'localhost:3000').toString().split(',')[0].trim();
-    const baseUrl = `${proto}://${host}`;
+    const baseUrl = getPublicWebBase(req);
     const BUSINESS_PRICE_CLP = Number(process.env.BUSINESS_PRICE_CLP || 39990);
 
     if (isTest) {
@@ -2115,7 +3935,7 @@ fastify.post('/api/business/activate', async (req, reply) => {
       back_url: `${baseUrl}/pago/ok?plan=business&tenant=${tenant.id}`,
       external_reference: `tenant:${tenant.id}|plan:business`,
       payer_email: emailVal,
-      notification_url: `${baseUrl}/api/mercadopago/webhook`,
+      notification_url: getMercadoPagoWebhookUrl(req),
       status: 'pending'
     };
 
@@ -2190,26 +4010,52 @@ fastify.post('/api/business/trial/create-preapproval', async (req, reply) => {
     if (tenant.trialStatus === 'active' || tenant.trialStartedAt || tenant.trialSubscriptionId) {
       return reply.code(409).send({ ok: false, error: 'TRIAL_ALREADY_STARTED', message: 'El trial ya fue iniciado anteriormente.' });
     }
-    if (tenant.referralPartnerId) {
+    const peerAttrExisting = await prisma.peerReferralAttribution.findUnique({
+      where: { referredTenantId: tenant.id },
+      select: { id: true }
+    });
+    const ambAttrExisting = await prisma.ambassadorReferralAttribution.findUnique({
+      where: { referredTenantId: tenant.id },
+      select: { id: true }
+    });
+    if (tenant.referralPartnerId || peerAttrExisting || ambAttrExisting) {
       return reply.code(409).send({
         ok: false,
         error: 'REFERRAL_ALREADY_ASSIGNED',
-        message: 'Esta cuenta ya tiene un código de referido asignado.'
+        message: 'Esta cuenta ya tiene un código ref. asignado.'
       });
     }
 
     let referralPartner = null;
+    let peerReferrer = null;
+    let ambassadorRef = null;
     if (partnerCodeNorm) {
       referralPartner = await prisma.referralPartner.findFirst({
         where: { code: partnerCodeNorm, active: true },
         select: { id: true, name: true, type: true }
       });
       if (!referralPartner) {
-        return reply.code(400).send({
-          ok: false,
-          error: 'PARTNER_CODE_INVALID',
-          message: 'Código de referido no válido o inactivo.'
+        peerReferrer = await prisma.tenant.findFirst({
+          where: {
+            peerReferralCode: partnerCodeNorm,
+            status: 'ACTIVE',
+            id: { not: tenant.id }
+          },
+          select: { id: true, name: true, legalName: true }
         });
+        if (!peerReferrer) {
+          ambassadorRef = await prisma.ambassador.findFirst({
+            where: { code: partnerCodeNorm.toLowerCase() },
+            select: { id: true, fullName: true, code: true }
+          });
+          if (!ambassadorRef) {
+            return reply.code(400).send({
+              ok: false,
+              error: 'PARTNER_CODE_INVALID',
+              message: 'Código ref. no válido o inactivo.'
+            });
+          }
+        }
       }
     }
 
@@ -2225,16 +4071,21 @@ fastify.post('/api/business/trial/create-preapproval', async (req, reply) => {
     }
 
     const trialDays = referralPartner ? PARTNER_TRIAL_DURATION_DAYS : TRIAL_DURATION_DAYS;
-    const trialCreditTotal =
-      TRIAL_INITIAL_REAL_INSPECTIONS + (referralPartner ? PARTNER_TRIAL_BONUS_CREDITS : 0);
+    const trialCreditTotal = referralPartner
+      ? TRIAL_INITIAL_REAL_INSPECTIONS + PARTNER_TRIAL_BONUS_CREDITS
+      : peerReferrer
+        ? TRIAL_INITIAL_REAL_INSPECTIONS + PEER_TRIAL_BONUS_CREDITS
+        : TRIAL_INITIAL_REAL_INSPECTIONS;
 
-    const proto = (req.headers['x-forwarded-proto'] || 'http').toString().split(',')[0].trim();
-    const host = (req.headers['x-forwarded-host'] || req.headers.host || 'localhost:3000').toString().split(',')[0].trim();
-    const baseUrl = `${proto}://${host}`;
+    const baseUrl = getPublicWebBase(req);
     const BUSINESS_PRICE_CLP = Number(process.env.BUSINESS_PRICE_CLP || 39990);
     const trialReason = referralPartner
       ? `Ainspecciona Business – Free Trial ${trialDays} días (código partner, cobro automático al finalizar)`
-      : `Ainspecciona Business – Free Trial ${trialDays} días (cobro automático al finalizar)`;
+      : peerReferrer
+        ? `Ainspecciona Business – Free Trial ${trialDays} días (código ref. peer, cobro automático al finalizar)`
+        : ambassadorRef
+          ? `Ainspecciona Business – Free Trial ${trialDays} días (código embajador, cobro automático al finalizar)`
+          : `Ainspecciona Business – Free Trial ${trialDays} días (cobro automático al finalizar)`;
     const preapprovalBody = {
       reason: trialReason,
       auto_recurring: {
@@ -2250,7 +4101,7 @@ fastify.post('/api/business/trial/create-preapproval', async (req, reply) => {
       back_url: `${baseUrl}/pago/ok?plan=business&tenant=${tenant.id}&trial=1`,
       external_reference: `tenant:${tenant.id}|plan:business|trial:1`,
       payer_email: tenant.email,
-      notification_url: `${baseUrl}/api/mercadopago/webhook`,
+      notification_url: getMercadoPagoWebhookUrl(req),
       status: 'pending'
     };
 
@@ -2268,7 +4119,14 @@ fastify.post('/api/business/trial/create-preapproval', async (req, reply) => {
     const now = new Date();
     const trialEndsAt = new Date(now.getTime() + trialDays * 24 * 60 * 60 * 1000);
     const trialSubId = String(mpData.id);
-    const trialSourceVal = referralPartner ? 'trial_partner_code' : 'trial_checkout_page';
+    const trialSourceVal = referralPartner
+      ? 'trial_partner_code'
+      : peerReferrer
+        ? 'trial_peer_code'
+        : ambassadorRef
+          ? 'trial_ambassador_code'
+          : 'trial_checkout_page';
+    let peerEnsure = { code: null, assigned: false };
     await prisma.$transaction(async (tx) => {
       await tx.tenant.update({
         where: { id: tenant.id },
@@ -2286,7 +4144,7 @@ fastify.post('/api/business/trial/create-preapproval', async (req, reply) => {
           trialAutoCharge: true,
           trialSource: trialSourceVal,
           referralPartnerId: referralPartner ? referralPartner.id : null,
-          referralCodeSnapshot: referralPartner ? partnerCodeNorm : null,
+          referralCodeSnapshot: referralPartner || peerReferrer || ambassadorRef ? partnerCodeNorm : null,
           trialPartnerBenefitsAt: referralPartner ? now : null
         }
       });
@@ -2300,7 +4158,11 @@ fastify.post('/api/business/trial/create-preapproval', async (req, reply) => {
       if (!alreadyCredited && trialCreditTotal > 0) {
         const desc = referralPartner
           ? `Free trial corporativo (${trialCreditTotal} inspecciones reales incluidas, código partner ${referralPartner.name})`
-          : `Free trial corporativo (${trialCreditTotal} inspección real incluida)`;
+          : peerReferrer
+            ? `Free trial corporativo (${trialCreditTotal} inspecciones reales incluidas, código ref. peer)`
+            : ambassadorRef
+              ? `Free trial corporativo (${trialCreditTotal} inspección real incluida, código embajador)`
+              : `Free trial corporativo (${trialCreditTotal} inspección real incluida)`;
         await tx.tenantCredit.upsert({
           where: { tenantId: tenant.id },
           create: { tenantId: tenant.id, balance: trialCreditTotal },
@@ -2315,7 +4177,49 @@ fastify.post('/api/business/trial/create-preapproval', async (req, reply) => {
           }
         });
       }
+      if (peerReferrer) {
+        await tx.peerReferralAttribution.create({
+          data: {
+            referrerTenantId: peerReferrer.id,
+            referredTenantId: tenant.id,
+            peerCodeUsed: partnerCodeNorm
+          }
+        });
+        if (PEER_TRIAL_BONUS_CREDITS > 0) {
+          await tx.tenantCredit.upsert({
+            where: { tenantId: peerReferrer.id },
+            create: { tenantId: peerReferrer.id, balance: PEER_TRIAL_BONUS_CREDITS },
+            update: { balance: { increment: PEER_TRIAL_BONUS_CREDITS } }
+          });
+          await tx.creditTransaction.create({
+            data: {
+              tenantId: peerReferrer.id,
+              amount: PEER_TRIAL_BONUS_CREDITS,
+              type: 'ADJUSTMENT',
+              description: 'Bono referente — programa código ref. peer'
+            }
+          });
+        }
+      }
+      if (ambassadorRef) {
+        await tx.ambassadorReferralAttribution.create({
+          data: {
+            ambassadorId: ambassadorRef.id,
+            referredTenantId: tenant.id,
+            codeSnapshot: ambassadorRef.code
+          }
+        });
+      }
+      peerEnsure = await ensureTenantPeerReferralCodeInTx(tx, tenant.id);
     });
+    if (peerEnsure.assigned && tenant.email) {
+      await notifyPeerReferralWelcomeIfNew(req, {
+        assigned: true,
+        code: peerEnsure.code,
+        email: tenant.email,
+        tenantName: tenant.name
+      });
+    }
 
     await updateHubspotTrialProperties({
       email: tenant.email,
@@ -2332,7 +4236,10 @@ fastify.post('/api/business/trial/create-preapproval', async (req, reply) => {
         endsAt: trialEndsAt,
         realInspectionsIncluded: trialCreditTotal,
         durationDays: trialDays,
-        partnerApplied: Boolean(referralPartner)
+        partnerApplied: Boolean(referralPartner),
+        peerApplied: Boolean(peerReferrer),
+        ambassadorApplied: Boolean(ambassadorRef),
+        referralChannel: referralPartner ? 'partner' : peerReferrer ? 'peer' : ambassadorRef ? 'ambassador' : null
       }
     });
   } catch (err) {
@@ -2432,8 +4339,15 @@ fastify.post('/api/business/set-password', async (req, reply) => {
 // Config de pago: saber si MercadoPago está disponible (para mostrar modo demo)
 fastify.get('/api/payment/config', async (req, reply) => {
   const agendarUrl = process.env.HUBSPOT_AGENDAR_URL || 'https://meetings.hubspot.com/saraya-silva';
+  const tok = process.env.MERCADOPAGO_ACCESS_TOKEN || '';
+  let mercadopagoMode = null;
+  if (tok) {
+    mercadopagoMode = tok.startsWith('TEST-') ? 'test' : 'live';
+  }
   return reply.send({
-    mercadopagoAvailable: !!process.env.MERCADOPAGO_ACCESS_TOKEN,
+    mercadopagoAvailable: !!tok,
+    mercadopagoMode,
+    publicUrl: (process.env.PUBLIC_URL || process.env.BASE_URL || '').trim() || null,
     agendarReunionUrl: agendarUrl
   });
 });
@@ -2455,10 +4369,7 @@ fastify.post('/api/starter/simulate-payment', async (req, reply) => {
     if (!nom || !ape || !rutVal) {
       return reply.code(400).send({ error: 'Starter requiere nombre, apellido y RUT' });
     }
-    const starterTenant = await prisma.tenant.findFirst({ where: { name: STARTER_TENANT_NAME } });
-    if (!starterTenant) {
-      return reply.code(503).send({ error: 'STARTER_TENANT_NOT_CONFIGURED', message: 'Ejecuta prisma:seed para crear el tenant Starter.' });
-    }
+    const starterTenant = await ensureStarterTenant();
     const paymentId = 'demo_' + crypto.randomUUID().replace(/-/g, '');
     const contactEmail = String(email).trim().toLowerCase();
     const contactName = `${nom} ${ape}`.trim();
@@ -2487,12 +4398,48 @@ fastify.post('/api/starter/simulate-payment', async (req, reply) => {
         status: 'DRAFT'
       }
     });
-    const proto = (req.headers['x-forwarded-proto'] || 'http').toString().split(',')[0].trim();
-    const host = (req.headers['x-forwarded-host'] || req.headers.host || 'localhost:3000').toString().split(',')[0].trim();
-    const baseUrl = `${proto}://${host}`;
+    const baseUrl = getPublicWebBase(req);
     const redirectUrl = `${baseUrl}/pago/ok?plan=starter&payment_id=${encodeURIComponent(paymentId)}`;
     fastify.log.info({ paymentId, contactEmail }, 'starter-demo-payment-simulated');
-    return reply.send({ redirectUrl, payment_id: paymentId });
+
+    /** Sin pago MP aprobado: emitir boleta de prueba SimpleFactura (certificación) si `ALLOW_SIMULATE_SIMPLEFACTURA=1` y hay datos de facturación. */
+    let simplefactura = null;
+    const allowSfSim =
+      process.env.ALLOW_SIMULATE_SIMPLEFACTURA === '1' || String(process.env.ALLOW_SIMULATE_SIMPLEFACTURA || '').toLowerCase() === 'true';
+    if (forceDemo && allowSfSim && facturacionJson && isSimpleFacturaConfigured()) {
+      const fakePayment = {
+        transaction_amount: STARTER_PRICE_CLP,
+        payer: { email: contactEmail }
+      };
+      const starterTipoDte = Number(process.env.SIMPLEFACTURA_STARTER_TIPO_DTE || process.env.SIMPLEFACTURA_TIPO_DTE || 39);
+      const sf = await maybeEmitSimpleFacturaForPayment(fastify.log, {
+        billingTenantId: starterTenant.id,
+        mercadopagoPaymentId: paymentId,
+        payment: fakePayment,
+        facturacionJson,
+        lineDescription: SF_LINE_STARTER,
+        fallbackMontoClp: STARTER_PRICE_CLP,
+        tipoDteDefault: starterTipoDte
+      });
+      simplefactura = { folio: sf.folio ?? null, ok: !!sf.folio };
+      if (sf.dtePdfBuffer && contactEmail) {
+        try {
+          await sendSimplefacturaDtePdfEmail(contactEmail, sf.dtePdfBuffer, { folio: sf.folio });
+          simplefactura.pdfEmailed = true;
+        } catch (mailErr) {
+          fastify.log.warn({ err: mailErr }, 'simulate-simplefactura-email-failed');
+          simplefactura.pdfEmailed = false;
+        }
+      }
+    } else if (forceDemo && allowSfSim && !facturacionJson) {
+      fastify.log.warn('simulate-simplefactura-skip: marca facturación y completa datos (necesitaFactura) para emitir DTE');
+    }
+
+    return reply.send({
+      redirectUrl,
+      payment_id: paymentId,
+      ...(simplefactura != null ? { simplefactura } : {})
+    });
   } catch (err) {
     fastify.log.error({ err, body: req.body }, 'starter-simulate-payment-error');
     const msg = err?.message || String(err);
@@ -2503,18 +4450,67 @@ fastify.post('/api/starter/simulate-payment', async (req, reply) => {
 // Starter: crear caso DRAFT + preferencia MercadoPago (flujo nuevo: form primero, pago después)
 fastify.post('/api/starter/create-draft', async (req, reply) => {
   try {
-    const { contactName, contactEmail, contactRut, propertyAddress, propertyRol, propertyOperationType,
-      propertySurface, propertyType, bathroomsCount, bedroomsCount,
-      hasPatio, hasAttic, hasLaundry, hasElevator, hasParking, hasGreenCertificate } = req.body || {};
+    const body = req.body || {};
+    const {
+      contactName,
+      contactEmail,
+      contactRut,
+      propertyAddress,
+      propertyRol,
+      propertyOperationType,
+      propertySurface,
+      propertyType,
+      bathroomsCount,
+      bedroomsCount,
+      hasEntranceGrille,
+      necesitaFactura,
+      facturaRazonSocial,
+      facturaRut,
+      facturaDireccion,
+      facturaComuna,
+      facturaCiudad,
+      facturaGiro,
+      facturaEmail,
+      facturaTipoDte
+    } = body;
 
     if (!contactName || !contactEmail || !contactRut) {
       return reply.code(400).send({ ok: false, error: 'Faltan nombre, email o RUT' });
     }
 
-    const starterTenant = await prisma.tenant.findFirst({ where: { name: STARTER_TENANT_NAME } });
-    if (!starterTenant) {
-      return reply.code(503).send({ ok: false, error: 'STARTER_TENANT_NOT_CONFIGURED' });
+    const contactEmailNorm = String(contactEmail).trim().toLowerCase();
+    if (necesitaFactura) {
+      const razon = String(facturaRazonSocial || '').trim();
+      const frut = facturaRut ? String(facturaRut).trim() : '';
+      const fdir = facturaDireccion ? String(facturaDireccion).trim() : '';
+      const fcom = facturaComuna ? String(facturaComuna).trim() : '';
+      const fciu = facturaCiudad ? String(facturaCiudad).trim() : '';
+      const fgiro = facturaGiro ? String(facturaGiro).trim() : '';
+      if (!razon || !frut || !fdir || !fcom || !fciu || !fgiro) {
+        return reply.code(400).send({
+          ok: false,
+          error: 'FACTURACION_INCOMPLETA',
+          message: 'Completa todos los campos de facturación o desmarca la casilla.'
+        });
+      }
     }
+
+    const facturacionJson = buildFacturacionJsonFromForm(
+      {
+        necesitaFactura,
+        facturaRazonSocial,
+        facturaRut,
+        facturaDireccion,
+        facturaComuna,
+        facturaCiudad,
+        facturaGiro,
+        facturaEmail,
+        facturaTipoDte
+      },
+      contactEmailNorm
+    );
+
+    const starterTenant = await ensureStarterTenant();
 
     const shortId = generateCaseShortId();
     const bedrooms = Math.max(0, Number(bedroomsCount) || 1);
@@ -2524,7 +4520,7 @@ fastify.post('/api/starter/create-draft', async (req, reply) => {
       data: {
         shortId,
         tenantId: starterTenant.id,
-        contactEmail: String(contactEmail).trim().toLowerCase(),
+        contactEmail: contactEmailNorm,
         contactName: String(contactName).trim(),
         contactRut: String(contactRut).trim() || null,
         propertyType: propertyType || 'DEPARTMENT',
@@ -2533,13 +4529,15 @@ fastify.post('/api/starter/create-draft', async (req, reply) => {
         bathroomsCount: bathrooms,
         bedroomsCount: bedrooms,
         floorType: 'CONCRETE',
-        hasPatio: !!hasPatio,
-        hasAttic: !!hasAttic,
-        hasLaundry: !!hasLaundry,
-        hasElevator: !!hasElevator,
-        hasParking: !!hasParking,
-        hasGreenCertificate: !!hasGreenCertificate,
-        status: 'DRAFT'
+        hasPatio: false,
+        hasAttic: false,
+        hasLaundry: true,
+        hasElevator: true,
+        hasParking: false,
+        hasGreenCertificate: true,
+        hasEntranceGrille: !!hasEntranceGrille,
+        status: 'DRAFT',
+        ...(facturacionJson ? { facturacionJson } : {})
       }
     });
 
@@ -2576,12 +4574,10 @@ fastify.post('/api/starter/create-draft', async (req, reply) => {
       propertyType: c.propertyType,
       bathroomsCount: bathrooms,
       bedroomsCount: bedrooms,
-      hasPatio: !!hasPatio,
-      hasAttic: !!hasAttic,
-      hasLaundry: !!hasLaundry,
-      hasElevator: !!hasElevator,
-      hasParking: !!hasParking,
-      hasGreenCertificate: !!hasGreenCertificate
+      hasLaundry: true,
+      hasElevator: true,
+      hasGreenCertificate: true,
+      hasEntranceGrille: !!hasEntranceGrille
     });
 
     await prisma.slot.createMany({
@@ -2622,9 +4618,7 @@ fastify.post('/api/starter/checkout', async (req, reply) => {
     if (!c) return reply.code(404).send({ ok: false, error: 'Caso no encontrado' });
     if (c.status !== 'DRAFT') return reply.code(400).send({ ok: false, error: 'El caso no está en estado DRAFT' });
 
-    const proto = (req.headers['x-forwarded-proto'] || 'http').toString().split(',')[0].trim();
-    const host = (req.headers['x-forwarded-host'] || req.headers.host || 'localhost:3000').toString().split(',')[0].trim();
-    const baseUrl = `${proto}://${host}`;
+    const baseUrl = getPublicWebBase(req);
 
     const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN;
     if (!accessToken) {
@@ -2635,21 +4629,22 @@ fastify.post('/api/starter/checkout', async (req, reply) => {
       return reply.send({ ok: true, checkoutUrl: redirectUrl });
     }
 
+    const emailOk = c.contactEmail && String(c.contactEmail).includes('@');
+    if (!emailOk) {
+      return reply.code(400).send({ ok: false, error: 'El caso no tiene un email de contacto válido' });
+    }
+
     const extRef = `plan:starter|caseId:${c.id}|ts:${Date.now()}`;
     const successUrl = `${baseUrl}/pago/ok?plan=starter`;
-    const nameParts = (c.contactName || '').trim().split(/\s+/);
     const prefPayload = {
-      items: [{ title: '1 crédito Starter', quantity: 1, unit_price: 15000, currency_id: 'CLP' }],
-      payer: {
-        email: c.contactEmail,
-        first_name: nameParts[0] || undefined,
-        last_name: nameParts.slice(1).join(' ') || undefined
-      },
+      items: [{ title: '1 crédito Starter', quantity: 1, unit_price: STARTER_PRICE_CLP, currency_id: 'CLP' }],
+      payer: buildMercadoPagoPayerPreference({ email: c.contactEmail }),
+      ...mercadoPagoCheckoutProDigitalPreferenceExtras(),
       statement_descriptor: 'AINSPECCIONA',
       external_reference: extRef,
       back_urls: { success: successUrl, failure: `${baseUrl}/photoplan?case=${c.shortId}`, pending: successUrl },
       auto_return: 'approved',
-      notification_url: `${baseUrl}/api/mercadopago/webhook`
+      notification_url: getMercadoPagoWebhookUrl(req)
     };
 
     const mpRes = await fetch('https://api.mercadopago.com/checkout/preferences', {
@@ -2666,8 +4661,24 @@ fastify.post('/api/starter/checkout', async (req, reply) => {
       fastify.log.error({ mpData }, 'starter-checkout-mp-error');
       return reply.code(500).send({ ok: false, error: 'Error al crear preferencia de pago' });
     }
-
-    fastify.log.info({ caseId: c.id, shortId: c.shortId, extRef }, 'starter-checkout-created');
+    let checkoutHost = null;
+    try {
+      checkoutHost = new URL(checkoutUrl).hostname;
+    } catch (_) {}
+    fastify.log.info(
+      {
+        caseId: c.id,
+        shortId: c.shortId,
+        extRef,
+        tokenMode: isTestToken ? 'test' : 'live',
+        checkoutHost,
+        hint:
+          !isTestToken && checkoutHost && !String(checkoutHost).includes('sandbox')
+            ? 'Credencial producción: checkout es prod; tarjetas de prueba suelen fallar. Usa TEST- o tarjeta real.'
+            : undefined
+      },
+      'starter-checkout-created'
+    );
     return reply.send({ ok: true, checkoutUrl });
   } catch (err) {
     fastify.log.error({ err, body: req.body }, 'starter-checkout-error');
@@ -2836,11 +4847,13 @@ fastify.post('/api/mercadopago/preference', async (req, reply) => {
   const BUSINESS_PRICE_CLP = Number(process.env.BUSINESS_PRICE_CLP || 39990);
   const PRECIO_M2_PRESENCIAL = 1700;
   const PLANS = {
-    starter: { title: '1 crédito Starter', unit_price: 15000, credits: 1 },
+    starter: { title: '1 crédito Starter', unit_price: STARTER_PRICE_CLP, credits: 1 },
     business: { title: 'Plan Business mensual', unit_price: BUSINESS_PRICE_CLP, credits: 2 },
-    corporate: { title: '100 créditos Corporate', unit_price: 1300000, credits: 100 },
+    corporate: { title: '100 créditos Corporate', unit_price: 1199000, credits: 100 },
+    'credits-10': { title: '10 créditos', unit_price: 139990, credits: 10 },
+    'credits-50': { title: '50 créditos', unit_price: 649500, credits: 50 },
+    'credits-100': { title: '100 créditos', unit_price: 1199000, credits: 100 },
     'credits-5': { title: '5 créditos', unit_price: 64950, credits: 5 },
-    'credits-10': { title: '10 créditos', unit_price: 119900, credits: 10 },
     'credits-20': { title: '20 créditos', unit_price: 219800, credits: 20 },
     'dashboard-standard': { title: 'Dashboard Standard', unit_price: billing === 'annual' ? 590000 : 59000, credits: 0 },
     'dashboard-corporate': { title: 'Dashboard Corporate', unit_price: billing === 'annual' ? 1490000 : 149000, credits: 0 },
@@ -2851,9 +4864,7 @@ fastify.post('/api/mercadopago/preference', async (req, reply) => {
     const surface = Math.max(45, parseInt(bodySurface, 10) || 45);
     planData = { ...planData, unit_price: surface * PRECIO_M2_PRESENCIAL };
   }
-  const proto = (req.headers['x-forwarded-proto'] || 'http').toString().split(',')[0].trim();
-  const host = (req.headers['x-forwarded-host'] || req.headers.host || 'localhost:3000').toString().split(',')[0].trim();
-  const baseUrl = `${proto}://${host}`;
+  const baseUrl = getPublicWebBase(req);
   const isStarter = plan === 'starter' && !tenantId;
 
   let extRef;
@@ -2882,13 +4893,10 @@ fastify.post('/api/mercadopago/preference', async (req, reply) => {
   }
 
   const successUrl = isStarter ? `${baseUrl}/pago/ok?plan=starter` : plan === 'inspeccion-presencial' ? `${baseUrl}/pago/ok?plan=inspeccion-presencial` : `${baseUrl}/pago/ok?plan=${plan || 'business'}`;
-  const preference = {
+  const payload = {
     items: [{ title: planData.title, quantity: 1, unit_price: planData.unit_price, currency_id: 'CLP' }],
-    payer: {
-      email,
-      first_name: nombre ? String(nombre).trim() : undefined,
-      last_name: apellido ? String(apellido).trim() : undefined
-    },
+    payer: buildMercadoPagoPayerPreference({ email }),
+    ...mercadoPagoCheckoutProDigitalPreferenceExtras(),
     statement_descriptor: 'AINSPECCIONA',
     back_urls: {
       success: successUrl,
@@ -2897,7 +4905,7 @@ fastify.post('/api/mercadopago/preference', async (req, reply) => {
     },
     auto_return: 'approved',
     external_reference: extRef,
-    notification_url: `${baseUrl}/api/mercadopago/webhook`
+    notification_url: getMercadoPagoWebhookUrl(req)
   };
   try {
     const res = await fetch('https://api.mercadopago.com/checkout/preferences', {
@@ -2906,19 +4914,37 @@ fastify.post('/api/mercadopago/preference', async (req, reply) => {
         'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(preference)
+      body: JSON.stringify(payload)
     });
-    const data = await res.json();
+    const preference = await res.json();
     if (!res.ok) {
-      fastify.log.warn({ status: res.status, data }, 'mercadopago-preference-error');
-      return reply.code(502).send({ error: data.message || 'Error al crear preferencia MercadoPago' });
+      fastify.log.warn({ status: res.status, data: preference }, 'mercadopago-preference-error');
+      return reply.code(502).send({ error: preference.message || 'Error al crear preferencia MercadoPago' });
     }
     const isTestToken = accessToken.startsWith('TEST-');
     const initPoint = isTestToken
-      ? (data.sandbox_init_point || data.init_point)
-      : (data.init_point || data.sandbox_init_point);
+      ? (preference.sandbox_init_point || preference.init_point)
+      : (preference.init_point || preference.sandbox_init_point);
     if (!initPoint) return reply.code(502).send({ error: 'MercadoPago no devolvió URL de pago' });
-    return reply.send({ init_point: initPoint });
+    let checkoutHost = null;
+    try {
+      checkoutHost = new URL(initPoint).hostname;
+    } catch (_) {}
+    fastify.log.info(
+      {
+        tokenMode: isTestToken ? 'test' : 'live',
+        checkoutHost,
+        hint:
+          !isTestToken && checkoutHost && !String(checkoutHost).includes('sandbox')
+            ? 'Credencial producción: checkout es prod; tarjetas de prueba suelen fallar. Usa TEST- o tarjeta real.'
+            : undefined
+      },
+      'mercadopago-preference-redirect'
+    );
+    return reply.send({
+      init_point: initPoint,
+      sandbox_init_point: preference.sandbox_init_point || null
+    });
   } catch (err) {
     fastify.log.error(err, 'mercadopago-preference');
     return reply.code(502).send({ error: 'Error de conexión con MercadoPago' });
@@ -2929,9 +4955,19 @@ fastify.post('/api/mercadopago/preference', async (req, reply) => {
 fastify.post('/api/mercadopago/webhook', async (req, reply) => {
   const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN;
   if (!accessToken) return reply.code(200).send(); // 200 para que MP no reintente
+  const q = req.query || {};
   const payload = req.body || {};
-  const topic = String(payload.type || payload.topic || '').toLowerCase();
-  const id = payload.data?.id || payload['data.id'];
+  let topic = String(payload.type || payload.topic || q.topic || '').toLowerCase();
+  if (!topic && payload.action) {
+    const a = String(payload.action).toLowerCase();
+    if (a.startsWith('payment.')) topic = 'payment';
+  }
+  if (topic === 'payment_v2') topic = 'payment';
+  let id =
+    payload.data?.id ??
+    (payload['data.id'] != null ? payload['data.id'] : undefined) ??
+    q.id ??
+    q['data.id'];
 
   // Manejar notificaciones de suscripción (preapproval)
   if (topic === 'subscription_preapproval' && id) {
@@ -2993,13 +5029,248 @@ fastify.post('/api/mercadopago/webhook', async (req, reply) => {
     return reply.code(200).send();
   }
 
+  // Checkout Pro suele notificar topic=merchant_order (IPN/query); hay que resolver el pago desde la orden
+  if (topic === 'merchant_order' && id) {
+    try {
+      const moId = encodeURIComponent(String(id));
+      const orderUrls = [
+        `https://api.mercadopago.com/v1/merchant_orders/${moId}`,
+        `https://api.mercadopago.com/merchant_orders/${moId}`
+      ];
+      const paymentIdsFromOrder = (o) => {
+        const out = [];
+        if (!o || typeof o !== 'object') return out;
+        let raw = [];
+        if (Array.isArray(o.payments)) raw = o.payments;
+        else if (o.payments && typeof o.payments === 'object') raw = Object.values(o.payments);
+        for (const p of raw) {
+          if (typeof p === 'number' || (typeof p === 'string' && String(p).trim() !== '' && !Number.isNaN(Number(p)))) {
+            out.push(String(p).trim());
+            continue;
+          }
+          if (typeof p === 'object' && p !== null) {
+            const pid =
+              p.id ??
+              p.payment_id ??
+              p.payment?.id ??
+              (typeof p.payment === 'number' ? p.payment : null);
+            if (pid != null && pid !== '') out.push(String(pid));
+          }
+        }
+        if (out.length > 0) return out;
+        if (o.payment && typeof o.payment === 'object' && o.payment.id != null) return [String(o.payment.id)];
+        return out;
+      };
+
+      const searchPaymentsByQuery = async (paramsObj) => {
+        const q = new URLSearchParams({
+          sort: 'date_created',
+          criteria: 'desc',
+          ...paramsObj
+        });
+        const searchRes = await fetch(`https://api.mercadopago.com/v1/payments/search?${q.toString()}`, {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        });
+        const search = await searchRes.json();
+        return { searchRes, search };
+      };
+
+      const pickPaymentFromSearchResults = (search) => {
+        if (!search || !Array.isArray(search.results) || search.results.length === 0) return null;
+        const approved = search.results.find((p) => p && p.status === 'approved');
+        return approved || search.results[0];
+      };
+
+      /** MP a menudo exige range + fechas para que /payments/search devuelva filas */
+      const searchPaymentByExternalRefStrategies = (extRef) => {
+        const ref = String(extRef);
+        const end = new Date();
+        const begin = new Date(end.getTime() - 14 * 24 * 60 * 60 * 1000);
+        return [
+          { external_reference: ref },
+          {
+            external_reference: ref,
+            range: 'date_created',
+            begin_date: begin.toISOString(),
+            end_date: end.toISOString()
+          },
+          {
+            external_reference: ref,
+            range: 'date_last_updated',
+            begin_date: begin.toISOString(),
+            end_date: end.toISOString()
+          }
+        ];
+      };
+
+      let order = null;
+      let lastMoStatus = 0;
+      for (const url of orderUrls) {
+        const moRes = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
+        const body = await moRes.json();
+        lastMoStatus = moRes.status;
+        if (moRes.ok && body && typeof body === 'object') {
+          order = body;
+          break;
+        }
+      }
+      if (!order) {
+        fastify.log.warn({ merchantOrderId: id, status: lastMoStatus }, 'mercadopago-merchant-order-fetch-failed');
+        return reply.code(200).send();
+      }
+
+      fastify.log.info(
+        {
+          merchantOrderId: id,
+          order_status: order.order_status,
+          status: order.status,
+          paid_amount: order.paid_amount,
+          total_amount: order.total_amount,
+          cancelled: order.cancelled
+        },
+        'mercadopago-merchant-order-snapshot'
+      );
+
+      let paymentIds = paymentIdsFromOrder(order);
+      // La notificación a veces llega antes de que MP asocie pagos a la orden
+      if (paymentIds.length === 0) {
+        await new Promise((r) => setTimeout(r, 900));
+        const retryRes = await fetch(orderUrls[0], { headers: { Authorization: `Bearer ${accessToken}` } });
+        const retryBody = await retryRes.json();
+        if (retryRes.ok && retryBody && typeof retryBody === 'object') {
+          paymentIds = paymentIdsFromOrder(retryBody);
+          order = retryBody;
+        }
+      }
+      // Aún sin pago en la orden: MP suele notificar merchant_order al abrir el checkout (no hay filas en /payments/search)
+      if (
+        paymentIds.length === 0 &&
+        Number(order.paid_amount || 0) === 0 &&
+        !order.cancelled &&
+        order.order_status === 'payment_required'
+      ) {
+        fastify.log.info(
+          { merchantOrderId: id, order_status: order.order_status, status: order.status },
+          'mercadopago-merchant-order-awaiting-payment'
+        );
+        return reply.code(200).send();
+      }
+      // Fallback: GET /v1/payments/search (external_reference; a veces hace falta range + fechas)
+      const runPaymentSearchForExtRef = async (extRef, phase) => {
+        if (!extRef) return false;
+        const strategies = searchPaymentByExternalRefStrategies(extRef);
+        for (let si = 0; si < strategies.length; si++) {
+          const { searchRes, search } = await searchPaymentsByQuery(strategies[si]);
+          const pick = pickPaymentFromSearchResults(search);
+          if (searchRes.ok && pick?.id) {
+            paymentIds.push(String(pick.id));
+            fastify.log.info(
+              {
+                merchantOrderId: id,
+                external_reference: extRef,
+                paymentId: pick.id,
+                phase,
+                strategyIndex: si
+              },
+              'mercadopago-merchant-order-via-search'
+            );
+            return true;
+          }
+          if (!searchRes.ok) {
+            fastify.log.warn(
+              { merchantOrderId: id, status: searchRes.status, err: search?.message || search, phase, strategyIndex: si },
+              'mercadopago-payment-search-failed'
+            );
+          } else {
+            fastify.log.info(
+              {
+                merchantOrderId: id,
+                phase,
+                strategyIndex: si,
+                pagingTotal: search?.paging?.total,
+                resultsLen: Array.isArray(search?.results) ? search.results.length : 0
+              },
+              'mercadopago-payment-search-empty'
+            );
+          }
+        }
+        return false;
+      };
+
+      const trySearchPaymentIds = async (label) => {
+        if (paymentIds.length > 0) return;
+        if (order.external_reference) {
+          const ok = await runPaymentSearchForExtRef(order.external_reference, label);
+          if (ok) return;
+        }
+        if (paymentIds.length === 0 && order.preference_id) {
+          try {
+            const prefRes = await fetch(
+              `https://api.mercadopago.com/checkout/preferences/${encodeURIComponent(String(order.preference_id))}`,
+              { headers: { Authorization: `Bearer ${accessToken}` } }
+            );
+            const pref = await prefRes.json();
+            if (prefRes.ok && pref?.external_reference) {
+              await runPaymentSearchForExtRef(pref.external_reference, `${label}-pref`);
+            }
+          } catch (prefErr) {
+            fastify.log.warn({ err: prefErr, merchantOrderId: id }, 'mercadopago-preference-fetch-failed');
+          }
+        }
+      };
+
+      if (paymentIds.length === 0) {
+        await trySearchPaymentIds('immediate');
+      }
+      if (paymentIds.length === 0) {
+        await new Promise((r) => setTimeout(r, 1500));
+        await trySearchPaymentIds('delayed');
+      }
+      if (paymentIds.length === 0) {
+        await new Promise((r) => setTimeout(r, 2500));
+        await trySearchPaymentIds('delayed2');
+      }
+
+      if (paymentIds.length === 0) {
+        const paySample = Array.isArray(order.payments) && order.payments[0] ? order.payments[0] : null;
+        fastify.log.warn(
+          {
+            merchantOrderId: id,
+            orderKeys: Object.keys(order),
+            hasExternalRef: !!order.external_reference,
+            preference_id: order.preference_id || null,
+            paymentsLen: Array.isArray(order.payments) ? order.payments.length : typeof order.payments,
+            paymentSampleKeys: paySample && typeof paySample === 'object' ? Object.keys(paySample) : null
+          },
+          'mercadopago-merchant-order-no-payments'
+        );
+        return reply.code(200).send();
+      }
+      const merchantOrderId = String(id);
+      id = paymentIds[0];
+      topic = 'payment';
+      if (paymentIds.length > 1) {
+        fastify.log.warn({ merchantOrderId, paymentIds }, 'mercadopago-merchant-order-multiple-using-first');
+      }
+      fastify.log.info({ merchantOrderId, paymentId: id }, 'mercadopago-merchant-order-resolved');
+    } catch (moErr) {
+      fastify.log.error(moErr, 'mercadopago-merchant-order-error');
+      return reply.code(200).send();
+    }
+  }
+
   if (topic !== 'payment' || !id) return reply.code(200).send();
   try {
     const res = await fetch(`https://api.mercadopago.com/v1/payments/${id}`, {
       headers: { Authorization: `Bearer ${accessToken}` }
     });
     const payment = await res.json();
-    if (!res.ok || payment.status !== 'approved') return reply.code(200).send();
+    if (!res.ok) return reply.code(200).send();
+    if (payment.status === 'refunded') {
+      await maybeRecordAmbassadorRefund(fastify.log, payment);
+      return reply.code(200).send();
+    }
+    if (payment.status !== 'approved') return reply.code(200).send();
     const extRef = String(payment.external_reference || '');
     const tenantMatch = extRef.match(/tenant:([a-f0-9-]+)/i);
     const planMatch = extRef.match(/plan:([a-z0-9-]+)/i);
@@ -3025,15 +5296,28 @@ fastify.post('/api/mercadopago/webhook', async (req, reply) => {
             data: { mercadopagoPaymentId: paymentIdStr, status: 'IN_PROGRESS' }
           });
           fastify.log.info({ caseId: draftCase.id, paymentId: paymentIdStr }, 'mercadopago-starter-draft-activated');
+          const starterTipoDte = Number(process.env.SIMPLEFACTURA_STARTER_TIPO_DTE || process.env.SIMPLEFACTURA_TIPO_DTE || 39);
+          const sfDraft = await maybeEmitSimpleFacturaForPayment(fastify.log, {
+            billingTenantId: draftCase.tenantId,
+            mercadopagoPaymentId: paymentIdStr,
+            payment,
+            facturacionJson: draftCase.facturacionJson,
+            lineDescription: SF_LINE_STARTER,
+            fallbackMontoClp: STARTER_PRICE_CLP,
+            tipoDteDefault: starterTipoDte
+          });
+          if (sfDraft.dtePdfBuffer && draftCase.contactEmail) {
+            try {
+              await sendSimplefacturaDtePdfEmail(draftCase.contactEmail, sfDraft.dtePdfBuffer, { folio: sfDraft.folio });
+            } catch (mailErr) {
+              fastify.log.warn({ err: mailErr }, 'starter-dte-email-failed');
+            }
+          }
           return reply.code(200).send();
         }
       }
 
-      const starterTenant = await prisma.tenant.findFirst({ where: { name: STARTER_TENANT_NAME } });
-      if (!starterTenant) {
-        fastify.log.warn('starter-tenant-not-found');
-        return reply.code(200).send();
-      }
+      const starterTenant = await ensureStarterTenant();
       const tokenMatch = extRef.match(/t:([a-f0-9-]+)/i);
       const pendingId = tokenMatch?.[1];
       const pending = pendingId ? await prisma.pendingStarterPayment.findUnique({ where: { id: pendingId } }) : null;
@@ -3072,6 +5356,23 @@ fastify.post('/api/mercadopago/webhook', async (req, reply) => {
         });
       }
       fastify.log.info({ paymentId: paymentIdStr, contactEmail }, 'mercadopago-starter-case-created');
+      const starterTipoDte = Number(process.env.SIMPLEFACTURA_STARTER_TIPO_DTE || process.env.SIMPLEFACTURA_TIPO_DTE || 39);
+      const sfStarter = await maybeEmitSimpleFacturaForPayment(fastify.log, {
+        billingTenantId: starterTenant.id,
+        mercadopagoPaymentId: paymentIdStr,
+        payment,
+        facturacionJson,
+        lineDescription: SF_LINE_STARTER,
+        fallbackMontoClp: STARTER_PRICE_CLP,
+        tipoDteDefault: starterTipoDte
+      });
+      if (sfStarter.dtePdfBuffer && contactEmail) {
+        try {
+          await sendSimplefacturaDtePdfEmail(contactEmail, sfStarter.dtePdfBuffer, { folio: sfStarter.folio });
+        } catch (mailErr) {
+          fastify.log.warn({ err: mailErr }, 'starter-dte-email-failed');
+        }
+      }
       return reply.code(200).send();
     }
 
@@ -3127,6 +5428,16 @@ fastify.post('/api/mercadopago/webhook', async (req, reply) => {
             }).catch(() => {});
           }
 
+          const sfSub = await maybeEmitSimpleFacturaForPayment(fastify.log, {
+            billingTenantId: subTenant.id,
+            mercadopagoPaymentId: id,
+            payment,
+            facturacionJson: subTenant.facturacionJson,
+            lineDescription: SF_LINE_BUSINESS,
+            fallbackMontoClp: Number(process.env.BUSINESS_PRICE_CLP || 39990),
+            tipoDteDefault: Number(process.env.SIMPLEFACTURA_TIPO_DTE || 39)
+          });
+
           // Primer pago: enviar magic link si el tenant no tiene contraseña
           if (!subTenant.passwordHash && subTenant.email) {
             try {
@@ -3137,8 +5448,21 @@ fastify.post('/api/mercadopago/webhook', async (req, reply) => {
               const hostH = (req.headers['x-forwarded-host'] || req.headers.host || 'localhost:3000').toString().split(',')[0].trim();
               const magicUrl = `${proto}://${hostH}/auth/verify?token=${token}`;
               const BUSINESS_PRICE_CLP_sub = Number(process.env.BUSINESS_PRICE_CLP || 39990);
+              let receiptPdfSub = null;
+              if (subTenant.facturacionJson && typeof subTenant.facturacionJson === 'object') {
+                try {
+                  receiptPdfSub = await generateBusinessReceiptPdf({
+                    facturacion: subTenant.facturacionJson,
+                    montoClp: BUSINESS_PRICE_CLP_sub
+                  });
+                } catch (pdfErr) {
+                  fastify.log.warn({ err: pdfErr }, 'subscription-receipt-pdf-error');
+                }
+              }
               const sent = await sendBusinessMagicLinkEmail(subTenant.email, magicUrl, subTenant.name, {
                 facturacion: subTenant.facturacionJson,
+                receiptPdfBuffer: receiptPdfSub,
+                dtePdfBuffer: sfSub.dtePdfBuffer,
                 montoClp: BUSINESS_PRICE_CLP_sub
               });
               if (sent.ok) fastify.log.info({ tenantId: subTenant.id }, 'subscription-magic-link-sent');
@@ -3156,6 +5480,25 @@ fastify.post('/api/mercadopago/webhook', async (req, reply) => {
             plan: 'business'
           });
         }
+        await maybeRecordAmbassadorCommission(fastify.log, {
+          tenantId: subTenant.id,
+          mercadopagoPaymentId: id,
+          payment,
+          plan: 'business',
+          source: 'SUBSCRIPTION',
+          extRef
+        });
+        if (subAlready) {
+          await maybeEmitSimpleFacturaForPayment(fastify.log, {
+            billingTenantId: subTenant.id,
+            mercadopagoPaymentId: id,
+            payment,
+            facturacionJson: subTenant.facturacionJson,
+            lineDescription: SF_LINE_BUSINESS,
+            fallbackMontoClp: Number(process.env.BUSINESS_PRICE_CLP || 39990),
+            tipoDteDefault: Number(process.env.SIMPLEFACTURA_TIPO_DTE || 39)
+          });
+        }
         return reply.code(200).send();
       }
     }
@@ -3170,13 +5513,34 @@ fastify.post('/api/mercadopago/webhook', async (req, reply) => {
         payment,
         log: fastify.log
       });
+      await maybeRecordAmbassadorCommission(fastify.log, {
+        tenantId,
+        mercadopagoPaymentId: paymentIdStr,
+        payment,
+        plan: 'inspeccion-presencial',
+        source: 'CHECKOUT',
+        extRef
+      });
       return reply.code(200).send();
     }
 
     // Planes con tenant: créditos (Business = 2 inspecciones incluidas; corporate/bolsas en dashboard)
-    const PLANS = { starter: 1, business: 2, corporate: 100, 'credits-5': 5, 'credits-10': 10, 'credits-20': 20 };
+    const PLANS = { starter: 1, business: 2, corporate: 100, 'credits-10': 10, 'credits-50': 50, 'credits-100': 100, 'credits-5': 5, 'credits-20': 20 };
     const credits = PLANS[plan] ?? 0;
-    if (!tenantId || credits < 1) return reply.code(200).send();
+    if (!tenantId) return reply.code(200).send();
+    if (credits < 1) {
+      if (plan === 'dashboard-standard' || plan === 'dashboard-corporate') {
+        await maybeRecordAmbassadorCommission(fastify.log, {
+          tenantId,
+          mercadopagoPaymentId: String(id),
+          payment,
+          plan,
+          source: 'CHECKOUT',
+          extRef
+        });
+      }
+      return reply.code(200).send();
+    }
 
     const alreadyProcessed = await prisma.creditTransaction.findFirst({
       where: { tenantId, description: { contains: String(id) } }
@@ -3210,6 +5574,14 @@ fastify.post('/api/mercadopago/webhook', async (req, reply) => {
       source: 'CREDIT_PURCHASE',
       plan
     });
+    await maybeRecordAmbassadorCommission(fastify.log, {
+      tenantId,
+      mercadopagoPaymentId: String(id),
+      payment,
+      plan,
+      source: 'CHECKOUT',
+      extRef
+    });
 
     // Business: enviar magic link para acceso inicial (luego crea contraseña)
     if (plan === 'business') {
@@ -3217,6 +5589,15 @@ fastify.post('/api/mercadopago/webhook', async (req, reply) => {
         const tenant = await prisma.tenant.findUnique({
           where: { id: tenantId },
           select: { id: true, name: true, email: true, facturacionJson: true }
+        });
+        const sfBiz = await maybeEmitSimpleFacturaForPayment(fastify.log, {
+          billingTenantId: tenantId,
+          mercadopagoPaymentId: id,
+          payment,
+          facturacionJson: tenant?.facturacionJson,
+          lineDescription: SF_LINE_BUSINESS,
+          fallbackMontoClp: Number(process.env.BUSINESS_PRICE_CLP || 39990),
+          tipoDteDefault: Number(process.env.SIMPLEFACTURA_TIPO_DTE || 39)
         });
         if (tenant?.email) {
           const token = crypto.randomUUID().replace(/-/g, '');
@@ -3240,6 +5621,7 @@ fastify.post('/api/mercadopago/webhook', async (req, reply) => {
           const sent = await sendBusinessMagicLinkEmail(tenant.email, magicUrl, tenant.name, {
             facturacion: tenant.facturacionJson,
             receiptPdfBuffer: receiptPdf,
+            dtePdfBuffer: sfBiz.dtePdfBuffer,
             montoClp: BUSINESS_PRICE_CLP
           });
           if (sent.ok) fastify.log.info({ tenantId, email: tenant.email }, 'business-magic-link-sent');
@@ -3289,6 +5671,14 @@ fastify.post('/api/mercadopago/verify-payment', async (req, reply) => {
         payment,
         log: fastify.log
       });
+      await maybeRecordAmbassadorCommission(fastify.log, {
+        tenantId,
+        mercadopagoPaymentId: String(paymentId),
+        payment,
+        plan: 'inspeccion-presencial',
+        source: 'CHECKOUT',
+        extRef
+      });
       return reply.send({
         ok: true,
         status: 'approved',
@@ -3297,10 +5687,20 @@ fastify.post('/api/mercadopago/verify-payment', async (req, reply) => {
       });
     }
 
-    const PLANS = { business: 2, 'credits-5': 5, 'credits-10': 10, 'credits-20': 20 };
+    const PLANS = { business: 2, 'credits-10': 10, 'credits-50': 50, 'credits-100': 100, 'credits-5': 5, 'credits-20': 20 };
     const credits = PLANS[plan] ?? 0;
 
     if (!tenantId || credits < 1) {
+      if (tenantId && (plan === 'dashboard-standard' || plan === 'dashboard-corporate')) {
+        await maybeRecordAmbassadorCommission(fastify.log, {
+          tenantId,
+          mercadopagoPaymentId: String(paymentId),
+          payment,
+          plan,
+          source: 'CHECKOUT',
+          extRef
+        });
+      }
       return reply.send({ ok: true, status: 'approved', credits: 0, message: 'No credits to add for this plan' });
     }
 
@@ -3336,6 +5736,29 @@ fastify.post('/api/mercadopago/verify-payment', async (req, reply) => {
       source: 'CREDIT_PURCHASE',
       plan
     });
+    await maybeRecordAmbassadorCommission(fastify.log, {
+      tenantId,
+      mercadopagoPaymentId: String(paymentId),
+      payment,
+      plan,
+      source: 'CHECKOUT',
+      extRef
+    });
+    if (plan === 'business') {
+      const t = await prisma.tenant.findUnique({
+        where: { id: tenantId },
+        select: { facturacionJson: true }
+      });
+      await maybeEmitSimpleFacturaForPayment(fastify.log, {
+        billingTenantId: tenantId,
+        mercadopagoPaymentId: paymentId,
+        payment,
+        facturacionJson: t?.facturacionJson,
+        lineDescription: SF_LINE_BUSINESS,
+        fallbackMontoClp: Number(process.env.BUSINESS_PRICE_CLP || 39990),
+        tipoDteDefault: Number(process.env.SIMPLEFACTURA_TIPO_DTE || 39)
+      });
+    }
     return reply.send({ ok: true, status: 'approved', credits, added: true });
   } catch (err) {
     fastify.log.error(err, 'mercadopago-verify-payment');
@@ -3516,7 +5939,14 @@ fastify.post('/api/starter/cases', async (req, reply) => {
   const bedrooms = Number(payload.bedrooms || bedroomsCount || 0);
   const bathrooms = Number(payload.bathrooms || bathroomsCount || 1);
 
-  const planSlots = buildPhotoPlanV1({ ...payload, bathroomsCount, bedroomsCount });
+  const planSlots = buildPhotoPlanV1({
+    ...payload,
+    bathroomsCount,
+    bedroomsCount,
+    hasLaundry: true,
+    hasElevator: true,
+    hasGreenCertificate: true
+  });
   const token = crypto.randomUUID();
   const captureExpires = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7);
 
@@ -3536,8 +5966,7 @@ fastify.post('/api/starter/cases', async (req, reply) => {
     const planMatch = extRef.match(/plan:([a-z0-9-]+)/i);
     const plan = planMatch?.[1] || 'starter';
     if (plan !== 'starter') return reply.code(400).send({ ok: false, error: 'NOT_STARTER_PAYMENT' });
-    const starterTenant = await prisma.tenant.findFirst({ where: { name: STARTER_TENANT_NAME } });
-    if (!starterTenant) return reply.code(503).send({ ok: false, error: 'STARTER_TENANT_NOT_CONFIGURED' });
+    const starterTenant = await ensureStarterTenant();
     const payerEmail = (payment.payer?.email || '').trim().toLowerCase();
     const payerName = payment.payer?.first_name || payment.payer?.identification?.name || '';
     c = await prisma.case.create({
@@ -3596,12 +6025,13 @@ fastify.post('/api/starter/cases', async (req, reply) => {
         yearBuilt: payload.yearBuilt ? Number(payload.yearBuilt) : null,
         floorType: (payload.floorType || 'CONCRETE').toUpperCase(),
         propertyAgeRange: payload.propertyAgeRange || null,
-        hasPatio: !!payload.hasPatio,
-        hasAttic: !!payload.hasAttic,
-        hasLaundry: !!payload.hasLaundry,
-        hasElevator: !!payload.hasElevator,
-        hasParking: !!payload.hasParking,
-        hasGreenCertificate: !!payload.hasGreenCertificate
+        hasPatio: false,
+        hasAttic: false,
+        hasLaundry: true,
+        hasElevator: true,
+        hasParking: false,
+        hasGreenCertificate: true,
+        hasEntranceGrille: !!payload.hasEntranceGrille
       }
     });
     await tx.slot.createMany({
@@ -3749,14 +6179,15 @@ fastify.get('/api/debug-db', async (req, reply) => {
 });
 
 // Protección de rutas de administración
+function isAdminAuthed(req) {
+  const expectedUser = process.env.ADMIN_USER || 'admin';
+  const expectedPass = process.env.ADMIN_PASS || 'admin123';
+  return req.headers['x-admin-user'] === expectedUser && req.headers['x-admin-pass'] === expectedPass;
+}
+
 fastify.addHook('onRequest', async (req, reply) => {
   if (req.url.startsWith('/api/admin')) {
-    const expectedUser = process.env.ADMIN_USER || 'admin';
-    const expectedPass = process.env.ADMIN_PASS || 'admin123';
-    const providedUser = req.headers['x-admin-user'];
-    const providedPass = req.headers['x-admin-pass'];
-    
-    if (providedUser !== expectedUser || providedPass !== expectedPass) {
+    if (!isAdminAuthed(req)) {
       req.log.warn({ url: req.url, ip: req.ip }, 'Intento de acceso admin no autorizado');
       return reply.code(401).send({ ok: false, error: 'UNAUTHORIZED_ADMIN' });
     }
@@ -3865,6 +6296,74 @@ fastify.get('/api/admin/visits', async (req, reply) => {
     return reply.send({ ok: true, visits: result });
   } catch (err) {
     req.log.error(err, 'GET /api/admin/visits');
+    return reply.code(500).send({ ok: false, error: 'DB_ERROR' });
+  }
+});
+
+function analyticsSince(days) {
+  const since = new Date();
+  since.setDate(since.getDate() - days);
+  since.setHours(0, 0, 0, 0);
+  return since;
+}
+
+fastify.get('/api/admin/analytics/funnel-business', async (req, reply) => {
+  try {
+    const days = clampDays(req.query?.days);
+    const data = await queryFunnelBusiness(prisma, analyticsSince(days), STARTER_TENANT_NAME);
+    return reply.send({ ok: true, days, ...data });
+  } catch (err) {
+    req.log.error(err, 'GET /api/admin/analytics/funnel-business');
+    return reply.code(500).send({ ok: false, error: 'DB_ERROR' });
+  }
+});
+
+fastify.get('/api/admin/analytics/inspections-daily', async (req, reply) => {
+  try {
+    const days = clampDays(req.query?.days);
+    const series = await queryInspectionsDaily(prisma, analyticsSince(days));
+    return reply.send({ ok: true, days, series });
+  } catch (err) {
+    req.log.error(err, 'GET /api/admin/analytics/inspections-daily');
+    return reply.code(500).send({ ok: false, error: 'DB_ERROR' });
+  }
+});
+
+fastify.get('/api/admin/analytics/inspections-geo', async (req, reply) => {
+  try {
+    const days = clampDays(req.query?.days);
+    const addresses = await queryInspectionAddresses(prisma, analyticsSince(days));
+    const geo = aggregateGeo(addresses);
+    return reply.send({
+      ok: true,
+      days,
+      ...geo,
+      disclaimer: 'Datos estimados por dirección libre (sin geocodificación).'
+    });
+  } catch (err) {
+    req.log.error(err, 'GET /api/admin/analytics/inspections-geo');
+    return reply.code(500).send({ ok: false, error: 'DB_ERROR' });
+  }
+});
+
+fastify.get('/api/admin/analytics/inspections-heatmap', async (req, reply) => {
+  try {
+    const days = clampDays(req.query?.days);
+    const heatmap = await queryInspectionsHeatmap(prisma, analyticsSince(days));
+    return reply.send({ ok: true, days, heatmap });
+  } catch (err) {
+    req.log.error(err, 'GET /api/admin/analytics/inspections-heatmap');
+    return reply.code(500).send({ ok: false, error: 'DB_ERROR' });
+  }
+});
+
+fastify.get('/api/admin/analytics/analysis-accuracy', async (req, reply) => {
+  try {
+    const days = clampDays(req.query?.days);
+    const data = await queryAnalysisAccuracyDaily(prisma, analyticsSince(days));
+    return reply.send({ ok: true, days, ...data });
+  } catch (err) {
+    req.log.error(err, 'GET /api/admin/analytics/analysis-accuracy');
     return reply.code(500).send({ ok: false, error: 'DB_ERROR' });
   }
 });
@@ -4608,10 +7107,40 @@ fastify.post('/api/tenant/logout', async (req, reply) => {
   return reply.send({ ok: true });
 });
 
+async function getTenantLogoUrl(tenantId) {
+  if (!tenantId) return null;
+  try {
+    const rows = await prisma.$queryRaw`
+      SELECT logoUrl FROM Tenant WHERE id = ${tenantId} LIMIT 1
+    `;
+    const url = rows?.[0]?.logoUrl;
+    return url ? String(url) : null;
+  } catch (err) {
+    // Columna ausente u otro error de esquema: no tumbar /me
+    return null;
+  }
+}
+
 fastify.get('/api/tenant/me', async (req, reply) => {
   const session = await getTenantSession(req);
   if (!session || !session.tenantId) return reply.code(401).send({ ok: false, error: 'UNAUTHORIZED' });
   try {
+    const peerEnsure = await ensureTenantPeerReferralCode(session.tenantId);
+    if (peerEnsure.assigned) {
+      const tRow = await prisma.tenant.findUnique({
+        where: { id: session.tenantId },
+        select: { email: true, name: true }
+      });
+      if (tRow?.email) {
+        await notifyPeerReferralWelcomeIfNew(req, {
+          assigned: true,
+          code: peerEnsure.code,
+          email: tRow.email,
+          tenantName: tRow.name
+        });
+      }
+    }
+
     const tenant = await prisma.tenant.findUnique({
       where: { id: session.tenantId },
       select: {
@@ -4622,6 +7151,7 @@ fastify.get('/api/tenant/me', async (req, reply) => {
         email: true,
         phone: true,
         status: true,
+        peerReferralCode: true,
         creditAccount: { select: { balance: true } },
         mpSubscriptionId: true,
         subscriptionStatus: true,
@@ -4637,18 +7167,24 @@ fastify.get('/api/tenant/me', async (req, reply) => {
     if (!tenant) return reply.code(401).send({ ok: false, error: 'UNAUTHORIZED' });
     const tenantResolved = await refreshTrialStatusIfNeeded(tenant);
     const credits = tenant.creditAccount?.balance ?? 0;
+    const logoUrl = await getTenantLogoUrl(session.tenantId);
+    const webBase = getPublicWebBase(req);
+    const peerCode = tenant.peerReferralCode || peerEnsure.code || null;
+    const peerReferralInviteUrl = peerCode ? `${webBase}/?ref=${encodeURIComponent(peerCode)}` : null;
     return reply.send({
       ok: true,
       tenant: {
         id: tenantResolved.id,
         name: tenantResolved.name,
         legalName: tenantResolved.legalName,
-        logoUrl: null,
+        logoUrl,
         rut: tenantResolved.rut,
         email: tenantResolved.email,
         phone: tenantResolved.phone,
         status: tenantResolved.status,
         credits,
+        peerReferralCode: peerCode,
+        peerReferralInviteUrl,
         mpSubscriptionId: tenantResolved.mpSubscriptionId || null,
         subscriptionStatus: tenantResolved.subscriptionStatus || null,
         subscriptionExpiresAt: tenantResolved.subscriptionExpiresAt || null,
@@ -4665,21 +7201,26 @@ fastify.get('/api/tenant/me', async (req, reply) => {
       try {
       const tenant = await prisma.tenant.findUnique({
         where: { id: session.tenantId },
-        select: { id: true, name: true, legalName: true, rut: true, email: true, phone: true, status: true }
+        select: { id: true, name: true, legalName: true, rut: true, email: true, phone: true, status: true, peerReferralCode: true }
       });
       if (!tenant) return reply.code(401).send({ ok: false, error: 'UNAUTHORIZED' });
+      const logoUrl = await getTenantLogoUrl(session.tenantId);
+      const webBase = getPublicWebBase(req);
+      const peerCode = tenant.peerReferralCode || null;
       return reply.send({
         ok: true,
         tenant: {
           id: tenant.id,
           name: tenant.name,
           legalName: tenant.legalName,
-          logoUrl: null,
+          logoUrl,
           rut: tenant.rut,
           email: tenant.email,
           phone: tenant.phone,
           status: tenant.status,
-          credits: 0
+          credits: 0,
+          peerReferralCode: peerCode,
+          peerReferralInviteUrl: peerCode ? `${webBase}/?ref=${encodeURIComponent(peerCode)}` : null
         }
       });
     } catch (err2) {
@@ -4733,8 +7274,32 @@ fastify.post('/api/tenant/logo', async (req, reply) => {
     try {
       await prisma.$executeRaw`UPDATE Tenant SET logoUrl = ${logoUrl} WHERE id = ${session.tenantId}`;
     } catch (dbErr) {
-      if (String(dbErr?.message || '').includes('logoUrl') || String(dbErr?.message || '').includes('does not exist')) {
-        req.log.warn({ err: dbErr?.message }, 'logoUrl column missing, logo saved to storage only');
+      const msg = String(dbErr?.message || '');
+      // Columna ausente: crearla y reintentar (prod a veces sin migración).
+      if (msg.includes('logoUrl') || msg.includes('Unknown column') || msg.includes('does not exist')) {
+        req.log.warn({ err: msg }, 'logoUrl column missing — creating');
+        try {
+          await prisma.$executeRawUnsafe(
+            'ALTER TABLE `Tenant` ADD COLUMN `logoUrl` VARCHAR(512) NULL'
+          );
+        } catch (alterErr) {
+          const alterMsg = String(alterErr?.message || '');
+          if (!alterMsg.includes('Duplicate column')) {
+            req.log.error({ err: alterMsg }, 'failed to add logoUrl column');
+            return reply.code(500).send({
+              ok: false,
+              error: 'LOGO_COLUMN_MISSING',
+              message: 'No se pudo guardar el logo en la base de datos. Contacta soporte.'
+            });
+          }
+        }
+        await prisma.$executeRaw`UPDATE Tenant SET logoUrl = ${logoUrl} WHERE id = ${session.tenantId}`;
+      } else if (msg.includes('Data too long') || msg.includes('too long')) {
+        // Ampliar columna y reintentar
+        await prisma.$executeRawUnsafe(
+          'ALTER TABLE `Tenant` MODIFY COLUMN `logoUrl` VARCHAR(512) NULL'
+        );
+        await prisma.$executeRaw`UPDATE Tenant SET logoUrl = ${logoUrl} WHERE id = ${session.tenantId}`;
       } else {
         throw dbErr;
       }
@@ -4742,7 +7307,7 @@ fastify.post('/api/tenant/logo', async (req, reply) => {
     return reply.send({ ok: true, logoUrl });
   } catch (err) {
     req.log.error(err, 'POST /api/tenant/logo');
-    return reply.code(500).send({ ok: false, error: 'UPLOAD_FAILED' });
+    return reply.code(500).send({ ok: false, error: 'UPLOAD_FAILED', message: err?.message || 'Error al subir logo' });
   }
 });
 
@@ -5157,6 +7722,15 @@ fastify.post('/api/tenant/inspections', async (req, reply) => {
   });
 });
 
+async function getTenantCreditsBalance(tenantId) {
+  if (!tenantId) return null;
+  const account = await prisma.tenantCredit.findUnique({
+    where: { tenantId },
+    select: { balance: true }
+  });
+  return account ? account.balance : 0;
+}
+
 fastify.post('/api/executive/login', async (req, reply) => {
   const payload = req.body || {};
   const email = String(payload.email || '').trim().toLowerCase();
@@ -5173,7 +7747,20 @@ fastify.post('/api/executive/login', async (req, reply) => {
 
   const token = await createExecSession(user.id, user.tenantId || null);
   reply.setCookie(EXEC_SESSION_COOKIE, token, sessionCookieOpts(req));
-  return reply.send({ ok: true, user: { id: user.id, fullName: user.fullName, role: user.role }, token });
+  const creditsBalance = await getTenantCreditsBalance(user.tenantId);
+  return reply.send({
+    ok: true,
+    user: {
+      id: user.id,
+      fullName: user.fullName,
+      email: user.email,
+      role: user.role,
+      tenantId: user.tenantId,
+      mustChangePassword: !!user.mustChangePassword
+    },
+    token,
+    creditsBalance
+  });
 });
 
 fastify.post('/api/executive/logout', async (req, reply) => {
@@ -5188,6 +7775,7 @@ fastify.get('/api/executive/me', async (req, reply) => {
   if (!session) return reply.code(401).send({ ok: false, error: 'UNAUTHORIZED' });
   const user = await prisma.user.findUnique({ where: { id: session.userId } });
   if (!user) return reply.code(401).send({ ok: false, error: 'UNAUTHORIZED' });
+  const creditsBalance = await getTenantCreditsBalance(user.tenantId);
   return reply.send({
     ok: true,
     user: {
@@ -5195,9 +7783,114 @@ fastify.get('/api/executive/me', async (req, reply) => {
       fullName: user.fullName,
       email: user.email,
       role: user.role,
-      tenantId: user.tenantId
+      tenantId: user.tenantId,
+      mustChangePassword: !!user.mustChangePassword
+    },
+    creditsBalance
+  });
+});
+
+/** Recuperación ejecutivo: envía clave temporal y exige cambio al entrar. */
+fastify.post('/api/executive/forgot-password', async (req, reply) => {
+  const payload = req.body || {};
+  const email = String(payload.email || '').trim().toLowerCase();
+  if (!email) return reply.code(400).send({ ok: false, error: 'EMAIL_REQUIRED' });
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true, email: true, fullName: true, status: true, tenantId: true }
+    });
+    // Respuesta genérica para no filtrar si el correo existe.
+    if (!user || user.status !== 'ACTIVE') {
+      return reply.send({ ok: true, emailSent: false });
+    }
+
+    const newPassword = 'A' + crypto.randomUUID().split('-')[0] + '1';
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        passwordHash: hashPassword(newPassword),
+        mustChangePassword: true
+      }
+    });
+
+    let tenantName = 'tu corredora';
+    if (user.tenantId) {
+      const tenant = await prisma.tenant.findUnique({
+        where: { id: user.tenantId },
+        select: { name: true, legalName: true }
+      });
+      tenantName = String(tenant?.legalName || tenant?.name || tenantName).trim() || tenantName;
+    }
+
+    const sendResult = await sendPasswordResetEmail(email, newPassword, tenantName);
+    const emailSent = !!(sendResult && sendResult.ok);
+    if (!emailSent) {
+      req.log.warn({ email, err: sendResult?.error }, 'executive-forgot-password-email-not-sent');
+    }
+    return reply.send({ ok: true, emailSent, ...(emailSent ? {} : { reason: sendResult?.error || 'SMTP' }) });
+  } catch (err) {
+    req.log.warn({ err: err?.message }, 'executive-forgot-password');
+    return reply.code(500).send({ ok: false, error: 'SERVER_ERROR' });
+  }
+});
+
+/** Tras clave temporal: define clave definitiva (sesión ejecutivo requerida). */
+fastify.post('/api/executive/password-after-recovery', async (req, reply) => {
+  const session = await getExecSession(req);
+  if (!session) return reply.code(401).send({ ok: false, error: 'UNAUTHORIZED' });
+
+  const newPassword = String(req.body?.newPassword || req.body?.password || '').trim();
+  const pwdCheck = validatePasswordStrength(newPassword);
+  if (!pwdCheck.ok) {
+    return reply.code(400).send({ ok: false, error: 'PASSWORD_INVALID', message: pwdCheck.msg });
+  }
+
+  await prisma.user.update({
+    where: { id: session.userId },
+    data: {
+      passwordHash: hashPassword(newPassword),
+      mustChangePassword: false,
+      status: 'ACTIVE',
+      activatedAt: new Date()
     }
   });
+
+  return reply.send({ ok: true });
+});
+
+/** Alternativa app: cambiar clave con email + nueva clave (usuario debe estar ACTIVE). */
+fastify.post('/api/executive/forgot-password/set-new', async (req, reply) => {
+  const email = String(req.body?.email || '').trim().toLowerCase();
+  const newPassword = String(req.body?.newPassword || req.body?.password || '').trim();
+  if (!email) return reply.code(400).send({ ok: false, error: 'EMAIL_REQUIRED' });
+  const pwdCheck = validatePasswordStrength(newPassword);
+  if (!pwdCheck.ok) {
+    return reply.code(400).send({ ok: false, error: 'PASSWORD_INVALID', message: pwdCheck.msg });
+  }
+
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user || user.status !== 'ACTIVE') {
+    return reply.code(404).send({ ok: false, error: 'USER_NOT_FOUND' });
+  }
+  if (!user.mustChangePassword) {
+    return reply.code(400).send({
+      ok: false,
+      error: 'NOT_IN_RECOVERY',
+      message: 'Esta cuenta no tiene un cambio de clave pendiente. Usa recuperación de contraseña primero.'
+    });
+  }
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      passwordHash: hashPassword(newPassword),
+      mustChangePassword: false
+    }
+  });
+
+  return reply.send({ ok: true, message: 'Clave actualizada' });
 });
 
 fastify.get('/api/executive/cases', async (req, reply) => {
@@ -5254,12 +7947,222 @@ fastify.get('/api/executive/cases', async (req, reply) => {
   return reply.send({ ok: true, cases: rows });
 });
 
+/**
+ * Crear inspección desde app ejecutivo (Ainspecciona Capture).
+ * Descuenta 1 crédito del tenant y asigna el caso al ejecutivo autenticado.
+ */
+fastify.post('/api/executive/inspections', async (req, reply) => {
+  const session = await getExecSession(req);
+  if (!session) return reply.code(401).send({ ok: false, error: 'UNAUTHORIZED' });
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.userId },
+    select: { id: true, tenantId: true, status: true }
+  });
+  if (!user || user.status !== 'ACTIVE') {
+    return reply.code(401).send({ ok: false, error: 'UNAUTHORIZED' });
+  }
+  if (!user.tenantId) {
+    return reply.code(400).send({ ok: false, error: 'NO_TENANT', message: 'Tu cuenta no está asociada a una corredora.' });
+  }
+
+  const payload = req.body || {};
+  const tenantId = user.tenantId;
+  const assignedUserId = user.id;
+  const bathroomsCount = Number(payload.bathroomsCount || payload.bathrooms || 1);
+  const bedroomsCount = Number(payload.bedroomsCount || payload.bedrooms || 1);
+  const bedrooms = Number(payload.bedrooms || bedroomsCount || 0);
+  const bathrooms = Number(payload.bathrooms || bathroomsCount || 1);
+
+  const planSlots = buildPhotoPlanV1({
+    ...payload,
+    bathroomsCount,
+    bedroomsCount
+  });
+
+  const token = crypto.randomUUID();
+  const captureExpires = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7);
+
+  let result;
+  try {
+    result = await prisma.$transaction(async (tx) => {
+      let account = await tx.tenantCredit.findUnique({ where: { tenantId } });
+      if (!account) {
+        account = await tx.tenantCredit.create({ data: { tenantId, balance: 0 } });
+      }
+      if (account.balance < 1) {
+        throw new Error('INSUFFICIENT_CREDITS');
+      }
+      await tx.tenantCredit.update({
+        where: { tenantId },
+        data: { balance: { decrement: 1 } }
+      });
+
+      const tenantTrial = await tx.tenant.findUnique({
+        where: { id: tenantId },
+        select: { trialStatus: true, trialRealInspectionUsedAt: true }
+      });
+      if (tenantTrial?.trialStatus === 'active' && !tenantTrial.trialRealInspectionUsedAt) {
+        await tx.tenant.update({
+          where: { id: tenantId },
+          data: { trialRealInspectionUsedAt: new Date() }
+        });
+      }
+
+      let ownerId = null;
+      const ownerRutNorm = payload.ownerRut ? normalizeRut(payload.ownerRut) : null;
+      if (ownerRutNorm || payload.ownerName) {
+        if (ownerRutNorm) {
+          const rutConds = [{ rut: ownerRutNorm }, payload.ownerRut ? { rut: String(payload.ownerRut).trim() } : null].filter(Boolean);
+          const existing = rutConds.length ? await tx.owner.findFirst({ where: { OR: rutConds } }) : null;
+          if (existing) ownerId = existing.id;
+        }
+        if (!ownerId && payload.ownerName) {
+          const rutToStore = ownerRutNorm || payload.ownerRut || null;
+          const created = await tx.owner.create({
+            data: { fullName: payload.ownerName, rut: rutToStore, tenantId }
+          });
+          ownerId = created.id;
+        }
+      }
+
+      const property = await tx.property.create({
+        data: {
+          tenantId,
+          ownerId,
+          rol: payload.propertyRol || null,
+          address: payload.propertyAddress || null,
+          operationType: payload.propertyOperationType || null,
+          surface: payload.propertySurface || null
+        }
+      });
+
+      const c = await tx.case.create({
+        data: {
+          shortId: generateCaseShortId(),
+          tenant: { connect: { id: tenantId } },
+          assignedUser: { connect: { id: assignedUserId } },
+          property: { connect: { id: property.id } },
+          propertyType: payload.propertyType || 'DEPARTMENT',
+          bathroomsCount,
+          bedroomsCount,
+          propertyAgeRange: payload.propertyAgeRange || null,
+          bedrooms,
+          bathrooms,
+          yearBuilt: payload.yearBuilt || null,
+          floorType: payload.floorType || 'CONCRETE',
+          hasPatio: !!payload.hasPatio,
+          hasAttic: !!payload.hasAttic,
+          hasLaundry: !!payload.hasLaundry,
+          hasElevator: !!payload.hasElevator,
+          hasParking: !!payload.hasParking,
+          hasGreenCertificate: !!payload.hasGreenCertificate,
+          hasEntranceGrille: !!payload.hasEntranceGrille,
+          planVersion: 'v1',
+          status: 'DRAFT'
+        }
+      });
+
+      const slots = await tx.slot.createMany({
+        data: planSlots.map((s, idx) => ({
+          tenantId,
+          caseId: c.id,
+          slotCode: s.slotCode,
+          title: s.title,
+          instructions: s.instructions,
+          required: s.required ?? true,
+          orderIndex: idx + 1,
+          status: 'PENDING'
+        }))
+      });
+
+      await tx.captureToken.create({
+        data: {
+          tenantId,
+          caseId: c.id,
+          token,
+          expiresAt: captureExpires
+        }
+      });
+
+      await tx.creditTransaction.create({
+        data: {
+          tenantId,
+          amount: -1,
+          type: 'CONSUMPTION',
+          caseId: c.id,
+          description: `Inspección ${c.shortId || c.id} (app ejecutivo)`
+        }
+      });
+
+      return { caseId: c.id, shortId: c.shortId, slotsCreated: slots.count };
+    });
+  } catch (err) {
+    if (err?.message === 'INSUFFICIENT_CREDITS') {
+      return reply.code(402).send({
+        ok: false,
+        error: 'INSUFFICIENT_CREDITS',
+        message: 'No tienes créditos suficientes. Solicita recarga al administrador de la corredora.'
+      });
+    }
+    req.log.error({ err: err?.message, stack: err?.stack }, 'POST /api/executive/inspections');
+    throw err;
+  }
+
+  const captureUrl = `/capture/${token}`;
+  const caseIdForUrl = result.shortId || result.caseId;
+  const reportUrl = `/cases/${encodeURIComponent(caseIdForUrl)}/report`;
+
+  return reply.send({
+    ok: true,
+    caseId: result.caseId,
+    shortId: result.shortId,
+    tenantId,
+    captureUrl,
+    reportUrl,
+    slots: planSlots
+  });
+});
+
+/** Info previa a activar: muestra el correo del ejecutivo sin revelar datos si el token es inválido. */
+fastify.get('/api/onboarding/activate-info', async (req, reply) => {
+  const token = String(req.query?.token || '').trim();
+  if (!token) return reply.code(400).send({ ok: false, error: 'TOKEN_REQUIRED' });
+
+  const row = await prisma.activationToken.findUnique({
+    where: { token },
+    select: { id: true, userId: true, expiresAt: true, usedAt: true }
+  });
+  if (!row || row.usedAt) return reply.code(400).send({ ok: false, error: 'INVALID_TOKEN' });
+  if (new Date(row.expiresAt).getTime() <= Date.now()) {
+    return reply.code(400).send({ ok: false, error: 'TOKEN_EXPIRED' });
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: row.userId },
+    select: { email: true, fullName: true, status: true }
+  });
+  if (!user?.email) return reply.code(400).send({ ok: false, error: 'INVALID_TOKEN' });
+
+  return reply.send({
+    ok: true,
+    email: user.email,
+    fullName: user.fullName || null,
+    status: user.status
+  });
+});
+
 fastify.post('/api/onboarding/activate', async (req, reply) => {
   const payload = req.body || {};
   const token = String(payload.token || '').trim();
   const password = String(payload.password || '').trim();
   if (!token) return reply.code(400).send({ ok: false, error: 'TOKEN_REQUIRED' });
   if (!password) return reply.code(400).send({ ok: false, error: 'PASSWORD_REQUIRED' });
+
+  const pwdCheck = validatePasswordStrength(password);
+  if (!pwdCheck.ok) {
+    return reply.code(400).send({ ok: false, error: 'PASSWORD_INVALID', message: pwdCheck.msg });
+  }
 
   const row = await prisma.activationToken.findUnique({ where: { token } });
   if (!row || row.usedAt) return reply.code(400).send({ ok: false, error: 'INVALID_TOKEN' });
@@ -5268,7 +8171,12 @@ fastify.post('/api/onboarding/activate', async (req, reply) => {
   await prisma.$transaction([
     prisma.user.update({
       where: { id: row.userId },
-      data: { status: 'ACTIVE', activatedAt: new Date(), passwordHash: hashPassword(password) }
+      data: {
+        status: 'ACTIVE',
+        activatedAt: new Date(),
+        passwordHash: hashPassword(password),
+        mustChangePassword: false
+      }
     }),
     prisma.activationToken.update({
       where: { id: row.id },
@@ -5816,11 +8724,144 @@ fastify.get('/api/cases/:caseId/review-status', async (req, reply) => {
   return reply.send({ ok: true, reviewStatus: c.reviewStatus || null, reviewedAt: c.reviewedAt, reviewerEmail: c.reviewerEmail });
 });
 
+/**
+ * Envía el informe por email al corredor/ejecutor (assignedUser → tenant.email)
+ * y, en Starter, también al contacto (cliente).
+ * @param {string} caseId
+ * @param {{ force?: boolean, req?: any }} [opts]
+ */
+async function sendCaseReportEmails(caseId, opts = {}) {
+  const force = opts.force === true;
+  const req = opts.req;
+  const c = await prisma.case.findUnique({
+    where: { id: caseId },
+    select: {
+      id: true,
+      shortId: true,
+      contactEmail: true,
+      contactName: true,
+      tenantId: true,
+      executiveReportNotifiedAt: true,
+      reviewStatus: true,
+      assignedUser: { select: { email: true, fullName: true } },
+      tenant: { select: { name: true, email: true } },
+      property: { select: { address: true } }
+    }
+  });
+  if (!c) return { ok: false, error: 'CASE_NOT_FOUND' };
+
+  const shortId = c.shortId || c.id;
+  const isStarter = c.tenant?.name === STARTER_TENANT_NAME;
+  const proto = (req?.headers?.['x-forwarded-proto'] || 'https').toString().split(',')[0].trim();
+  const host = (req?.headers?.['x-forwarded-host'] || req?.headers?.host || 'ainspecciona.com').toString().split(',')[0].trim();
+  const publicBase =
+    String(process.env.PUBLIC_URL || process.env.BASE_URL || process.env.WEB_APP_ORIGIN || '').trim().replace(/\/$/, '') ||
+    `${proto}://${host}`;
+  const reportUrl = `${publicBase}/cases/${encodeURIComponent(shortId)}/report`;
+
+  let pdfBuffer = null;
+  let certBuffer = null;
+  try {
+    const runtimeCfg = await getRuntimeScoreConfig();
+    const summary = await getCaseSummary({
+      prisma,
+      storage,
+      caseId: c.id,
+      slotGroupTitleFromCode,
+      scoreConfig: runtimeCfg.config,
+      scoreConfigUpdatedAt: runtimeCfg.updatedAt,
+      tenantId: c.tenantId || undefined
+    });
+    pdfBuffer = await generateReportPdf({ summary, storage, prisma, scoreConfig: runtimeCfg.config });
+    let qrDataUri = null;
+    try {
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=0&data=${encodeURIComponent(reportUrl)}`;
+      const qrRes = await fetch(qrUrl);
+      if (qrRes.ok) {
+        const qrBuf = Buffer.from(await qrRes.arrayBuffer());
+        qrDataUri = `data:image/png;base64,${qrBuf.toString('base64')}`;
+      }
+    } catch (_) {}
+    const score = Math.round(Math.max(0, Math.min(100, summary.score ?? 0)));
+    const badge = summary.badge || 'GREEN';
+    certBuffer = await generateCertificateImage({ score, badge, shortId, reportUrl, qrDataUri });
+  } catch (err) {
+    fastify.log.warn({ err: err?.message, caseId: c.id }, 'send-report-email-pdf-build');
+  }
+
+  const sent = [];
+  const errors = [];
+
+  // Starter: PDF al contacto (cliente)
+  if (isStarter && c.contactEmail) {
+    try {
+      const r = await sendApprovedReportEmail(c.contactEmail, c.contactName || '', shortId, pdfBuffer, certBuffer);
+      if (r.ok) sent.push({ role: 'contact', email: c.contactEmail });
+      else errors.push({ role: 'contact', email: c.contactEmail, error: r.error || (r.skipped ? 'SMTP_SKIPPED' : 'SEND_FAILED') });
+    } catch (err) {
+      errors.push({ role: 'contact', email: c.contactEmail, error: err?.message || String(err) });
+    }
+  }
+
+  // Corredor/ejecutor: assignedUser, si no tenant.email
+  const executorEmail = String(c.assignedUser?.email || (!isStarter ? c.tenant?.email : '') || '')
+    .trim()
+    .toLowerCase();
+  const executorName = c.assignedUser?.fullName || c.tenant?.name || '';
+  const alreadyNotified = !!c.executiveReportNotifiedAt;
+  if (executorEmail && (force || !alreadyNotified)) {
+    const contactNorm = String(c.contactEmail || '').trim().toLowerCase();
+    const sameAsContact = isStarter && contactNorm && contactNorm === executorEmail;
+    try {
+      let r;
+      if (pdfBuffer && !sameAsContact) {
+        r = await sendApprovedReportEmail(executorEmail, executorName, shortId, pdfBuffer, certBuffer);
+      } else if (!sameAsContact) {
+        r = await sendExecutiveReportReadyEmail(executorEmail, {
+          fullName: executorName,
+          shortId,
+          address: c.property?.address || '',
+          reportUrl
+        });
+      } else {
+        r = { ok: true, skippedDuplicate: true };
+      }
+      if (r.ok || r.skippedDuplicate) {
+        if (!r.skippedDuplicate) sent.push({ role: 'executor', email: executorEmail });
+        await prisma.case.updateMany({
+          where: { id: c.id },
+          data: { executiveReportNotifiedAt: new Date() }
+        });
+      } else {
+        errors.push({
+          role: 'executor',
+          email: executorEmail,
+          error: r.error || (r.skipped ? 'SMTP_SKIPPED' : 'SEND_FAILED')
+        });
+      }
+    } catch (err) {
+      errors.push({ role: 'executor', email: executorEmail, error: err?.message || String(err) });
+    }
+  } else if (!executorEmail) {
+    errors.push({ role: 'executor', error: 'NO_EXECUTOR_EMAIL' });
+  }
+
+  return {
+    ok: sent.length > 0 || (errors.length === 0 && alreadyNotified && !force),
+    emailSent: sent.length > 0,
+    alreadyNotified: alreadyNotified && !force && sent.length === 0,
+    shortId,
+    sent,
+    errors,
+    reportUrl
+  };
+}
+
 fastify.post('/api/cases/:caseId/approve', async (req, reply) => {
   const rawId = String(req.params.caseId || '');
   const c = await prisma.case.findFirst({
     where: { OR: [{ id: rawId }, { shortId: rawId }] },
-    select: { id: true, shortId: true, contactEmail: true, contactName: true, reviewStatus: true, tenantId: true, tenant: { select: { name: true } } }
+    select: { id: true, shortId: true }
   });
   if (!c) return reply.code(404).send({ ok: false, error: 'CASE_NOT_FOUND' });
 
@@ -5829,51 +8870,121 @@ fastify.post('/api/cases/:caseId/approve', async (req, reply) => {
     data: { reviewStatus: 'approved', reviewedAt: new Date(), reviewerEmail: REVIEWER_EMAIL }
   });
 
-  const shortId = c.shortId || c.id;
-  const isStarter = c.tenant?.name === STARTER_TENANT_NAME;
+  const mail = await sendCaseReportEmails(c.id, { force: false, req });
+  fastify.log.info(
+    { caseId: c.id, shortId: mail.shortId, emailSent: mail.emailSent, sent: mail.sent, errors: mail.errors },
+    'approved-report-emails'
+  );
 
-  let emailSent = false;
-  if (isStarter && c.contactEmail) {
-    try {
-      const tenantId = c.tenantId || undefined;
-      const runtimeCfg = await getRuntimeScoreConfig();
-      const summary = await getCaseSummary({
-        prisma,
-        storage,
-        caseId: c.id,
-        slotGroupTitleFromCode,
-        scoreConfig: runtimeCfg.config,
-        scoreConfigUpdatedAt: runtimeCfg.updatedAt,
-        tenantId
-      });
-      const pdfBuffer = await generateReportPdf({ summary, storage, prisma, scoreConfig: runtimeCfg.config });
+  return reply.send({
+    ok: true,
+    approved: true,
+    emailSent: !!mail.emailSent,
+    executiveReportNotified: !!(mail.sent || []).some((s) => s.role === 'executor'),
+    sent: mail.sent || [],
+    errors: mail.errors || [],
+    shortId: mail.shortId || c.shortId || c.id
+  });
+});
 
-      const proto = (req.headers['x-forwarded-proto'] || 'https').toString().split(',')[0].trim();
-      const host = (req.headers['x-forwarded-host'] || req.headers.host || 'ainspecciona.web.app').toString().split(',')[0].trim();
-      const reportUrl = `${proto}://${host}/cases/${shortId}/report`;
-      let qrDataUri = null;
-      try {
-        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=0&data=${encodeURIComponent(reportUrl)}`;
-        const qrRes = await fetch(qrUrl);
-        if (qrRes.ok) {
-          const qrBuf = Buffer.from(await qrRes.arrayBuffer());
-          qrDataUri = `data:image/png;base64,${qrBuf.toString('base64')}`;
-        }
-      } catch (_) {}
+/** Reenvío manual del informe por email (admin o tenant dueño del caso). */
+fastify.post('/api/cases/:caseId/send-report-email', async (req, reply) => {
+  const rawId = String(req.params.caseId || '');
+  const c = await prisma.case.findFirst({
+    where: { OR: [{ id: rawId }, { shortId: rawId }] },
+    select: { id: true, tenantId: true, reviewStatus: true }
+  });
+  if (!c) return reply.code(404).send({ ok: false, error: 'CASE_NOT_FOUND' });
 
-      const score = Math.round(Math.max(0, Math.min(100, summary.score ?? 0)));
-      const badge = summary.badge || 'GREEN';
-      const certBuffer = await generateCertificateImage({ score, badge, shortId, reportUrl, qrDataUri });
-
-      const result = await sendApprovedReportEmail(c.contactEmail, c.contactName || '', shortId, pdfBuffer, certBuffer);
-      emailSent = !!result.ok;
-      fastify.log.info({ caseId: c.id, shortId, contactEmail: c.contactEmail, emailSent }, 'approved-report-sent');
-    } catch (err) {
-      fastify.log.warn(err, 'approve-send-report');
-    }
+  const adminOk = typeof isAdminAuthed === 'function' && isAdminAuthed(req);
+  const tenantSession = await getTenantSession(req);
+  const tenantOk = !!(tenantSession?.tenantId && c.tenantId && tenantSession.tenantId === c.tenantId);
+  if (!adminOk && !tenantOk) {
+    return reply.code(401).send({ ok: false, error: 'UNAUTHORIZED', message: 'Debes iniciar sesión (admin o tenant).' });
   }
 
-  return reply.send({ ok: true, approved: true, emailSent, shortId });
+  const mail = await sendCaseReportEmails(c.id, { force: true, req });
+  if (!mail.ok && mail.error === 'CASE_NOT_FOUND') {
+    return reply.code(404).send({ ok: false, error: 'CASE_NOT_FOUND' });
+  }
+  return reply.send({
+    ok: !!mail.emailSent,
+    emailSent: !!mail.emailSent,
+    sent: mail.sent || [],
+    errors: mail.errors || [],
+    shortId: mail.shortId,
+    message: mail.emailSent
+      ? `Email enviado a ${(mail.sent || []).map((s) => s.email).join(', ')}`
+      : (mail.errors || []).map((e) => e.error).join('; ') || 'No se pudo enviar el email'
+  });
+});
+
+
+const queuePostventaTicketAnalysis = createPostventaAnalysisQueue({
+  prisma,
+  storage,
+  log: fastify.log
+});
+
+await registerWhatsAppRoutes(fastify, { prisma });
+await registerPostventaAgentRoutes(fastify, { prisma });
+await registerPostventaPublicRoutes(fastify, { prisma });
+await registerPostventaCaptureRoutes(fastify, {
+  prisma,
+  storage,
+  safeExtFromMime,
+  queuePostventaTicketAnalysis
+});
+await registerPostventaTicketRoutes(fastify, {
+  prisma,
+  storage,
+  queuePostventaTicketAnalysis
+});
+await registerPostventaAdminRoutes(fastify, {
+  prisma,
+  queuePostventaTicketAnalysis,
+  storage
+});
+await registerPostventaPortalRoutes(fastify, {
+  prisma,
+  storage,
+  queuePostventaTicketAnalysis
+});
+await registerEntregaRoutes(fastify, { prisma });
+await registerInOutRoutes(fastify, { prisma });
+await registerScanRoutes(fastify, { prisma });
+await registerPlatformRoutes(fastify, { prisma });
+await registerAintelligenceAdminRoutes(fastify, {
+  prisma,
+  storage,
+  getRuntimeScoreConfig,
+  applyScoreConfigUpdate
+});
+await registerTaxonomyAdminRoutes(fastify);
+await registerReviewCenterRoutes(fastify, {
+  prisma,
+  storage,
+  classifyKpiFromSlot,
+  getRuntimeScoreConfig,
+  applyScoreConfigUpdate,
+  queuePostventaTicketAnalysis,
+  reviewerEmailDefault: REVIEWER_EMAIL
+});
+await registerReviewAssistantRoutes(fastify, {
+  prisma,
+  classifyKpiFromSlot,
+  getRuntimeScoreConfig
+});
+
+fastify.delete('/api/admin/cases/:caseId', async (req, reply) => {
+  try {
+    const result = await deleteAinspeccionaCase(prisma, storage, String(req.params.caseId || ''), { log: req.log });
+    if (!result.ok) return reply.code(result.status || 400).send(result);
+    return reply.send(result);
+  } catch (err) {
+    req.log.error({ err }, 'admin delete case');
+    return reply.code(500).send({ ok: false, error: 'DELETE_FAILED', message: err?.message || 'Error al borrar' });
+  }
 });
 
 fastify.listen({ port: PORT, host: '0.0.0.0' })
@@ -5884,7 +8995,24 @@ fastify.listen({ port: PORT, host: '0.0.0.0' })
     ensureReviewColumns().catch((err) => fastify.log.warn(err, 'ensure-review-columns'));
     ensureSubscriptionColumns().catch((err) => fastify.log.warn(err, 'ensure-subscription-columns'));
     ensureTrialColumns().catch((err) => fastify.log.warn(err, 'ensure-trial-columns'));
+    ensurePromoTables().catch((err) => fastify.log.warn(err, 'ensure-promo-tables'));
+    ensureMagicLinkTokenTable().catch((err) => fastify.log.warn(err, 'ensure-magic-link-token-table'));
     ensurePageViewTable().catch((err) => fastify.log.warn(err, 'ensure-pageview-table'));
+    if (prisma) {
+      ensurePlatformSchema(prisma)
+        .then(() => ensureToctocTenants(prisma))
+        .then((r) => {
+          fastify.log.info({ postventa: r?.postventa?.email }, 'toctoc-tenants-ready');
+          return ensurePlatformDemo(prisma, r);
+        })
+        .then((p) =>
+          fastify.log.info(
+            { hub: p?.hub?.email, control: p?.control?.email },
+            'platform-demo-ready'
+          )
+        )
+        .catch((err) => fastify.log.warn(err, 'ensure-platform-demo'));
+    }
     ensureAppSettingsTable()
       .then(async () => {
         const runtime = await getRuntimeScoreConfig({ force: true });
@@ -5900,3 +9028,4 @@ fastify.listen({ port: PORT, host: '0.0.0.0' })
     fastify.log.error({ err: err?.message, port: PORT }, 'Failed to start server');
     process.exit(1);
   });
+

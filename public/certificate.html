@@ -146,6 +146,7 @@
         <image id="qrImage" x="10" y="10" width="160" height="160" preserveAspectRatio="xMidYMid meet"/>
       </g>
       <g transform="translate(150 940)">
+        <image id="logoTenantFooter" href="" x="0" y="0" width="120" height="70" preserveAspectRatio="xMidYMid meet" opacity="0"/>
         <image id="logoFooter" href="/assets/Logo%202%20ainspecciona.png" x="0" y="0" width="280" height="70" preserveAspectRatio="xMidYMid meet"/>
       </g>
     </svg>
@@ -159,10 +160,19 @@
       return null;
     }
 
-    function starsFromScore(score) {
+    function starsFromScore(score, badgeCfg) {
+      const yellowFrom = badgeCfg?.yellowFrom ?? 60;
+      const greenFrom = badgeCfg?.greenFrom ?? 86;
       const s = Math.max(0, Math.min(100, Number(score) || 0));
-      if (s <= 0) return 1;
-      return Math.min(5, Math.max(1, Math.ceil(s / 20)));
+      if (s >= greenFrom) {
+        const topTier = greenFrom + Math.max(1, Math.round((100 - greenFrom) * 0.33));
+        return s >= topTier ? 5 : 4;
+      }
+      if (s >= yellowFrom) {
+        const midYellow = yellowFrom + Math.round((greenFrom - yellowFrom) * 0.5);
+        return s >= midYellow ? 3 : 2;
+      }
+      return 1;
     }
 
     function badgeLabel(badge) {
@@ -221,9 +231,21 @@
         const newPath = "/cases/" + data.case.shortId + "/certificate";
         if (window.location.pathname !== newPath) history.replaceState(null, "", newPath);
       }
+
+      var tenantLogoUrl = data.tenant && data.tenant.logoUrl ? String(data.tenant.logoUrl).trim() : "";
+      var logoTenantEl = document.getElementById("logoTenantFooter");
+      var logoFooterEl = document.getElementById("logoFooter");
+      if (tenantLogoUrl && logoTenantEl && logoFooterEl) {
+        logoTenantEl.setAttribute("href", tenantLogoUrl);
+        logoTenantEl.setAttribute("opacity", "1");
+        logoFooterEl.setAttribute("x", "140");
+        logoFooterEl.setAttribute("width", "220");
+        embedLogoAsDataUrl(logoTenantEl, tenantLogoUrl);
+      }
+
       const score = Math.max(0, Math.min(100, Number(data.score) || 0));
       const badge = data.badge || "GREEN";
-      const stars = starsFromScore(score);
+      const stars = starsFromScore(score, data.scoreConfig?.badge);
 
       for (let i = 1; i <= 5; i++) {
         const starEl = document.getElementById("star" + i);

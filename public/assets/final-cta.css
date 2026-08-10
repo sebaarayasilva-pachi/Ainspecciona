@@ -1,0 +1,427 @@
+/* FinalCtaSection — cierre comercial */
+.final-cta {
+  --cta-bg: #f04438;
+  --cta-text: #ffffff;
+  --cta-muted: rgba(255, 255, 255, 0.82);
+  --cta-micro: rgba(255, 255, 255, 0.72);
+  --cta-dark: #0b0d0f;
+  --cta-max: 1280px;
+
+  position: relative;
+  background: var(--cta-bg);
+  color: var(--cta-text);
+  overflow: hidden;
+}
+
+.final-cta::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 56px 56px;
+  opacity: 0.35;
+}
+
+.final-cta__inner {
+  position: relative;
+  z-index: 1;
+  max-width: var(--cta-max);
+  margin: 0 auto;
+  padding: 120px 80px;
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(320px, 5fr);
+  gap: 72px;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.final-cta__content {
+  min-width: 0;
+}
+
+.final-cta__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.final-cta__eyebrow::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  background: #fff;
+}
+
+.final-cta__title {
+  margin: 24px 0 0;
+  max-width: 860px;
+  font-size: clamp(52px, 5vw, 82px);
+  font-weight: 600;
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+  color: var(--cta-text);
+}
+
+.final-cta__lead {
+  margin: 28px 0 0;
+  max-width: 650px;
+  font-size: 19px;
+  line-height: 1.6;
+  color: var(--cta-muted);
+}
+
+.final-cta__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 34px;
+}
+
+.final-cta__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 52px;
+  padding: 0 24px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: background 180ms ease, border-color 180ms ease, transform 180ms ease, color 180ms ease;
+}
+
+.final-cta__btn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+.final-cta__btn--primary {
+  border: 1px solid var(--cta-dark);
+  background: var(--cta-dark);
+  color: #fff;
+}
+
+.final-cta__btn--primary:hover {
+  background: #15181c;
+  border-color: #15181c;
+  transform: translateY(-1px);
+}
+
+.final-cta__btn--ghost {
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  background: transparent;
+  color: #fff;
+}
+
+.final-cta__btn--ghost:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.75);
+}
+
+.final-cta__micro {
+  margin: 18px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--cta-micro);
+}
+
+/* ——— Visual ——— */
+.final-cta__visual {
+  position: relative;
+  min-height: 320px;
+  height: 100%;
+  max-height: min(520px, 70vh);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.final-cta__diagram {
+  width: min(100%, 500px);
+  max-width: 520px;
+  max-height: 70%;
+  height: auto;
+  display: block;
+}
+
+.final-cta__diagram-ring-outer {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.12);
+  stroke-width: 1;
+  stroke-dasharray: 4 8;
+  opacity: 0;
+}
+
+.final-cta__diagram-ring {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.3);
+  stroke-width: 1.25;
+}
+
+.final-cta__diagram-line {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.18);
+  stroke-width: 1;
+}
+
+.final-cta__diagram-mark {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.18);
+  stroke-width: 1;
+  opacity: 0;
+}
+
+.final-cta__diagram-node {
+  fill: rgba(255, 255, 255, 0.05);
+  stroke: rgba(255, 255, 255, 0.38);
+  stroke-width: 1.25;
+  opacity: 0;
+  transform-origin: center;
+  transform-box: fill-box;
+}
+
+.final-cta__diagram-core {
+  fill: rgba(11, 13, 15, 0.08);
+  stroke: rgba(255, 255, 255, 0.48);
+  stroke-width: 1.25;
+  opacity: 0;
+}
+
+.final-cta__diagram-building {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.32);
+  stroke-width: 1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+}
+
+.final-cta__diagram-label {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  fill: rgba(255, 255, 255, 0.5);
+  text-anchor: middle;
+  opacity: 0;
+}
+
+.final-cta__diagram-ring,
+.final-cta__diagram-line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+
+/* ——— Diagram animations ——— */
+.final-cta.is-visible .final-cta__diagram-ring-outer {
+  animation: ctaFadeIn 280ms ease forwards;
+  animation-delay: 0ms;
+}
+
+.final-cta.is-visible .final-cta__diagram-ring {
+  animation: ctaDraw 380ms ease forwards;
+  animation-delay: 120ms;
+}
+
+.final-cta.is-visible .final-cta__diagram-line {
+  animation: ctaDraw 320ms ease forwards;
+}
+
+.final-cta.is-visible line.final-cta__diagram-line:nth-child(7) { animation-delay: 320ms; }
+.final-cta.is-visible line.final-cta__diagram-line:nth-child(8) { animation-delay: 360ms; }
+.final-cta.is-visible line.final-cta__diagram-line:nth-child(9) { animation-delay: 400ms; }
+.final-cta.is-visible line.final-cta__diagram-line:nth-child(10) { animation-delay: 440ms; }
+
+.final-cta.is-visible .final-cta__diagram-mark {
+  animation: ctaFadeIn 240ms ease forwards;
+  animation-delay: 460ms;
+}
+
+.final-cta.is-visible .final-cta__diagram-node {
+  animation: ctaNodeIn 280ms ease forwards;
+}
+
+.final-cta.is-visible circle.final-cta__diagram-node:nth-child(13) { animation-delay: 520ms; }
+.final-cta.is-visible circle.final-cta__diagram-node:nth-child(14) { animation-delay: 560ms; }
+.final-cta.is-visible circle.final-cta__diagram-node:nth-child(15) { animation-delay: 600ms; }
+.final-cta.is-visible circle.final-cta__diagram-node:nth-child(16) { animation-delay: 640ms; }
+
+.final-cta.is-visible .final-cta__diagram-label {
+  animation: ctaFadeIn 280ms ease forwards;
+}
+
+.final-cta.is-visible text.final-cta__diagram-label:nth-child(17) { animation-delay: 680ms; }
+.final-cta.is-visible text.final-cta__diagram-label:nth-child(18) { animation-delay: 720ms; }
+.final-cta.is-visible text.final-cta__diagram-label:nth-child(19) { animation-delay: 760ms; }
+.final-cta.is-visible text.final-cta__diagram-label:nth-child(20) { animation-delay: 800ms; }
+
+.final-cta.is-visible .final-cta__diagram-core {
+  animation: ctaFadeIn 280ms ease forwards;
+  animation-delay: 780ms;
+}
+
+.final-cta.is-visible .final-cta__diagram-building {
+  animation: ctaFadeIn 260ms ease forwards;
+  animation-delay: 840ms;
+}
+
+@keyframes ctaNodeIn {
+  from { opacity: 0; transform: scale(0.85); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ——— Animations ——— */
+.final-cta [data-cta-animate="title"] {
+  opacity: 0;
+  transform: translateY(14px);
+}
+
+.final-cta [data-cta-animate="lead"],
+.final-cta [data-cta-animate="actions"],
+.final-cta [data-cta-animate="micro"] {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.final-cta [data-cta-animate="eyebrow"] {
+  opacity: 0;
+}
+
+.final-cta.is-visible [data-cta-animate="eyebrow"] {
+  animation: ctaFadeIn 400ms ease forwards;
+}
+
+.final-cta.is-visible [data-cta-animate="title"] {
+  animation: ctaFadeUp 550ms ease forwards;
+  animation-delay: 80ms;
+}
+
+.final-cta.is-visible [data-cta-animate="lead"] {
+  animation: ctaFadeUp 550ms ease forwards;
+  animation-delay: 180ms;
+}
+
+.final-cta.is-visible [data-cta-animate="actions"] {
+  animation: ctaFadeUp 550ms ease forwards;
+  animation-delay: 280ms;
+}
+
+.final-cta.is-visible [data-cta-animate="micro"] {
+  animation: ctaFadeUp 550ms ease forwards;
+  animation-delay: 360ms;
+}
+
+@keyframes ctaFadeIn {
+  to { opacity: 1; }
+}
+
+@keyframes ctaFadeUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ctaDraw {
+  to { stroke-dashoffset: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .final-cta [data-cta-animate] {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+
+  .final-cta__diagram-line,
+  .final-cta__diagram-ring {
+    stroke-dashoffset: 0 !important;
+    animation: none !important;
+  }
+
+  .final-cta__diagram-ring-outer,
+  .final-cta__diagram-mark,
+  .final-cta__diagram-node,
+  .final-cta__diagram-core,
+  .final-cta__diagram-building,
+  .final-cta__diagram-label {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+
+  .final-cta__btn--primary:hover {
+    transform: none;
+  }
+}
+
+/* ——— Tablet ——— */
+@media (max-width: 1024px) {
+  .final-cta__inner {
+    grid-template-columns: 1fr;
+    gap: 48px;
+    padding: 104px 40px 96px;
+  }
+
+  .final-cta__visual {
+    min-height: 0;
+    max-height: none;
+    margin-top: 8px;
+  }
+
+  .final-cta__diagram {
+    width: min(100%, 400px);
+    max-width: 420px;
+    margin: 0 auto;
+  }
+}
+
+/* ——— Mobile ——— */
+@media (max-width: 720px) {
+  .final-cta__inner {
+    padding: 88px 20px 72px;
+  }
+
+  .final-cta__title {
+    font-size: clamp(42px, 11vw, 54px);
+  }
+
+  .final-cta__lead {
+    font-size: 17px;
+  }
+
+  .final-cta__actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .final-cta__btn {
+    width: 100%;
+  }
+
+  .final-cta__visual {
+    margin-top: 28px;
+  }
+
+  .final-cta__diagram {
+    width: min(100%, 300px);
+    max-width: 320px;
+  }
+
+  .final-cta__diagram-label {
+    font-size: 9px;
+    letter-spacing: 0.08em;
+  }
+}

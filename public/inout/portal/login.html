@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ingresar · In &amp; Out</title>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/inout/assets/inout.css" />
+  <style>
+    body { display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .login-card { width: 100%; max-width: 420px; }
+  </style>
+</head>
+<body>
+  <div class="card login-card">
+    <div class="brand" style="margin-bottom:8px">Ainspecciona <span>In &amp; Out</span></div>
+    <h1 style="font-size:22px">Portal administradoras</h1>
+    <p class="sub">Inicia sesión para gestionar ciclos de entrada y salida.</p>
+    <form id="form">
+      <label>Email</label>
+      <input type="email" id="email" required autocomplete="username" />
+      <label>Contraseña</label>
+      <input type="password" id="password" required autocomplete="current-password" />
+      <button class="btn" type="submit" style="width:100%">Ingresar</button>
+      <p id="err" class="err" hidden></p>
+    </form>
+    <p class="sub" style="margin-top:16px;margin-bottom:0;font-size:12px">
+      ¿Primera vez en local? <a href="#" id="bootstrap">Crear tenant demo</a>
+    </p>
+  </div>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const next = params.get('next') || '/inout/portal';
+    document.getElementById('form').onsubmit = async (e) => {
+      e.preventDefault();
+      const err = document.getElementById('err');
+      err.hidden = true;
+      const res = await fetch('/api/inout/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: document.getElementById('email').value,
+          password: document.getElementById('password').value
+        })
+      });
+      const data = await res.json();
+      if (!data.ok) {
+        err.textContent = data.message || 'Credenciales inválidas';
+        err.hidden = false;
+        return;
+      }
+      try {
+        if (data.token) sessionStorage.setItem('inout_session', data.token);
+      } catch (e) { /* ignore */ }
+      const dest = next.startsWith('/inout') ? next : '/inout/portal';
+      location.href = dest;
+    };
+    document.getElementById('bootstrap').onclick = async (e) => {
+      e.preventDefault();
+      const res = await fetch('/api/inout/auth/bootstrap-demo', { method: 'POST' });
+      const data = await res.json();
+      if (data.ok) {
+        document.getElementById('email').value = data.login.email;
+        document.getElementById('password').value = data.login.password;
+        alert('Demo creado. Credenciales cargadas en el formulario.');
+      } else {
+        alert(data.error || 'No se pudo crear demo');
+      }
+    };
+  </script>
+</body>
+</html>

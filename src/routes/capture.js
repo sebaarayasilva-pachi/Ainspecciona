@@ -57,7 +57,10 @@ export async function registerCaptureRoutes(app, {
   validateSlotMatchWithOpenAI,
   slotGroupFromSlotCode,
   queueOpenAiSlotAnalysis,
-  sendCaseToReview
+  sendCaseToReview,
+  notifyExecutiveReportIfReady,
+  queueExecutiveSummaryForCase,
+  recordReportAccuracyOnComplete
 }) {
   const mapSlotForResponse = (next) => next
     ? {
@@ -217,6 +220,10 @@ export async function registerCaptureRoutes(app, {
       data: { status: 'DONE' }
     });
 
+    if (typeof recordReportAccuracyOnComplete === 'function') {
+      recordReportAccuracyOnComplete(prisma, c.id).catch(() => {});
+    }
+
     let notified = false;
     try {
       if (typeof sendCaseToReview === 'function') {
@@ -224,6 +231,16 @@ export async function registerCaptureRoutes(app, {
         notified = !!sent?.ok;
       }
     } catch (_) {}
+
+    try {
+      if (typeof notifyExecutiveReportIfReady === 'function') {
+        await notifyExecutiveReportIfReady(c.id);
+      }
+    } catch (_) {}
+
+    if (typeof queueExecutiveSummaryForCase === 'function') {
+      queueExecutiveSummaryForCase(c.id).catch(() => {});
+    }
 
     return reply.send({ ok: true, finished: true, reviewStatus: 'pending_review', notified, progress });
   });
@@ -246,6 +263,7 @@ export async function registerCaptureRoutes(app, {
     });
     if (!slot || slot.caseId !== t.caseId) return reply.code(404).send({ ok: false, error: 'SLOT_NOT_FOUND' });
 
+    const captureStartedAt = Date.now();
     const part = await req.file({ limits: { fileSize: 8 * 1024 * 1024 } });
     if (!part) return reply.code(400).send({ ok: false, error: 'NO_FILE' });
     if (part.fieldname && part.fieldname !== 'photo') {
@@ -257,8 +275,9 @@ export async function registerCaptureRoutes(app, {
     if (!ext) return reply.code(400).send({ ok: false, error: 'UNSUPPORTED_TYPE', mimeType });
 
     const buffer = await part.toBuffer();
+    const receiveMs = Date.now() - captureStartedAt;
 
-    // Validación de calidad: borrosidad, tamaño, iluminación, detalle
+    // 1) Calidad local (rápida). 2) Slot-match IA (única IA bloqueante). 3) GCS + DB. Análisis KPI en background.
     const qualityResult = await validatePhotoQuality(buffer, undefined, {
       slotCode: slot.slotCode,
       slotTitle: slot.title,
@@ -268,109 +287,113 @@ export async function registerCaptureRoutes(app, {
     if (!qualityResult.ok) {
       analysis = { meta: {}, problem: qualityResult.problem };
     } else {
-      analysis = await analyzeImageBufferV1({
-        buffer,
-        filename: part.filename || 'capture.jpg',
-        mimetype: mimeType,
-        slotGroup: slotGroupFromSlotCode(slot.slotCode)
-      });
-      if (qualityResult.debug) {
-        analysis.problem.debug = { ...(analysis.problem.debug || {}), quality: qualityResult.debug };
-      }
-    }
-
-    const saved = await storage.saveImageBuffer({
-      buffer,
-      contentType: mimeType,
-      ext,
-      caseId: slot.caseId
-    });
-
-    // metadata
-    let width = null;
-    let height = null;
-    try {
-      const m = await sharp(buffer).metadata();
-      width = m.width ?? null;
-      height = m.height ?? null;
-    } catch {
-      // ignore
-    }
-
-    const originalFileName = part.filename || saved.storedFileName;
-    const filePath = saved.filePath;
-
-    const code = String(analysis.problem.code || '').toUpperCase();
-    if (!REPEAT_CODES.has(code) && typeof validateSlotMatchWithOpenAI === 'function') {
-      const slotMatch = await validateSlotMatchWithOpenAI({
-        buffer,
-        mimeType,
-        slotTitle: slot.title,
-        slotCode: slot.slotCode,
-        instructions: slot.instructions
-      });
-      // failOpen=true por defecto: no bloquear el flujo si OpenAI falla o no está configurado.
-      const minPositiveConfidence = Math.max(0, Math.min(1, Number(process.env.SLOT_MATCH_MIN_POSITIVE_CONFIDENCE || 0.5)));
-      const failOpen = String(process.env.SLOT_MATCH_FAIL_OPEN || 'true').toLowerCase() === 'true';
-      const isMismatch = slotMatch.checked && slotMatch.matchesSlot === false;
-      const isLowConfidencePositive = slotMatch.checked && slotMatch.matchesSlot === true && slotMatch.confidence < minPositiveConfidence;
-      const isUncheckedAndStrict = !slotMatch.checked && !failOpen;
-      const currentDebug = analysis.problem.debug || {};
-      analysis.problem.debug = {
-        ...currentDebug,
-        slotMatch,
-        slotMatchMinPositiveConfidence: minPositiveConfidence,
-        slotMatchFailOpen: failOpen
+      analysis = {
+        meta: {},
+        problem: {
+          code: 'OK',
+          severity: null,
+          confidence: null,
+          message: 'Foto aceptada. El análisis técnico continúa en segundo plano.',
+          debug: qualityResult.debug ? { quality: qualityResult.debug, analysisPhase: 'pending_deep' } : { analysisPhase: 'pending_deep' }
+        }
       };
-      if (isMismatch || isLowConfidencePositive || isUncheckedAndStrict) {
-        const reasonText = isUncheckedAndStrict
-          ? 'No fue posible validar con certeza que la foto corresponde al componente solicitado.'
-          : isMismatch
-          ? (slotMatch.reason || 'El componente detectado no coincide con el slot esperado.')
-          : isLowConfidencePositive
-          ? `La IA no tuvo suficiente certeza de correspondencia (${Math.round(slotMatch.confidence * 100)}%).`
-          : 'Validación de componente no superada.';
-        analysis.problem = {
-          code: 'SLOT_MISMATCH',
-          severity: 'medium',
-          confidence: slotMatch.confidence,
-          message: `La foto no parece corresponder a "${slot.title || slot.slotCode}". ${reasonText}`,
-          debug: { ...analysis.problem.debug, expectedSlot: { code: slot.slotCode, title: slot.title || null } }
+
+      if (typeof validateSlotMatchWithOpenAI === 'function') {
+        const slotMatch = await validateSlotMatchWithOpenAI({
+          buffer,
+          mimeType,
+          slotTitle: slot.title,
+          slotCode: slot.slotCode,
+          instructions: slot.instructions
+        });
+        const minPositiveConfidence = Math.max(0, Math.min(1, Number(process.env.SLOT_MATCH_MIN_POSITIVE_CONFIDENCE || 0.5)));
+        const failOpen = String(process.env.SLOT_MATCH_FAIL_OPEN || 'true').toLowerCase() === 'true';
+        const isMismatch = slotMatch.checked && slotMatch.matchesSlot === false;
+        const isLowConfidencePositive = slotMatch.checked && slotMatch.matchesSlot === true && slotMatch.confidence < minPositiveConfidence;
+        const isUncheckedAndStrict = !slotMatch.checked && !failOpen;
+        analysis.problem.debug = {
+          ...(analysis.problem.debug || {}),
+          slotMatch,
+          slotMatchMinPositiveConfidence: minPositiveConfidence,
+          slotMatchFailOpen: failOpen
         };
+        if (isMismatch || isLowConfidencePositive || isUncheckedAndStrict) {
+          const reasonText = isUncheckedAndStrict
+            ? 'No fue posible validar con certeza que la foto corresponde al componente solicitado.'
+            : isMismatch
+            ? (slotMatch.reason || 'El componente detectado no coincide con el slot esperado.')
+            : isLowConfidencePositive
+            ? `La IA no tuvo suficiente certeza de correspondencia (${Math.round(slotMatch.confidence * 100)}%).`
+            : 'Validación de componente no superada.';
+          analysis.problem = {
+            code: 'SLOT_MISMATCH',
+            severity: 'medium',
+            confidence: slotMatch.confidence,
+            message: `La foto no parece corresponder a "${slot.title || slot.slotCode}". ${reasonText}`,
+            debug: { ...analysis.problem.debug, expectedSlot: { code: slot.slotCode, title: slot.title || null } }
+          };
+        }
       }
     }
 
     const finalCode = String(analysis.problem.code || '').toUpperCase();
     const passed = !REPEAT_CODES.has(finalCode);
-    const nextStatus = passed ? 'ANALYZED' : 'REJECTED';
+    const nextStatus = passed ? 'UPLOADED' : 'REJECTED';
+
+    let saved = null;
+    let width = null;
+    let height = null;
+    let originalFileName = part.filename || 'capture.jpg';
+    let filePath = null;
+
+    if (passed) {
+      saved = await storage.saveImageBuffer({
+        buffer,
+        contentType: mimeType,
+        ext,
+        caseId: slot.caseId
+      });
+      try {
+        const m = await sharp(buffer).metadata();
+        width = m.width ?? null;
+        height = m.height ?? null;
+      } catch {
+        // ignore
+      }
+      originalFileName = part.filename || saved.storedFileName;
+      filePath = saved.filePath;
+    }
 
     const result = await prisma.$transaction(async (tx) => {
-      const photo = await tx.photo.create({
-        data: {
-          id: saved.id,
-          slotId: slot.id,
-          tenantId: t.tenantId || null,
-          caseId: slot.caseId,
-          filePath,
-          fileName: originalFileName,
-          mimeType,
-          fileSize: buffer.length,
-          width,
-          height
-        }
-      });
+      let photo = null;
+      if (passed && saved && filePath) {
+        photo = await tx.photo.create({
+          data: {
+            id: saved.id,
+            slotId: slot.id,
+            tenantId: t.tenantId || null,
+            caseId: slot.caseId,
+            filePath,
+            fileName: originalFileName,
+            mimeType,
+            fileSize: buffer.length,
+            width,
+            height
+          }
+        });
+      }
 
       const updatedSlot = await tx.slot.update({
         where: { id: slot.id },
         data: {
           status: nextStatus,
-          photoId: photo.id,
+          photoId: photo?.id ?? null,
           analysisCode: analysis.problem.code,
           analysisSeverity: analysis.problem.severity,
           analysisConfidence: analysis.problem.confidence ?? null,
           analysisMessage: analysis.problem.message,
           analysisDebug: analysis.problem.debug ?? null,
-          analyzedAt: now()
+          analyzedAt: passed ? null : now()
         },
         select: { id: true, status: true }
       });
@@ -391,6 +414,25 @@ export async function registerCaptureRoutes(app, {
       queueOpenAiSlotAnalysis({ slotId: result.slot.id, caseId: slot.caseId });
     }
 
+    const durationMs = Math.max(0, Date.now() - captureStartedAt);
+    const processMs = Math.max(0, durationMs - receiveMs);
+    req.log.info(
+      { caseId: slot.caseId, slotId: result.slot.id, durationMs, receiveMs, processMs, passed, imageBytes: buffer.length },
+      'capture-upload-timing'
+    );
+    void prisma.captureUploadMetric
+      .create({
+        data: {
+          caseId: slot.caseId,
+          tenantId: t.tenantId || null,
+          slotId: result.slot.id,
+          durationMs,
+          passed,
+          imageBytes: buffer.length
+        }
+      })
+      .catch((err) => req.log.warn(err, 'capture-upload-metric'));
+
     return reply.send({
       ok: true,
       passed,
@@ -398,14 +440,16 @@ export async function registerCaptureRoutes(app, {
       slotId: result.slot.id,
       slotStatus: result.slot.status,
       problem: analysis.problem,
-      photo: {
-        id: result.photo.id,
-        url: storage.publicUrl(filePath),
-        mimeType,
-        size: buffer.length,
-        width,
-        height
-      },
+      photo: result.photo
+        ? {
+            id: result.photo.id,
+            url: storage.publicUrl(filePath),
+            mimeType,
+            size: buffer.length,
+            width,
+            height
+          }
+        : null,
       progress,
       nextSlotId: next?.id ?? null
     });

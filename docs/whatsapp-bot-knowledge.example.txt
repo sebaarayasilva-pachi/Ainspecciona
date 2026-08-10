@@ -1,0 +1,10 @@
+# Texto vivo de la base de conocimiento del bot
+#
+# Archivo que usa el servidor (configurar en .env):
+#   WHATSAPP_BOT_KNOWLEDGE_PATH=config/whatsapp-knowledge.txt
+#
+# Ese archivo es: config/whatsapp-knowledge.txt
+# Se va ajustando según feedback del equipo (en conversación o PRs).
+#
+# Enlace agendar reunión (HubSpot), también en el playbook por código:
+#   HUBSPOT_AGENDAR_URL=https://meetings.hubspot.com/saraya-silva

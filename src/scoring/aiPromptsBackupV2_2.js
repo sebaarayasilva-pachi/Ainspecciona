@@ -128,6 +128,8 @@ export const AI_PROMPTS_BACKUP_V2_2 = {
     "- corrosión u óxido visible en grifería",
     "- desalineación visible de artefactos (si es evidente)",
     "",
+    "Cañerías pintadas (frecuente en entregas inmobiliarias): la pintura sobre tubos visibles NO es por sí sola hallazgo; no confundir con corrosión, humedad o desgaste. Solo señalar si además hay grietas, goteo, óxido en metal expuesto o sellos deteriorados claramente visibles.",
+    "",
     "Instrucciones estrictas:",
     "- Analiza únicamente lo que sea visible en la imagen.",
     "- No evalúes funcionamiento ni condiciones internas.",

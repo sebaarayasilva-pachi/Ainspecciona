@@ -1,0 +1,106 @@
+{
+
+  "brand": {
+
+    "href": "/",
+
+    "logo": "/assets/Logo Ainspecciona.png",
+
+    "alt": "Ainspecciona"
+
+  },
+
+  "nav": [
+
+    { "label": "Plataforma", "href": "/#plataforma" },
+
+    { "type": "dropdown", "label": "Soluciones", "key": "soluciones" },
+
+    { "label": "Tecnología", "href": "/#tecnologia" },
+
+    { "label": "Nosotros", "href": "/#equipo" },
+
+    { "label": "Recursos", "href": "/faq.html" }
+
+  ],
+
+  "products": [
+
+    {
+
+      "id": "inspeccion",
+
+      "label": "Inspección STI",
+
+      "description": "Corredores, oficinas y administradores",
+
+      "href": "/como-funciona.html",
+
+      "badge": "Producción"
+
+    },
+
+    {
+
+      "id": "postventa",
+
+      "label": "Postventa",
+
+      "description": "Garantías y reclamos con agente IA",
+
+      "href": "/postventa",
+
+      "badge": "Piloto"
+
+    },
+
+    {
+
+      "id": "entrega",
+
+      "label": "Recepción / Entrega",
+
+      "description": "Constructoras e inmobiliarias",
+
+      "href": "/entrega",
+
+      "badge": "Demo"
+
+    },
+
+    {
+
+      "id": "propertycheck",
+
+      "label": "PropertyCheck",
+
+      "description": "Integración API para proptech",
+
+      "href": "/contacto.html?producto=propertycheck",
+
+      "badge": "Partner"
+
+    }
+
+  ],
+
+  "access": {
+
+    "label": "Iniciar sesión",
+
+    "loginHref": "/?login=1"
+
+  },
+
+  "demoCta": {
+
+    "label": "Solicitar demostración",
+
+    "href": "/?motivo=demo#contacto",
+
+    "external": false
+
+  }
+
+}
+

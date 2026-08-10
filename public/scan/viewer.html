@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f1419" />
+  <title>Ainspecciona Scan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: "Source Sans 3", "Segoe UI", sans-serif;
+      background: #0f1419; color: #e8eef4; min-height: 100vh;
+    }
+    header {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 12px 16px; border-bottom: 1px solid #2a3542;
+      position: sticky; top: 0; z-index: 10; background: rgba(15,20,25,.92); backdrop-filter: blur(8px);
+    }
+    .brand { font-weight: 800; font-size: 15px; }
+    .brand span { color: #2bb673; }
+    .tabs { display: flex; gap: 8px; }
+    .tabs button {
+      border: 1px solid #2a3542; background: transparent; color: #e8eef4;
+      border-radius: 999px; padding: 8px 14px; font-weight: 700; cursor: pointer; font-family: inherit;
+    }
+    .tabs button.active { background: #2bb673; color: #062415; border-color: #2bb673; }
+    .btn {
+      border: none; border-radius: 10px; padding: 10px 14px; font-weight: 800;
+      background: #2bb673; color: #062415; cursor: pointer; font-family: inherit;
+    }
+    .btn.secondary { background: transparent; color: #e8eef4; border: 1px solid #2a3542; }
+    main { max-width: 960px; margin: 0 auto; padding: 16px; }
+    #stage {
+      width: 100%; aspect-ratio: 16/10; background: #000; border-radius: 14px;
+      border: 1px solid #2a3542; overflow: hidden; position: relative;
+    }
+    #stage canvas { width: 100% !important; height: 100% !important; display: block; }
+    #planWrap {
+      display: none; width: 100%; aspect-ratio: 16/10; background: #1a222c;
+      border-radius: 14px; border: 1px solid #2a3542; padding: 16px; overflow: auto;
+    }
+    #planWrap.show { display: block; }
+    #stage.hide { display: none; }
+    .meta { margin-top: 14px; color: #8b9aab; font-size: 14px; line-height: 1.4; }
+    .meta h1 { margin: 0 0 6px; font-size: 22px; color: #e8eef4; }
+    .note {
+      margin-top: 12px; padding: 12px 14px; border-radius: 10px;
+      background: rgba(43,182,115,.1); border: 1px solid rgba(43,182,115,.35);
+      font-size: 13px; color: #b8c5d4;
+    }
+    .err { color: #e85d5d; margin-top: 16px; }
+    .loading { padding: 48px 16px; text-align: center; color: #8b9aab; }
+  </style>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.169.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.169.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="brand">Ainspecciona <span>Scan</span></div>
+    <div class="tabs">
+      <button type="button" id="tabTour" class="active">Tour 3D</button>
+      <button type="button" id="tabPlan">Plano</button>
+    </div>
+    <button type="button" class="btn secondary" id="shareBtn">Compartir</button>
+  </header>
+  <main>
+    <div id="loading" class="loading">Cargando recorrido…</div>
+    <div id="err" class="err" hidden></div>
+    <div id="content" hidden>
+      <div id="stage"></div>
+      <div id="planWrap"><svg id="planSvg" width="100%" height="100%" viewBox="0 0 900 560"></svg></div>
+      <div class="meta">
+        <h1 id="title">—</h1>
+        <div id="address"></div>
+      </div>
+      <div class="note">
+        Recorrido y planimetría de marketing (MVP). Las verticales/horizontales se alinean al eje mundo.
+        El modelo fotoreal llegará cuando conectemos el motor de reconstrucción.
+      </div>
+    </div>
+  </main>
+  <script type="module">
+    import * as THREE from "three";
+    import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+    const parts = location.pathname.split("/").filter(Boolean);
+    // /scan/s/:publicId
+    const publicId = decodeURIComponent(parts[parts.length - 1] || "");
+
+    const loading = document.getElementById("loading");
+    const errEl = document.getElementById("err");
+    const content = document.getElementById("content");
+    const stage = document.getElementById("stage");
+    const planWrap = document.getElementById("planWrap");
+
+    function showErr(msg) {
+      loading.hidden = true;
+      errEl.hidden = false;
+      errEl.textContent = msg;
+    }
+
+    async function load() {
+      if (!publicId || publicId === "s" || publicId === "viewer.html") {
+        showErr("Link incompleto. Usa /scan/s/{id}");
+        return;
+      }
+      const res = await fetch("/api/scan/public/" + encodeURIComponent(publicId));
+      const data = await res.json().catch(() => ({}));
+      if (!data.ok) {
+        showErr(data.error === "NOT_FOUND" ? "Scan no encontrado." : (data.message || "No se pudo cargar"));
+        return;
+      }
+      if (!data.ready) {
+        loading.textContent = "Procesando… " + (data.processingProgress || 0) + "%";
+        setTimeout(load, 2000);
+        return;
+      }
+      loading.hidden = true;
+      content.hidden = false;
+      const scan = data.scan;
+      document.getElementById("title").textContent = scan.property?.name || "Propiedad";
+      document.getElementById("address").textContent = scan.property?.address || "";
+      document.title = (scan.property?.name || "Scan") + " · Ainspecciona Scan";
+      renderPlan(scan.planJson);
+      initTour(scan.planJson);
+      document.getElementById("shareBtn").onclick = async () => {
+        const url = location.href;
+        try {
+          if (navigator.share) await navigator.share({ title: document.title, url });
+          else {
+            await navigator.clipboard.writeText(url);
+            alert("Link copiado");
+          }
+        } catch {
+          try { await navigator.clipboard.writeText(url); alert("Link copiado"); } catch (_) {}
+        }
+      };
+    }
+
+    function renderPlan(planJson) {
+      const svg = document.getElementById("planSvg");
+      svg.innerHTML = "";
+      const rooms = planJson?.rooms || [];
+      if (!rooms.length) {
+        svg.innerHTML = '<text x="40" y="60" fill="#8b9aab" font-size="18">Sin planimetría</text>';
+        return;
+      }
+      let maxX = 0, maxY = 0;
+      rooms.forEach((r) => {
+        maxX = Math.max(maxX, r.x + r.w);
+        maxY = Math.max(maxY, r.y + r.h);
+      });
+      const pad = 40;
+      const scale = Math.min((900 - pad * 2) / maxX, (560 - pad * 2) / maxY);
+      rooms.forEach((r, i) => {
+        const x = pad + r.x * scale;
+        const y = pad + r.y * scale;
+        const w = r.w * scale;
+        const h = r.h * scale;
+        const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        rect.setAttribute("x", x);
+        rect.setAttribute("y", y);
+        rect.setAttribute("width", w);
+        rect.setAttribute("height", h);
+        rect.setAttribute("fill", i % 2 ? "#243041" : "#1e2834");
+        rect.setAttribute("stroke", "#2bb673");
+        rect.setAttribute("stroke-width", "2");
+        svg.appendChild(rect);
+        const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        label.setAttribute("x", x + 10);
+        label.setAttribute("y", y + 24);
+        label.setAttribute("fill", "#e8eef4");
+        label.setAttribute("font-size", "14");
+        label.setAttribute("font-family", "Source Sans 3, sans-serif");
+        label.textContent = r.label || r.id;
+        svg.appendChild(label);
+      });
+    }
+
+    function initTour(planJson) {
+      const rooms = planJson?.rooms || [];
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x0b1016);
+      const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 100);
+      camera.position.set(6, 5, 8);
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+      stage.appendChild(renderer.domElement);
+
+      const light = new THREE.HemisphereLight(0xffffff, 0x223344, 1.1);
+      scene.add(light);
+      const dir = new THREE.DirectionalLight(0xffffff, 0.7);
+      dir.position.set(5, 10, 3);
+      scene.add(dir);
+
+      // World up = +Y (horizontales/verticales estables)
+      const floorMat = new THREE.MeshStandardMaterial({ color: 0x2a3542, roughness: 0.9 });
+      const wallMat = new THREE.MeshStandardMaterial({ color: 0xd8dee8, roughness: 0.85, side: THREE.DoubleSide });
+
+      let maxX = 8, maxZ = 7;
+      if (rooms.length) {
+        maxX = 0; maxZ = 0;
+        rooms.forEach((r) => {
+          maxX = Math.max(maxX, r.x + r.w);
+          maxZ = Math.max(maxZ, r.y + r.h);
+        });
+        rooms.forEach((r) => {
+          const geo = new THREE.BoxGeometry(r.w, 0.05, r.h);
+          const mesh = new THREE.Mesh(geo, floorMat);
+          mesh.position.set(r.x + r.w / 2, 0, r.y + r.h / 2);
+          scene.add(mesh);
+          // walls as thin boxes on perimeter of each room (simple mock)
+          const h = 2.55;
+          const edges = [
+            [r.x + r.w / 2, r.y, r.w, 0.08],
+            [r.x + r.w / 2, r.y + r.h, r.w, 0.08],
+            [r.x, r.y + r.h / 2, 0.08, r.h],
+            [r.x + r.w, r.y + r.h / 2, 0.08, r.h]
+          ];
+          edges.forEach(([px, pz, sx, sz]) => {
+            const wgeo = new THREE.BoxGeometry(sx, h, sz);
+            const wmesh = new THREE.Mesh(wgeo, wallMat);
+            wmesh.position.set(px, h / 2, pz);
+            scene.add(wmesh);
+          });
+        });
+      } else {
+        const floor = new THREE.Mesh(new THREE.BoxGeometry(8, 0.05, 7), floorMat);
+        floor.position.y = 0;
+        scene.add(floor);
+      }
+
+      const grid = new THREE.GridHelper(Math.max(maxX, maxZ) + 2, 20, 0x2bb673, 0x243041);
+      grid.position.set(maxX / 2, 0.01, maxZ / 2);
+      scene.add(grid);
+
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.target.set(maxX / 2, 1.2, maxZ / 2);
+      controls.enableDamping = true;
+      camera.lookAt(controls.target);
+
+      function resize() {
+        const w = stage.clientWidth;
+        const h = stage.clientHeight;
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(w, h, false);
+      }
+      resize();
+      window.addEventListener("resize", resize);
+
+      function tick() {
+        controls.update();
+        renderer.render(scene, camera);
+        requestAnimationFrame(tick);
+      }
+      tick();
+    }
+
+    document.getElementById("tabTour").onclick = () => {
+      document.getElementById("tabTour").classList.add("active");
+      document.getElementById("tabPlan").classList.remove("active");
+      stage.classList.remove("hide");
+      planWrap.classList.remove("show");
+    };
+    document.getElementById("tabPlan").onclick = () => {
+      document.getElementById("tabPlan").classList.add("active");
+      document.getElementById("tabTour").classList.remove("active");
+      stage.classList.add("hide");
+      planWrap.classList.add("show");
+    };
+
+    load();
+  </script>
+</body>
+</html>

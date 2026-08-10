@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ainspecciona</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0e1318;
+      --aside: #141b22;
+      --panel: #1a222c;
+      --ink: #eef2f6;
+      --muted: #8b9aab;
+      --accent: #2bb673;
+      --accent-soft: rgba(43, 182, 115, 0.14);
+      --line: rgba(255, 255, 255, 0.08);
+      --aside-w: 260px;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: "DM Sans", system-ui, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .aside {
+      width: var(--aside-w);
+      flex-shrink: 0;
+      background: var(--aside);
+      border-right: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+    .aside-brand {
+      padding: 22px 20px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+    .aside-brand .name {
+      font-family: "Instrument Serif", Georgia, serif;
+      font-size: 1.45rem;
+      margin: 0;
+      letter-spacing: -0.02em;
+    }
+    .aside-brand .org {
+      margin: 6px 0 0;
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .nav-label {
+      margin: 18px 20px 8px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .nav {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 10px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      border: none;
+      background: transparent;
+      color: var(--ink);
+      text-align: left;
+      font: inherit;
+      font-size: 0.92rem;
+      font-weight: 500;
+      padding: 11px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background .12s, color .12s;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.05); }
+    .nav-item.active,
+    .nav-item:focus-visible {
+      background: var(--accent-soft);
+      color: var(--accent);
+      outline: none;
+    }
+    .nav-item .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--muted);
+      flex-shrink: 0;
+    }
+    .nav-item.active .dot,
+    .nav-item:hover .dot { background: var(--accent); }
+
+    .aside-foot {
+      border-top: 1px solid var(--line);
+      padding: 14px 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .user-chip {
+      padding: 8px 10px 10px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+    .user-chip strong {
+      display: block;
+      color: var(--ink);
+      font-weight: 600;
+      font-size: 0.86rem;
+      margin-bottom: 2px;
+    }
+
+    .shell {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    .topbar {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+      background: var(--aside);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+    .menu-btn {
+      border: 1px solid var(--line);
+      background: transparent;
+      color: var(--ink);
+      border-radius: 10px;
+      width: 40px;
+      height: 40px;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+    .topbar .name {
+      font-family: "Instrument Serif", Georgia, serif;
+      font-size: 1.25rem;
+      margin: 0;
+    }
+
+    .content {
+      flex: 1;
+      padding: 36px 40px 56px;
+      background:
+        radial-gradient(700px 320px at 100% 0%, rgba(43, 182, 115, 0.08), transparent 55%),
+        var(--bg);
+    }
+    .content h1 {
+      margin: 0 0 8px;
+      font-size: 1.65rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .content .lead {
+      margin: 0 0 28px;
+      color: var(--muted);
+      max-width: 42rem;
+      line-height: 1.5;
+    }
+    .hero-panel {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel);
+      padding: 24px 26px;
+      max-width: 560px;
+    }
+    .hero-panel h2 {
+      margin: 0 0 8px;
+      font-size: 1.05rem;
+    }
+    .hero-panel p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+    .err {
+      margin-top: 16px;
+      color: #f07178;
+      font-size: 0.9rem;
+    }
+    .empty {
+      color: var(--muted);
+      font-size: 0.9rem;
+      padding: 8px 12px;
+    }
+
+    .backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 30;
+    }
+
+    @media (max-width: 860px) {
+      body { display: block; }
+      .aside {
+        position: fixed;
+        left: 0;
+        top: 0;
+        z-index: 40;
+        transform: translateX(-105%);
+        transition: transform .2s ease;
+        box-shadow: 8px 0 32px rgba(0,0,0,0.35);
+      }
+      body.nav-open .aside { transform: translateX(0); }
+      body.nav-open .backdrop { display: block; }
+      .topbar { display: flex; }
+      .content { padding: 24px 18px 48px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="backdrop" id="backdrop" hidden></div>
+
+  <aside class="aside" id="aside">
+    <div class="aside-brand">
+      <p class="name">Ainspecciona</p>
+      <p class="org" id="orgLine">Cargando…</p>
+    </div>
+
+    <div class="nav-label">Productos</div>
+    <nav class="nav" id="nav" aria-label="Productos"></nav>
+
+    <div class="aside-foot">
+      <div class="user-chip" id="who">
+        <strong>…</strong>
+        <span></span>
+      </div>
+      <a class="nav-item" id="controlLink" href="/control" style="display:none">
+        <span class="dot"></span> Control
+      </a>
+      <button class="nav-item" type="button" id="logout">
+        <span class="dot"></span> Salir
+      </button>
+    </div>
+  </aside>
+
+  <div class="shell">
+    <div class="topbar">
+      <button class="menu-btn" type="button" id="menuBtn" aria-label="Abrir menú">☰</button>
+      <p class="name">Ainspecciona</p>
+    </div>
+    <main class="content">
+      <h1>Inicio</h1>
+      <p class="lead" id="lead">Elige un producto en el menú para continuar.</p>
+      <div class="hero-panel">
+        <h2>Plataforma</h2>
+        <p>Un acceso, una organización y los módulos que tienes contratados. Los logins por producto quedan como compatibilidad.</p>
+      </div>
+      <p class="err" id="err" style="display:none"></p>
+    </main>
+  </div>
+
+  <script>
+    (function () {
+      const headers = {};
+      try {
+        const t = sessionStorage.getItem("platform_session");
+        if (t) headers["x-platform-session"] = t;
+      } catch (_) {}
+
+      const menuBtn = document.getElementById("menuBtn");
+      const backdrop = document.getElementById("backdrop");
+      function closeNav() { document.body.classList.remove("nav-open"); backdrop.hidden = true; }
+      function openNav() { document.body.classList.add("nav-open"); backdrop.hidden = false; }
+      menuBtn.addEventListener("click", () => {
+        if (document.body.classList.contains("nav-open")) closeNav();
+        else openNav();
+      });
+      backdrop.addEventListener("click", closeNav);
+
+      async function load() {
+        const res = await fetch("/api/auth/me", { credentials: "include", headers });
+        if (res.status === 401) {
+          location.href = "/login?next=/app";
+          return;
+        }
+        const data = await res.json();
+        if (!data.ok) throw new Error("No se pudo cargar la sesión");
+        const ctx = data.context;
+
+        document.getElementById("orgLine").textContent = ctx.organization
+          ? ctx.organization.name
+          : "Sin organización";
+
+        const who = document.getElementById("who");
+        who.innerHTML = "<strong>" + escapeHtml(ctx.user.fullName) + "</strong><span>" + escapeHtml(ctx.user.email) + "</span>";
+
+        document.getElementById("lead").textContent = ctx.organization
+          ? ("Organización " + ctx.organization.name + ". Abre un módulo desde el menú lateral.")
+          : "Abre un módulo desde el menú lateral.";
+
+        if (ctx.user.isPlatformAdmin) {
+          document.getElementById("controlLink").style.display = "flex";
+        }
+
+        const nav = document.getElementById("nav");
+        nav.innerHTML = "";
+        const products = ctx.products || [];
+        if (!products.length) {
+          nav.innerHTML = '<p class="empty">No hay productos habilitados.</p>';
+          return;
+        }
+        for (const p of products) {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "nav-item";
+          btn.innerHTML = '<span class="dot"></span>' + escapeHtml(p.label);
+          btn.addEventListener("click", () => {
+            nav.querySelectorAll(".nav-item").forEach((el) => el.classList.remove("active"));
+            btn.classList.add("active");
+            closeNav();
+            enter(p.code, p.label);
+          });
+          nav.appendChild(btn);
+        }
+      }
+
+      function escapeHtml(s) {
+        return String(s || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      async function enter(product, label) {
+        const err = document.getElementById("err");
+        err.style.display = "none";
+        document.getElementById("lead").textContent = "Abriendo " + (label || product) + "…";
+        try {
+          const res = await fetch("/api/auth/enter-product", {
+            method: "POST",
+            credentials: "include",
+            headers: { ...headers, "Content-Type": "application/json" },
+            body: JSON.stringify({ product })
+          });
+          const data = await res.json();
+          if (!res.ok || !data.ok) throw new Error(data.message || "No se pudo abrir el producto");
+          if (data.storageKey && data.token) {
+            try {
+              if (data.storage === "local") localStorage.setItem(data.storageKey, data.token);
+              else sessionStorage.setItem(data.storageKey, data.token);
+            } catch (_) {}
+          }
+          location.href = data.href || "/app";
+        } catch (ex) {
+          err.textContent = ex.message;
+          err.style.display = "block";
+          document.getElementById("lead").textContent = "Elige un producto en el menú para continuar.";
+        }
+      }
+
+      document.getElementById("logout").addEventListener("click", async () => {
+        await fetch("/api/auth/logout", { method: "POST", credentials: "include", headers });
+        try { sessionStorage.removeItem("platform_session"); } catch (_) {}
+        location.href = "/?login=1";
+      });
+
+      load().catch((ex) => {
+        document.getElementById("err").textContent = ex.message;
+        document.getElementById("err").style.display = "block";
+      });
+    })();
+  </script>
+</body>
+</html>

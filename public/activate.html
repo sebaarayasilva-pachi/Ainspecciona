@@ -39,6 +39,17 @@
       border: 1px solid #e5e7eb;
       font-size: 14px;
     }
+    .emailBox {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      font-size: 15px;
+      font-weight: 600;
+      color: #0f172a;
+      word-break: break-all;
+    }
     .btn {
       width: 100%;
       padding: 12px 14px;
@@ -52,6 +63,10 @@
       text-align: center;
       text-decoration: none;
       display: inline-block;
+    }
+    .btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
     }
     .btn.secondary {
       background: #f1f5f9;
@@ -93,10 +108,11 @@
   <div class="card" id="activateCard">
     <div id="formPanel">
       <h1>Activar cuenta</h1>
-      <div class="muted">Crea tu clave para acceder al panel ejecutivo y a la app móvil.</div>
-      <div class="row">
-        <label for="tokenInput">Token de activación</label>
-        <input id="tokenInput" type="text" autocomplete="one-time-code" />
+      <div class="muted">Crea tu clave para acceder al panel ejecutivo y a la app en el móvil (Android: Google Play; iPhone/iPad: App Store). Tu usuario será el correo con el que te invitaron. Mínimo 8 caracteres, 1 mayúscula y 1 número.</div>
+      <div class="row" id="userRow">
+        <span id="userLabel">Tu usuario</span>
+        <div class="emailBox hidden" id="userEmailDisplay" aria-live="polite"></div>
+        <div class="muted hidden" id="userEmailLoading">Cargando…</div>
       </div>
       <div class="row">
         <label for="passwordInput">Crea tu clave</label>
@@ -106,7 +122,7 @@
         <label for="passwordConfirm">Repite tu clave</label>
         <input id="passwordConfirm" type="password" autocomplete="new-password" />
       </div>
-      <button class="btn" id="activateBtn" type="button">Activar</button>
+      <button class="btn" id="activateBtn" type="button" disabled>Activar</button>
       <div class="note" id="statusMsg"></div>
     </div>
 
@@ -118,26 +134,34 @@
       </p>
       <p class="note hidden" id="captureEmailNote" style="text-align:center;margin-bottom:16px;padding:10px 12px;border-radius:10px;background:#f0fdf4;border:1px solid #bbf7d0;color:#166534"></p>
 
-      <p class="muted" style="font-weight:600;color:#334155;margin:0 0 8px">1. Descarga la app</p>
-      <a class="btn play hidden" id="playStoreBtn" href="#" target="_blank" rel="noopener noreferrer">Abrir en Google Play</a>
-      <p class="note hidden" id="playStoreFallback">Busca <strong>Ainspecciona</strong> (app ejecutivo) en Google Play e instálala.</p>
+      <div id="installAndroidBlock">
+        <p class="muted" style="font-weight:600;color:#334155;margin:0 0 8px">1. Android — Ainspecciona Capture</p>
+        <p class="muted" style="margin:0 0 10px;font-size:13px">Instala desde Google Play e inicia sesión con tu correo y la clave que acabas de crear.</p>
+        <a class="btn play hidden" id="playStoreBtn" href="#" target="_blank" rel="noopener noreferrer">Abrir en Google Play</a>
+        <p class="note hidden" id="playStoreFallback">Busca <strong>Ainspecciona</strong> (app ejecutivo) en Google Play e instálala.</p>
+      </div>
 
-      <p class="muted" style="font-weight:600;color:#334155;margin:20px 0 8px">2. Inicia sesión</p>
-      <p class="muted" style="margin:0 0 12px">Al abrir la app verás tu <strong>dashboard</strong> con las inspecciones que te asignaron.</p>
+      <div id="installIosBlock" style="margin-top:18px;padding-top:18px;border-top:1px solid #e5e7eb">
+        <p class="muted" style="font-weight:600;color:#334155;margin:0 0 8px"><span id="iosHeadingNum">2</span>. iPhone o iPad — Ainspecciona Capture</p>
+        <p class="muted" style="margin:0 0 12px;font-size:13px">Instala desde el <strong>App Store</strong> e inicia sesión con tu correo y la clave que acabas de crear.</p>
+        <a class="btn play hidden" id="appStoreBtn" href="#" target="_blank" rel="noopener noreferrer" style="margin-bottom:10px">Abrir en App Store</a>
+        <p class="note hidden" id="appStoreFallback">Busca <strong>Ainspecciona Capture</strong> en el App Store e instálala.</p>
+        <a class="btn secondary" id="executiveOpenBtn" href="/executive">Abrir panel ejecutivo</a>
+      </div>
 
-      <a class="btn secondary" id="webExecutiveBtn" href="/executive">Abrir panel web (opcional)</a>
+      <p class="muted" style="font-weight:600;color:#334155;margin:20px 0 8px"><span id="loginStepNum">3</span>. Inicia sesión</p>
+      <p class="muted" style="margin:0 0 12px">En la app en el móvil (Android o iPhone) verás tu <strong>dashboard</strong> con las inspecciones que te asignaron.</p>
 
       <ul class="steps">
         <li>Si no ves casos, espera a que tu corredora te asigne inspecciones.</li>
-        <li>Puedes usar la misma clave en la app y en el panel web.</li>
+        <li>Puedes usar la misma clave en la app Android, en la app iPhone y en el panel web.</li>
       </ul>
     </div>
   </div>
 
   <script>
-    const params = new URLSearchParams(window.location.search);
-    const tokenParam = params.get("token") || "";
-    const input = document.getElementById("tokenInput");
+    const TOKEN_STORAGE = "ainspecta_activate_token";
+
     const status = document.getElementById("statusMsg");
     const passInput = document.getElementById("passwordInput");
     const passConfirm = document.getElementById("passwordConfirm");
@@ -145,18 +169,118 @@
     const successPanel = document.getElementById("successPanel");
     const playStoreBtn = document.getElementById("playStoreBtn");
     const playStoreFallback = document.getElementById("playStoreFallback");
-    const webExecutiveBtn = document.getElementById("webExecutiveBtn");
+    const executiveOpenBtn = document.getElementById("executiveOpenBtn");
+    const appStoreBtn = document.getElementById("appStoreBtn");
+    const appStoreFallback = document.getElementById("appStoreFallback");
     const captureEmailNote = document.getElementById("captureEmailNote");
+    const userEmailDisplay = document.getElementById("userEmailDisplay");
+    const userEmailLoading = document.getElementById("userEmailLoading");
+    const activateBtn = document.getElementById("activateBtn");
 
-    input.value = tokenParam;
+    let activationToken = "";
+
+    function cleanUrlBar() {
+      if (window.history.replaceState && window.location.search) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+
+    async function initToken() {
+      const params = new URLSearchParams(window.location.search);
+      const fromUrl = (params.get("token") || "").trim();
+      if (fromUrl) {
+        try {
+          sessionStorage.setItem(TOKEN_STORAGE, fromUrl);
+        } catch (_) {}
+        cleanUrlBar();
+        activationToken = fromUrl;
+      } else {
+        try {
+          activationToken = (sessionStorage.getItem(TOKEN_STORAGE) || "").trim();
+        } catch (_) {
+          activationToken = "";
+        }
+      }
+
+      if (!activationToken) {
+        status.textContent =
+          "Falta el enlace de invitación. Abre la página desde el botón del correo que te enviamos.";
+        userEmailLoading.classList.add("hidden");
+        return;
+      }
+
+      userEmailLoading.classList.remove("hidden");
+      userEmailDisplay.classList.add("hidden");
+      status.textContent = "";
+
+      try {
+        const res = await fetch(
+          "/api/onboarding/activate-info?token=" + encodeURIComponent(activationToken)
+        );
+        const data = await res.json().catch(() => ({}));
+        userEmailLoading.classList.add("hidden");
+        if (!res.ok || !data.ok || !data.email) {
+          const expired = data.error === "TOKEN_EXPIRED";
+          const invalid = data.error === "INVALID_TOKEN" || data.error === "TOKEN_REQUIRED";
+          status.textContent = expired
+            ? "Este enlace expiró. Pide a tu corredora que te reenvíe la invitación."
+            : invalid
+              ? "Enlace inválido o ya utilizado. Si ya activaste la cuenta, inicia sesión en la app o en el panel ejecutivo."
+              : "No se pudo verificar el enlace (error del servidor). Recarga la página o pide una nueva invitación.";
+          if (expired || invalid) {
+            try {
+              sessionStorage.removeItem(TOKEN_STORAGE);
+            } catch (_) {}
+          }
+          return;
+        }
+        userEmailDisplay.textContent = data.email;
+        userEmailDisplay.classList.remove("hidden");
+        activateBtn.disabled = false;
+      } catch {
+        userEmailLoading.classList.add("hidden");
+        status.textContent = "No se pudo verificar el enlace. Revisa tu conexión e intenta de nuevo.";
+      }
+    }
+
+    function isAppleMobile() {
+      var ua = navigator.userAgent || "";
+      if (/iPad|iPhone|iPod/.test(ua)) return true;
+      if (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1) return true;
+      return false;
+    }
+
+    function layoutSuccessInstallSteps() {
+      var androidBlock = document.getElementById("installAndroidBlock");
+      var iosBlock = document.getElementById("installIosBlock");
+      var iosNum = document.getElementById("iosHeadingNum");
+      var loginNum = document.getElementById("loginStepNum");
+      if (!androidBlock || !iosBlock) return;
+      if (isAppleMobile()) {
+        androidBlock.classList.add("hidden");
+        if (iosNum) iosNum.textContent = "1";
+        if (loginNum) loginNum.textContent = "2";
+        iosBlock.style.marginTop = "0";
+        iosBlock.style.paddingTop = "0";
+        iosBlock.style.borderTop = "none";
+      }
+    }
 
     async function loadAppLinks() {
       try {
         const res = await fetch("/api/public/executive-app");
         if (!res.ok) return;
         const data = await res.json();
-        if (data.executiveWebUrl) {
-          webExecutiveBtn.href = data.executiveWebUrl;
+        if (data.executiveWebUrl && executiveOpenBtn) {
+          executiveOpenBtn.href = data.executiveWebUrl;
+        }
+        if (data.appStoreUrl && appStoreBtn) {
+          appStoreBtn.href = data.appStoreUrl;
+          appStoreBtn.classList.remove("hidden");
+          if (appStoreFallback) appStoreFallback.classList.add("hidden");
+        } else {
+          if (appStoreBtn) appStoreBtn.classList.add("hidden");
+          if (appStoreFallback) appStoreFallback.classList.remove("hidden");
         }
         if (data.playStoreUrl) {
           playStoreBtn.href = data.playStoreUrl;
@@ -169,26 +293,37 @@
       } catch {
         playStoreBtn.classList.add("hidden");
         playStoreFallback.classList.remove("hidden");
+        if (appStoreBtn) appStoreBtn.classList.add("hidden");
+        if (appStoreFallback) appStoreFallback.classList.remove("hidden");
       }
     }
 
-    document.getElementById("activateBtn").addEventListener("click", async () => {
-      const val = input.value.trim();
+    activateBtn.addEventListener("click", async () => {
+      const val = activationToken;
       const pass = passInput.value.trim();
       const pass2 = passConfirm.value.trim();
       status.textContent = "";
       if (!val) {
-        status.textContent = "Token requerido.";
+        status.textContent = "Falta el enlace de invitación.";
         return;
       }
-      if (!pass || pass.length < 6) {
-        status.textContent = "La clave debe tener al menos 6 caracteres.";
+      if (!pass || pass.length < 8) {
+        status.textContent = "La clave debe tener al menos 8 caracteres.";
+        return;
+      }
+      if (!/[A-Z]/.test(pass)) {
+        status.textContent = "La clave debe tener al menos 1 mayúscula.";
+        return;
+      }
+      if (!/[0-9]/.test(pass)) {
+        status.textContent = "La clave debe tener al menos 1 número.";
         return;
       }
       if (pass !== pass2) {
         status.textContent = "Las claves no coinciden.";
         return;
       }
+      activateBtn.disabled = true;
       status.textContent = "Activando...";
       try {
         const res = await fetch("/api/onboarding/activate", {
@@ -197,13 +332,17 @@
           body: JSON.stringify({ token: val, password: pass })
         });
         if (res.ok) {
+          try {
+            sessionStorage.removeItem(TOKEN_STORAGE);
+          } catch (_) {}
+          activationToken = "";
           const data = await res.json().catch(() => ({}));
           formPanel.classList.add("hidden");
           successPanel.classList.remove("hidden");
           if (captureEmailNote) {
             if (data.captureEmailSent) {
               captureEmailNote.textContent =
-                "Te enviamos un correo con el enlace para instalar Ainspecciona Capture (revisa spam).";
+                "Te enviamos un correo con enlaces a la app en Google Play y en el App Store. Revisa spam.";
               captureEmailNote.classList.remove("hidden");
             } else if (data.captureEmailSkipped) {
               captureEmailNote.style.background = "#fffbeb";
@@ -222,14 +361,24 @@
             }
           }
           await loadAppLinks();
+          layoutSuccessInstallSteps();
         } else {
-          status.textContent = "Token inválido o expirado.";
+          const err = await res.json().catch(() => ({}));
+          status.textContent =
+            err.error === "TOKEN_EXPIRED"
+              ? "Este enlace expiró. Pide una nueva invitación."
+              : err.error === "PASSWORD_INVALID"
+                ? (err.message || "La clave no cumple los requisitos.")
+                : "No se pudo activar. El enlace puede ser inválido o haberse usado ya.";
+          activateBtn.disabled = false;
         }
       } catch {
         status.textContent = "No se pudo activar. Intenta nuevamente.";
+        activateBtn.disabled = false;
       }
     });
 
+    initToken();
     loadAppLinks();
   </script>
 </body>

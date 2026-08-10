@@ -1,5 +1,6 @@
-import { computeScoringV2_2, badgeFromScore, classifyKpiFromSlot } from '../scoring/scoringV2_2.js';
+import { computeScoringV2_2, badgeFromScore, classifyKpiFromSlot, kpiPenaltyFromSeverity } from '../scoring/scoringV2_2.js';
 import { mapFindingToProblemType } from '../scoring/problemMapV2_2.js';
+import { effectiveSlotAnalysis } from '../analysis/applySlotReviewCorrection.js';
 
 /** Códigos de calidad de imagen: las fotos ya pasaron validación en captura; no exponer al usuario */
 const QUALITY_ISSUE_CODES = /image_quality_issue|imagequalityissue|calidad\s*(de\s*)?(imagen|foto)|retomar\s*foto|falta\s*de\s*claridad/i;
@@ -54,7 +55,7 @@ function normalizeSource(code, debug) {
 
 function shouldHideLegacySlot(slotCode) {
   const code = String(slotCode || '').toUpperCase();
-  return code === 'ELEVATOR' || code === 'ASCENSOR' || code === 'ESTACIONAMIENTO' || code === 'PARKING';
+  return code === 'ESTACIONAMIENTO' || code === 'PARKING';
 }
 
 function normalizeOperationTypeLabel(value) {
@@ -76,14 +77,36 @@ export async function getCaseSummary({ prisma, storage, caseId, slotGroupTitleFr
   });
   if (!c) return { ok: false, error: 'CASE_NOT_FOUND' };
 
+  // Correcciones ITO: el informe debe usar SlotReview (corrected), no solo el análisis IA crudo.
+  const slotReviews = await prisma.slotReview.findMany({
+    where: { caseId: c.id, verdict: 'corrected' },
+    select: {
+      slotId: true,
+      verdict: true,
+      humanCode: true,
+      humanSeverity: true,
+      humanMessage: true,
+      note: true,
+      reviewerEmail: true
+    }
+  }).catch(() => []);
+  const reviewBySlotId = new Map((slotReviews || []).map((r) => [r.slotId, r]));
+
   const slots = (c.slots || [])
     .filter((s) => !shouldHideLegacySlot(s.slotCode))
     .map((s) => {
-    const isOmitted = String(s.status || '').toUpperCase() === 'NOT_CAPTURABLE' || String(s.analysisCode || '').toUpperCase() === 'NOT_CAPTURABLE';
-    const isQualityIssue = isQualityIssueCode(s.analysisCode);
-    const effectiveCode = (isQualityIssue || isOmitted) ? 'OK' : s.analysisCode;
-    const effectiveSeverity = (isQualityIssue || isOmitted) ? null : s.analysisSeverity;
-    const effectiveMessage = isOmitted ? '' : removeRetakePhrases(s.analysisMessage || '');
+    const review = reviewBySlotId.get(s.id) || null;
+    const effective = effectiveSlotAnalysis(s, review) || s;
+    const analysisCode = effective.analysisCode;
+    const analysisSeverity = effective.analysisSeverity;
+    const analysisMessage = effective.analysisMessage;
+    const slotDebug = effective.analysisDebug || s.analysisDebug;
+
+    const isOmitted = String(s.status || '').toUpperCase() === 'NOT_CAPTURABLE' || String(analysisCode || '').toUpperCase() === 'NOT_CAPTURABLE';
+    const isQualityIssue = isQualityIssueCode(analysisCode);
+    const effectiveCode = (isQualityIssue || isOmitted) ? 'OK' : analysisCode;
+    const effectiveSeverity = (isQualityIssue || isOmitted) ? null : analysisSeverity;
+    const effectiveMessage = isOmitted ? '' : removeRetakePhrases(analysisMessage || '');
 
     const group = slotGroupTitleFromCode ? slotGroupTitleFromCode(s.slotCode) : { groupKey: 'OTHER', groupTitle: 'Otros' };
     const kpiKey = classifyKpiFromSlot({
@@ -93,7 +116,7 @@ export async function getCaseSummary({ prisma, storage, caseId, slotGroupTitleFr
       message: effectiveMessage
     }, scoreConfig?.slotKpiMap);
 
-    const parsed = s.analysisDebug?.openai?.parsed;
+    const parsed = slotDebug?.openai?.parsed;
     let analysisDebug = null;
     if (parsed && typeof parsed === 'object') {
       try {
@@ -107,6 +130,10 @@ export async function getCaseSummary({ prisma, storage, caseId, slotGroupTitleFr
       }
     }
 
+    const severitySource = review
+      ? 'human_review_correction'
+      : String(slotDebug?.openai?.parsed?.severity_source || slotDebug?.severitySource || (effectiveSeverity ? 'legacy_rule' : 'none'));
+
     return {
       id: s.id,
       slotCode: s.slotCode,
@@ -117,25 +144,24 @@ export async function getCaseSummary({ prisma, storage, caseId, slotGroupTitleFr
       findingCode: effectiveCode,
       severity: effectiveSeverity,
       confidence: s.analysisConfidence,
-      message: isOmitted ? '' : (effectiveMessage || s.analysisMessage || ''),
+      message: isOmitted ? '' : (effectiveMessage || analysisMessage || ''),
       analysisDebug,
       analyzedAt: s.analyzedAt ? new Date(s.analyzedAt).toISOString() : null,
-      source: normalizeSource(s.analysisCode, s.analysisDebug),
+      source: normalizeSource(analysisCode, slotDebug),
       groupKey: group.groupKey,
       groupTitle: group.groupTitle,
       kpiKey,
-      severitySource: String(s.analysisDebug?.openai?.parsed?.severity_source || s.analysisDebug?.severitySource || (effectiveSeverity ? 'legacy_rule' : 'none')),
-      scorePenaltyApplied: Number(
-        s.analysisDebug?.openai?.parsed?.score_penalty_applied
-        ?? s.analysisDebug?.scorePenaltyApplied
-        ?? (effectiveSeverity && kpiKey && scoreConfig?.kpis?.[kpiKey]
-          ? Number(scoreConfig.kpis[kpiKey][String(effectiveSeverity).toLowerCase()] ?? 0)
-          : 0)
-      ),
-      expectedComponent: s.analysisDebug?.slotMatch?.expectedComponent || null,
-      detectedComponent: s.analysisDebug?.slotMatch?.detectedComponent || null,
+      severitySource,
+      scorePenaltyApplied: effectiveSeverity && kpiKey
+        ? kpiPenaltyFromSeverity(kpiKey, effectiveSeverity, scoreConfig)
+        : 0,
+      expectedComponent: slotDebug?.slotMatch?.expectedComponent || null,
+      detectedComponent: slotDebug?.slotMatch?.detectedComponent || null,
       photoUrl: s.photo?.filePath ? storage.publicUrl(s.photo.filePath) : null,
-      photoId: s.photoId ?? s.photo?.id ?? null
+      photoId: s.photoId ?? s.photo?.id ?? null,
+      humanReview: review
+        ? { verdict: review.verdict, humanCode: review.humanCode, humanSeverity: review.humanSeverity }
+        : null
     };
     });
 
@@ -169,6 +195,7 @@ export async function getCaseSummary({ prisma, storage, caseId, slotGroupTitleFr
     propertyType: c.propertyType,
     bedrooms: c.bedrooms,
     bathrooms: c.bathrooms,
+    tenantId: c.tenantId || null,
     property: {
       id: property.id,
       rol: property.rol,
@@ -183,15 +210,44 @@ export async function getCaseSummary({ prisma, storage, caseId, slotGroupTitleFr
     }
   };
 
+  let tenant = null;
+  if (c.tenantId) {
+    try {
+      const rows = await prisma.$queryRaw`
+        SELECT id, name, legalName, logoUrl FROM Tenant WHERE id = ${c.tenantId} LIMIT 1
+      `;
+      const t = rows?.[0];
+      if (t) {
+        tenant = {
+          id: t.id,
+          name: t.name || null,
+          legalName: t.legalName || null,
+          logoUrl: t.logoUrl ? String(t.logoUrl) : null
+        };
+      }
+    } catch (_) {
+      tenant = null;
+    }
+  }
+
   return {
     ok: true,
     case: caseSafe,
+    tenant,
     slots,
     score: scoring.score ?? 0,
     badge: scoring.badge || badgeFromScore(scoring.score ?? 0, scoreConfig),
     byGroup: scoring.byGroup || [],
     scoreConfigMeta: {
       updatedAt: scoreConfigUpdatedAt ? new Date(scoreConfigUpdatedAt).toISOString() : null
-    }
+    },
+    /** KPIs/badge para el reporte público (evita /api/admin/score-config sin sesión). */
+    scoreConfig: scoreConfig ? {
+      kpis: scoreConfig.kpis,
+      badge: scoreConfig.badge,
+      kpiWeights: scoreConfig.kpiWeights,
+      messages: scoreConfig.messages,
+      recommendations: scoreConfig.recommendations
+    } : null
   };
 }

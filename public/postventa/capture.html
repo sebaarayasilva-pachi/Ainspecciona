@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0B1220" />
+  <title>Captura postventa · Ainspecta</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f6f7f9;
+      color: #0f172a;
+    }
+    html.pv-embed body { background: #f6f7f9; }
+    html.pv-embed main { max-width: none; padding: 8px 8px 100px; }
+    html.pv-embed .header { padding: 10px 12px; margin: -8px -8px 10px; }
+    html.pv-embed .header h1 { font-size: 15px; }
+    main { max-width: 720px; margin: 0 auto; padding: 16px 16px 120px; }
+    .header {
+      background: #0b1220;
+      color: #fff;
+      padding: 16px;
+      margin: -16px -16px 16px;
+    }
+    .header h1 { margin: 0 0 4px; font-size: 18px; }
+    .header p { margin: 0; font-size: 13px; color: #94a3b8; }
+    .card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+    }
+    .progress { height: 8px; background: #e5e7eb; border-radius: 999px; overflow: hidden; margin-top: 10px; }
+    .progress > div { height: 100%; background: #2563eb; width: 0%; transition: width 0.2s; }
+    .title { font-size: 17px; font-weight: 700; margin: 0 0 8px; }
+    .muted { color: #64748b; font-size: 13px; line-height: 1.5; }
+    video, img.preview { width: 100%; border-radius: 12px; background: #000; max-height: 50vh; object-fit: cover; }
+    .hidden { display: none !important; }
+    .sticky {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      max-width: 720px; margin: 0 auto;
+      background: #fff; padding: 12px 16px;
+      padding-bottom: max(12px, env(safe-area-inset-bottom));
+      box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.08);
+      display: grid; gap: 8px;
+    }
+    .btn {
+      display: flex; align-items: center; justify-content: center;
+      padding: 14px; border-radius: 12px; font-weight: 700; font-size: 15px;
+      border: none; cursor: pointer; width: 100%;
+    }
+    .btn-primary { background: #2563eb; color: #fff; }
+    .btn-outline { background: #fff; color: #334155; border: 1px solid #cbd5e1; }
+    .btn-ghost { background: transparent; color: #64748b; border: 1px solid #e2e8f0; }
+    .error { color: #b91c1c; font-size: 14px; margin-top: 8px; }
+    .success { color: #15803d; font-size: 14px; }
+    input[type="file"] { display: none; }
+    .camera-hint {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 12px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1e40af;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .camera-hint.ai-ok {
+      background: #ecfdf5;
+      border-color: #6ee7b7;
+      color: #047857;
+    }
+    .camera-hint.ai-warn {
+      background: #fffbeb;
+      border-color: #fcd34d;
+      color: #92400e;
+    }
+    .email-row { display: grid; gap: 10px; margin-top: 16px; }
+    .email-row input {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid #cbd5e1;
+      font-size: 15px;
+    }
+    html.pv-embed .sticky { max-width: none; left: 0; right: 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="header">
+      <h1>Captura guiada</h1>
+      <p id="ticketLabel">Postventa · cargando...</p>
+      <div class="progress"><div id="progressBar"></div></div>
+      <p class="muted" id="progressText" style="margin-top:8px;color:#94a3b8"></p>
+    </div>
+
+    <div id="errorCard" class="card hidden">
+      <p class="title">Link no disponible</p>
+      <p class="muted" id="errorText">El enlace expiró o no es válido. Solicita uno nuevo al asistente de postventa.</p>
+    </div>
+
+    <div id="slotCard" class="card hidden">
+      <p class="title" id="slotTitle"></p>
+      <p class="muted" id="slotInstructions"></p>
+      <div class="camera-hint" id="cameraHint">Te pediremos unas fotos guiadas del problema. Toca <strong>Tomar foto</strong>, revisa la imagen y pulsa <strong>Subir foto</strong>. Repite con cada instrucción en pantalla.</div>
+      <p id="statusMsg" class="muted" style="margin-top:12px"></p>
+      <video id="camera" class="hidden" playsinline autoplay muted></video>
+      <img id="preview" class="preview hidden" alt="Vista previa" />
+      <p id="rejectMsg" class="error hidden"></p>
+    </div>
+
+    <div id="doneCard" class="card hidden">
+      <p class="title" id="doneTitle">¡Listo!</p>
+      <p class="muted" id="doneText">Todas las fotos fueron enviadas.</p>
+      <p class="success" id="ticketDone"></p>
+      <div id="emailSection" class="email-row hidden">
+        <p class="muted" id="emailPrompt">¿A qué correo te enviamos una copia de tu requerimiento?</p>
+        <input type="email" id="emailInput" inputmode="email" autocomplete="email" placeholder="tu@correo.com" />
+        <button type="button" class="btn btn-primary" id="sendCopyBtn">Enviar copia</button>
+        <p id="emailError" class="error hidden"></p>
+      </div>
+      <div id="farewellSection" class="farewell hidden">
+        <p class="success" id="farewellText"></p>
+        <p class="muted" id="farewellSub">Gracias por contactarnos. El equipo de postventa revisará tu caso. ¡Que tengas buen día!</p>
+      </div>
+    </div>
+  </main>
+
+  <div class="sticky" id="stickyActions">
+    <button type="button" class="btn btn-primary hidden" id="takePhotoBtn">Tomar foto</button>
+    <button type="button" class="btn btn-primary hidden" id="captureBtn">Capturar</button>
+    <button type="button" class="btn btn-primary hidden" id="uploadBtn">Subir foto</button>
+    <button type="button" class="btn btn-outline hidden" id="liveCameraBtn">Vista previa en vivo</button>
+    <button type="button" class="btn btn-outline hidden" id="galleryBtn">Elegir desde galería</button>
+    <input type="file" id="cameraInput" accept="image/*" capture="environment" />
+    <input type="file" id="galleryInput" accept="image/*" />
+    <input type="file" id="videoInput" accept="video/*" capture="environment" />
+    <input type="file" id="videoGalleryInput" accept="video/*" />
+    <button type="button" class="btn btn-primary hidden" id="recordVideoBtn">Grabar video</button>
+    <button type="button" class="btn btn-outline hidden" id="videoGalleryBtn">Elegir video de galería</button>
+    <button type="button" class="btn btn-ghost hidden" id="retryBtn">Repetir</button>
+    <button type="button" class="btn btn-ghost hidden" id="omitBtn">Omitir este paso</button>
+    <button type="button" class="btn btn-primary hidden" id="finishBtn">Enviar solicitud</button>
+  </div>
+
+  <script>
+(function () {
+  if (new URLSearchParams(window.location.search).get('embed') === '1') {
+    document.documentElement.classList.add('pv-embed');
+  }
+  var isEmbed = document.documentElement.classList.contains('pv-embed');
+
+  function isMobileCapture() {
+    return (
+      /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+      (navigator.maxTouchPoints > 1 && window.innerWidth < 900)
+    );
+  }
+
+  function notifyParent(type, payload) {
+    if (!isEmbed || window.parent === window) return;
+    try {
+      window.parent.postMessage(
+        { source: 'pv-capture', type: type, payload: payload || {} },
+        window.location.origin
+      );
+    } catch (e) {}
+  }
+
+  function slotPayload(data, kind, completedStep) {
+    var done = data.progress && typeof data.progress.done === 'number' ? data.progress.done : 0;
+    var total = data.progress && data.progress.total ? data.progress.total : 1;
+    var step = data.slot ? done + 1 : Math.max(1, done);
+    var spoken = data.slot && (data.slot.spokenHint || data.slot.instructions);
+    return {
+      kind: kind || (done === 0 ? 'open' : 'slot'),
+      step: Math.max(1, step),
+      total: total,
+      completedStep: completedStep != null ? completedStep : done,
+      title: data.slot && data.slot.title,
+      spoken: spoken,
+      instructions: data.slot && data.slot.instructions,
+      nextSpoken: kind === 'uploaded' || kind === 'skipped' ? spoken : undefined,
+      canFinish: !!(data.canFinish && !data.slot)
+    };
+  }
+  var parts = window.location.pathname.replace(/\/+$/, '').split('/');
+  var token = parts[parts.length - 1] || '';
+  var API = '/api/postventa/capture/' + encodeURIComponent(token);
+
+  var els = {
+    ticketLabel: document.getElementById('ticketLabel'),
+    progressBar: document.getElementById('progressBar'),
+    progressText: document.getElementById('progressText'),
+    errorCard: document.getElementById('errorCard'),
+    slotCard: document.getElementById('slotCard'),
+    doneCard: document.getElementById('doneCard'),
+    slotTitle: document.getElementById('slotTitle'),
+    slotInstructions: document.getElementById('slotInstructions'),
+    cameraHint: document.getElementById('cameraHint'),
+    statusMsg: document.getElementById('statusMsg'),
+    rejectMsg: document.getElementById('rejectMsg'),
+    camera: document.getElementById('camera'),
+    preview: document.getElementById('preview'),
+    takePhotoBtn: document.getElementById('takePhotoBtn'),
+    captureBtn: document.getElementById('captureBtn'),
+    uploadBtn: document.getElementById('uploadBtn'),
+    liveCameraBtn: document.getElementById('liveCameraBtn'),
+    galleryBtn: document.getElementById('galleryBtn'),
+    cameraInput: document.getElementById('cameraInput'),
+    galleryInput: document.getElementById('galleryInput'),
+    videoInput: document.getElementById('videoInput'),
+    videoGalleryInput: document.getElementById('videoGalleryInput'),
+    recordVideoBtn: document.getElementById('recordVideoBtn'),
+    videoGalleryBtn: document.getElementById('videoGalleryBtn'),
+    retryBtn: document.getElementById('retryBtn'),
+    omitBtn: document.getElementById('omitBtn'),
+    finishBtn: document.getElementById('finishBtn'),
+    stickyActions: document.getElementById('stickyActions'),
+    doneTitle: document.getElementById('doneTitle'),
+    doneText: document.getElementById('doneText'),
+    ticketDone: document.getElementById('ticketDone'),
+    emailSection: document.getElementById('emailSection'),
+    emailPrompt: document.getElementById('emailPrompt'),
+    emailInput: document.getElementById('emailInput'),
+    sendCopyBtn: document.getElementById('sendCopyBtn'),
+    emailError: document.getElementById('emailError'),
+    farewellSection: document.getElementById('farewellSection'),
+    farewellText: document.getElementById('farewellText')
+  };
+
+  var currentSlot = null;
+  var currentSlotId = null;
+  var cameraStream = null;
+  var capturedBlob = null;
+  var liveMode = false;
+  var ticketShortId = '';
+  var captureCategory = '';
+  var earlyFinishAllowed = false;
+  var captureFinished = false;
+
+  function show(el) { el.classList.remove('hidden'); }
+  function hide(el) { el.classList.add('hidden'); }
+
+  function setProgress(p) {
+    if (!p) return;
+    els.progressBar.style.width = (p.pct || 0) + '%';
+    var unit = captureCategory === 'sanitarios' ? 'evidencias' : 'fotos';
+    els.progressText.textContent = (p.done || 0) + ' de ' + (p.total || 0) + ' ' + unit;
+  }
+
+  function isVideoSlot(slot) {
+    return slot && (slot.mediaType === 'video' || slot.isVideo);
+  }
+
+  function hidePhotoControls() {
+    hide(els.takePhotoBtn);
+    hide(els.galleryBtn);
+    hide(els.liveCameraBtn);
+    hide(els.recordVideoBtn);
+    hide(els.videoGalleryBtn);
+  }
+
+  function resetCaptureUi() {
+    capturedBlob = null;
+    liveMode = false;
+    hide(els.preview);
+    els.preview.removeAttribute('src');
+    hide(els.uploadBtn);
+    hide(els.retryBtn);
+    hide(els.captureBtn);
+    hide(els.rejectMsg);
+    hide(els.camera);
+    els.statusMsg.textContent = '';
+    els.cameraHint.className = 'camera-hint';
+    hidePhotoControls();
+    if (!currentSlot) return;
+    if (isVideoSlot(currentSlot)) {
+      els.cameraHint.innerHTML = 'Graba un <strong>video corto</strong> según la instrucción. Toca <strong>Grabar video</strong> o elige uno de la galería, revisa y pulsa <strong>Subir</strong>.';
+      show(els.cameraHint);
+      show(els.recordVideoBtn);
+      show(els.videoGalleryBtn);
+      els.uploadBtn.textContent = 'Subir video';
+    } else {
+      els.cameraHint.innerHTML = 'Toca <strong>Tomar foto</strong>, revisa y pulsa <strong>Subir foto</strong>.';
+      show(els.cameraHint);
+      show(els.takePhotoBtn);
+      show(els.galleryBtn);
+      if (!isMobileCapture() && !isEmbed) show(els.liveCameraBtn);
+      els.uploadBtn.textContent = 'Subir foto';
+    }
+    if (currentSlot.optional) {
+      show(els.omitBtn);
+      els.omitBtn.textContent = 'Omitir este paso (opcional)';
+    } else {
+      hide(els.omitBtn);
+    }
+  }
+
+  function stopCamera() {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(function (t) { t.stop(); });
+      cameraStream = null;
+    }
+    hide(els.camera);
+    hide(els.captureBtn);
+  }
+
+  async function startLiveCamera() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      els.statusMsg.textContent = 'Tu navegador no soporta vista en vivo. Usa Tomar foto.';
+      return;
+    }
+    try {
+      liveMode = true;
+      cameraStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 } },
+        audio: false
+      });
+      els.camera.srcObject = cameraStream;
+      show(els.camera);
+      hide(els.takePhotoBtn);
+      hide(els.galleryBtn);
+      hide(els.liveCameraBtn);
+      hide(els.cameraHint);
+      show(els.captureBtn);
+      els.statusMsg.textContent = 'Encuadra la foto y toca Capturar.';
+    } catch (e) {
+      liveMode = false;
+      els.statusMsg.textContent = 'No se pudo abrir la cámara en vivo. Usa Tomar foto.';
+      show(els.takePhotoBtn);
+    }
+  }
+
+  function takeLivePhoto() {
+    if (!els.camera.videoWidth) return;
+    var canvas = document.createElement('canvas');
+    canvas.width = els.camera.videoWidth;
+    canvas.height = els.camera.videoHeight;
+    canvas.getContext('2d').drawImage(els.camera, 0, 0);
+    canvas.toBlob(function (blob) {
+      if (!blob) return;
+      applyCapturedBlob(blob);
+    }, 'image/jpeg', 0.88);
+  }
+
+  function applyCapturedBlob(blob) {
+    capturedBlob = blob;
+    stopCamera();
+    hidePhotoControls();
+    var url = URL.createObjectURL(blob);
+    var isVideo = blob.type && blob.type.indexOf('video/') === 0;
+    if (isVideo) {
+      els.preview.style.display = 'none';
+      els.camera.src = url;
+      els.camera.muted = false;
+      els.camera.controls = true;
+      els.camera.loop = true;
+      show(els.camera);
+    } else {
+      hide(els.camera);
+      els.preview.style.display = '';
+      els.preview.src = url;
+      show(els.preview);
+    }
+    hide(els.cameraHint);
+    show(els.uploadBtn);
+    show(els.retryBtn);
+    els.statusMsg.textContent = isVideo ? 'Revisa el video y súbelo, o repite.' : 'Revisa la foto y súbela, o repite.';
+  }
+
+  function openNativeVideo() {
+    els.videoInput.value = '';
+    els.videoInput.click();
+  }
+
+  function openVideoGallery() {
+    els.videoGalleryInput.value = '';
+    els.videoGalleryInput.click();
+  }
+
+  function openNativeCamera() {
+    els.cameraInput.value = '';
+    els.cameraInput.click();
+  }
+
+  function openGallery() {
+    els.galleryInput.value = '';
+    els.galleryInput.click();
+  }
+
+  function onFileSelected(input) {
+    var f = input.files && input.files[0];
+    if (!f) return;
+    applyCapturedBlob(f);
+  }
+
+  // Comprime imágenes antes de subir: una foto de celular pesa 4-10 MB y en
+  // datos móviles tarda 10-50 s; reducida a 1600px JPEG queda en ~300-600 KB.
+  async function compressImageBlob(blob) {
+    if (!blob || !blob.type || blob.type.indexOf('image/') !== 0) return blob;
+    if (blob.size < 700 * 1024) return blob;
+    try {
+      var bmp = await createImageBitmap(blob, { imageOrientation: 'from-image' });
+      var MAX = 1600;
+      var scale = Math.min(1, MAX / Math.max(bmp.width, bmp.height));
+      var canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(bmp.width * scale));
+      canvas.height = Math.max(1, Math.round(bmp.height * scale));
+      canvas.getContext('2d').drawImage(bmp, 0, 0, canvas.width, canvas.height);
+      if (bmp.close) bmp.close();
+      var out = await new Promise(function (resolve) { canvas.toBlob(resolve, 'image/jpeg', 0.85); });
+      // Si el navegador no pudo (ej. HEIC), se sube el original y el server lo convierte.
+      return out && out.size > 0 && out.size < blob.size ? out : blob;
+    } catch (e) {
+      return blob;
+    }
+  }
+
+  async function uploadBlob(blob) {
+    if (!currentSlotId || !blob) return;
+    hide(els.rejectMsg);
+    els.uploadBtn.disabled = true;
+    var isVideo = blob.type && blob.type.indexOf('video/') === 0;
+    if (!isVideo) {
+      els.statusMsg.textContent = 'Optimizando foto...';
+      blob = await compressImageBlob(blob);
+    }
+    els.statusMsg.textContent = isVideo ? 'Subiendo video...' : 'Subiendo...';
+    var fd = new FormData();
+    var file = blob;
+    if (blob instanceof Blob && (!blob.type || blob.type.indexOf('image/') !== 0) && !isVideo) {
+      file = new File([blob], 'capture.jpg', { type: 'image/jpeg' });
+    } else if (isVideo && !(blob instanceof File)) {
+      file = new File([blob], 'capture.mp4', { type: blob.type || 'video/mp4' });
+    }
+    fd.append('photo', file, isVideo ? 'capture.mp4' : 'capture.jpg');
+    var res;
+    try {
+      res = await fetch(API + '/slots/' + encodeURIComponent(currentSlotId) + '/capture', {
+        method: 'POST',
+        body: fd
+      });
+    } catch (e) {
+      els.uploadBtn.disabled = false;
+      show(els.rejectMsg);
+      els.rejectMsg.textContent = 'Sin conexión. Revisa tu internet e intenta de nuevo.';
+      return;
+    }
+    var data = await res.json().catch(function () { return {}; });
+    els.uploadBtn.disabled = false;
+    if (!res.ok && !data.message) {
+      show(els.rejectMsg);
+      els.rejectMsg.textContent = 'Error al subir (' + res.status + '). Intenta de nuevo.';
+      return;
+    }
+    if (!data.ok) {
+      show(els.rejectMsg);
+      els.rejectMsg.textContent = data.message || 'Repite la captura.';
+      els.statusMsg.textContent = isVideo ? 'Video rechazado.' : 'Foto rechazada.';
+      show(els.retryBtn);
+      if (data.slot && data.slot.id) {
+        currentSlotId = data.slot.id;
+        currentSlot = data.slot;
+      }
+      return;
+    }
+    if (data.earlyFinishAllowed) earlyFinishAllowed = true;
+    if (data.slotAnalysis && data.slotAnalysis.messageForOwner) {
+      els.cameraHint.className = 'camera-hint ' + (data.slotAnalysis.canFinishEarly ? 'ai-ok' : 'ai-warn');
+      els.cameraHint.innerHTML = '<strong>Revisión rápida:</strong> ' + data.slotAnalysis.messageForOwner;
+      show(els.cameraHint);
+    }
+    notifyParent('uploaded', slotPayload(data, 'uploaded', data.progress && data.progress.done));
+    await showSlot(data, { skipNotify: true });
+  }
+
+  async function omitSlot() {
+    if (!currentSlotId) return;
+    els.statusMsg.textContent = 'Omitiendo...';
+    var res = await fetch(API + '/slots/' + encodeURIComponent(currentSlotId) + '/omit', { method: 'POST' });
+    var data = await res.json();
+    if (!data.ok) {
+      show(els.rejectMsg);
+      els.rejectMsg.textContent = data.message || 'No se puede omitir este paso.';
+      els.statusMsg.textContent = '';
+      return;
+    }
+    if (data.ok) {
+      notifyParent('skipped', slotPayload(data, 'skipped', data.progress && data.progress.done));
+      await showSlot(data, { skipNotify: true });
+    }
+  }
+
+  function showDoneState(data) {
+    captureFinished = true;
+    stopCamera();
+    hide(els.slotCard);
+    hide(els.stickyActions);
+    show(els.doneCard);
+    hide(els.farewellSection);
+    hide(els.emailError);
+    ticketShortId = data.ticketShortId || ticketShortId;
+    els.doneTitle.textContent = '¡Solicitud terminada!';
+    els.doneText.textContent = 'Todas las fotos fueron enviadas correctamente.';
+    els.ticketDone.textContent = 'N° solicitud: ' + ticketShortId;
+    show(els.emailSection);
+    els.emailPrompt.textContent = '¿A qué correo te enviamos una copia de tu requerimiento?';
+    if (data.ownerEmail) els.emailInput.value = data.ownerEmail;
+    els.emailInput.focus();
+    notifyParent('complete', { ticketShortId: ticketShortId });
+  }
+
+  async function sendCopyEmail() {
+    var email = (els.emailInput.value || '').trim();
+    hide(els.emailError);
+    if (!email) {
+      show(els.emailError);
+      els.emailError.textContent = 'Ingresa tu correo electrónico.';
+      return;
+    }
+    els.sendCopyBtn.disabled = true;
+    els.sendCopyBtn.textContent = 'Enviando...';
+    var res;
+    try {
+      res = await fetch(API + '/send-copy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email })
+      });
+    } catch (e) {
+      els.sendCopyBtn.disabled = false;
+      els.sendCopyBtn.textContent = 'Enviar copia';
+      show(els.emailError);
+      els.emailError.textContent = 'Sin conexión. Intenta de nuevo.';
+      return;
+    }
+    var data = await res.json().catch(function () { return {}; });
+    els.sendCopyBtn.disabled = false;
+    els.sendCopyBtn.textContent = 'Enviar copia';
+    if (!res.ok || !data.ok) {
+      show(els.emailError);
+      els.emailError.textContent = data.message || 'No se pudo enviar el correo.';
+      return;
+    }
+    hide(els.emailSection);
+    show(els.farewellSection);
+    els.farewellText.textContent = data.message || ('Te enviamos la copia a ' + email + '.');
+  }
+
+  async function finishCapture() {
+    els.finishBtn.disabled = true;
+    var res = await fetch(API + '/finish', { method: 'POST' });
+    var data = await res.json();
+    els.finishBtn.disabled = false;
+    if (!data.ok) {
+      els.statusMsg.textContent = 'Aún faltan fotos por completar.';
+      return;
+    }
+    showDoneState(data);
+  }
+
+  async function showSlot(data, options) {
+    options = options || {};
+    setProgress(data.progress);
+    if (data.category) captureCategory = data.category;
+    if (data.ticketShortId) {
+      els.ticketLabel.textContent = 'Solicitud ' + data.ticketShortId;
+    }
+    stopCamera();
+    hide(els.camera);
+    els.camera.removeAttribute('src');
+    els.camera.controls = false;
+    els.camera.loop = false;
+
+    if (data.canFinish && !data.slot) {
+      hide(els.slotCard);
+      show(els.doneCard);
+      show(els.finishBtn);
+      hidePhotoControls();
+      hide(els.omitBtn);
+      hide(els.cameraHint);
+      els.doneTitle.textContent = 'Evidencias completas';
+      els.doneText.textContent = earlyFinishAllowed
+        ? 'Con lo enviado alcanza para revisar tu caso. Presiona Enviar solicitud.'
+        : 'Presiona Enviar solicitud para confirmar.';
+      return;
+    }
+
+    if (!data.slot) {
+      hide(els.slotCard);
+      show(els.doneCard);
+      return;
+    }
+
+    show(els.slotCard);
+    hide(els.doneCard);
+    currentSlot = data.slot;
+    currentSlotId = data.slot.id;
+    els.slotTitle.textContent = data.slot.title || (isVideoSlot(data.slot) ? 'Video' : 'Foto');
+    els.slotInstructions.textContent = data.slot.instructions || '';
+    resetCaptureUi();
+    if (data.slot.spokenHint) {
+      els.cameraHint.innerHTML = '<strong>Paso ' + ((data.progress && data.progress.done) ? data.progress.done + 1 : 1) + ':</strong> ' + data.slot.spokenHint;
+      show(els.cameraHint);
+    }
+    if (data.canFinish || data.earlyFinishAllowed) {
+      earlyFinishAllowed = earlyFinishAllowed || !!data.earlyFinishAllowed;
+      show(els.finishBtn);
+    } else {
+      hide(els.finishBtn);
+    }
+    if (!options.skipNotify && data.slot) {
+      var kind = data.progress && data.progress.done === 0 ? 'open' : 'slot';
+      notifyParent('slot', slotPayload(data, kind));
+    }
+  }
+
+  async function loadNext() {
+    var res = await fetch(API + '/next');
+    if (!res.ok) {
+      hide(els.slotCard);
+      hide(els.stickyActions);
+      show(els.errorCard);
+      return;
+    }
+    var data = await res.json();
+    if (data.category) captureCategory = data.category;
+    if (data.ticketShortId) els.ticketLabel.textContent = 'Solicitud ' + data.ticketShortId;
+    show(els.takePhotoBtn);
+    await showSlot(data);
+  }
+
+  els.takePhotoBtn.addEventListener('click', openNativeCamera);
+  els.galleryBtn.addEventListener('click', openGallery);
+  els.recordVideoBtn.addEventListener('click', openNativeVideo);
+  els.videoGalleryBtn.addEventListener('click', openVideoGallery);
+  els.liveCameraBtn.addEventListener('click', startLiveCamera);
+  els.captureBtn.addEventListener('click', takeLivePhoto);
+  els.uploadBtn.addEventListener('click', function () { uploadBlob(capturedBlob); });
+  els.retryBtn.addEventListener('click', function () { resetCaptureUi(); });
+  els.omitBtn.addEventListener('click', omitSlot);
+  els.finishBtn.addEventListener('click', finishCapture);
+  els.sendCopyBtn.addEventListener('click', sendCopyEmail);
+  els.emailInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') sendCopyEmail();
+  });
+  els.cameraInput.addEventListener('change', function () { onFileSelected(els.cameraInput); });
+  els.galleryInput.addEventListener('change', function () { onFileSelected(els.galleryInput); });
+  els.videoInput.addEventListener('change', function () { onFileSelected(els.videoInput); });
+  els.videoGalleryInput.addEventListener('change', function () { onFileSelected(els.videoGalleryInput); });
+
+  show(els.stickyActions);
+  loadNext();
+})();
+  </script>
+</body>
+</html>

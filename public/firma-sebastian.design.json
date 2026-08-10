@@ -1,0 +1,34 @@
+{
+  "_comment": "Firma correo: firma-email-sebastian.html (tabla HTML). Logo Logo 2 ainspecciona.png · foto Photo-Seba.png. Datos abajo.",
+  "canvas": { "width": 3114, "height": 400 },
+  "colors": {
+    "bannerBackground": "#d9d9d9",
+    "textPrimary": "#363636"
+  },
+  "fonts": { "family": "Inter, Segoe UI, Calibri, Arial, sans-serif" },
+  "brand": {
+    "tagline": "Sistema de Inspección Inmobiliaria con ia",
+    "taglineHighlight": "ia",
+    "logoNote": "Logo en /assets/Logo 2 ainspecciona.png (URL codificar espacios: Logo%202%20ainspecciona.png)"
+  },
+  "person": {
+    "name": "Sebastián Araya Silva",
+    "nameBoldPart": "Sebastián",
+    "title": "CEO",
+    "photoUrl": "https://ainspecciona.com/assets/Photo-Seba.png"
+  },
+  "contact": {
+    "email": "sebastian.araya@ainspecciona.com",
+    "phoneDisplay": "(56) 9766 75851",
+    "phoneTel": "+56976675851"
+  },
+  "address": {
+    "line1": "Av Las condes 11380 Of 52",
+    "locality": "Vitacura | Santiago | Chile"
+  },
+  "links": {
+    "linkedin": "https://www.linkedin.com/in/sebasti%C3%A1n-araya-silva/",
+    "meet": "https://meetings.hubspot.com/saraya-silva",
+    "web": "https://ainspecciona.com/"
+  }
+}

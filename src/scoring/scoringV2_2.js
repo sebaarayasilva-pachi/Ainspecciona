@@ -15,7 +15,8 @@ export const DEFAULT_SCORE_CONFIG = {
     ELECTRICIDAD: { low: 5, medium: 15, high: 30 },
     VENTANAS_CERRAMIENTOS: { low: 5, medium: 15, high: 30 },
     PUERTAS_HERRAJES: { low: 5, medium: 15, high: 30 },
-    MOBILIARIO_FIJO: { low: 5, medium: 15, high: 30 }
+    MOBILIARIO_FIJO: { low: 5, medium: 15, high: 30 },
+    DOCUMENTOS_CUMPLIMIENTO: { low: 5, medium: 15, high: 30 }
   },
   slotKpiMap: {
     BATHROOM_1_SHOWER: "SANITARIOS",
@@ -58,9 +59,11 @@ export const DEFAULT_SCORE_CONFIG = {
     LAUNDRY_WALLS_FLOOR: "HUMEDAD",
     ELECTRICAL_PANEL: "ELECTRICIDAD",
     PUERTA_ENTRADA: "PUERTAS_HERRAJES",
-    ELEVATOR: "ELECTRICIDAD",
+    ASCENSOR_CERTIFICADO_INSPECCION: "DOCUMENTOS_CUMPLIMIENTO",
+    ASCENSOR_CABINA: "DOCUMENTOS_CUMPLIMIENTO",
+    ELEVATOR: "DOCUMENTOS_CUMPLIMIENTO",
     ESTACIONAMIENTO: "PISOS",
-    CERTIFICADO_VERDE: "ELECTRICIDAD"
+    CERTIFICADO_VERDE: "DOCUMENTOS_CUMPLIMIENTO"
   },
   aiPrompts: {
     GENERAL: [
@@ -162,18 +165,51 @@ export const DEFAULT_SCORE_CONFIG = {
       "Reglas: analiza solo lo visible; no asumas el origen de la fuga si no es evidente; no infieras humedad no visible."
     ].join("\n"),
     PISOS: [
-      "Eres un inspector técnico profesional evaluando el estado de los pisos y revestimientos.",
-      "Busca cerámicas quebradas, piso flotante levantado o separado, alfombras manchadas o gastadas, o guardapolvos desprendidos.",
-      "Evalúa la continuidad y nivelación general visible en la imagen."
+      "Eres un inspector técnico profesional evaluando el estado de los pisos y revestimientos (cerámica, madera, laminado, flotante, vinílico, etc.).",
+      "",
+      "En pisos laminados o flotante de tablones largos, revisa con atención los ENCUENTROS y las JUNTAS (incluidos los cabezales de los tablones):",
+      "- levantamiento, escalonamiento, hinchazón localizada o ondulación en la línea de junta;",
+      "- bordes de tablón más altos que el resto (efecto “peaking” / cabeceo en juntas), separación visible entre lengüeta y ranura si aplica;",
+      "- cambios de brillo o color solo a lo largo de la junta que sugieran hinchamiento por humedad.",
+      "Esto NO es equivalente a un simple rayón o desgaste superficial del barniz: si ves deformación en juntas, descríbela y en signals_detected usa redacción explícita (ej.: “levantamiento o hinchazón en juntas de cabezales”, “deformación en encuentros de tablones compatible con exposición a humedad”).",
+      "Si la evidencia es clara, proposed_severity debe ser al menos medium; reserva low solo para marcas leves sin deformación en juntas.",
+      "",
+      "También busca: cerámicas quebradas, piso flotante separado del zócalo, alfombras manchadas o gastadas, guardapolvos desprendidos.",
+      "Evalúa la continuidad y nivelación general visible en la imagen.",
+      "Coherencia del texto: la conclusión (kpi_analysis) no debe contradecir la descripción. No afirmes «no se detectan hallazgos relevantes» o equivalente si al mismo tiempo describes desgaste, deformación o levantamiento en juntas que amerite registro; unifica criterio. Si solo hay desgaste cosmético mínimo sin relevancia técnica, concluye en consecuencia y ajusta proposed_severity."
     ].join("\n"),
     SANITARIOS: [
-      "Eres un inspector técnico profesional revisando artefactos sanitarios.",
-      "Revisa la imagen en busca de tinas, WC, lavamanos o griferías con daños visibles como trizaduras, manchas de sarro extremo, falta de sellos (silicona) o piezas faltantes.",
-      "Evalúa el estado de las conexiones visibles a la pared o piso."
+      "Eres un inspector técnico profesional revisando artefactos sanitarios y cañerías visibles (bajo lavamanos, WC, ducha, etc.).",
+      "",
+      "Reglas estrictas sobre HUMEDAD y FILTRACIONES (evitar falsos positivos):",
+      "- No uses las palabras «humedad», «húmedo», «filtración activa» ni «fuga» salvo que en la imagen haya señales CLARAS y localizables: por ejemplo gotas o brillo de agua reciente, charco, goteo visible, aureola húmeda reciente muy definida, eflorescencia blanca clara, pintura/capa sobre azulejo claramente inflada por capilaridad, u hongo filamentoso evidente.",
+      "- Manchas marrones/amarillentas fijas, lechada oscura, polvo en tubos o suciedad acumulada NO bastan para afirmar «humedad superficial visible»; descríbelas como manchas o decoloración / suciedad o lechada deteriorada y explica la ubicación.",
+      "- No concluyas «no hay filtración activa» ni «no hay daños severos» como si pudieras ver el interior de la pared o tuberías: solo lo visible en el encuadre.",
+      "",
+      "Cañerías pintadas (práctica muy frecuente en departamentos y entregas inmobiliarias):",
+      "- Una capa de pintura sobre PVC o metal visible, uniforme o con retoques, NO es por sí sola un hallazgo técnico: no la confundas con corrosión, desgaste de tubo, humedad, filtración ni «material deteriorado».",
+      "- Si solo observas color distinto al plástico «natural», textura mate o irregularidades propias de la pintura, descríbelo como cañería pintada o acabado estético; no uses signals_detected ni subas proposed_severity solo por eso.",
+      "- Sí registra defecto cuando exista otra evidencia clara y localizable: grieta o quebradura en tubo, abultamiento, goteo u húmedo reciente, óxido laminar en metal realmente expuesto (no interpretes manchas bajo pintura homogénea), sellos de silicona cortados o faltantes, conexiones con patrón claro de goteo frecuente bajo la unión.",
+      "",
+      "«Intervención no estándar» en grifería o desagüe (evitar falsos positivos):",
+      "- No uses esa etiqueta salvo que veas evidencia CLARA de chapuza o modificación: por ejemplo cinta aislante o huincha en empalmes, teflón excesivo y desordenado en roscas visibles, soldadura fría o irregular en cobre, abrazaderas improvisadas, mezcla brusca PVC–metal a la vista, manguera tipo «perico» sustituyendo tramo rígido, roscas destrozadas o piezas claramente no originales mal acopladas.",
+      "- Una grifería bimando o monomando clásica sobre lavamanos de pedestal, corrosión/sarro en cuerpos o manijas, o acabado antiguo NO constituyen por sí «intervención no estándar». En ese caso limita el hallazgo a corrosión, desgaste del cromado o sarro según corresponda.",
+      "",
+      "Lavamanos y piletas (encuadre sobre el artefacto): antes de concluir, inspecciona con atención el desagüe visible (aro, tapón o rejilla cromada), el rebosadero si aparece y la unión grifería–porcelana.",
+      "- Cromado del desagüe: busca descascarado, desconchado, levantamiento o pérdida localizada del baño cromado que deja ver metal más oscuro, mate o cobrizo; manchas o velos rojizo-marrón compatibles con óxido (incluso leve) en el metal expuesto. Eso SÍ es hallazgo de desgaste/corrosión superficial en sanitarios: descríbelo en description (ubicación exacta) y en kpi_analysis o signals_detected (ej. «desconchado del cromado y óxido en aro del desagüe»). No lo atribuyas a sombra del encuadre si el patrón sigue alrededor del círculo del desagüe.",
+      "- Pie de la grifería: sarro o mineralización amarillenta-marrón acumulada en la junta con la porcelana es hallazgo menor; menciónalo si es visible.",
+      "- Si cualquiera de lo anterior es claramente visible, no afirmes que el área está «en buen estado» ni cierres con «sin hallazgos»; proposed_severity al menos «low» y señales concretas.",
+      "",
+      "Severidad (óxido / corrosión en metal): sube a `high` solo cuando en la imagen haya **oxidación ferrosa clara** (tonalidad rojiza/cobriza en metal expuesto, pérdida o desconchado del cromado dejando metal oscuro, óxido laminar, corrosión marcada en conexiones). No uses `high` si solo ves **sarro, mineralización, pintura sobre cañería, suciedad acumulada o acabado mate** sin evidencia clara de óxido. La palabra «corrosión» sola o en forma dudosa («posible corrosión») no basta: confirma con descripción visual concreta o usa `medium`/`low`.",
+      "",
+      "Sí revisa: trizaduras en porcelana o artefactos, sarro o corrosión marcada en grifería (metal expuesto), sellos de silicona faltantes o cortados, piezas flojas, conexiones visiblemente corroídas o con depósitos que sugieran goteo frecuente (solo si se ve patrón claro bajo la conexión).",
+      "En signals_detected usa redacción objetiva (ej. «mancha en junta vertical junto a cañería», «posible sellado deficiente en empotramiento») en lugar de etiquetas vagas."
     ].join("\n"),
     ELECTRICIDAD: [
       "Analiza la imagen correspondiente al slot {{SLOT_CODE}}",
       "bajo el contexto técnico del KPI: ELECTRICIDAD VISIBLE.",
+      "",
+      "IMPORTANTE: distingue el tipo de slot. Si es interruptores o enchufes de pared, no exijas tablero ni interruptor diferencial. Esas reglas aplican solo al slot de tablero (ELECTRICAL_PANEL).",
       "",
       "Paso 1 — Descripción objetiva del encuadre:",
       "Describe detalladamente lo visible (mínimo 4 líneas):",
@@ -193,11 +229,17 @@ export const DEFAULT_SCORE_CONFIG = {
       "- cables visibles expuestos",
       "- signos visibles de sobrecalentamiento (quemaduras, derretimiento, decoloración localizada)",
       "- fijación deficiente visible de enchufes o interruptores (desplazamiento, separación del muro)",
-      "- tablero eléctrico visible sin tapa o con elementos dañados",
-      "- presencia visible de interruptor diferencial, solamente en el slot del tablero eléctrico",
-      "- ausencia visible de interruptor diferencial (solo si el tablero completo es visible y no se observa dicho elemento)",
+      "- [SOLO slot tablero ELECTRICAL_PANEL] tablero eléctrico visible sin tapa o con elementos dañados",
+      "- [SOLO slot tablero] presencia o ausencia de interruptor diferencial (solo si el tablero completo es visible; el diferencial suele ser breaker ancho/doble al inicio)",
       "",
-      "Interruptor diferencial (solo en slot de tablero eléctrico):",
+      "[SOLO slot tablero / interior de tablero abierto] No uses «desgaste superficial» ni «desgaste en la parte inferior» para polvo, suciedad, manchas oscuras o residuos en el fondo, riel DIN o marco metálico si no hay evidencia clara de deterioro mecánico (rayones profundos, pintura removida por roce, plástico trizado o partido, corrosión que altere visiblemente el metal). En ese caso descríbelo como suciedad acumulada, manchas o residuos. Si únicamente observas suciedad o manchas sin ninguno de los defectos eléctricos listados arriba, usa proposed_severity \"none\" y no inventes hallazgos técnicos.",
+      "En tablero abierto, la zona baja del chasis o riel suele acumular polvo y residuos oscuros: eso NO es desgaste del tablero salvo que veas además trizaduras, corrosión activa marcada en bornes o carcasas, o daño mecánico claro. No mezcles «diferencial y térmicos en buen estado» con una supuesta «parte inferior desgastada» por suciedad.",
+      "",
+      "Si el slot es de INTERRUPTORES o ENCHUFES de pared (p.ej. LIVING_SWITCHES, *_OUTLETS): NO evalúes tablero ni diferencial; NO pongas matches_slot=false por no ver el panel.",
+      "",
+      "[SOLO slots *_SWITCHES] No confundas con interruptores: conectores coaxiales (tipo F, rosca central, salida TV/audio-video/antena), tomas de corriente tipo L (3 orificios) y placas ciegas son instalaciones normales. NO uses «interruptores sin tapas» ni «mecanismos expuestos» para describir salidas AV o enchufes. Solo reporta defecto si hay apagador/interruptor real dañado, sin placa, cable expuesto o sobrecalentamiento.",
+      "",
+      "Interruptor diferencial (únicamente cuando el slot es tablero eléctrico):",
       "El diferencial suele ser el primer breaker a la izquierda, de mayor tamaño (doble módulo o dos posiciones). Si ves un breaker ancho o doble al inicio de la fila, considéralo como posible diferencial y NO reportes 'ausencia de diferencial'. Solo reporta ausencia si el tablero se ve completo y no hay ningún elemento de ese tipo (breaker doble/general a la izquierda).",
       "",
       "Recorre visualmente los elementos eléctricos de forma ordenada y describe únicamente lo que sea claramente observable.",
@@ -211,7 +253,7 @@ export const DEFAULT_SCORE_CONFIG = {
       "Si NO se observan señales visibles, debes indicarlo explícitamente describiendo qué evidencia visual permite descartarlas (tapas íntegras, ausencia de cables expuestos, fijación alineada, etc.).",
       "",
       "Paso 3 — Limitaciones:",
-      "Indica si el encuadre es parcial, si el tablero no es completamente visible o si existen zonas fuera de foco que limiten la evaluación.",
+      "Indica si el encuadre es parcial o hay zonas fuera de foco. Menciona visibilidad del tablero solo cuando el slot sea de tablero.",
       "",
       "Reglas estrictas:",
       "- Analiza únicamente lo claramente visible.",
@@ -243,7 +285,27 @@ export const DEFAULT_SCORE_CONFIG = {
       "Revisa únicamente lo que sea claramente visible: puertas de gabinetes caídas o descuadradas, repisas pandeadas, cubiertas manchadas, quemadas o trizadas, daños en tiradores o tapacantos.",
       "Solo reporta desalineación, holgura o descuadre cuando sea CLARAMENTE OBSERVABLE en la imagen (por ejemplo: puerta que no cierra en el marco, hueco evidente, bisagra vista despegada). No reportes 'ligera desalineación' ni 'holgura moderada' si no hay evidencia visual clara; en ese caso indica que no se observan problemas relevantes en el mobiliario visible.",
       "",
+      "Clósets con varias hojas batientes: la altura de los pomos/tiradores puede variar levemente por instalación de herrajes o tolerancia de fábrica; eso NO demuestra por sí solo que las hojas estén desalineadas respecto al marco. No confundas suciedad o rozaduras en el borde inferior de las hojas con desalineación. Un entrehoja algo distinto entre un par de hojas puede deberse a perspectiva de la cámara (encuadre no perfectamente perpendicular): solo afirma «desalineamiento entre puertas» o «puertas desalineadas» si se ve claramente hoja torcida respecto al marco, folio que sobresale de forma asimétrica respecto al coplanado, o desajuste obvio entre hoja y zócalo. Si solo ves rayones o marcas en el zócalo inferior, descríbelo así; proposed_severity no debe ser medium solo por eso.",
+      "",
       "Reglas: analiza solo lo visible; no infieras desalineación por sombras o ángulo de la foto; si el elemento no corresponde al slot esperado, describe sin inventar hallazgos."
+    ].join("\n"),
+    DOCUMENTOS_CUMPLIMIENTO: [
+      "Analiza la imagen del slot {{SLOT_CODE}} bajo el KPI: DOCUMENTOS Y CUMPLIMIENTO REGULATORIO.",
+      "",
+      "Este slot es un DOCUMENTO (certificado verde, certificado de inspección de ascensor u otro certificado visible), NO una foto de terminaciones, cabina de ascensor sin placa, ni otra habitación.",
+      "",
+      "Paso 1 — Correspondencia:",
+      "Indica si el encuadre muestra el documento solicitado en el título del slot. Si no corresponde, matches_slot=false.",
+      "",
+      "Paso 2 — Legibilidad:",
+      "¿Se leen identificación, fechas, organismo emisor y resultado? Si el texto es ilegible por desenfoque, recorte o reflejo, indícalo.",
+      "",
+      "Paso 3 — Vigencia (obligatorio si hay fechas legibles):",
+      "Compara fechas de vencimiento o próxima inspección con la fecha actual implícita de la inspección. Si el certificado está vencido o la fecha de vencimiento es pasada, proposed_severity=\"high\" y describe «vencido» o «no vigente». Si está vigente, proposed_severity=\"none\". Si no hay fechas legibles, proposed_severity=\"medium\" por no poder confirmar vigencia.",
+      "",
+      "Para ASCENSOR / certificado de inspección: NO evalúes estado de cabina, botonera ni puertas; solo el documento o placa de inspección.",
+      "",
+      "Reglas: no infieras cumplimiento normativo más allá de lo legible; no inventes fechas que no se vean."
     ].join("\n")
   },
   messages: {
@@ -286,6 +348,11 @@ export const DEFAULT_SCORE_CONFIG = {
       low: "Se observan condiciones visibles menores en mobiliario fijo del área inspeccionada.",
       medium: "Se observan condiciones visibles en mobiliario fijo del área inspeccionada.",
       high: "Se observan condiciones visibles relevantes en mobiliario fijo del área inspeccionada."
+    },
+    DOCUMENTOS_CUMPLIMIENTO: {
+      low: "Se observan observaciones menores en documentación del área inspeccionada.",
+      medium: "No fue posible confirmar plenamente la vigencia o legibilidad del documento registrado.",
+      high: "El certificado o documento registrado no se encuentra vigente o presenta incumplimiento relevante."
     }
   },
   recommendations: {
@@ -293,7 +360,12 @@ export const DEFAULT_SCORE_CONFIG = {
     YELLOW: "Se recomienda revisar y monitorear el estado observado.",
     RED: "Se recomienda una revisión técnica detallada del hallazgo."
   },
-  badge: { yellowFrom: 60, greenFrom: 85 },
+  badge: { yellowFrom: 60, greenFrom: 86 },
+  kpiWeights: {
+    HUMEDAD: 2,
+    SANITARIOS: 2,
+    ELECTRICIDAD: 2
+  },
   severityRules: {
     enforceFavorableOk: true,
     criticalKeywords: [
@@ -302,8 +374,15 @@ export const DEFAULT_SCORE_CONFIG = {
     ],
     mediumKeywords: [
       "desgaste", "mancha", "rayon", "rayón", "fisura", "levantamiento", "desalineacion", "desalineación"
-    ]
-  }
+    ],
+    byKpi: {
+      DOCUMENTOS_CUMPLIMIENTO: {
+        criticalKeywords: ["vencido", "no vigente", "expirado", "caducado", "fuera de plazo", "certificado vencido"]
+      }
+    }
+  },
+  /** Ejemplos enseñados desde admin (Intelligence); se inyectan en prompts sin redeploy. */
+  aiFindingExamples: []
 };
 
 export const PROBLEM_BASE_V22 = {
@@ -351,6 +430,23 @@ export function badgeFromScore(score, scoreConfig) {
   return "GREEN";
 }
 
+/** 1–5 estrellas alineadas con rangos de badge (rojo=1, amarillo=2–3, verde=4–5). */
+export function starsFromScore(score, scoreConfig) {
+  const cfg = normalizeScoreConfig(scoreConfig || {});
+  const yellowFrom = cfg.badge.yellowFrom;
+  const greenFrom = cfg.badge.greenFrom;
+  const n = Math.max(0, Math.min(100, Number(score) || 0));
+  if (n >= greenFrom) {
+    const topTier = greenFrom + Math.max(1, Math.round((100 - greenFrom) * 0.33));
+    return n >= topTier ? 5 : 4;
+  }
+  if (n >= yellowFrom) {
+    const midYellow = yellowFrom + Math.round((greenFrom - yellowFrom) * 0.5);
+    return n >= midYellow ? 3 : 2;
+  }
+  return 1;
+}
+
 export function normalizeScoreConfig(input) {
   const base = structuredClone(DEFAULT_SCORE_CONFIG);
   if (!input || typeof input !== "object") return base;
@@ -384,6 +480,14 @@ export function normalizeScoreConfig(input) {
     yellowFrom: Number.isFinite(Number(next.badge?.yellowFrom)) ? Number(next.badge.yellowFrom) : base.badge.yellowFrom,
     greenFrom: Number.isFinite(Number(next.badge?.greenFrom)) ? Number(next.badge.greenFrom) : base.badge.greenFrom
   };
+  next.kpiWeights = {
+    ...base.kpiWeights,
+    ...Object.fromEntries(
+      Object.entries(next.kpiWeights || {})
+        .map(([key, value]) => [String(key).toUpperCase(), Number(value)])
+        .filter(([, value]) => Number.isFinite(value) && value > 0)
+    )
+  };
   next.severityRules = {
     enforceFavorableOk: next.severityRules?.enforceFavorableOk !== undefined
       ? !!next.severityRules.enforceFavorableOk
@@ -407,17 +511,77 @@ export function normalizeScoreConfig(input) {
       Object.entries(next.aiPrompts || {}).map(([key, value]) => [String(key).toUpperCase(), String(value || "").trim()])
     )
   };
+  const validSeverity = new Set(["low", "medium", "high", "none", ""]);
+  next.aiFindingExamples = Array.isArray(next.aiFindingExamples)
+    ? next.aiFindingExamples
+      .map((row) => {
+        if (!row || typeof row !== "object") return null;
+        const kpiKey = String(row.kpiKey || "").toUpperCase().trim();
+        const signal = String(row.signal || "").trim();
+        if (!kpiKey || !signal) return null;
+        const severity = String(row.severity || "").toLowerCase().trim();
+        return {
+          id: String(row.id || `ex_${Date.now()}`),
+          kpiKey,
+          signal,
+          severity: validSeverity.has(severity) ? severity : "",
+          guidance: String(row.guidance || "").trim(),
+          active: row.active !== false,
+          createdAt: row.createdAt ? String(row.createdAt) : null
+        };
+      })
+      .filter(Boolean)
+      .slice(0, 200)
+    : [];
   return next;
+}
+
+const AI_FINDING_EXAMPLES_PER_KPI_LIMIT = 20;
+
+/** Bloque de few-shot desde admin Intelligence → prompt de visión. */
+export function formatAiFindingExamplesBlock(kpiKey, scoreConfig) {
+  const key = String(kpiKey || "").toUpperCase();
+  if (!key) return "";
+  const rows = (normalizeScoreConfig(scoreConfig || {}).aiFindingExamples || [])
+    .filter((e) => e.active !== false && String(e.kpiKey).toUpperCase() === key)
+    .slice(-AI_FINDING_EXAMPLES_PER_KPI_LIMIT);
+  if (!rows.length) return "";
+  const lines = rows.map((e, i) => {
+    const sev = e.severity ? ` → severidad sugerida: ${e.severity}` : "";
+    const guide = e.guidance ? ` ${e.guidance}` : "";
+    return `${i + 1}. Si observas «${e.signal}»${sev}.${guide}`.trim();
+  });
+  return [
+    "",
+    "Criterios aprendidos del equipo (aplicar al analizar este KPI; priorizar sobre suposiciones genéricas):",
+    ...lines
+  ].join("\n");
 }
 
 export function classifyKpiFromSlot(slot, slotKpiMap) {
   const rawCode = String(slot.slotCode || "");
-  let mapKey = String(slotKpiMap?.[rawCode] || "").toUpperCase();
+  const codeUpper = rawCode.toUpperCase();
+  let mapKey = String(slotKpiMap?.[codeUpper] || slotKpiMap?.[rawCode] || "").toUpperCase();
   if (!mapKey && slotKpiMap) {
-    const bathMatch = rawCode.match(/^bathroom_(\d+)_/);
-    if (bathMatch) mapKey = String(slotKpiMap[`BATHROOM_1_${rawCode.replace(/^bathroom_\d+_/, '')}`] || "").toUpperCase();
-    const bedMatch = rawCode.match(/^bedroom_(\d+)_/);
-    if (!mapKey && bedMatch) mapKey = String(slotKpiMap[`BEDROOM_1_${rawCode.replace(/^bedroom_\d+_/, '')}`] || "").toUpperCase();
+    const bathMatch = codeUpper.match(/^BATHROOM_\d+_(.+)$/);
+    if (bathMatch) {
+      const suffix = bathMatch[1];
+      mapKey = String(
+        slotKpiMap[`BATHROOM_1_${suffix}`]
+        || slotKpiMap[`BATHROOM_2_${suffix}`]
+        || ""
+      ).toUpperCase();
+    }
+    const bedMatch = codeUpper.match(/^BEDROOM_\d+_(.+)$/);
+    if (!mapKey && bedMatch) {
+      const suffix = bedMatch[1];
+      mapKey = String(
+        slotKpiMap[`BEDROOM_1_${suffix}`]
+        || slotKpiMap[`BEDROOM_2_${suffix}`]
+        || slotKpiMap[`BEDROOM_3_${suffix}`]
+        || ""
+      ).toUpperCase();
+    }
   }
   if (mapKey) return mapKey;
 
@@ -431,8 +595,9 @@ export function classifyKpiFromSlot(slot, slotKpiMap) {
   if (msg && ["humedad", "moho", "filtr", "water", "mold"].some((w) => msg.includes(w))) return "HUMEDAD";
   if (hasAny(["muros", "pintura", "pared", "cielo", "paint"])) return "MUROS_PINTURA";
   if (hasAny(["piso", "pisos", "floor"])) return "PISOS";
+  if (code.includes("_outlets") || code.includes("_switches") || hasAny(["electrical", "tablero", "enchufe", "interruptor"])) return "ELECTRICIDAD";
   if (hasAny(["wc", "lavamanos", "lavaplatos", "grifer", "ducha", "tina", "sanitario", "sifon", "cañer", "baño", "baño"])) return "SANITARIOS";
-  if (hasAny(["electrical", "tablero", "enchufe", "interruptor"])) return "ELECTRICIDAD";
+  if (hasAny(["ascensor", "certificado", "inspeccion", "inspección", "certificacion", "certificación"])) return "DOCUMENTOS_CUMPLIMIENTO";
   if (hasAny(["ventana", "vidrio", "marco", "cerramiento"])) return "VENTANAS_CERRAMIENTOS";
   if (hasAny(["puerta", "cerradura", "bisagra", "manilla", "herraje"])) return "PUERTAS_HERRAJES";
   if (hasAny(["mueble", "mobiliario", "closet", "clóset", "clósets", "gabinete", "cajon", "alacena"])) return "MOBILIARIO_FIJO";
@@ -448,9 +613,27 @@ function kpiTitleFromKey(key) {
     ELECTRICIDAD: "Electricidad visible",
     VENTANAS_CERRAMIENTOS: "Ventanas y cerramientos",
     PUERTAS_HERRAJES: "Puertas y herrajes",
-    MOBILIARIO_FIJO: "Mobiliario fijo"
+    MOBILIARIO_FIJO: "Mobiliario fijo",
+    DOCUMENTOS_CUMPLIMIENTO: "Documentos y cumplimiento"
   };
   return map[key] || key[0] + key.slice(1).toLowerCase();
+}
+
+export function kpiWeightForKey(key, scoreConfig) {
+  const cfg = normalizeScoreConfig(scoreConfig || {});
+  const k = String(key || "").toUpperCase();
+  const w = Number(cfg.kpiWeights?.[k]);
+  return Number.isFinite(w) && w > 0 ? w : 1;
+}
+
+/** Penalización por slot según KPI + severidad y score-config vigente (admin). */
+export function kpiPenaltyFromSeverity(kpiKey, severity, scoreConfig) {
+  const sev = String(severity || "").toLowerCase();
+  if (!sev || !kpiKey) return 0;
+  const cfg = normalizeScoreConfig(scoreConfig || {});
+  const kpiCfg = cfg.kpis?.[String(kpiKey).toUpperCase()];
+  if (!kpiCfg) return 0;
+  return Number(kpiCfg[sev] ?? 0);
 }
 
 function computeScoringByKpi(slots, scoreConfig) {
@@ -467,22 +650,31 @@ function computeScoringByKpi(slots, scoreConfig) {
     const group = byGroup.get(key);
     group.slotsCount += 1;
     if (!s.severity) return;
-    const sev = String(s.severity || "").toLowerCase();
-    const penalty = Number(cfg.kpis[key][sev] ?? 0);
+    const penalty = kpiPenaltyFromSeverity(key, s.severity, cfg);
     totalPenalty += penalty;
     group.impact += penalty;
   });
 
-  const byGroupArr = Array.from(byGroup.values())
-    .map(g => ({
+  const byGroupArr = Array.from(byGroup.values()).map((g) => {
+    const avgPenalty = g.slotsCount > 0 ? g.impact / g.slotsCount : 0;
+    const stiWeight = kpiWeightForKey(g.groupKey, cfg);
+    return {
       ...g,
-      scoreIfOnlyGroup: Math.max(0, Math.min(100, 100 - g.impact)),
-    }));
+      stiWeight,
+      scoreIfOnlyGroup: Math.max(0, Math.min(100, Math.round(100 - avgPenalty)))
+    };
+  });
 
   const scoredGroups = byGroupArr.filter(g => g.slotsCount > 0);
-  const avgScore = scoredGroups.length
-    ? scoredGroups.reduce((acc, g) => acc + g.scoreIfOnlyGroup, 0) / scoredGroups.length
-    : 0;
+  const weightedScoreSum = scoredGroups.reduce(
+    (acc, g) => acc + g.scoreIfOnlyGroup * kpiWeightForKey(g.groupKey, cfg),
+    0
+  );
+  const weightedTotal = scoredGroups.reduce(
+    (acc, g) => acc + kpiWeightForKey(g.groupKey, cfg),
+    0
+  );
+  const avgScore = weightedTotal > 0 ? weightedScoreSum / weightedTotal : 0;
   const score = Math.max(0, Math.min(100, Math.round(avgScore)));
   const badge = badgeFromScore(score, cfg);
 
@@ -511,7 +703,7 @@ export function computeScoringV2_2(findingsNormalized, slots, scoreConfig) {
   let totalImpact = 0;
 
   // optional breakdown by group for UI (informativo, no manda)
-  const byGroup = new Map(); // groupKey -> { title, impact }
+  const byGroup = new Map(); // groupKey -> { title, impact, findingCount }
 
   for (const f of findingsNormalized) {
     const slot = slotById.get(f.slotId);
@@ -531,8 +723,10 @@ export function computeScoringV2_2(findingsNormalized, slots, scoreConfig) {
 
     const gk = (slot.groupKey || "OTHER").toUpperCase();
     const gt = slot.groupTitle || "Otros";
-    if (!byGroup.has(gk)) byGroup.set(gk, { groupKey: gk, title: gt, impact: 0 });
-    byGroup.get(gk).impact += impact;
+    if (!byGroup.has(gk)) byGroup.set(gk, { groupKey: gk, title: gt, impact: 0, findingCount: 0 });
+    const grp = byGroup.get(gk);
+    grp.impact += impact;
+    grp.findingCount += 1;
   }
 
   let score = 100 - totalImpact;
@@ -540,12 +734,13 @@ export function computeScoringV2_2(findingsNormalized, slots, scoreConfig) {
 
   const badge = badgeFromScore(score, scoreConfig);
 
-  const byGroupArr = Array.from(byGroup.values())
-    .map(g => ({
+  const byGroupArr = Array.from(byGroup.values()).map((g) => {
+    const avgImpact = g.findingCount > 0 ? g.impact / g.findingCount : 0;
+    return {
       ...g,
-      // Informativo: "score estimado si solo existiera este grupo"
-      scoreIfOnlyGroup: Math.max(0, Math.min(100, 100 - g.impact)),
-    }));
+      scoreIfOnlyGroup: Math.max(0, Math.min(100, Math.round(100 - avgImpact)))
+    };
+  });
 
   return {
     scoreVersion: "SCORING_V2_2",

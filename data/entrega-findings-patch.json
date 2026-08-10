@@ -1,0 +1,332 @@
+{
+  "units": {
+    "cuvee-2:301": [
+      {
+        "id": "H-301-mqsvk9uv",
+        "recinto": "Living",
+        "descripcion": "Pintura deficiente",
+        "kpi": "Terminaciones",
+        "especialidad": "Pintor",
+        "severidad": "menor",
+        "estado": "abierto",
+        "apertura": "2026-06-25",
+        "cierre": null,
+        "foto": true,
+        "fotoUrl": "https://storage.googleapis.com/ainspecciona-photos-852721861524/entrega/cuvee-2/301/H-301-mqsvk9uv.jpg",
+        "target": {
+          "x": 0.5718654078451636,
+          "y": 0.38825175973801546
+        },
+        "origen": "agente"
+      },
+      {
+        "id": "H-301-mqsvkzvu",
+        "recinto": "Living",
+        "descripcion": "Guardapolvo faltante",
+        "kpi": "Terminaciones",
+        "especialidad": "Instalador de guardapolvos",
+        "severidad": "intermedia",
+        "estado": "abierto",
+        "apertura": "2026-06-25",
+        "cierre": null,
+        "foto": true,
+        "fotoUrl": "https://storage.googleapis.com/ainspecciona-photos-852721861524/entrega/cuvee-2/301/H-301-mqsvkzvu.jpg",
+        "target": {
+          "x": 0.5550458370261881,
+          "y": 0.410677854163316
+        },
+        "origen": "agente"
+      },
+      {
+        "id": "H-301-mqsvlj3a",
+        "recinto": "Cocina",
+        "descripcion": "Piso en mal estado",
+        "kpi": "Terminaciones",
+        "especialidad": "Instalador de cerámica",
+        "severidad": "intermedia",
+        "estado": "abierto",
+        "apertura": "2026-06-25",
+        "cierre": null,
+        "foto": true,
+        "fotoUrl": "https://storage.googleapis.com/ainspecciona-photos-852721861524/entrega/cuvee-2/301/H-301-mqsvlj3a.jpg",
+        "target": {
+          "x": 0.46814472112814864,
+          "y": 0.5312181116993063
+        },
+        "origen": "agente"
+      },
+      {
+        "id": "H-301-mqty02rx",
+        "recinto": "Comedor",
+        "descripcion": "Piso rayado",
+        "kpi": "Terminaciones",
+        "especialidad": "Instalador de piso flotante",
+        "severidad": "menor",
+        "estado": "abierto",
+        "apertura": "2026-06-25",
+        "cierre": null,
+        "foto": true,
+        "fotoUrl": "https://storage.googleapis.com/ainspecciona-photos-852721861524/entrega/cuvee-2/301/H-301-mqty02rx.jpg",
+        "target": {
+          "x": 0.33358815457634544,
+          "y": 0.702217081692223
+        },
+        "origen": "agente"
+      },
+      {
+        "id": "H-301-mqty0kth",
+        "recinto": "Comedor",
+        "descripcion": "Piso rayado",
+        "kpi": "Terminaciones",
+        "especialidad": "Instalador de piso flotante",
+        "severidad": "menor",
+        "estado": "abierto",
+        "apertura": "2026-06-25",
+        "cierre": null,
+        "foto": false,
+        "fotoUrl": null,
+        "target": null,
+        "origen": "agente"
+      },
+      {
+        "id": "H-301-mqty196w",
+        "recinto": "Tornillo",
+        "descripcion": "pintura en mal estado",
+        "kpi": "Terminaciones",
+        "especialidad": "Pintor",
+        "severidad": "menor",
+        "estado": "abierto",
+        "apertura": "2026-06-25",
+        "cierre": null,
+        "foto": true,
+        "fotoUrl": "https://storage.googleapis.com/ainspecciona-photos-852721861524/entrega/cuvee-2/301/H-301-mqty196w.jpg",
+        "target": {
+          "x": 0.6867991417748288,
+          "y": 0.2705147640051877
+        },
+        "origen": "agente"
+      },
+      {
+        "id": "H-301-mqtytz8s",
+        "recinto": "Cocina",
+        "descripcion": "Enchufe suelto",
+        "kpi": "Instalaciones Eléctricas",
+        "especialidad": "Electricista",
+        "severidad": "intermedia",
+        "estado": "abierto",
+        "apertura": "2026-06-25",
+        "cierre": null,
+        "foto": true,
+        "fotoUrl": "https://storage.googleapis.com/ainspecciona-photos-852721861524/entrega/cuvee-2/301/H-301-mqtytz8s.jpg",
+        "target": {
+          "x": 0.5494393134198631,
+          "y": 0.36582566531271493
+        },
+        "origen": "agente"
+      },
+      {
+        "id": "H-301-mqu1v3bx",
+        "recinto": "Escalera",
+        "descripcion": "Mancha en el muro",
+        "kpi": "Terminaciones",
+        "especialidad": "Pintor",
+        "severidad": "menor",
+        "estado": "abierto",
+        "apertura": "2026-06-25",
+        "cierre": null,
+        "foto": true,
+        "fotoUrl": "https://storage.googleapis.com/ainspecciona-photos-852721861524/entrega/cuvee-2/301/H-301-mqu1v3bx.jpg",
+        "target": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "origen": "agente"
+      },
+      {
+        "id": "H-301-mqu1w5fo",
+        "recinto": "Escritorio",
+        "descripcion": "Dos perforaciones en el muro",
+        "kpi": "Terminaciones",
+        "especialidad": "Yesero",
+        "severidad": "menor",
+        "estado": "abierto",
+        "apertura": "2026-06-25",
+        "cierre": null,
+        "foto": true,
+        "fotoUrl": "https://storage.googleapis.com/ainspecciona-photos-852721861524/entrega/cuvee-2/301/H-301-mqu1w5fo.jpg",
+        "target": {
+          "x": 0.44666665836256375,
+          "y": 0.5746938383217615
+        },
+        "origen": "agente"
+      },
+      {
+        "id": "H-301-mr14voi8",
+        "recinto": "Living",
+        "descripcion": "Piso con rotura",
+        "kpi": "Terminaciones",
+        "especialidad": "Instalador de cerámica",
+        "severidad": "intermedia",
+        "estado": "abierto",
+        "apertura": "2026-06-30",
+        "cierre": null,
+        "foto": true,
+        "fotoUrl": "https://storage.googleapis.com/ainspecciona-photos-852721861524/entrega/cuvee-2/301/H-301-mr14voi8.jpg",
+        "target": {
+          "x": 0.4877675537502866,
+          "y": 0.326580000068439
+        },
+        "origen": "agente"
+      },
+      {
+        "id": "H-301-mr14wqgs",
+        "recinto": "Cocina",
+        "descripcion": "Cerámica suelta",
+        "kpi": "Terminaciones",
+        "especialidad": "Instalador de cerámica",
+        "severidad": "intermedia",
+        "estado": "abierto",
+        "apertura": "2026-06-30",
+        "cierre": null,
+        "foto": true,
+        "fotoUrl": "https://storage.googleapis.com/ainspecciona-photos-852721861524/entrega/cuvee-2/301/H-301-mr14wqgs.jpg",
+        "target": {
+          "x": 0.3812436052301091,
+          "y": 0.09390927040594597
+        },
+        "origen": "agente"
+      },
+      {
+        "id": "H-301-mr14xave",
+        "recinto": "Dormitorio 1",
+        "descripcion": "Ventana sin sellar",
+        "kpi": "Terminaciones",
+        "especialidad": "Sellador de juntas y silicona",
+        "severidad": "intermedia",
+        "estado": "abierto",
+        "apertura": "2026-06-30",
+        "cierre": null,
+        "foto": true,
+        "fotoUrl": "https://storage.googleapis.com/ainspecciona-photos-852721861524/entrega/cuvee-2/301/H-301-mr14xave.jpg",
+        "target": {
+          "x": 0.5550458370261881,
+          "y": 0.4359072103917791
+        },
+        "origen": "agente"
+      },
+      {
+        "id": "H-301-mr5qng7i",
+        "recinto": "INE",
+        "descripcion": "pintura deficiente",
+        "kpi": "Terminaciones",
+        "especialidad": "Pintor",
+        "severidad": "menor",
+        "estado": "abierto",
+        "apertura": "2026-07-04",
+        "cierre": null,
+        "foto": true,
+        "fotoUrl": "https://storage.googleapis.com/ainspecciona-photos-852721861524/entrega/cuvee-2/301/H-301-mr5qng7i.jpg",
+        "target": {
+          "x": 0.6952089271843165,
+          "y": 0.46393982842340475
+        },
+        "origen": "agente"
+      },
+      {
+        "id": "H-301-mr5qof2q",
+        "recinto": "INE",
+        "descripcion": "piso con imperfección",
+        "kpi": "Terminaciones",
+        "especialidad": "Instalador de cerámica",
+        "severidad": "intermedia",
+        "estado": "abierto",
+        "apertura": "2026-07-04",
+        "cierre": null,
+        "foto": true,
+        "fotoUrl": "https://storage.googleapis.com/ainspecciona-photos-852721861524/entrega/cuvee-2/301/H-301-mr5qof2q.jpg",
+        "target": {
+          "x": 0.7849133048855187,
+          "y": 0.3602191417063898
+        },
+        "origen": "agente"
+      },
+      {
+        "id": "H-303-mrax9q84",
+        "recinto": "Dormitorio 1",
+        "descripcion": "Manchas en la pintura de la puerta",
+        "kpi": "Terminaciones",
+        "especialidad": "Pintor",
+        "severidad": "menor",
+        "estado": "abierto",
+        "apertura": "2026-07-07",
+        "cierre": null,
+        "foto": true,
+        "fotoUrl": "https://storage.googleapis.com/ainspecciona-photos-852721861524/entrega/cuvee-2/301/H-303-mrax9q84.jpg",
+        "target": null,
+        "origen": "agente"
+      },
+      {
+        "id": "H-303-mraxaxpe",
+        "recinto": "Dormitorio 1",
+        "descripcion": "Chapa de puerta en mal estado",
+        "kpi": "Terminaciones",
+        "especialidad": "Instalador de quincallería",
+        "severidad": "intermedia",
+        "estado": "abierto",
+        "apertura": "2026-07-07",
+        "cierre": null,
+        "foto": true,
+        "fotoUrl": "https://storage.googleapis.com/ainspecciona-photos-852721861524/entrega/cuvee-2/301/H-303-mraxaxpe.jpg",
+        "target": null,
+        "origen": "agente"
+      }
+    ],
+    "cuvee-2:308": [
+      {
+        "id": "H-308-mr9dbeki",
+        "recinto": "Dormitorio 1",
+        "descripcion": "Puerta con mancha",
+        "kpi": "Terminaciones",
+        "especialidad": "Pintor",
+        "severidad": "menor",
+        "estado": "abierto",
+        "apertura": "2026-07-06",
+        "cierre": null,
+        "foto": true,
+        "fotoUrl": "https://storage.googleapis.com/ainspecciona-photos-852721861524/entrega/cuvee-2/308/H-308-mr9dbeki.jpg",
+        "target": null,
+        "origen": "agente"
+      },
+      {
+        "id": "H-308-mr9dc88r",
+        "recinto": "Dormitorio 1",
+        "descripcion": "Muro, papel manchado",
+        "kpi": "Terminaciones",
+        "especialidad": "Instalador de papel mural",
+        "severidad": "menor",
+        "estado": "abierto",
+        "apertura": "2026-07-06",
+        "cierre": null,
+        "foto": true,
+        "fotoUrl": "https://storage.googleapis.com/ainspecciona-photos-852721861524/entrega/cuvee-2/308/H-308-mr9dc88r.jpg",
+        "target": null,
+        "origen": "agente"
+      },
+      {
+        "id": "H-308-mr9dcx35",
+        "recinto": "Dormitorio 1",
+        "descripcion": "Ventana corredera no cierra",
+        "kpi": "Ventanas y Cerramientos",
+        "especialidad": "Aluminiero",
+        "severidad": "intermedia",
+        "estado": "abierto",
+        "apertura": "2026-07-06",
+        "cierre": null,
+        "foto": true,
+        "fotoUrl": "https://storage.googleapis.com/ainspecciona-photos-852721861524/entrega/cuvee-2/308/H-308-mr9dcx35.jpg",
+        "target": null,
+        "origen": "agente"
+      }
+    ]
+  }
+}

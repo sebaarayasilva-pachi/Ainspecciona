@@ -35,6 +35,9 @@ export const FINDING_TO_PROBLEM_V22 = {
   // Cosmético
   COSMETIC_WEAR: "COSMETIC",
 
+  // Piso: juntas / cabezales con deformación compatible con humedad (laminado/flotante)
+  FLOOR_MOISTURE_JOINT_DAMAGE: "HUMIDITY_FILTRATION",
+
   // QA / validaciones técnicas (fotos rechazadas en captura, no llegan al scoring)
   NOT_PROPERTY_IMAGE: "COSMETIC",
   NOT_BATHROOM_IMAGE: "COSMETIC",

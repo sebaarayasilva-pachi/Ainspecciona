@@ -1,0 +1,637 @@
+/* RagTechnologySection — inteligencia especializada */
+.rag-technology {
+  --rag-bg: #080a0c;
+  --rag-text: #f3f1ec;
+  --rag-muted: #a9afb4;
+  --rag-accent: #f04438;
+  --rag-line: rgba(255, 255, 255, 0.1);
+  --rag-line-bright: rgba(255, 255, 255, 0.22);
+  --rag-node: rgba(255, 255, 255, 0.08);
+  --rag-max: 1280px;
+
+  position: relative;
+  background: var(--rag-bg);
+  color: var(--rag-text);
+  overflow: hidden;
+  border-top: 1px solid var(--rag-line);
+}
+
+.rag-technology::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.032) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.032) 1px, transparent 1px);
+  background-size: 48px 48px;
+  opacity: 0.55;
+}
+
+.rag-technology::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 55% 40% at 18% 42%, rgba(240, 68, 56, 0.06), transparent 70%),
+    radial-gradient(ellipse 45% 35% at 82% 58%, rgba(255, 255, 255, 0.03), transparent 65%);
+}
+
+.rag-technology__inner {
+  position: relative;
+  z-index: 1;
+  max-width: var(--rag-max);
+  margin: 0 auto;
+  padding: 150px 80px;
+  box-sizing: border-box;
+}
+
+/* ——— Intro ——— */
+.rag-technology__intro {
+  max-width: 880px;
+}
+
+.rag-technology__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--rag-muted);
+}
+
+.rag-technology__eyebrow::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  background: var(--rag-accent);
+}
+
+.rag-technology__title {
+  margin: 24px 0 0;
+  font-size: clamp(52px, 4.8vw, 76px);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.035em;
+  color: var(--rag-text);
+}
+
+.rag-technology__lead {
+  margin: 30px 0 0;
+  max-width: 760px;
+  font-size: 19px;
+  line-height: 1.65;
+  color: var(--rag-muted);
+}
+
+/* ——— Flow ——— */
+.rag-technology__flow-wrap {
+  position: relative;
+  margin-top: 88px;
+}
+
+.rag-technology__flow-line {
+  position: absolute;
+  top: 28px;
+  left: 12.5%;
+  right: 12.5%;
+  height: 1px;
+  background: var(--rag-line);
+  transform: scaleX(0);
+  transform-origin: left center;
+  z-index: 0;
+}
+
+.rag-technology.is-visible .rag-technology__flow-line {
+  animation: ragLineDraw 700ms ease forwards;
+  animation-delay: 380ms;
+}
+
+.rag-technology__flow {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.rag-step {
+  position: relative;
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.rag-technology.is-visible .rag-step:nth-child(1) {
+  animation: ragStepIn 480ms ease forwards;
+  animation-delay: 520ms;
+}
+
+.rag-technology.is-visible .rag-step:nth-child(2) {
+  animation: ragStepIn 480ms ease forwards;
+  animation-delay: 680ms;
+}
+
+.rag-technology.is-visible .rag-step:nth-child(3) {
+  animation: ragStepIn 480ms ease forwards;
+  animation-delay: 840ms;
+}
+
+.rag-technology.is-visible .rag-step:nth-child(4) {
+  animation: ragStepIn 480ms ease forwards;
+  animation-delay: 1000ms;
+}
+
+.rag-step__node {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  margin-bottom: 20px;
+  border-radius: 50%;
+  border: 1px solid var(--rag-line-bright);
+  background: var(--rag-bg);
+  box-shadow: 0 0 0 4px rgba(8, 10, 12, 0.9);
+}
+
+.rag-step__node::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: var(--rag-accent);
+  opacity: 0.85;
+  transform: scale(0);
+  transition: transform 300ms ease;
+}
+
+.rag-technology.is-visible .rag-step__node::after {
+  animation: ragNodePulse 400ms ease forwards;
+}
+
+.rag-technology.is-visible .rag-step:nth-child(1) .rag-step__node::after { animation-delay: 560ms; }
+.rag-technology.is-visible .rag-step:nth-child(2) .rag-step__node::after { animation-delay: 720ms; }
+.rag-technology.is-visible .rag-step:nth-child(3) .rag-step__node::after { animation-delay: 880ms; }
+.rag-technology.is-visible .rag-step:nth-child(4) .rag-step__node::after { animation-delay: 1040ms; }
+
+.rag-step__index {
+  display: block;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--rag-accent);
+  margin-bottom: 10px;
+}
+
+.rag-step__title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--rag-text);
+  letter-spacing: -0.01em;
+}
+
+.rag-step__text {
+  margin: 10px 0 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--rag-muted);
+}
+
+/* ——— Step 01 stat ——— */
+.rag-step__stat {
+  margin-top: 18px;
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.rag-technology.is-visible .rag-step--01 .rag-step__stat {
+  animation: ragStatIn 550ms ease forwards;
+  animation-delay: 600ms;
+}
+
+.rag-step__stat-value {
+  display: block;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: clamp(64px, 5vw, 84px);
+  font-weight: 500;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  color: #e8e6e1;
+}
+
+.rag-step__stat-label {
+  display: block;
+  margin-top: 6px;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--rag-muted);
+}
+
+/* ——— Step 02 fragments ——— */
+.rag-step__visual {
+  position: relative;
+  min-height: 120px;
+  margin-top: 16px;
+}
+
+.rag-step__fragments {
+  position: relative;
+  height: 110px;
+}
+
+.rag-step__fragment {
+  position: absolute;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8b939c;
+  padding: 4px 7px;
+  border: 1px solid var(--rag-line);
+  background: rgba(8, 10, 12, 0.75);
+  white-space: nowrap;
+  opacity: 0;
+}
+
+.rag-step__fragment:nth-child(1) { top: 4px; left: 0; }
+.rag-step__fragment:nth-child(2) { top: 28px; right: 0; }
+.rag-step__fragment:nth-child(3) { top: 58px; left: 8%; }
+.rag-step__fragment:nth-child(4) { top: 78px; right: 12%; }
+.rag-step__fragment:nth-child(5) { top: 36px; left: 38%; }
+
+.rag-technology.is-visible .rag-step__fragment:nth-child(1) { animation: ragFragmentIn 500ms ease forwards; animation-delay: 760ms; }
+.rag-technology.is-visible .rag-step__fragment:nth-child(2) { animation: ragFragmentIn 500ms ease forwards; animation-delay: 820ms; }
+.rag-technology.is-visible .rag-step__fragment:nth-child(3) { animation: ragFragmentIn 500ms ease forwards; animation-delay: 880ms; }
+.rag-technology.is-visible .rag-step__fragment:nth-child(4) { animation: ragFragmentIn 500ms ease forwards; animation-delay: 940ms; }
+.rag-technology.is-visible .rag-step__fragment:nth-child(5) { animation: ragFragmentIn 500ms ease forwards; animation-delay: 1000ms; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .rag-technology.is-visible .rag-step__fragment:nth-child(odd) {
+    animation-name: ragFragmentIn, ragFragmentDrift;
+    animation-duration: 500ms, 9s;
+    animation-timing-function: ease, ease-in-out;
+    animation-iteration-count: 1, infinite;
+    animation-fill-mode: forwards, none;
+    animation-delay: var(--rag-frag-delay, 760ms), 1.4s;
+  }
+
+  .rag-technology.is-visible .rag-step__fragment:nth-child(even) {
+    animation-name: ragFragmentIn, ragFragmentDrift;
+    animation-duration: 500ms, 8s;
+    animation-timing-function: ease, ease-in-out;
+    animation-iteration-count: 1, infinite;
+    animation-fill-mode: forwards, none;
+    animation-direction: normal, reverse;
+    animation-delay: var(--rag-frag-delay, 820ms), 1.4s;
+  }
+
+  .rag-step__fragment:nth-child(1) { --rag-frag-delay: 760ms; }
+  .rag-step__fragment:nth-child(2) { --rag-frag-delay: 820ms; }
+  .rag-step__fragment:nth-child(3) { --rag-frag-delay: 880ms; }
+  .rag-step__fragment:nth-child(4) { --rag-frag-delay: 940ms; }
+  .rag-step__fragment:nth-child(5) { --rag-frag-delay: 1000ms; }
+}
+
+/* ——— Step 03 RAG ——— */
+.rag-step__rag {
+  position: relative;
+  height: 120px;
+  margin-top: 8px;
+}
+
+.rag-step__rag-lines {
+  position: absolute;
+  inset: 0 0 36px 0;
+  width: 100%;
+  height: auto;
+  opacity: 0;
+}
+
+.rag-technology.is-visible .rag-step__rag-lines {
+  animation: ragFadeIn 600ms ease forwards;
+  animation-delay: 920ms;
+}
+
+.rag-step__rag-core {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: calc(100% - 8px);
+  padding: 10px 8px;
+  text-align: center;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 9px;
+  font-weight: 500;
+  line-height: 1.45;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--rag-text);
+  border: 1px solid var(--rag-line-bright);
+  background: rgba(17, 21, 25, 0.85);
+  opacity: 0;
+}
+
+.rag-technology.is-visible .rag-step__rag-core {
+  animation: ragCoreIn 550ms ease forwards;
+  animation-delay: 980ms;
+}
+
+/* ——— Step 04 results ——— */
+.rag-step__results {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.rag-step__result {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #c2c6ca;
+  opacity: 0;
+  transform: translateX(-6px);
+}
+
+.rag-step__result::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--rag-accent);
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.rag-technology.is-visible .rag-step__result:nth-child(1) { animation: ragResultIn 400ms ease forwards; animation-delay: 1080ms; }
+.rag-technology.is-visible .rag-step__result:nth-child(2) { animation: ragResultIn 400ms ease forwards; animation-delay: 1140ms; }
+.rag-technology.is-visible .rag-step__result:nth-child(3) { animation: ragResultIn 400ms ease forwards; animation-delay: 1200ms; }
+.rag-technology.is-visible .rag-step__result:nth-child(4) { animation: ragResultIn 400ms ease forwards; animation-delay: 1260ms; }
+
+.rag-step__result-tag {
+  margin-left: auto;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 8px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8b939c;
+  padding: 2px 5px;
+  border: 1px solid var(--rag-line);
+}
+
+/* ——— Statement ——— */
+.rag-technology__statement {
+  margin-top: 112px;
+  max-width: 820px;
+  opacity: 0;
+  transform: translateY(14px);
+}
+
+.rag-technology.is-visible .rag-technology__statement {
+  animation: ragStepIn 420ms ease forwards;
+  animation-delay: 1180ms;
+}
+
+.rag-technology__marker {
+  display: block;
+  width: 48px;
+  height: 2px;
+  background: var(--rag-accent);
+  margin-bottom: 28px;
+}
+
+.rag-technology__declaration {
+  margin: 0;
+  font-size: clamp(42px, 3.6vw, 58px);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  color: var(--rag-text);
+}
+
+.rag-technology__declaration-line {
+  display: block;
+}
+
+.rag-technology__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 36px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--rag-text);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.22);
+  padding-bottom: 3px;
+  transition: border-color 180ms ease;
+}
+
+.rag-technology__cta span {
+  color: var(--rag-accent);
+  transition: transform 180ms ease;
+}
+
+.rag-technology__cta:hover {
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+.rag-technology__cta:hover span {
+  transform: translateX(3px);
+}
+
+.rag-technology__cta:focus-visible {
+  outline: 2px solid var(--rag-text);
+  outline-offset: 4px;
+}
+
+/* ——— Intro animations ——— */
+.rag-technology [data-rag-intro] {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.rag-technology.is-visible [data-rag-intro="eyebrow"] {
+  animation: ragFadeIn 450ms ease forwards;
+}
+
+.rag-technology.is-visible [data-rag-intro="title"] {
+  animation: ragStepIn 550ms ease forwards;
+  animation-delay: 80ms;
+}
+
+.rag-technology.is-visible [data-rag-intro="lead"] {
+  animation: ragStepIn 550ms ease forwards;
+  animation-delay: 180ms;
+}
+
+@keyframes ragFadeIn {
+  to { opacity: 1; }
+}
+
+@keyframes ragStepIn {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ragLineDraw {
+  to { transform: scaleX(1); }
+}
+
+@keyframes ragNodePulse {
+  to { transform: scale(1); }
+}
+
+@keyframes ragStatIn {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ragFragmentIn {
+  to { opacity: 1; }
+}
+
+@keyframes ragFragmentDrift {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(2px, -3px); }
+}
+
+@keyframes ragCoreIn {
+  to { opacity: 1; }
+}
+
+@keyframes ragResultIn {
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rag-technology [data-rag-intro],
+  .rag-step,
+  .rag-step__stat,
+  .rag-step__fragment,
+  .rag-step__rag-lines,
+  .rag-step__rag-core,
+  .rag-step__result,
+  .rag-technology__statement,
+  .rag-technology__flow-line {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+
+  .rag-step__node::after {
+    transform: scale(1) !important;
+    animation: none !important;
+  }
+
+  .rag-technology__flow-line {
+    transform: scaleX(1) !important;
+  }
+}
+
+/* ——— Tablet ——— */
+@media (max-width: 1024px) {
+  .rag-technology__inner {
+    padding: 120px 40px;
+  }
+
+  .rag-technology__flow {
+    grid-template-columns: repeat(2, 1fr);
+    row-gap: 48px;
+  }
+
+  .rag-technology__flow-line {
+    display: none;
+  }
+
+  .rag-step__node {
+    margin-bottom: 16px;
+  }
+}
+
+/* ——— Mobile ——— */
+@media (max-width: 720px) {
+  .rag-technology__inner {
+    padding: 96px 20px;
+  }
+
+  .rag-technology__title {
+    font-size: clamp(42px, 11vw, 54px);
+  }
+
+  .rag-technology__lead {
+    font-size: 17px;
+  }
+
+  .rag-technology__flow-wrap {
+    margin-top: 56px;
+  }
+
+  .rag-technology__flow {
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding-left: 24px;
+  }
+
+  .rag-technology__flow::before {
+    content: "";
+    position: absolute;
+    top: 12px;
+    bottom: 12px;
+    left: 6px;
+    width: 1px;
+    background: var(--rag-line);
+  }
+
+  .rag-step {
+    padding: 0 0 40px;
+  }
+
+  .rag-step:last-child {
+    padding-bottom: 0;
+  }
+
+  .rag-step__node {
+    position: absolute;
+    left: -24px;
+    top: 4px;
+    width: 12px;
+    height: 12px;
+    margin: 0;
+  }
+
+  .rag-step__stat-value {
+    font-size: clamp(56px, 16vw, 72px);
+  }
+
+  .rag-step__fragments {
+    height: 96px;
+  }
+
+  .rag-step__fragment {
+    font-size: 8px;
+    padding: 3px 6px;
+  }
+
+  .rag-technology__statement {
+    margin-top: 72px;
+  }
+
+  .rag-technology__declaration {
+    font-size: clamp(34px, 9vw, 42px);
+  }
+}

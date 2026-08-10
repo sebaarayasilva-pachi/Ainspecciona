@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <script>(function(){try{var t=localStorage.getItem("entrega-theme");document.documentElement.setAttribute("data-theme",t==="light"?"light":"dark");}catch(e){document.documentElement.setAttribute("data-theme","dark");}})();</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Proyecto · Ainspecciona Recepción</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/entrega/assets/entrega.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    .elev-cell { cursor: pointer; transition: opacity .12s; }
+    .elev-cell:hover rect { fill-opacity: 0.62; }
+    .seg { display: inline-flex; background: var(--surface-2); border-radius: 10px; padding: 3px; gap: 2px; border: 1px solid var(--border); }
+    .seg-btn {
+      border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 12px; font-weight: 700;
+      padding: 7px 12px; border-radius: 8px; cursor: pointer; line-height: 1;
+    }
+    .seg-btn.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+    .seg-btn:hover:not(.active) { color: var(--text); }
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+    <div id="sidebar"></div>
+    <div class="main">
+      <header class="topbar">
+        <div class="titles">
+          <h1 id="projTitle">Proyecto</h1>
+          <div class="crumb">Dashboard del proyecto</div>
+        </div>
+        <div class="spacer"></div>
+        <div id="projSelector"></div>
+        <div id="dateChip"></div>
+        <span class="status-live" id="liveChip"></span>
+      </header>
+      <div class="content" id="content"></div>
+    </div>
+  </div>
+
+  <script src="/entrega/assets/entrega-app.js"></script>
+  <script>
+    (async function () {
+      const E = window.Entrega;
+      try {
+      if (!E) throw new Error("No se cargó entrega-app.js");
+      const seed = await E.loadSeed();
+      const kpiCatalog = await E.loadKpiCatalog(seed);
+      let project = E.getProject(seed, E.currentProjectId());
+      if (!project) {
+        document.getElementById("content").innerHTML = `<div class="card pad-lg"><div class="card-title">Proyecto no disponible</div><p class="muted">No se pudo cargar Proyecto Demo desde el seed.</p></div>`;
+        return;
+      }
+      E.setProject(project.id);
+
+      document.getElementById("sidebar").innerHTML = E.renderSidebar("proyecto", project, seed);
+      document.getElementById("projTitle").textContent = project.name;
+      document.getElementById("projSelector").innerHTML = E.projectSelector(seed, project);
+      document.getElementById("dateChip").innerHTML = E.dateChip(project);
+      document.getElementById("liveChip").textContent = project.statusLabel || "";
+      E.bindProjectSelector();
+      E.ensureChartDefaults();
+      document.getElementById("content").innerHTML = `<div class="card pad-lg"><p class="muted">Cargando métricas de cierre…</p></div>`;
+
+      let findingsMap = {};
+      try {
+        findingsMap = await E.loadProjectFindingsMap(seed, project.id);
+      } catch (err) {
+        console.error("[proyecto] findings", err);
+      }
+      let enriched;
+      try {
+        enriched = E.enrichProjectWithFindings(project, findingsMap, seed, kpiCatalog);
+        project = enriched.project;
+      } catch (err) {
+        console.error("[proyecto] enrich", err);
+        enriched = { project, hasLive: false, avancePorPiso: (project.charts && project.charts.avancePorPiso) || [], topUnidadesCriticas: project.charts && project.charts.topUnidadesCriticas };
+      }
+
+      const m = project.metrics;
+      const c = project.charts;
+      const avancePorPiso = enriched.hasLive ? enriched.avancePorPiso : (c.avancePorPiso || []);
+      const topUnits = enriched.topUnidadesCriticas || c.topUnidadesCriticas || [];
+      if (enriched.hasLive) {
+        document.getElementById("liveChip").textContent = "Cierre en vivo";
+      }
+      const forecastBundle = E.riesgoEntregaFromMetrics(
+        m,
+        enriched.hasLive,
+        project.riesgoEntrega,
+        project,
+        enriched.chartHallazgos || enriched.allHallazgos || []
+      );
+      const riesgo = forecastBundle;
+      const forecast = forecastBundle.forecast || E.computeEntregaForecast(
+        project,
+        m,
+        enriched.chartHallazgos || enriched.allHallazgos || [],
+        enriched.hasLive
+      );
+      const fmtEntrega = (d) => (E.fmtEntregaDate ? E.fmtEntregaDate(d) : "—");
+      const holguraTxt =
+        forecast.diasHolgura == null
+          ? "Sin proyección de ritmo"
+          : forecast.diasHolgura >= 0
+            ? `${forecast.diasHolgura} día${forecast.diasHolgura === 1 ? "" : "s"} de holgura`
+            : `${Math.abs(forecast.diasHolgura)} día${Math.abs(forecast.diasHolgura) === 1 ? "" : "s"} de atraso proy.`;
+      const fechasKpi = `<div class="k-sub" style="margin-top:6px;line-height:1.45">Entrega: <b>${fmtEntrega(forecast.comprometida || project.fechaComprometidaEntrega)}</b></div>
+            <div class="k-sub" style="line-height:1.45">Proyectada: <b>${fmtEntrega(forecast.proyectada || project.fechaProyectadaEntrega)}</b></div>
+            <div class="k-sub" style="line-height:1.45">${holguraTxt} · avance ${forecast.avance ?? 0}%</div>`;
+
+      function kpiDonut(pct, color) {
+        return `<div class="donut" style="width:54px;height:54px"><canvas></canvas><div class="donut-center">${pct}%</div></div>`;
+      }
+
+      const content = document.getElementById("content");
+      content.innerHTML = `
+        <div class="kpi-row">
+          <div class="kpi with-donut">
+            <div><div class="k-label">% Avance recepción</div><div class="k-value">${m.avanceRecepcion}%</div><div class="k-sub">${
+              enriched.hasLive
+                ? `${E.fmt(m.unidadesInspeccionadas ?? m.unidadesRecibidas ?? 0)} / ${E.fmt(m.unidadesTotales)} inspeccionados`
+                : `${E.fmt(m.hallazgosRecepcion ?? 0)} / ${E.fmt(m.hallazgosRecepcionTotal ?? m.observacionesTotales)} hallazgos`
+            }</div></div>
+            ${miniDonut(m.avanceRecepcion, "#6366F1")}
+          </div>
+          <div class="kpi with-donut">
+            <div><div class="k-label">% Avance cierre</div><div class="k-value">${
+              enriched.hasLive
+                ? (m.avanceCierreHallazgos ?? m.avanceCierre ?? 0)
+                : (m.avanceUnidadesRecibidas ?? Math.round((m.unidadesRecibidas / m.unidadesTotales) * 100))
+            }%</div><div class="k-sub">${
+              enriched.hasLive
+                ? `${E.fmt(m.hallazgosCerrados ?? 0)} / ${E.fmt(m.hallazgosTotales ?? 0)} hallazgos`
+                : `${m.unidadesRecibidas} / ${m.unidadesTotales} unid.`
+            }</div></div>
+            ${miniDonut(
+              enriched.hasLive
+                ? (m.avanceCierreHallazgos ?? m.avanceCierre ?? 0)
+                : (m.avanceUnidadesRecibidas ?? Math.round((m.unidadesRecibidas / m.unidadesTotales) * 100)),
+              "#22C55E"
+            )}
+          </div>
+          <div class="kpi"><div class="k-label">💬 Observaciones totales</div><div class="k-value">${E.fmt(enriched.hasLive ? (m.hallazgosTotales || m.observacionesTotales) : m.observacionesTotales)}</div><div class="k-sub">${enriched.hasLive && m.hallazgosAbiertos != null ? `${m.hallazgosAbiertos} abiertas` : "100% del total"}</div></div>
+          <div class="kpi"><div class="k-label">🚩 Críticas abiertas</div><div class="k-value">${m.criticasAbiertas}</div><div class="k-sub">${m.criticasPctTotal}% del total</div></div>
+          <div class="kpi"><div class="k-label">🔧 OT activas</div><div class="k-value">${m.otActivas}</div><div class="k-sub">${enriched.hasLive ? `${m.otAbiertas} hallazgos abiertos` : `${m.otAbiertas} abiertas`}</div></div>
+          <div class="kpi"><div class="k-label">✅ Deptos listos</div><div class="k-value">${enriched.hasLive ? (m.unidadesListas ?? 0) : m.unidadesRecibidas}</div><div class="k-sub">${
+            enriched.hasLive
+              ? `de ${m.unidadesTotales} · ${m.unidadesInspeccionadas ?? 0} con captura`
+              : `de ${m.unidadesTotales} (${m.avanceUnidadesRecibidas ?? Math.round((m.unidadesRecibidas / m.unidadesTotales) * 100)}%)`
+          }</div></div>
+          <div class="kpi kpi-riesgo${riesgo.cls === "critico" ? " kpi-riesgo--alert" : ""}">
+            <div class="k-label">📅 Fechas de entrega</div>
+            ${fechasKpi}
+            <div class="k-value" style="margin-top:4px"><span class="riesgo-badge badge ${riesgo.cls}">${riesgo.label}</span></div>
+          </div>
+        </div>
+
+        <div class="layout-main-side">
+          <div class="grid" style="gap:16px">
+            <div class="card pad-lg">
+              <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+                <span>Visión general del proyecto · Elevación del edificio <span class="hint">depto por piso · color por estado · clic para abrir</span></span>
+                <div class="seg" id="elevFaceSeg" role="group" aria-label="Fachada">
+                  <button type="button" class="seg-btn" data-face="poniente">Poniente</button>
+                  <button type="button" class="seg-btn" data-face="oriente">Oriente</button>
+                </div>
+              </div>
+              <div class="plan-wrap" id="elevWrap"></div>
+              <div class="legend">
+                ${legendDot("#22C55E", "Lista")}${legendDot("#FACC15", "Pendiente menor")}${legendDot("#F97316", "Pendiente intermedio")}${legendDot("#EF4444", "Crítico")}${legendDot("#D1D5DB", "No inspeccionado")}
+              </div>
+            </div>
+
+            <div class="cols-3">
+              <div class="card" id="kpi"><div class="card-title">Hallazgos por KPI</div><div class="chart-box sm"><canvas id="chKpi"></canvas></div><div class="mt" id="kpiLegend"></div></div>
+              <div class="card" id="especialidades"><div class="card-title">Observaciones por especialidad</div><div class="chart-box chart-box-esp"><canvas id="chEsp"></canvas></div></div>
+              <div class="card"><div class="card-title">Aperturas vs cierres <span class="hint">(14 días)</span></div><div class="chart-box sm"><canvas id="chLine"></canvas></div></div>
+            </div>
+
+            <div class="cols-3">
+              <div class="card"><div class="card-title">${enriched.hasLive ? "Avance cierre por piso" : "Avance por piso"}</div><div class="chart-box sm"><canvas id="chFloor"></canvas></div></div>
+              <div class="card pad-lg">
+                <div class="ai-summary">
+                  <div class="ai-ico">${E.svgIcon("kpi")}</div>
+                  <div><div class="card-title" style="margin-bottom:6px">Resumen ejecutivo generado por IA</div><p>${project.resumenEjecutivo}</p></div>
+                </div>
+              </div>
+              <div class="card"><div class="card-title" id="topUnitsTitle">Top unidades críticas</div><table class="tbl" id="topUnits"></table></div>
+            </div>
+          </div>
+
+          <div class="grid" style="gap:16px">
+            <div class="card">
+              <div class="card-title">Panel gerencial</div>
+              ${panelRow("kpi", "KPI crítico dominante", project.panelGerencial.kpiDominante.nombre + " (" + project.panelGerencial.kpiDominante.pct + "% del total)")}
+              ${panelRow("especialidades", "Especialidad con mayor atraso", project.panelGerencial.especialidadMayorAtraso.nombre + " (" + project.panelGerencial.especialidadMayorAtraso.pct + "% pendientes)")}
+              ${panelRow("pisos", "Piso crítico", project.panelGerencial.pisoCritico.nombre + " (" + project.panelGerencial.pisoCritico.criticas + " críticas)", true)}
+              ${panelRow("unidades", "Críticas", project.panelGerencial.unidadesBloqueadas + " críticas", true)}
+              ${panelRow("ot", "OT atrasadas", project.panelGerencial.otAtrasadas + " órdenes", true)}
+              <a class="btn primary block" style="margin-top:14px" href="${E.withProject("/entrega/piso", project.id)}">Ir al proyecto</a>
+            </div>
+            <div class="card">
+              <div class="card-title">Acciones recomendadas</div>
+              ${project.accionesRecomendadas.map(actionItem).join("")}
+              <a class="btn block" style="margin-top:10px" href="${E.withProject("/entrega/reportes", project.id)}">Ver plan de acción sugerido</a>
+            </div>
+          </div>
+        </div>`;
+
+      // Elevación: Poniente = ×01–×04 · Oriente = ×05–×08 (fachada opuesta)
+      (function renderElevacion() {
+        const IMGW = 988, IMGH = 335;
+        const rowH = 53;
+        const rows = [
+          { id: "piso-5", label: "P5", y: 51 },
+          { id: "piso-4", label: "P4", y: 104 },
+          { id: "piso-3", label: "P3", y: 157 },
+          { id: "piso-2", label: "P2", y: 210 },
+          { id: "piso-1", label: "P1", y: 263 },
+        ];
+        // 4 deptos por fachada: 2 bloque izq + 2 bloque der (núcleo al centro)
+        const slots = [
+          { x: 60, w: 222 },
+          { x: 281, w: 217 },
+          { x: 499, w: 199 },
+          { x: 698, w: 222 },
+        ];
+        const FACES = {
+          poniente: { label: "Poniente", unitCols: [1, 2, 3, 4] },
+          // Oriente se mira desde el otro lado → orden espejo en planta
+          oriente: { label: "Oriente", unitCols: [8, 7, 6, 5] },
+        };
+
+        function unitRef(floorId, unitCol) {
+          return floorId.replace("piso-", "") + "0" + unitCol;
+        }
+
+        function cellData(floorId, unitCol) {
+          const ref = unitRef(floorId, unitCol);
+          const fromUnits = (enriched.units || []).find((x) => String(x.ref) === String(ref));
+          const detail = (project.floorDetail || {})[floorId];
+          const u = fromUnits || (detail ? detail.units.find((x) => String(x.ref) === String(ref)) : null);
+          // Live: solo _hallazgos del API. Sin array o vacío = sin color.
+          const hall = u && Array.isArray(u._hallazgos) ? u._hallazgos : [];
+          let estado = "no_inspeccionado";
+          if (enriched.hasLive) {
+            if (hall.length) {
+              estado = E.estadoForUnitDisplay({ ...u, _hallazgos: hall });
+            }
+          } else if (u) {
+            estado = E.estadoForUnitDisplay(u);
+          } else {
+            const f = project.floors.find((x) => x.id === floorId);
+            estado = (f && f.cells && f.cells[unitCol - 1]) || "no_inspeccionado";
+          }
+          const hallCount = enriched.hasLive ? hall.length : (u && u.hallazgos) || hall.length || 0;
+          return { ref, estado, u, hasUnit: true, hallCount };
+        }
+
+        function paint(faceKey) {
+          const face = FACES[faceKey] || FACES.poniente;
+          let g = "";
+          rows.forEach((r) => {
+            g += `<text x="30" y="${r.y + rowH / 2 + 6}" text-anchor="middle" font-size="17" font-weight="800" fill="var(--plan-ink)">${r.label}</text>`;
+            face.unitCols.forEach((unitCol, i) => {
+              const slot = slots[i];
+              const d = cellData(r.id, unitCol);
+              // Color solo con hallazgos reales; vacío = máscara neutra (oculta tintes del PNG).
+              const empty = enriched.hasLive ? !(d.hallCount > 0) : (!d.estado || d.estado === "no_inspeccionado");
+              const color = empty ? (E.cssVar ? E.cssVar("--surface-2", "#1A2234") : "#1A2234") : (E.STATE_COLORS[d.estado] || "#64748B");
+              const fillOp = empty ? "0.62" : "0.42";
+              const stroke = empty ? "#CBD5E1" : color;
+              const strokeOp = empty ? "0.7" : "1";
+              const href = `${E.withProject("/entrega/unidad", project.id)}&u=${d.ref}`;
+              const sub = ` · ${d.hallCount || 0} hallazgos`;
+              g += `<g class="elev-cell" onclick="location.href='${href}'">
+                  <rect x="${slot.x}" y="${r.y}" width="${slot.w}" height="${rowH}" rx="3" fill="${color}" fill-opacity="${fillOp}" stroke="${stroke}" stroke-opacity="${strokeOp}" stroke-width="2"/>
+                  <text x="${slot.x + slot.w / 2}" y="${r.y + rowH / 2 + 8}" text-anchor="middle" font-size="24" font-weight="800" fill="#fff" style="paint-order:stroke;stroke:rgba(0,0,0,.45);stroke-width:3.5px">${d.ref}</text>
+                  <title>Fachada ${face.label} · Depto ${d.ref} — ${empty ? "No inspeccionado" : (E.STATE_LABELS[d.estado] || d.estado)}${sub}</title>
+                </g>`;
+            });
+          });
+          document.getElementById("elevWrap").innerHTML = `<svg viewBox="0 0 ${IMGW} ${IMGH}" preserveAspectRatio="xMidYMid meet">
+              <image href="/entrega/assets/elevacion-edificio.png" x="0" y="0" width="${IMGW}" height="${IMGH}" preserveAspectRatio="none"/>
+              ${g}
+            </svg>
+            <div class="muted" style="margin-top:8px;font-size:12px;font-weight:600">Fachada ${face.label} · deptos ${face.unitCols.map((c) => "×0" + c).join(" · ")}</div>`;
+        }
+
+        // Si hay captura en 05–08 (p. ej. 405), abrir Oriente por defecto.
+        const liveRefs = (enriched.units || [])
+          .filter((u) => Array.isArray(u._hallazgos) && u._hallazgos.length)
+          .map((u) => String(u.ref));
+        const preferOriente = liveRefs.some((ref) => /0[5-8]$/.test(ref));
+        let faceKey = preferOriente ? "oriente" : "poniente";
+
+        function syncSeg() {
+          document.querySelectorAll("#elevFaceSeg .seg-btn").forEach((btn) => {
+            btn.classList.toggle("active", btn.getAttribute("data-face") === faceKey);
+          });
+        }
+
+        document.getElementById("elevFaceSeg").addEventListener("click", (ev) => {
+          const btn = ev.target.closest(".seg-btn");
+          if (!btn) return;
+          faceKey = btn.getAttribute("data-face") || "poniente";
+          syncSeg();
+          paint(faceKey);
+        });
+
+        syncSeg();
+        paint(faceKey);
+      })();
+
+      const topMode = topUnits.length && topUnits[0].mode === "abiertos" ? "abiertos" : "criticas";
+      const topTitle = document.getElementById("topUnitsTitle");
+      if (topTitle) {
+        topTitle.textContent = topMode === "abiertos" ? "Top unidades con hallazgos" : "Top unidades críticas";
+      }
+      document.getElementById("topUnits").innerHTML =
+        `<thead><tr><th>Unidad</th><th class="num">Piso</th><th class="num">${topMode === "abiertos" ? "Abiertos" : "Críticas"}</th><th>Estado</th></tr></thead><tbody>` +
+        (topUnits.length
+          ? topUnits
+              .map((u) => {
+                const n = topMode === "abiertos" ? u.abiertos ?? u.hallazgos ?? 0 : u.criticas;
+                return `<tr class="clickable" onclick="location.href='${E.withProject("/entrega/unidad", project.id)}&u=${u.unidad}'"><td><b>${u.unidad}</b></td><td class="num">${u.piso}</td><td class="num${topMode === "criticas" ? " crit" : ""}">${n}</td><td><span class="badge ${u.estado}">${E.STATE_LABELS[u.estado] || u.estado}</span></td></tr>`;
+              })
+              .join("")
+          : `<tr><td colspan="4" class="muted">Sin unidades con hallazgos abiertos.</td></tr>`) +
+        `</tbody>`;
+
+      // Charts desde hallazgos (live si hay; seedItems solo como fallback)
+      const chartHallazgos = enriched.chartHallazgos || enriched.allHallazgos || [];
+      const kpiChart = E.chartDataKpi({
+        hallazgos: chartHallazgos.length ? chartHallazgos : null,
+        seedItems: c.hallazgosPorKpi,
+        catalog: kpiCatalog,
+      });
+      E.donutChart(document.getElementById("chKpi"), kpiChart);
+      document.getElementById("kpiLegend").innerHTML = E.legendList(kpiChart, { total: kpiChart.reduce((a, b) => a + b.value, 0) });
+      const espChart = E.chartDataEsp({
+        hallazgos: chartHallazgos.length ? chartHallazgos : null,
+        seedItems: c.observacionesPorEspecialidad,
+        catalog: kpiCatalog,
+        limit: 12,
+        knownOnly: false,
+      });
+      const espBox = document.querySelector("#especialidades .chart-box-esp");
+      if (espBox) espBox.style.height = Math.max(200, 28 + espChart.length * 28) + "px";
+      E.barChart(document.getElementById("chEsp"), espChart, { horizontal: true, catalog: kpiCatalog });
+      const timeline = chartHallazgos.length ? E.hallazgosTimeline(chartHallazgos) : null;
+      E.lineChart(document.getElementById("chLine"), timeline || (enriched.hasLive ? null : c.aperturasVsCierres));
+      // Live: solo pisos con captura (incl. 0% cierre). Seed: todos.
+      const floorChartData = (avancePorPiso || [])
+        .filter((i) => !enriched.hasLive || (i.inspeccionadas || 0) > 0 || (i.hallazgos || 0) > 0)
+        .map((i) => ({ ...i, color: i.color || "#22C55E" }));
+      E.barChart(document.getElementById("chFloor"), floorChartData);
+
+      // Helpers de render
+      function actionItem(t) {
+        return `<div class="action-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg><span>${t}</span></div>`;
+      }
+      } catch (err) {
+        console.error("[proyecto]", err);
+        document.getElementById("content").innerHTML = `<div class="card pad-lg"><div class="card-title">Error al cargar el proyecto</div><p class="muted">${E && E.escapeHtml ? E.escapeHtml(String(err.message || err)) : String(err)}</p></div>`;
+      }
+    })();
+
+    function miniDonut(pct, color) {
+      const id = "d" + Math.random().toString(36).slice(2);
+      setTimeout(() => {
+        const cv = document.getElementById(id);
+        if (cv && window.Chart) new Chart(cv, { type: "doughnut", data: { datasets: [{ data: [pct, 100 - pct], backgroundColor: [color, E.cssVar("--chart-grid", "#243044")], borderWidth: 0 }] }, options: { cutout: "72%", plugins: { legend: { display: false }, tooltip: { enabled: false } }, responsive: false } });
+      }, 0);
+      return `<div class="donut" style="width:54px;height:54px"><canvas id="${id}" width="54" height="54"></canvas><div class="donut-center">${pct}%</div></div>`;
+    }
+    function legendDot(color, label) { return `<span><i class="dot" style="background:${color}"></i>${label}</span>`; }
+    function panelRow(icon, label, value, crit) {
+      return `<div class="panel-row"><div class="p-ico">${window.Entrega.svgIcon(icon)}</div><div><div class="p-label">${label}</div><div class="p-value ${crit ? "crit" : ""}">${value}</div></div></div>`;
+    }
+  </script>
+</body>
+</html>

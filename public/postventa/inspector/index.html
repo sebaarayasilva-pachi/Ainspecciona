@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#070b10" />
+  <title>Mis tickets · Inspector</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=IBM+Plex+Sans:wght@400;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/postventa/inspector/assets/inspector.css?v=1" />
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div class="brand">Ainspecciona <small id="userLabel">Inspector</small></div>
+      <button type="button" class="btn" style="width:auto;min-height:36px;padding:8px 12px;font-size:12px;" id="logoutBtn">Salir</button>
+    </div>
+    <h1 class="h1">Cola en terreno</h1>
+    <p class="sub" id="sub">Tickets asignados a ti</p>
+    <div id="list"><div class="empty">Cargando…</div></div>
+  </div>
+  <script src="/postventa/inspector/assets/inspector-app.js?v=5"></script>
+  <script>
+    (async function () {
+      const I = window.PvInspector;
+      const me = await I.ensureAuth();
+      if (!me) return;
+      document.getElementById("userLabel").textContent = (me.user && me.user.fullName) || "Inspector";
+      document.getElementById("logoutBtn").onclick = () => I.logout();
+
+      const FIELD = new Set(["asignada", "programado", "en_ejecucion"]);
+      const res = await I.portalFetch("/api/postventa/portal/my-tickets");
+      const data = await res.json();
+      const list = document.getElementById("list");
+      if (!res.ok || !data.ok) {
+        list.innerHTML = `<div class="empty">${I.escapeHtml(data.message || "No se pudo cargar.")}</div>`;
+        return;
+      }
+      const tickets = (data.tickets || []).filter((t) => FIELD.has(t.status));
+      document.getElementById("sub").textContent =
+        tickets.length + " abierto(s) · " + ((me.tenant && me.tenant.name) || "");
+
+      if (!tickets.length) {
+        list.innerHTML = `<div class="empty">No tienes tickets en terreno.<br/><br/>
+          Entra al <a href="/postventa">portal</a>, abre el proyecto y asegúrate de estar como <b>inspector de la obra</b>.<br/>
+          Luego vuelve a esta pantalla.
+        </div>`;
+        return;
+      }
+
+      list.innerHTML = tickets
+        .map((t) => {
+          const sched = I.fmtSchedule(t.scheduledAt);
+          return `<a class="card card-link" href="/postventa/inspector/ticket?id=${encodeURIComponent(t.shortId)}">
+            <div class="row">
+              <div>
+                <div class="mono" style="font-weight:700;font-size:14px;">${I.escapeHtml(t.shortId)}</div>
+                <div style="font-weight:700;margin-top:4px;">${I.escapeHtml(t.projectName || "Proyecto")}</div>
+                <div class="muted" style="font-size:13px;margin-top:2px;">${I.escapeHtml(t.unitLabel || "—")}</div>
+              </div>
+              <span class="pill ${I.statusPillClass(t.status)}">${I.escapeHtml(t.statusLabel || t.status)}</span>
+            </div>
+            <div class="muted" style="font-size:13px;margin-top:10px;line-height:1.4;">${I.escapeHtml((t.summary || "").slice(0, 120))}${(t.summary || "").length > 120 ? "…" : ""}</div>
+            ${t.urgent ? `<div style="margin-top:8px;"><span class="pill bad">Urgente</span></div>` : ""}
+            ${sched ? `<div class="muted mono" style="margin-top:8px;">Prog. ${I.escapeHtml(sched)}</div>` : ""}
+          </a>`;
+        })
+        .join("");
+    })();
+  </script>
+</body>
+</html>

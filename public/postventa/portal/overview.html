@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <script>(function(){try{var t=localStorage.getItem("postventa-portal-theme");document.documentElement.setAttribute("data-theme",t==="light"?"light":"dark");}catch(e){document.documentElement.setAttribute("data-theme","dark");}})();</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Portafolio · Ainspecciona Postventa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/postventa/portal/assets/portal.css?v=20260726-chart1" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="app" id="app">
+    <div id="sidebar"></div>
+    <div class="main">
+      <header class="topbar">
+        <div class="titles">
+          <h1 id="tenantTitle">Portafolio</h1>
+          <div class="crumb">Gestión postventa · Inmobiliaria</div>
+        </div>
+        <div class="spacer"></div>
+        <div class="date-chip" id="dateChip"></div>
+      </header>
+      <div class="content" id="content"><div class="empty">Cargando…</div></div>
+    </div>
+  </div>
+
+  <script src="/postventa/portal/assets/portal-app.js?v=20260806-sep1"></script>
+  <script>
+    (async function () {
+      const P = window.PvPortal;
+      const me = await P.ensureAuth();
+      if (!me) return;
+
+      document.getElementById("sidebar").innerHTML = P.renderSidebar("overview", null);
+      document.getElementById("tenantTitle").textContent = me.tenant.name;
+      document.getElementById("dateChip").textContent = P.dateChip();
+
+      function projCard(p) {
+        const m = p.metrics || {};
+        return `<a class="proj-card" href="${P.appHref("/postventa/portal/proyecto?slug=" + encodeURIComponent(p.slug))}">
+          <div class="pc-name">${P.escapeHtml(p.name)}</div>
+          <div class="pc-meta">${P.escapeHtml([p.comuna, p.address].filter(Boolean).join(" · ") || "Sin dirección")}</div>
+          <div class="pc-stats">
+            <div><b>${P.fmt(m.open)}</b><span>Abiertas</span></div>
+            <div><b>${P.fmt(m.resolutionPct)}%</b><span>Resolución</span></div>
+            <div class="crit"><b>${P.fmt(m.urgentOpen)}</b><span>Urgentes</span></div>
+            <div><b>${P.fmt(m.warrantyRisk)}</b><span>Garantía</span></div>
+          </div>
+          <div class="pc-link">Ver proyecto →</div>
+        </a>`;
+      }
+
+      async function load() {
+        const content = document.getElementById("content");
+        P.destroyChartsIn(content);
+
+        const res = await P.portalFetch("/api/postventa/portal/overview");
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          content.innerHTML = `<div class="empty">${P.escapeHtml(data.message || "No se pudo cargar el portafolio.")}</div>`;
+          return;
+        }
+
+        const k = data.kpis || {};
+        const charts = data.charts || {};
+        const projects = data.projects || [];
+        const aging = k.aging || {};
+
+        const OPS_KEYS = ["recibido", "programado", "en_ejecucion", "terminado"];
+        const OPS_LABELS = {
+          recibido: "Recibido",
+          programado: "Programado",
+          en_ejecucion: "En ejecución",
+          terminado: "Terminado"
+        };
+        const byStatus = charts.byStatus || [];
+        const ops =
+          charts.opsPipeline && charts.opsPipeline.length
+            ? charts.opsPipeline
+            : OPS_KEYS.map((key) => {
+                const row = byStatus.find((x) => x.key === key);
+                return {
+                  key,
+                  label: (row && row.label) || OPS_LABELS[key] || key,
+                  count: (row && row.count) || 0
+                };
+              });
+
+        const openPct = P.pctOf(k.open, k.total);
+        const urgentPct = P.pctOf(k.urgentOpen, k.open || k.total);
+        const queuePct = P.pctOf(k.classified, k.open || k.total);
+        const warrantyPct = P.pctOf(k.warrantyRisk, k.open || k.total);
+        const agingPct = P.pctOf(aging.over30, k.open || k.total);
+
+        content.innerHTML = `
+          <div class="kpi-row">
+            <div class="kpi with-gauge">
+              <div class="kpi-text"><div class="k-label">Proyectos</div><div class="k-value">${P.fmt(k.projects)}</div><div class="k-sub">portafolio activo</div></div>
+              ${P.miniGauge(P.pctOf(projects.filter((p) => (p.metrics && p.metrics.open) > 0).length, k.projects || projects.length), "#22D3EE")}
+            </div>
+            <div class="kpi with-gauge">
+              <div class="kpi-text"><div class="k-label">Solicitudes abiertas</div><div class="k-value">${P.fmt(k.open)}</div><div class="k-sub">${P.fmt(k.total)} totales</div></div>
+              ${P.miniGauge(openPct, "#A5F3FC")}
+            </div>
+            <div class="kpi with-gauge">
+              <div class="kpi-text"><div class="k-label">% Avance resolución</div><div class="k-value">${P.fmt(k.resolutionPct)}%</div><div class="k-sub">${P.fmt(k.closed)} terminadas</div></div>
+              ${P.miniGauge(k.resolutionPct, "#FFFFFF")}
+            </div>
+            <div class="kpi with-gauge">
+              <div class="kpi-text"><div class="k-label">Urgentes abiertas</div><div class="k-value crit">${P.fmt(k.urgentOpen)}</div><div class="k-sub">${urgentPct}% del backlog</div></div>
+              ${P.miniGauge(urgentPct, "#FB7185")}
+            </div>
+            <div class="kpi with-gauge">
+              <div class="kpi-text"><div class="k-label">En cola revisión</div><div class="k-value">${P.fmt(k.classified)}</div><div class="k-sub">${queuePct}% del backlog</div></div>
+              ${P.miniGauge(queuePct, "#67E8F9")}
+            </div>
+            <div class="kpi with-gauge">
+              <div class="kpi-text"><div class="k-label">Garantía en riesgo</div><div class="k-value">${P.fmt(k.warrantyRisk)}</div><div class="k-sub">Aging &gt;30d: ${P.fmt(aging.over30 || 0)} (${agingPct}%)</div></div>
+              ${P.miniGauge(warrantyPct, "#06B6D4")}
+            </div>
+          </div>
+
+          <div class="panel chart-panel" style="margin-bottom:16px;">
+            <h2>Pipeline operativo</h2>
+            <div class="pc-stats" style="border-top:0;padding-top:0;grid-template-columns:repeat(4,1fr);">
+              ${ops.map((s) => `
+                <div>
+                  <b>${P.fmt(s.count)}</b>
+                  <span>${P.escapeHtml(s.label)}</span>
+                </div>`).join("")}
+            </div>
+            <div class="chart-box" style="margin-top:12px;min-height:200px;"><canvas id="chartOps"></canvas></div>
+          </div>
+
+          <div class="charts-grid">
+            <div class="panel chart-panel"><h2>Por categoría</h2><div class="chart-box"><canvas id="chartCat"></canvas></div></div>
+            <div class="panel chart-panel"><h2>Aging backlog por etapa</h2><div class="chart-box"><canvas id="chartAging"></canvas></div></div>
+            <div class="panel chart-panel"><h2>Aperturas vs cierres · 14d</h2><div class="chart-box"><canvas id="chartTimeline"></canvas></div></div>
+            <div class="panel chart-panel"><h2>Abiertas por proyecto</h2><div class="chart-box"><canvas id="chartByProject"></canvas></div></div>
+          </div>
+
+          <div class="panel">
+            <h2>Proyectos</h2>
+            ${projects.length
+              ? `<div class="proj-grid">${projects.map(projCard).join("")}</div>`
+              : `<div class="empty">Aún no hay proyectos registrados.</div>`}
+          </div>`;
+
+        const cats = charts.byCategory || [];
+        const agingByOps = charts.agingByOps || [
+          { key: "recibido", label: "Recibido", under7: 0, d7to30: 0, over30: 0 },
+          { key: "programado", label: "Programado", under7: 0, d7to30: 0, over30: 0 },
+          { key: "en_ejecucion", label: "En ejecución", under7: 0, d7to30: 0, over30: 0 },
+          { key: "terminado", label: "Terminado", under7: 0, d7to30: 0, over30: 0 }
+        ];
+        const timeline = charts.timeline || [];
+        const byProject = charts.byProject || [];
+        const opsColors = ["#22D3EE", "#A5F3FC", "#67E8F9", "#FFFFFF"];
+
+        P.barChart(
+          document.getElementById("chartOps"),
+          ops.map((x) => x.label),
+          ops.map((x) => x.count),
+          opsColors
+        );
+
+        const catEl = document.getElementById("chartCat");
+        if (cats.length) {
+          P.barChart(
+            catEl,
+            cats.map((x) => x.label),
+            cats.map((x) => x.count),
+            "#22D3EE"
+          );
+        } else if (catEl && catEl.parentElement) {
+          catEl.parentElement.innerHTML = `<div class="chart-empty">Sin datos de categoría</div>`;
+        }
+
+        P.stackedBarChart(
+          document.getElementById("chartAging"),
+          agingByOps.map((x) => x.label),
+          [
+            { label: "< 7 días", data: agingByOps.map((x) => x.under7 || 0), color: "#FFFFFF" },
+            { label: "7–30 días", data: agingByOps.map((x) => x.d7to30 || 0), color: "#67E8F9" },
+            { label: "> 30 días", data: agingByOps.map((x) => x.over30 || 0), color: "#22D3EE" }
+          ]
+        );
+
+        if (timeline.length) {
+          P.lineChart(
+            document.getElementById("chartTimeline"),
+            timeline.map((x) => x.date.slice(5)),
+            timeline.map((x) => x.opened),
+            timeline.map((x) => x.closed)
+          );
+        }
+        if (byProject.length) {
+          P.barChart(
+            document.getElementById("chartByProject"),
+            byProject.map((x) => x.label),
+            byProject.map((x) => x.open),
+            "#06B6D4"
+          );
+        }
+      }
+
+      await P.bindLiveReload(load)();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ainspecciona Scan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0; min-height: 100vh; font-family: "Source Sans 3", sans-serif;
+      background: #0f1419; color: #e8eef4; display: grid; place-items: center; padding: 24px;
+    }
+    .card { max-width: 480px; }
+    h1 { font-size: 28px; margin: 0 0 8px; }
+    p { color: #8b9aab; line-height: 1.45; }
+    button {
+      margin-top: 16px; border: none; border-radius: 12px; padding: 14px 18px;
+      background: #2bb673; color: #062415; font-weight: 800; font-size: 15px; cursor: pointer;
+      font-family: inherit; width: 100%;
+    }
+    .out { margin-top: 16px; word-break: break-all; font-size: 14px; }
+    a { color: #2bb673; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Ainspecciona Scan</h1>
+    <p>Tour 3D + planimetría de marketing. Genera un link demo mock para probar el viewer.</p>
+    <button type="button" id="btn">Crear demo y abrir</button>
+    <div class="out" id="out"></div>
+  </div>
+  <script>
+    document.getElementById("btn").onclick = async () => {
+      const out = document.getElementById("out");
+      out.textContent = "Creando…";
+      try {
+        const res = await fetch("/api/scan/demo/publish", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: "Depto demo Scan", address: "Las Condes" })
+        });
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.error || "Error");
+        out.innerHTML = '<a href="' + data.scan.publicUrl + '">' + data.scan.publicUrl + "</a>";
+        location.href = data.scan.publicUrl;
+      } catch (e) {
+        out.textContent = e.message;
+      }
+    };
+  </script>
+</body>
+</html>

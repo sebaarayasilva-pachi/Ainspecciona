@@ -2,9 +2,71 @@
   "hosting": {
     "public": "public",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "headers": [
+      {
+        "source": "**/*.html",
+        "headers": [
+          { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+        ]
+      },
+      {
+        "source": "/",
+        "headers": [
+          { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+        ]
+      }
+    ],
     "rewrites": [
       {"source": "/", "destination": "/corredores.html"},
+      {"source": "/login", "run": {"serviceId": "ainspecciona-api", "region": "southamerica-west1"}},
+      {"source": "/app", "run": {"serviceId": "ainspecciona-api", "region": "southamerica-west1"}},
+      {"source": "/app/**", "run": {"serviceId": "ainspecciona-api", "region": "southamerica-west1"}},
+      {"source": "/control", "run": {"serviceId": "ainspecciona-api", "region": "southamerica-west1"}},
+      {"source": "/control/**", "run": {"serviceId": "ainspecciona-api", "region": "southamerica-west1"}},
+      {"source": "/admin", "destination": "/admin.html"},
+      {"source": "/review", "destination": "/review.html"},
+      {"source": "/entrega", "destination": "/entrega/overview.html"},
+      {"source": "/entrega/login", "destination": "/entrega/login.html"},
+      {"source": "/entrega/usuarios", "destination": "/entrega/usuarios.html"},
+      {"source": "/entrega/overview", "destination": "/entrega/overview.html"},
+      {"source": "/entrega/proyecto", "destination": "/entrega/proyecto.html"},
+      {"source": "/entrega/piso", "destination": "/entrega/piso.html"},
+      {"source": "/entrega/unidad", "destination": "/entrega/unidad.html"},
+      {"source": "/entrega/ot", "destination": "/entrega/ot.html"},
+      {"source": "/entrega/reportes", "destination": "/entrega/reportes.html"},
+      {"source": "/entrega/captura", "destination": "/entrega/captura.html"},
+      {"source": "/toctoc", "destination": "/toctoc/index.html"},
+      {"source": "/toctoc/**", "destination": "/toctoc/index.html"},
+      {"source": "/scan", "destination": "/scan/index.html"},
+      {"source": "/scan/", "destination": "/scan/index.html"},
+      {"source": "/scan/s/**", "run": {"serviceId": "ainspecciona-api", "region": "southamerica-west1"}},
+      {"source": "/inout/captura", "run": {"serviceId": "ainspecciona-api", "region": "southamerica-west1"}},
+      {"source": "/inout/captura/", "run": {"serviceId": "ainspecciona-api", "region": "southamerica-west1"}},
+      {"source": "/inout/portal", "run": {"serviceId": "ainspecciona-api", "region": "southamerica-west1"}},
+      {"source": "/inout/portal/**", "run": {"serviceId": "ainspecciona-api", "region": "southamerica-west1"}},
+      {"source": "/inout/capture/**", "run": {"serviceId": "ainspecciona-api", "region": "southamerica-west1"}},
       {"source": "/precios", "destination": "/precios.html"},
+      {"source": "/tenant", "destination": "/tenant.html"},
+      {"source": "/tenant/comprar-creditos", "destination": "/tenant-comprar-creditos.html"},
+      {"source": "/postventa/captura", "destination": "/postventa/captura.html"},
+      {"source": "/postventa/captura/", "destination": "/postventa/captura.html"},
+      {"source": "/postventa", "run": {"serviceId": "ainspecciona-api", "region": "southamerica-west1"}},
+      {"source": "/postventa/", "run": {"serviceId": "ainspecciona-api", "region": "southamerica-west1"}},
+      {"source": "/postventa/login", "run": {"serviceId": "ainspecciona-api", "region": "southamerica-west1"}},
+      {"source": "/postventa/overview", "run": {"serviceId": "ainspecciona-api", "region": "southamerica-west1"}},
+      {"source": "/postventa/proyecto", "run": {"serviceId": "ainspecciona-api", "region": "southamerica-west1"}},
+      {"source": "/postventa/ticket", "run": {"serviceId": "ainspecciona-api", "region": "southamerica-west1"}},
+      {"source": "/postventa/mis-tickets", "run": {"serviceId": "ainspecciona-api", "region": "southamerica-west1"}},
+      {"source": "/postventa/configuracion", "run": {"serviceId": "ainspecciona-api", "region": "southamerica-west1"}},
+      {"source": "/postventa_prueba", "destination": "/postventa/prueba.html"},
+      {"source": "/postventa/portal", "run": {"serviceId": "ainspecciona-api", "region": "southamerica-west1"}},
+      {"source": "/postventa/portal/**", "run": {"serviceId": "ainspecciona-api", "region": "southamerica-west1"}},
+      {"source": "/postventa/inspector", "destination": "/postventa/inspector/index.html"},
+      {"source": "/postventa/inspector/login", "destination": "/postventa/inspector/login.html"},
+      {"source": "/postventa/inspector/ticket", "destination": "/postventa/inspector/ticket.html"},
+      {"source": "/postventa/capture/**", "run": {"serviceId": "ainspecciona-api", "region": "southamerica-west1"}},
+      {"source": "/whatsapp-test", "destination": "/whatsapp-test.html"},
+      {"source": "/api/**", "run": {"serviceId": "ainspecciona-api", "region": "southamerica-west1"}},
       {"source": "**", "run": {"serviceId": "ainspecciona-api", "region": "southamerica-west1"}}
     ]
   }

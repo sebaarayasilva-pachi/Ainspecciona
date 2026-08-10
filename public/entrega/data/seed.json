@@ -1,0 +1,531 @@
+{
+  "tenant": { "slug": "exxacon", "name": "Inmobiliaria Exxacon" },
+  "kpis": [
+    "Terminaciones",
+    "Instalaciones Sanitarias",
+    "Instalaciones Eléctricas",
+    "Instalaciones de Gas",
+    "Fachadas y Terminaciones Exteriores",
+    "Estructura Visible",
+    "Climatización",
+    "Ventanas y Cerramientos",
+    "Áreas Verdes y Exteriores"
+  ],
+  "catalogoEspecialidades": {
+    "Terminaciones": ["Pintor", "Yesero", "Instalador de cerámica", "Instalador de porcelanato", "Instalador de piso flotante", "Instalador de piso SPC/Vinílico", "Instalador de alfombra", "Carpintero terminaciones", "Instalador de guardapolvos", "Instalador de papel mural", "Instalador de cubiertas", "Mueblista", "Vidriero", "Instalador de quincallería", "Sellador de juntas y silicona"],
+    "Instalaciones Sanitarias": ["Gasfiter", "Destapador sanitario", "Técnico de bombas", "Técnico de presurización", "Técnico de aguas lluvias"],
+    "Instalaciones Eléctricas": ["Electricista", "Técnico corrientes débiles", "Técnico iluminación", "Técnico citofonía/intercom"],
+    "Instalaciones de Gas": ["Instalador autorizado SEC gas", "Técnico calefont", "Técnico caldera", "Técnico cocina y horno"],
+    "Fachadas y Terminaciones Exteriores": ["Fachadista", "Pintor exterior", "Impermeabilizador", "Instalador EIFS", "Instalador siding", "Hojalatero", "Techumbre"],
+    "Estructura Visible": ["Constructor", "ITO", "Ingeniero estructural", "Especialista en reparación de hormigón"],
+    "Climatización": ["Técnico aire acondicionado", "Técnico ventilación", "Técnico extracción"],
+    "Ventanas y Cerramientos": ["Aluminiero", "Instalador PVC", "Vidriero", "Técnico de cierres y herrajes"],
+    "Áreas Verdes y Exteriores": ["Jardinero", "Técnico riego", "Paisajista"]
+  },
+  "especialidades": [
+    "Pintor", "Yesero", "Instalador de cerámica", "Instalador de porcelanato", "Instalador de piso flotante", "Instalador de piso SPC/Vinílico", "Instalador de alfombra", "Carpintero terminaciones", "Instalador de guardapolvos", "Instalador de papel mural", "Instalador de cubiertas", "Mueblista", "Vidriero", "Instalador de quincallería", "Sellador de juntas y silicona",
+    "Gasfiter", "Destapador sanitario", "Técnico de bombas", "Técnico de presurización", "Técnico de aguas lluvias",
+    "Electricista", "Técnico corrientes débiles", "Técnico iluminación", "Técnico citofonía/intercom",
+    "Instalador autorizado SEC gas", "Técnico calefont", "Técnico caldera", "Técnico cocina y horno",
+    "Fachadista", "Pintor exterior", "Impermeabilizador", "Instalador EIFS", "Instalador siding", "Hojalatero", "Techumbre",
+    "Constructor", "ITO", "Ingeniero estructural", "Especialista en reparación de hormigón",
+    "Técnico aire acondicionado", "Técnico ventilación", "Técnico extracción",
+    "Aluminiero", "Instalador PVC", "Técnico de cierres y herrajes",
+    "Jardinero", "Técnico riego", "Paisajista"
+  ],
+  "estados": {
+    "lista": { "label": "Lista", "color": "#22C55E" },
+    "pendiente_menor": { "label": "Pendiente menor", "color": "#FACC15" },
+    "pendiente_intermedio": { "label": "Pendiente intermedio", "color": "#F97316" },
+    "critico": { "label": "Crítico", "color": "#EF4444" },
+    "no_inspeccionado": { "label": "No inspeccionado", "color": "#D1D5DB" }
+  },
+  "severidades": {
+    "critica": { "label": "Crítica", "color": "#EF4444" },
+    "intermedia": { "label": "Intermedia", "color": "#F97316" },
+    "menor": { "label": "Menor", "color": "#FACC15" }
+  },
+  "projects": [
+    {
+      "id": "cuvee-2",
+      "name": "Proyecto Demo",
+      "familia": "Demo",
+      "building": "Edificio A",
+      "address": "Av. Vista Norte 1234, Las Condes",
+      "comuna": "Las Condes",
+      "ciudad": "Santiago",
+      "status": "en_curso",
+      "statusLabel": "En curso",
+      "inspectionDate": "2024-05-23",
+      "lastUpdate": "2024-05-23T10:30:00",
+      "riesgoEntrega": "Atención",
+      "fechaComprometidaEntrega": "2027-09-30",
+      "fechaProyectadaEntrega": "2027-09-30",
+      "fechaInicioRecepcion": "2026-07-01",
+      "composition": {
+        "locales": 5,
+        "oficinas": 18,
+        "departamentos": 131,
+        "estacionamientos": 100,
+        "bodegas": 117
+      },
+      "metrics": {
+        "avanceRecepcion": 74,
+        "unidadesRecibidas": 97,
+        "unidadesTotales": 131,
+        "avanceCierre": 58,
+        "unidadesCierre": 89,
+        "observacionesTotales": 6160,
+        "criticasAbiertas": 128,
+        "criticasPctTotal": 2.1,
+        "otActivas": 64,
+        "otAbiertas": 24,
+        "otAtrasadas": 12,
+        "unidadesListas": 96,
+        "unidadesListasPct": 62,
+        "unidadesBloqueadas": 32
+      },
+      "panelGerencial": {
+        "kpiDominante": { "nombre": "Terminaciones", "pct": 35 },
+        "especialidadMayorAtraso": { "nombre": "Pintor", "pct": 28 },
+        "pisoCritico": { "nombre": "Piso 2", "criticas": 24 },
+        "unidadesBloqueadas": 32,
+        "otAtrasadas": 12
+      },
+      "accionesRecomendadas": [
+        "Priorizar cierre de críticas en Piso 2 y Piso 1",
+        "Asignar más recursos a Terminaciones",
+        "Revisar y reprogramar OT atrasadas",
+        "Implementar plan de cierre acelerado",
+        "Revisar críticas abiertas"
+      ],
+      "resumenEjecutivo": "El proyecto presenta un avance de recepción del 74% y un avance de cierre del 58%. Terminaciones e Instalaciones Eléctricas concentran el 54% de las observaciones totales. Los pisos 2 y 1 muestran la mayor criticidad, con 40 críticas abiertas y el menor avance de recepción. Se recomienda priorizar el cierre de hallazgos críticos en estos pisos y reforzar los recursos en Terminaciones para asegurar el cumplimiento del plan de entrega.",
+      "charts": {
+        "hallazgosPorKpi": [
+          { "label": "Terminaciones", "value": 2154, "color": "#6366F1" },
+          { "label": "Instalaciones Eléctricas", "value": 1180, "color": "#22C55E" },
+          { "label": "Instalaciones Sanitarias", "value": 940, "color": "#F97316" },
+          { "label": "Ventanas y Cerramientos", "value": 620, "color": "#EAB308" },
+          { "label": "Climatización", "value": 410, "color": "#14B8A6" },
+          { "label": "Fachadas y Terminaciones Exteriores", "value": 380, "color": "#EC4899" },
+          { "label": "Instalaciones de Gas", "value": 260, "color": "#0EA5E9" },
+          { "label": "Estructura Visible", "value": 140, "color": "#8B5CF6" },
+          { "label": "Áreas Verdes y Exteriores", "value": 76, "color": "#84CC16" }
+        ],
+        "observacionesPorEspecialidad": [
+          { "label": "Pintor", "value": 1240 },
+          { "label": "Electricista", "value": 980 },
+          { "label": "Yesero", "value": 720 },
+          { "label": "Instalador de cerámica", "value": 610 },
+          { "label": "Gasfiter", "value": 540 },
+          { "label": "Mueblista", "value": 430 },
+          { "label": "Sellador de juntas y silicona", "value": 360 }
+        ],
+        "aperturasVsCierres": {
+          "labels": ["12 May", "14 May", "16 May", "18 May", "20 May", "22 May", "24 May"],
+          "aperturas": [120, 180, 260, 240, 300, 280, 250],
+          "cierres": [40, 90, 150, 180, 210, 240, 260]
+        },
+        "avancePorPiso": [
+          { "label": "Piso 2", "value": 42 },
+          { "label": "Piso 3", "value": 58 },
+          { "label": "Piso 4", "value": 74 },
+          { "label": "Piso 5", "value": 86 },
+          { "label": "Piso 6", "value": 88 },
+          { "label": "Piso 7", "value": 92 }
+        ],
+        "topUnidadesCriticas": [
+          { "unidad": "204", "piso": 2, "criticas": 18, "estado": "critico" },
+          { "unidad": "203", "piso": 2, "criticas": 15, "estado": "critico" },
+          { "unidad": "205", "piso": 2, "criticas": 14, "estado": "critico" },
+          { "unidad": "103", "piso": 1, "criticas": 13, "estado": "critico" },
+          { "unidad": "307", "piso": 3, "criticas": 9, "estado": "critico" }
+        ],
+        "estadoOtPorEspecialidad": [
+          { "label": "Pintor", "value": 18, "pct": 28, "color": "#6366F1" },
+          { "label": "Electricista", "value": 12, "pct": 19, "color": "#22C55E" },
+          { "label": "Gasfiter", "value": 10, "pct": 16, "color": "#F97316" },
+          { "label": "Instalador de cerámica", "value": 9, "pct": 14, "color": "#EAB308" },
+          { "label": "Mueblista", "value": 8, "pct": 12, "color": "#14B8A6" },
+          { "label": "Sellador de juntas y silicona", "value": 7, "pct": 11, "color": "#94A3B8" }
+        ]
+      },
+      "floors": [
+        { "id": "piso-7", "name": "Piso 7", "estado": "lista", "avanceRecepcion": 92, "criticas": 1, "cells": ["lista","lista","lista","pendiente_menor","lista","lista","lista","lista"] },
+        { "id": "piso-6", "name": "Piso 6", "estado": "pendiente_menor", "avanceRecepcion": 88, "criticas": 2, "cells": ["lista","lista","pendiente_menor","lista","lista","pendiente_menor","lista","lista"] },
+        { "id": "piso-5", "name": "Piso 5", "estado": "lista", "avanceRecepcion": 86, "criticas": 3, "cells": ["lista","lista","lista","lista","pendiente_menor","lista","lista","lista"] },
+        { "id": "piso-4", "name": "Piso 4", "estado": "pendiente_menor", "avanceRecepcion": 74, "criticas": 6, "cells": ["lista","pendiente_menor","lista","pendiente_menor","lista","pendiente_menor","lista","lista"] },
+        { "id": "piso-3", "name": "Piso 3", "estado": "pendiente_intermedio", "avanceRecepcion": 58, "criticas": 12, "cells": ["pendiente_intermedio","pendiente_menor","critico","lista","pendiente_intermedio","pendiente_menor","critico","lista"] },
+        { "id": "piso-2", "name": "Piso 2", "estado": "critico", "avanceRecepcion": 42, "criticas": 24, "cells": ["critico","pendiente_intermedio","critico","critico","critico","pendiente_intermedio","pendiente_intermedio","critico"] },
+        { "id": "piso-1", "name": "Piso 1", "estado": "critico", "avanceRecepcion": 46, "criticas": 16, "cells": ["critico","critico","pendiente_intermedio","critico","critico","pendiente_intermedio","critico","pendiente_intermedio"] }
+      ],
+      "floorDetail": {
+        "piso-3": {
+          "name": "Piso 3",
+          "planoPiso": {
+            "image": "/entrega/assets/plano-piso3.png",
+            "viewBox": "0 0 709 252",
+            "imgX": 0,
+            "imgY": 0,
+            "imgW": 709,
+            "imgH": 252,
+            "zones": [
+              { "ref": "305", "ox": 37, "oy": 37, "cx": 119, "cy": 83, "path": "M148 92.5V81.8H163.5V0.5H101V6.3H34V50.9H0.5V92.5H148Z" },
+              { "ref": "306", "ox": 201, "oy": 36, "cx": 258, "cy": 82, "path": "M68.5 0.5V6.5H113.5V92.5H0.5V0.5H68.5Z" },
+              { "ref": "307", "ox": 358, "oy": 37, "cx": 435, "cy": 83, "path": "M151.511 0.5L153.489 92.5H0.5V22H45V5.5H89.5V0.5H151.511Z" },
+              { "ref": "308", "ox": 512, "oy": 35, "cx": 595, "cy": 86, "path": "M67.5 5.5H135V55H166V102.5H22.5V93.5H0.5V1.49219L67.5 0.506836V5.5Z" },
+              { "ref": "301", "ox": 37, "oy": 138, "cx": 119, "cy": 190, "path": "M148 0.5V12.5H163.5V103.5H101V97H34V47H0.5V0.5H148Z" },
+              { "ref": "302", "ox": 204, "oy": 147, "cx": 282, "cy": 194, "path": "M155.5 0.5V71.5H110.5V88H66V95H0.5V0.5H155.5Z" },
+              { "ref": "303", "ox": 360, "oy": 147, "cx": 436, "cy": 194, "path": "M152 0.5V93.5H85.5V90H41.5V71.5H0.5V0.5H152Z" },
+              { "ref": "304", "ox": 512, "oy": 138, "cx": 595, "cy": 190, "path": "M165.5 0.5V49H134.5V98.5H68V103H0.5V10H21.5V0.5H165.5Z" }
+            ]
+          },
+          "metrics": {
+            "avanceRecepcion": 58,
+            "unidadesRecibidas": 86,
+            "unidadesTotales": 148,
+            "avanceCierre": 49,
+            "unidadesCierre": 72,
+            "observacionesAbiertas": 74,
+            "criticas": 12,
+            "criticasPct": 8.0,
+            "otActivas": 14,
+            "otAtrasadas": 4,
+            "unidadesInspeccionadas": 58
+          },
+          "units": [
+            { "ref": "301", "tipo": "Departamento", "estado": "critico", "avance": 20, "hallazgos": 5, "criticas": 1 },
+            { "ref": "302", "tipo": "Departamento", "estado": "pendiente_menor", "avance": 74, "hallazgos": 6, "criticas": 0 },
+            { "ref": "303", "tipo": "Departamento", "estado": "critico", "avance": 40, "hallazgos": 13, "criticas": 3 },
+            { "ref": "304", "tipo": "Departamento", "estado": "lista", "avance": 96, "hallazgos": 2, "criticas": 0 },
+            { "ref": "305", "tipo": "Departamento", "estado": "pendiente_intermedio", "avance": 62, "hallazgos": 9, "criticas": 1 },
+            { "ref": "306", "tipo": "Departamento", "estado": "pendiente_menor", "avance": 70, "hallazgos": 5, "criticas": 0 },
+            { "ref": "307", "tipo": "Departamento", "estado": "critico", "avance": 44, "hallazgos": 11, "criticas": 3 },
+            { "ref": "308", "tipo": "Departamento", "estado": "lista", "avance": 92, "hallazgos": 3, "criticas": 0 }
+          ],
+          "charts": {
+            "hallazgosPorKpi": [
+              { "label": "Terminaciones", "value": 30, "color": "#6366F1" },
+              { "label": "Instalaciones Eléctricas", "value": 18, "color": "#22C55E" },
+              { "label": "Instalaciones Sanitarias", "value": 16, "color": "#F97316" },
+              { "label": "Ventanas y Cerramientos", "value": 12, "color": "#EAB308" },
+              { "label": "Climatización", "value": 14, "color": "#14B8A6" }
+            ],
+            "observacionesPorEspecialidad": [
+              { "label": "Pintor", "value": 30 },
+              { "label": "Electricista", "value": 18 },
+              { "label": "Mueblista", "value": 12 },
+              { "label": "Gasfiter", "value": 10 },
+              { "label": "Técnico aire acondicionado", "value": 6 },
+              { "label": "Sellador de juntas y silicona", "value": 4 }
+            ],
+            "aperturasVsCierres": {
+              "labels": ["10 May", "14 May", "18 May", "22 May"],
+              "aperturas": [16, 24, 22, 18],
+              "cierres": [6, 12, 18, 22]
+            }
+          }
+        },
+        "piso-2": {
+          "name": "Piso 2",
+          "metrics": {
+            "avanceRecepcion": 67,
+            "unidadesRecibidas": 96,
+            "unidadesTotales": 144,
+            "avanceCierre": 54,
+            "unidadesCierre": 77,
+            "observacionesAbiertas": 124,
+            "criticas": 18,
+            "criticasPct": 14.5,
+            "otActivas": 22,
+            "otAtrasadas": 8,
+            "unidadesInspeccionadas": 64
+          },
+          "units": [
+            { "ref": "201", "tipo": "Departamento", "estado": "pendiente_intermedio", "avance": 64, "hallazgos": 8, "criticas": 1 },
+            { "ref": "202", "tipo": "Departamento", "estado": "pendiente_menor", "avance": 78, "hallazgos": 5, "criticas": 0 },
+            { "ref": "203", "tipo": "Departamento", "estado": "critico", "avance": 38, "hallazgos": 15, "criticas": 4 },
+            { "ref": "204", "tipo": "Departamento", "estado": "critico", "avance": 32, "hallazgos": 17, "criticas": 5 },
+            { "ref": "205", "tipo": "Departamento", "estado": "critico", "avance": 41, "hallazgos": 14, "criticas": 4 },
+            { "ref": "206", "tipo": "Departamento", "estado": "pendiente_intermedio", "avance": 60, "hallazgos": 9, "criticas": 1 },
+            { "ref": "207", "tipo": "Departamento", "estado": "pendiente_intermedio", "avance": 62, "hallazgos": 8, "criticas": 1 },
+            { "ref": "208", "tipo": "Departamento", "estado": "critico", "avance": 45, "hallazgos": 12, "criticas": 3 }
+          ],
+          "charts": {
+            "hallazgosPorKpi": [
+              { "label": "Terminaciones", "value": 38, "color": "#6366F1" },
+              { "label": "Instalaciones Eléctricas", "value": 26, "color": "#22C55E" },
+              { "label": "Instalaciones Sanitarias", "value": 24, "color": "#F97316" },
+              { "label": "Ventanas y Cerramientos", "value": 16, "color": "#EAB308" },
+              { "label": "Climatización", "value": 20, "color": "#14B8A6" }
+            ],
+            "observacionesPorEspecialidad": [
+              { "label": "Pintor", "value": 48 },
+              { "label": "Electricista", "value": 32 },
+              { "label": "Mueblista", "value": 16 },
+              { "label": "Gasfiter", "value": 14 },
+              { "label": "Técnico aire acondicionado", "value": 8 },
+              { "label": "Sellador de juntas y silicona", "value": 6 }
+            ],
+            "aperturasVsCierres": {
+              "labels": ["10 May", "14 May", "18 May", "22 May"],
+              "aperturas": [20, 32, 28, 24],
+              "cierres": [8, 16, 22, 26]
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "cuvee-1",
+      "name": "Cuvée 1",
+      "familia": "Cuvée",
+      "building": "Edificio Central",
+      "address": "Av. Apoquindo 4500, Las Condes",
+      "comuna": "Las Condes",
+      "ciudad": "Santiago",
+      "status": "finalizado",
+      "statusLabel": "Finalizado",
+      "inspectionDate": "2024-02-10",
+      "lastUpdate": "2024-03-01T18:00:00",
+      "riesgoEntrega": "Bajo",
+      "composition": { "locales": 3, "oficinas": 0, "departamentos": 88, "estacionamientos": 70, "bodegas": 80 },
+      "metrics": {
+        "avanceRecepcion": 100,
+        "unidadesRecibidas": 88,
+        "unidadesTotales": 88,
+        "avanceCierre": 96,
+        "unidadesCierre": 85,
+        "observacionesTotales": 3120,
+        "criticasAbiertas": 4,
+        "criticasPctTotal": 0.1,
+        "otActivas": 6,
+        "otAbiertas": 2,
+        "otAtrasadas": 0,
+        "unidadesListas": 84,
+        "unidadesListasPct": 95,
+        "unidadesBloqueadas": 0
+      },
+      "panelGerencial": {
+        "kpiDominante": { "nombre": "Terminaciones", "pct": 30 },
+        "especialidadMayorAtraso": { "nombre": "Gasfiter", "pct": 12 },
+        "pisoCritico": { "nombre": "Piso 3", "criticas": 2 },
+        "unidadesBloqueadas": 0,
+        "otAtrasadas": 0
+      },
+      "accionesRecomendadas": [
+        "Cerrar las 4 críticas pendientes para emitir certificados",
+        "Emitir certificados de unidades listas"
+      ],
+      "resumenEjecutivo": "Proyecto en etapa final con 100% de recepción y 96% de cierre. Solo quedan 4 observaciones críticas abiertas. Listo para emisión masiva de certificados de entrega.",
+      "charts": {
+        "hallazgosPorKpi": [
+          { "label": "Terminaciones", "value": 980, "color": "#6366F1" },
+          { "label": "Instalaciones Eléctricas", "value": 620, "color": "#22C55E" },
+          { "label": "Instalaciones Sanitarias", "value": 540, "color": "#F97316" },
+          { "label": "Ventanas y Cerramientos", "value": 480, "color": "#EAB308" },
+          { "label": "Climatización", "value": 280, "color": "#14B8A6" },
+          { "label": "Fachadas y Terminaciones Exteriores", "value": 220, "color": "#EC4899" }
+        ],
+        "observacionesPorEspecialidad": [
+          { "label": "Pintor", "value": 980 },
+          { "label": "Electricista", "value": 620 },
+          { "label": "Gasfiter", "value": 540 },
+          { "label": "Instalador de cerámica", "value": 480 },
+          { "label": "Mueblista", "value": 500 }
+        ],
+        "aperturasVsCierres": {
+          "labels": ["1 Feb", "8 Feb", "15 Feb", "22 Feb"],
+          "aperturas": [400, 380, 200, 80],
+          "cierres": [200, 360, 420, 300]
+        },
+        "avancePorPiso": [
+          { "label": "Piso 1", "value": 100 },
+          { "label": "Piso 2", "value": 100 },
+          { "label": "Piso 3", "value": 96 },
+          { "label": "Piso 4", "value": 100 }
+        ],
+        "topUnidadesCriticas": [
+          { "unidad": "302", "piso": 3, "criticas": 2, "estado": "pendiente_intermedio" },
+          { "unidad": "104", "piso": 1, "criticas": 1, "estado": "pendiente_menor" }
+        ],
+        "estadoOtPorEspecialidad": [
+          { "label": "Pintor", "value": 3, "pct": 50, "color": "#6366F1" },
+          { "label": "Gasfiter", "value": 2, "pct": 33, "color": "#F97316" },
+          { "label": "Electricista", "value": 1, "pct": 17, "color": "#22C55E" }
+        ]
+      },
+      "floors": [
+        { "id": "piso-4", "name": "Piso 4", "estado": "lista", "avanceRecepcion": 100, "criticas": 0, "cells": ["lista","lista","lista","lista","lista","lista"] },
+        { "id": "piso-3", "name": "Piso 3", "estado": "pendiente_menor", "avanceRecepcion": 96, "criticas": 2, "cells": ["lista","pendiente_menor","lista","lista","pendiente_menor","lista"] },
+        { "id": "piso-2", "name": "Piso 2", "estado": "lista", "avanceRecepcion": 100, "criticas": 0, "cells": ["lista","lista","lista","lista","lista","lista"] },
+        { "id": "piso-1", "name": "Piso 1", "estado": "lista", "avanceRecepcion": 100, "criticas": 2, "cells": ["lista","lista","pendiente_menor","lista","lista","lista"] }
+      ],
+      "floorDetail": {}
+    }
+  ],
+  "units": {
+    "cuvee-2:204": {
+      "ref": "204",
+      "projectId": "cuvee-2",
+      "tipo": "Departamento",
+      "piso": 2,
+      "floorId": "piso-2",
+      "estado": "critico",
+      "estadoLabel": "Crítico / Abierto",
+      "inspector": "Claudio Ramírez",
+      "fechaInspeccion": "2024-05-22",
+      "tiempoEnObra": "3 días",
+      "lastUpdate": "2024-05-23T10:30:00",
+      "metrics": {
+        "avance": 32,
+        "verificados": 12,
+        "totalVerificables": 37,
+        "hallazgosTotales": 25,
+        "abiertos": 17,
+        "cerrados": 8,
+        "criticos": 5,
+        "otActivas": 2
+      },
+      "kpiDominante": "Terminaciones",
+      "especialidadDominante": "Pintor",
+      "recintos": ["Living - Comedor", "Cocina", "Dormitorio 1", "Dormitorio 2", "Baño 1", "Baño 2", "Terraza", "Pasillo"],
+      "evidencia": { "antes": 25, "despues": 8 },
+      "resumenTecnico": "La unidad presenta 25 hallazgos, de los cuales 5 son críticos y requieren atención prioritaria antes de la entrega. Las principales observaciones se concentran en terminaciones de pintura en living y dormitorio 1, sellos deficientes en terraza y detalles en instalaciones eléctricas en dormitorio 2.",
+      "accionesRecomendadas": [
+        "Corregir manchas y retoques de pintura en living y dormitorio 1",
+        "Reparar y asegurar enchufe suelto en dormitorio 2",
+        "Reforzar sellado perimetral de ventana en terraza",
+        "Revisar y pulir rayado en cubierta de cocina"
+      ],
+      "hallazgos": [
+        { "id": "H-204-01", "recinto": "Living - Comedor", "descripcion": "Mancha de pintura en living", "kpi": "Terminaciones", "especialidad": "Pintor", "severidad": "critica", "estado": "abierto", "apertura": "2024-05-20", "cierre": null, "foto": true },
+        { "id": "H-204-02", "recinto": "Dormitorio 2", "descripcion": "Enchufe suelto dormitorio 2", "kpi": "Instalaciones Eléctricas", "especialidad": "Electricista", "severidad": "intermedia", "estado": "abierto", "apertura": "2024-05-19", "cierre": null, "foto": true },
+        { "id": "H-204-03", "recinto": "Terraza", "descripcion": "Sellado deficiente ventana", "kpi": "Terminaciones", "especialidad": "Sellador de juntas y silicona", "severidad": "intermedia", "estado": "abierto", "apertura": "2024-05-19", "cierre": null, "foto": true },
+        { "id": "H-204-04", "recinto": "Cocina", "descripcion": "Rayado en cubierta cocina", "kpi": "Terminaciones", "especialidad": "Mueblista", "severidad": "menor", "estado": "abierto", "apertura": "2024-05-18", "cierre": null, "foto": true },
+        { "id": "H-204-05", "recinto": "Baño 1", "descripcion": "Grifería con filtración", "kpi": "Instalaciones Sanitarias", "especialidad": "Gasfiter", "severidad": "intermedia", "estado": "abierto", "apertura": "2024-05-19", "cierre": null, "foto": true }
+      ],
+      "charts": {
+        "hallazgosPorRecinto": [
+          { "label": "Living", "value": 6 },
+          { "label": "Dorm 1", "value": 5 },
+          { "label": "Dorm 2", "value": 4 },
+          { "label": "Cocina", "value": 4 },
+          { "label": "Baño 1", "value": 3 },
+          { "label": "Baño 2", "value": 2 },
+          { "label": "Terraza", "value": 1 }
+        ],
+        "hallazgosPorKpi": [
+          { "label": "Terminaciones", "value": 12, "color": "#6366F1" },
+          { "label": "Instalaciones Eléctricas", "value": 5, "color": "#22C55E" },
+          { "label": "Instalaciones Sanitarias", "value": 5, "color": "#F97316" },
+          { "label": "Ventanas y Cerramientos", "value": 3, "color": "#EAB308" }
+        ],
+        "estadoPorEspecialidad": [
+          { "label": "Pintor", "criticos": 5, "value": 8 },
+          { "label": "Sellador de juntas y silicona", "criticos": 5, "value": 6 },
+          { "label": "Electricista", "criticos": 4, "value": 5 },
+          { "label": "Mueblista", "criticos": 4, "value": 4 },
+          { "label": "Gasfiter", "criticos": 0, "value": 3 }
+        ],
+        "lineaTiempo": {
+          "labels": ["10 May", "14 May", "18 May", "22 May"],
+          "aperturas": [4, 8, 9, 4],
+          "cierres": [1, 3, 5, 8]
+        }
+      }
+    },
+    "cuvee-2:301": {
+      "ref": "301",
+      "tipoUnidad": "301 D",
+      "projectId": "cuvee-2",
+      "tipo": "Departamento",
+      "piso": 3,
+      "floorId": "piso-3",
+      "estado": "critico",
+      "estadoLabel": "Crítico / Abierto",
+      "dormitorios": 3,
+      "orientacion": "Sur",
+      "superficie": { "util": 78.72, "terraza": 8.95, "total": 88 },
+      "precioUF": 7710,
+      "inspector": "Claudio Ramírez",
+      "fechaInspeccion": "2024-05-21",
+      "tiempoEnObra": "2 días",
+      "lastUpdate": "2024-05-23T09:10:00",
+      "ubicacion": "/entrega/assets/ubicacion-cuvee2-301.png",
+      "plano": {
+        "image": "/entrega/assets/plano-cuvee2-601.png",
+        "viewBox": "0 0 794 625",
+        "imgX": 0,
+        "imgY": 0,
+        "imgW": 794,
+        "imgH": 625,
+        "zones": [
+          { "recinto": "Living Comedor Cocina", "ox": 72, "oy": 77, "cx": 168, "cy": 300, "path": "M138 0.5V36H167.18L202.5 112.609V366.5H0.5V0.5H138Z" },
+          { "recinto": "Terraza", "ox": 72, "oy": 444, "cx": 175, "cy": 510, "path": "M206.5 0.5V132.5H0.5V0.5H206.5Z" },
+          { "recinto": "Logia", "x": 313, "y": 43, "w": 88, "h": 97, "cx": 357, "cy": 91 },
+          { "recinto": "Baño", "x": 401, "y": 43, "w": 133, "h": 97, "cx": 467, "cy": 91 },
+          { "recinto": "W. Closet", "x": 534, "y": 43, "w": 112, "h": 97, "cx": 590, "cy": 91 },
+          { "recinto": "Baño Suite", "x": 646, "y": 43, "w": 90, "h": 151, "cx": 691, "cy": 118 },
+          { "recinto": "Pasillo", "ox": 239, "oy": 43, "cx": 400, "cy": 162, "path": "M74.5 0.5V95.5H288.5V145.5H35.3223L0.5 68.8916V0.5H74.5Z" },
+          { "recinto": "Dormitorio 1", "x": 289, "y": 189, "w": 112, "h": 226, "cx": 345, "cy": 302 },
+          { "recinto": "Dormitorio 2", "x": 401, "y": 189, "w": 163, "h": 226, "cx": 482, "cy": 302 },
+          { "recinto": "Dormitorio Suite", "ox": 528, "oy": 140, "cx": 632, "cy": 300, "path": "M113 0.5V57H208V274.5H37V48.5H0.5V0.5H113Z" }
+        ]
+      },
+      "caracteristicas": [
+        "Piso SPC en todo el departamento para mayor continuidad",
+        "Gres porcelánico en baños, terrazas y loggia",
+        "Ventanas termopanel con marcos de PVC color grafito",
+        "Cocina integrada con cubierta de cuarzo y mueble tipo cava para vinos",
+        "Cocina equipada con encimera vitrocerámica, horno eléctrico y campana retráctil"
+      ],
+      "metrics": {
+        "avance": 20,
+        "verificados": 1,
+        "totalVerificables": 5,
+        "hallazgosTotales": 5,
+        "abiertos": 4,
+        "cerrados": 1,
+        "criticos": 1,
+        "otActivas": 1
+      },
+      "kpiDominante": "Terminaciones",
+      "especialidadDominante": "Pintor",
+      "recintos": ["Living Comedor Cocina", "Dormitorio 1", "Dormitorio 2", "Dormitorio Suite", "Baño", "Baño Suite", "W. Closet", "Logia", "Pasillo", "Terraza"],
+      "evidencia": { "antes": 18, "despues": 9 },
+      "resumenTecnico": "La unidad 301 D (3 dormitorios, 88 m²) presenta 12 hallazgos, 1 de ellos crítico. Las observaciones se concentran en terminaciones de pintura en dormitorios y sellos de las ventanas termopanel en terraza y logia. La cubierta de cuarzo de la cocina presenta un rayado menor a revisar.",
+      "accionesRecomendadas": [
+        "Retocar pintura en dormitorio 1 y dormitorio 3",
+        "Reforzar sello perimetral de ventanas termopanel en terraza y logia",
+        "Revisar rayado en cubierta de cuarzo de la cocina",
+        "Verificar nivelación de piso SPC en pasillo"
+      ],
+      "hallazgos": [
+        { "id": "H-301-01", "recinto": "Dormitorio 1", "descripcion": "Retoque de pintura en muro", "kpi": "Terminaciones", "especialidad": "Pintor", "severidad": "menor", "estado": "cerrado", "apertura": "2024-05-21", "cierre": "2024-06-02", "foto": true },
+        { "id": "H-301-02", "recinto": "Terraza", "descripcion": "Sello deficiente en ventana termopanel", "kpi": "Terminaciones", "especialidad": "Sellador de juntas y silicona", "severidad": "intermedia", "estado": "abierto", "apertura": "2024-05-21", "cierre": null, "foto": true },
+        { "id": "H-301-03", "recinto": "Logia", "descripcion": "Gres porcelánico con trizadura", "kpi": "Terminaciones", "especialidad": "Instalador de porcelanato", "severidad": "intermedia", "estado": "abierto", "apertura": "2024-05-21", "cierre": null, "foto": true },
+        { "id": "H-301-04", "recinto": "Living Comedor Cocina", "descripcion": "Rayado en cubierta de cuarzo", "kpi": "Terminaciones", "especialidad": "Mueblista", "severidad": "menor", "estado": "abierto", "apertura": "2024-05-21", "cierre": null, "foto": true },
+        { "id": "H-301-05", "recinto": "Baño Suite", "descripcion": "Filtración bajo lavamanos", "kpi": "Instalaciones Sanitarias", "especialidad": "Gasfiter", "severidad": "critica", "estado": "abierto", "apertura": "2024-05-21", "cierre": null, "foto": true }
+      ],
+      "charts": {
+        "hallazgosPorRecinto": [
+          { "label": "Dorm 1", "value": 1 },
+          { "label": "Terraza", "value": 1 },
+          { "label": "Logia", "value": 1 },
+          { "label": "Living Comedor Cocina", "value": 1 },
+          { "label": "Baño Suite", "value": 1 }
+        ],
+        "hallazgosPorKpi": [
+          { "label": "Terminaciones", "value": 4, "color": "#6366F1" },
+          { "label": "Instalaciones Sanitarias", "value": 1, "color": "#F97316" }
+        ],
+        "lineaTiempo": {
+          "labels": ["10 May", "14 May", "18 May", "22 May"],
+          "aperturas": [2, 5, 3, 2],
+          "cierres": [0, 2, 3, 5]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Control · Ainspecciona</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #11161c;
+      --panel: #1a212b;
+      --ink: #eef2f6;
+      --muted: #8b9aab;
+      --line: rgba(255,255,255,0.1);
+      --ok: #3ecf8e;
+      --off: #6b7280;
+      --accent: #5b9fd4;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "DM Sans", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--line);
+      background: var(--panel);
+    }
+    h1 { margin: 0; font-size: 1.15rem; letter-spacing: 0.02em; }
+    .nav a { color: var(--muted); margin-left: 14px; text-decoration: none; font-size: 0.9rem; }
+    .nav a:hover { color: var(--ink); }
+    main { max-width: 1100px; margin: 0 auto; padding: 28px 20px 64px; }
+    h2 { margin: 0 0 16px; font-size: 1.1rem; }
+    .org {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 14px;
+      background: var(--panel);
+    }
+    .org-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .slug {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 0.78rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0,0,0,0.2);
+    }
+    .chip.enabled { border-color: rgba(62, 207, 142, 0.45); }
+    .chip button {
+      border: none;
+      background: transparent;
+      color: var(--accent);
+      cursor: pointer;
+      font: inherit;
+      font-size: 0.75rem;
+      padding: 0;
+    }
+    .dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--off);
+    }
+    .chip.enabled .dot { background: var(--ok); }
+    .err { color: #f07178; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin-top: 28px; }
+    th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); }
+    th { color: var(--muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Ainspecciona Control</h1>
+    <nav class="nav">
+      <a href="/app">App</a>
+      <a href="/admin">Admin legacy</a>
+      <a href="#" id="logout">Salir</a>
+    </nav>
+  </header>
+  <main>
+    <h2>Organizaciones</h2>
+    <div id="orgs"></div>
+    <h2 style="margin-top:36px">Usuarios plataforma</h2>
+    <div id="usersWrap"></div>
+    <p class="err" id="err" style="display:none"></p>
+  </main>
+  <script>
+    (function () {
+      const headers = {};
+      try {
+        const t = sessionStorage.getItem("platform_session");
+        if (t) headers["x-platform-session"] = t;
+      } catch (_) {}
+
+      async function api(path, opts) {
+        const res = await fetch(path, {
+          credentials: "include",
+          headers: { ...headers, ...(opts && opts.body ? { "Content-Type": "application/json" } : {}), ...(opts && opts.headers || {}) },
+          ...opts
+        });
+        if (res.status === 401) {
+          location.href = "/login?next=/control";
+          return null;
+        }
+        if (res.status === 403) {
+          location.href = "/app";
+          return null;
+        }
+        return res.json();
+      }
+
+      async function toggle(orgId, product, status) {
+        const next = status === "ENABLED" ? "DISABLED" : "ENABLED";
+        await api("/api/control/organizations/" + orgId + "/products/" + product, {
+          method: "PATCH",
+          body: JSON.stringify({ status: next })
+        });
+        load();
+      }
+
+      async function load() {
+        const [orgData, userData] = await Promise.all([
+          api("/api/control/organizations"),
+          api("/api/control/users")
+        ]);
+        if (!orgData || !orgData.ok) {
+          document.getElementById("err").textContent = "No se pudo cargar Control";
+          document.getElementById("err").style.display = "block";
+          return;
+        }
+        const catalog = orgData.catalog || {};
+        const box = document.getElementById("orgs");
+        box.innerHTML = "";
+        for (const o of orgData.organizations || []) {
+          const byCode = {};
+          for (const p of o.products || []) byCode[p.product] = p;
+          const el = document.createElement("article");
+          el.className = "org";
+          const chips = Object.keys(catalog).map((code) => {
+            const row = byCode[code];
+            const enabled = row && row.status === "ENABLED";
+            return (
+              '<span class="chip ' + (enabled ? "enabled" : "") + '">' +
+              '<span class="dot"></span>' +
+              (catalog[code].label || code) +
+              '<button type="button" data-org="' + o.id + '" data-product="' + code + '" data-status="' + (enabled ? "ENABLED" : "DISABLED") + '">' +
+              (enabled ? "Desactivar" : "Activar") +
+              "</button></span>"
+            );
+          }).join("");
+          el.innerHTML =
+            '<div class="org-head"><div><strong>' + o.name + '</strong>' +
+            '<div class="slug">' + o.slug + ' · ' + o.type + ' · ' + o.memberCount + ' miembros</div></div>' +
+            '<div class="slug">' + o.status + '</div></div>' +
+            '<div class="chips">' + chips + '</div>';
+          box.appendChild(el);
+        }
+        box.querySelectorAll("button[data-org]").forEach((btn) => {
+          btn.addEventListener("click", () => toggle(btn.dataset.org, btn.dataset.product, btn.dataset.status));
+        });
+
+        if (userData && userData.ok) {
+          const rows = (userData.users || []).map((u) =>
+            "<tr><td>" + u.fullName + "</td><td>" + u.email + "</td><td>" +
+            (u.organizations.map((o) => o.name).join(", ") || "—") +
+            "</td><td>" + (u.products || []).join(", ") +
+            "</td><td>" + (u.isPlatformAdmin ? "Control" : "—") + "</td></tr>"
+          ).join("");
+          document.getElementById("usersWrap").innerHTML =
+            "<table><thead><tr><th>Nombre</th><th>Email</th><th>Orgs</th><th>Links</th><th>Rol</th></tr></thead><tbody>" +
+            rows + "</tbody></table>";
+        }
+      }
+
+      document.getElementById("logout").addEventListener("click", async (e) => {
+        e.preventDefault();
+        await api("/api/auth/logout", { method: "POST" });
+        try { sessionStorage.removeItem("platform_session"); } catch (_) {}
+        location.href = "/login";
+      });
+
+      load();
+    })();
+  </script>
+</body>
+</html>

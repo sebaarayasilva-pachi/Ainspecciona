@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <script>(function(){try{var t=localStorage.getItem("entrega-theme");document.documentElement.setAttribute("data-theme",t==="light"?"light":"dark");}catch(e){document.documentElement.setAttribute("data-theme","dark");}})();</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reportes · Ainspecciona Recepción</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/entrega/assets/entrega.css" />
+  <style>
+    .rep-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .rep-card { display: flex; flex-direction: column; gap: 10px; }
+    .rep-card .rep-ico { width: 40px; height: 40px; border-radius: 11px; background: var(--primary-tint); color: var(--primary-700); display: grid; place-items: center; }
+    .rep-card h3 { margin: 0; font-size: 14.5px; }
+    .rep-card p { margin: 0; font-size: 12.5px; color: var(--muted); flex: 1; line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div id="sidebar"></div>
+    <div class="main">
+      <header class="topbar no-print">
+        <div class="titles"><h1>Reportes</h1><div class="crumb" id="crumb"></div></div>
+        <div class="spacer"></div>
+        <div id="projSelector"></div>
+      </header>
+      <div class="content">
+        <div id="repLoading" class="rep-loading">Cargando hallazgos del proyecto…</div>
+        <div class="card rep-toolbar no-print" id="repToolbar" style="display:none">
+          <div>
+            <label for="repUnit">Unidad (acta, informe, certificado)</label>
+            <select class="select" id="repUnit"></select>
+          </div>
+          <div class="muted" style="font-size:12px;line-height:1.5;max-width:320px">
+            Los reportes usan la taxonomía KPI y hallazgos en vivo cuando la API responde; si no, datos del prototipo.
+          </div>
+        </div>
+        <div class="rep-grid" id="repGrid"></div>
+      </div>
+    </div>
+  </div>
+  <div id="repPrintArea"></div>
+
+  <script src="/entrega/assets/entrega-app.js"></script>
+  <script>
+    (async function () {
+      const E = window.Entrega;
+      const seed = await E.loadSeed();
+      const kpiCatalog = await E.loadKpiCatalog(seed);
+      const project = E.getProject(seed, E.currentProjectId());
+      E.setProject(project.id);
+
+      document.getElementById("sidebar").innerHTML = E.renderSidebar("reportes", project, seed);
+      document.getElementById("projSelector").innerHTML = E.projectSelector(seed, project);
+      document.getElementById("crumb").textContent = project.name;
+      E.bindProjectSelector();
+
+      const REPORTS = [
+        { id: "acta", title: "Acta de recepción", desc: "Listado formal de observaciones con inspector, fecha y firmas.", scope: "unit" },
+        { id: "por_unidad", title: "Informe de hallazgos por unidad", desc: "Detalle con fotos Antes (R0) y Después por hallazgo.", scope: "unit" },
+        { id: "por_especialidad", title: "Informe por especialidad", desc: "Resumen taxonomía + detalle para asignar subcontratistas.", scope: "project" },
+        { id: "por_piso", title: "Informe por piso/torre", desc: "Avance, críticas y pendientes por piso.", scope: "project" },
+        { id: "punch_list", title: "Punch list", desc: "Observaciones abiertas con foto y trabajo pendiente.", scope: "project" },
+        { id: "avance_cierre", title: "Avance de cierre / levantamiento", desc: "Aperturas vs cierres y OT activas del proyecto.", scope: "project" },
+        { id: "ejecutivo", title: "Reporte ejecutivo / gerencial", desc: "KPIs, taxonomía dominante y resumen gerencial.", scope: "project" },
+        { id: "certificado", title: "Certificado de unidad lista", desc: "Emitido cuando la unidad no tiene hallazgos abiertos.", scope: "unit" },
+      ];
+
+      const unitKeys = E.projectUnitKeys(seed, project.id);
+      const unitSelect = document.getElementById("repUnit");
+      const defaultKey = unitKeys.find((k) => k.endsWith(":301")) || unitKeys[0] || "";
+      unitSelect.innerHTML = E.reportUnitSelectorHtml(seed, project, defaultKey);
+
+      let findingsMap = {};
+      try {
+        findingsMap = await E.loadProjectFindingsMap(seed, project.id);
+      } catch {
+        /* offline */
+      }
+      const enriched = E.enrichProjectWithFindings(project, findingsMap, seed, kpiCatalog);
+      document.getElementById("repLoading").style.display = "none";
+      document.getElementById("repToolbar").style.display = "";
+
+      const printCtx = {
+        project: enriched.project,
+        seed,
+        tenant: seed.tenant,
+        kpiCatalog,
+        findingsMap,
+        emittedAt: new Date().toLocaleDateString("es-CL", { day: "2-digit", month: "2-digit", year: "numeric" }),
+      };
+
+      document.getElementById("repGrid").innerHTML = REPORTS.map((r) => {
+        const scopeLabel = r.scope === "unit" ? "Por unidad" : "Proyecto";
+        return (
+          `<div class="card rep-card pad-lg">` +
+          `<div class="rep-ico">${E.svgIcon("reportes")}</div>` +
+          `<h3>${r.title}</h3>` +
+          `<p>${r.desc}</p>` +
+          `<div class="rep-scope">${scopeLabel}</div>` +
+          `<button class="btn primary" type="button" data-rep="${r.id}">Generar PDF</button>` +
+          `</div>`
+        );
+      }).join("");
+
+      document.getElementById("repGrid").addEventListener("click", (ev) => {
+        const btn = ev.target.closest("[data-rep]");
+        if (!btn) return;
+        const id = btn.getAttribute("data-rep");
+        const ctx = { ...printCtx, unitKey: unitSelect.value };
+        const html = E.buildReportHtml(id, ctx);
+        E.printReportDocuments(html);
+      });
+    })();
+  </script>
+</body>
+</html>

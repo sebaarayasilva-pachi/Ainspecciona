@@ -241,6 +241,25 @@
   </main>
 
   <script>
+    (function stashTrialRefFromActivarUrl() {
+      try {
+        var ref = new URLSearchParams(window.location.search).get('ref');
+        if (!ref) return;
+        var trimmed = String(ref).trim();
+        if (!trimmed) return;
+        var ctx = {};
+        try {
+          ctx = JSON.parse(sessionStorage.getItem('trial_checkout_context') || '{}');
+        } catch (_) {}
+        ctx.partnerCode = trimmed;
+        sessionStorage.setItem('trial_checkout_context', JSON.stringify(ctx));
+        var url = new URL(window.location.href);
+        url.searchParams.delete('ref');
+        var qs = url.searchParams.toString();
+        window.history.replaceState({}, '', url.pathname + (qs ? '?' + qs : '') + (url.hash || ''));
+      } catch (_) {}
+    })();
+
     const necesitaFactura = document.getElementById('necesitaFactura');
     const facturacionCampos = document.getElementById('facturacionCampos');
     const btn = document.getElementById('btnActivar');

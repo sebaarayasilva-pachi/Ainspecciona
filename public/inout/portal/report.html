@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Informe · In &amp; Out</title>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/inout/assets/inout.css" />
+  <style>
+    .slider-wrap { position: relative; aspect-ratio: 4/3; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); background: #000; }
+    .slider-wrap img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .slider-wrap .out { clip-path: inset(0 0 0 50%); }
+    .slider-wrap input[type=range] {
+      position: absolute; left: 0; right: 0; bottom: 8px; width: 90%; margin: 0 5%; z-index: 2;
+    }
+  </style>
+</head>
+<body class="io-shell">
+  <div class="io-layout">
+    <div id="shell"></div>
+    <main class="io-main">
+      <p style="margin:0 0 12px"><a id="backDash" href="/inout/portal">← Dashboard</a> · <a id="back" href="#">Contrato</a></p>
+      <h1 id="title">Informe comparativo</h1>
+      <p class="sub" id="conclusion"></p>
+      <div class="disclaimer" id="disclaimer"></div>
+      <div class="card" id="counts"></div>
+      <div id="items"></div>
+    </main>
+  </div>
+  <script src="/inout/portal/assets/inout-app.js"></script>
+  <script>
+    const Io = window.IoPortal;
+    const id = new URLSearchParams(location.search).get('id');
+    document.getElementById('back').href = Io.appHref(`/inout/portal/lease?id=${encodeURIComponent(id || '')}`);
+    document.getElementById('backDash').href = Io.appHref('/inout/portal');
+
+    function classBadge(c) {
+      if (c === 'sin_cambio') return 'ok';
+      if (c === 'posible_deterioro' || c === 'elemento_faltante') return 'danger';
+      if (c === 'cambio_detectado' || c === 'no_comparable') return 'warn';
+      return '';
+    }
+
+    async function load() {
+      const res = await fetch(`/api/inout/leases/${encodeURIComponent(id)}/report`);
+      const data = await res.json();
+      if (!data.ok) { document.getElementById('conclusion').textContent = data.error || 'Error'; return; }
+      document.getElementById('title').textContent = data.lease?.property?.address || 'Informe';
+      document.getElementById('conclusion').textContent = data.summary?.conclusion || '';
+      document.getElementById('disclaimer').textContent = data.disclaimer || '';
+      const c = data.summary?.counts || {};
+      document.getElementById('counts').innerHTML = `
+        <div class="grid 2">
+          <div><span class="badge ok">Sin cambio ${c.sin_cambio || 0}</span></div>
+          <div><span class="badge warn">Cambios ${c.cambio_detectado || 0}</span></div>
+          <div><span class="badge danger">Posible deterioro ${c.posible_deterioro || 0}</span></div>
+          <div><span class="badge danger">Faltantes ${c.elemento_faltante || 0}</span></div>
+          <div><span class="badge warn">No comparable ${c.no_comparable || 0}</span></div>
+          <div><span class="badge">Total ${c.total || 0}</span></div>
+        </div>`;
+
+      const root = document.getElementById('items');
+      root.innerHTML = '';
+      (data.items || []).forEach((item, idx) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        const sliderId = 'sl' + idx;
+        card.innerHTML = `
+          <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
+            <div>
+              <strong>${item.title}</strong>
+              <div style="margin-top:6px">
+                <span class="badge ${classBadge(item.classification)}">${item.classification || '—'}</span>
+                <span class="badge">${item.reviewStatus || 'pending'}</span>
+              </div>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <button class="btn secondary" data-rev="accepted" type="button">Aceptar</button>
+              <button class="btn secondary" data-rev="rejected" type="button">Rechazar</button>
+              <button class="btn secondary" data-rev="needs_recapture" type="button">Recapturar</button>
+            </div>
+          </div>
+          <p class="sub" style="margin:12px 0">${item.description || 'Sin descripción'}</p>
+          <div class="slider-wrap" id="${sliderId}">
+            ${item.inPhotoUrl ? `<img class="in" src="${item.inPhotoUrl}" alt="IN" />` : ''}
+            ${item.outPhotoUrl ? `<img class="out" src="${item.outPhotoUrl}" alt="OUT" />` : ''}
+            <input type="range" min="0" max="100" value="50" />
+          </div>
+          <div class="compare" style="margin-top:10px">
+            <div><small>IN</small>${item.inPhotoUrl ? `<img src="${item.inPhotoUrl}" alt="IN" />` : '<p class="sub">Sin foto</p>'}</div>
+            <div><small>OUT</small>${item.outPhotoUrl ? `<img src="${item.outPhotoUrl}" alt="OUT" />` : '<p class="sub">Sin foto</p>'}</div>
+          </div>`;
+        const range = card.querySelector('input[type=range]');
+        const outImg = card.querySelector('.out');
+        if (range && outImg) {
+          range.oninput = () => {
+            outImg.style.clipPath = `inset(0 0 0 ${range.value}%)`;
+          };
+        }
+        card.querySelectorAll('[data-rev]').forEach((btn) => {
+          btn.onclick = async () => {
+            if (!item.diffId) return alert('Sin resultado de IA para revisar');
+            const r = await fetch(`/api/inout/diffs/${item.diffId}/review`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ reviewStatus: btn.dataset.rev })
+            });
+            const d = await r.json();
+            if (!d.ok) alert(d.error || 'Error');
+            else load();
+          };
+        });
+        root.appendChild(card);
+      });
+    }
+
+    (async function () {
+      const me = await Io.ensureAuth();
+      if (!me) return;
+      document.getElementById('shell').outerHTML = Io.renderShell('overview', me);
+      Io.bindShell();
+      if (!id) location.href = Io.appHref('/inout/portal');
+      else load();
+    })();
+  </script>
+</body>
+</html>

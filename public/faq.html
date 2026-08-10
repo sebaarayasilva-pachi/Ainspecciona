@@ -73,6 +73,22 @@
     .footerCol h4 { margin: 0 0 10px; font-size: 14px; }
     .footerCol a { color: #cbd5e1; text-decoration: none; font-size: 14px; display: block; margin-bottom: 8px; }
     .footerCol a:hover { color: #ffffff; }
+    .footerPartners {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: flex-start;
+      min-width: 0;
+    }
+    .footerPartners img {
+      display: block;
+      width: auto;
+      max-width: 100%;
+      height: auto;
+      max-height: 92px;
+      object-fit: contain;
+      object-position: left center;
+    }
     .footerCta {
       display: inline-flex;
       align-items: center;
@@ -232,6 +248,10 @@
         <h4>Contacto</h4>
         <a href="/contacto.html">Contacto</a>
         <a href="/precios">Precios</a>
+      </div>
+      <div class="footerCol footerPartners" aria-label="Referencias técnicas">
+        <h4>Referencias técnicas</h4>
+        <img src="/assets/footer-referencias-tecnicas.png" alt="Referencias técnicas (NCH, CDT, CChC, ICC)" loading="lazy" decoding="async" />
       </div>
     </div>
     <div class="footerBottom">

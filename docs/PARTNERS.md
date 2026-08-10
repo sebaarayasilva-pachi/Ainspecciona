@@ -2,10 +2,12 @@
 
 ## Resumen
 
-- Los tenants pueden ingresar un **código de referido** al activar el Free Trial Business (modal en corredores, página `/business/trial/pago`, o `?ref=CODIGO` en la URL de pago del trial).
+- Los tenants pueden ingresar un **código ref.** al activar el Free Trial Business (modal en corredores, página `/business/trial/pago`, o `?ref=CODIGO` en la URL de pago del trial).
 - Con código **válido y activo** en `ReferralPartner`: trial de **30 días** (vs 14 por defecto) y **1 crédito extra** de inspección real (además de `TRIAL_INITIAL_REAL_INSPECTIONS`).
 - MercadoPago recibe el `free_trial` en días alineado con la BD (`trialEndsAt`).
 - Tras el trial, cada pago aprobado vía webhook (suscripción mensual Business y compras de créditos `business`, `corporate`, `credits-*`) genera un registro en `PartnerCommissionAccrual` con **15%** del monto bruto CLP (configurable por partner).
+
+**Peer (corredor → corredor):** el mismo campo «código ref.» en el trial. Si el texto coincide primero con un partner activo, aplican las reglas de arriba. Si no, y coincide con `Tenant.peerReferralCode` de otra corredora en estado **ACTIVE**, el trial sigue siendo **14 días** con **+1 crédito** extra al referido y **+1** al referente (`PeerReferralAttribution`). El código peer se genera al crear el tenant (dashboard + email opcional). Detalle: `docs/REFERRALS_PEER_ETAPA1.md`.
 
 ## Variables de entorno (opcional)
 
@@ -15,12 +17,14 @@
 | `PARTNER_TRIAL_BONUS_CREDITS` | 1 | Créditos extra con código |
 | `TRIAL_DURATION_DAYS` | 14 | Trial sin código |
 | `TRIAL_INITIAL_REAL_INSPECTIONS` | 1 | Inspecciones base del trial |
+| `PEER_TRIAL_BONUS_CREDITS` | 1 | Crédito extra referido + crédito al referente (peer) |
 
 ## Migración
 
-Aplicar migración Prisma / SQL:
+Aplicar migraciones Prisma / SQL (partners + peer):
 
-`prisma/migrations/20260319120000_referral_partners_commission/migration.sql`
+`prisma/migrations/20260319120000_referral_partners_commission/migration.sql`  
+`prisma/migrations/20260403120000_peer_referral/migration.sql`
 
 ## Partner de prueba (SQL)
 

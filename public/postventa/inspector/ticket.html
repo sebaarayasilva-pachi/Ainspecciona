@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#070b10" />
+  <title>Reclamo · Inspector</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=IBM+Plex+Sans:wght@400;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/postventa/inspector/assets/inspector.css?v=6" />
+  <link rel="stylesheet" href="/postventa/assets/schedule-picker.css?v=5" />
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <a href="/postventa/inspector" class="muted" style="font-size:13px;">← Cola</a>
+      <button type="button" class="btn" style="width:auto;min-height:36px;padding:8px 12px;font-size:12px;" id="logoutBtn">Salir</button>
+    </div>
+    <div id="content"><div class="empty">Cargando…</div></div>
+  </div>
+  <script src="/postventa/assets/schedule-picker.js?v=3"></script>
+  <script src="/postventa/inspector/assets/inspector-app.js?v=6"></script>
+  <script>
+    (async function () {
+      const I = window.PvInspector;
+      const me = await I.ensureAuth();
+      if (!me) return;
+      document.getElementById("logoutBtn").onclick = () => I.logout();
+
+      const id = I.qs("id", "");
+      if (!id) {
+        location.replace("/postventa/inspector");
+        return;
+      }
+
+      const content = document.getElementById("content");
+
+      async function load() {
+        const res = await I.portalFetch("/api/postventa/portal/tickets/" + encodeURIComponent(id));
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          content.innerHTML = `<div class="empty">${I.escapeHtml(data.message || "No encontrado")}</div>`;
+          return;
+        }
+        const t = data.ticket;
+        const photos = t.photosDetail || [];
+        const sched = I.fmtSchedule(t.scheduledAt);
+        const canStart = ["asignada", "programado"].includes(t.status);
+        const canClose = t.status === "en_ejecucion";
+        const done = t.status === "terminado";
+
+        content.innerHTML = `
+          <div class="row" style="margin-bottom:8px;">
+            <h1 class="h1 mono" style="font-size:24px;">${I.escapeHtml(t.shortId)}</h1>
+            <span class="pill ${I.statusPillClass(t.status)}">${I.escapeHtml(t.statusLabel || t.status)}</span>
+          </div>
+          <p class="sub">${I.escapeHtml(t.unit?.projectName || t.projectName || "")}${t.unitLabel ? " · " + I.escapeHtml(t.unitLabel) : ""}</p>
+
+          <div class="card">
+            <div class="muted" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;">Resumen</div>
+            <p style="margin:8px 0 0;line-height:1.45;font-size:14px;">${I.escapeHtml(t.summary || "—")}</p>
+            ${sched ? `<div class="muted mono" style="margin-top:10px;font-size:12px;">Programada: ${I.escapeHtml(sched)}</div>` : ""}
+            ${t.assignedToName ? `<div class="muted" style="margin-top:6px;font-size:12px;">Inspector: ${I.escapeHtml(t.assignedToName)}</div>` : ""}
+            ${
+              t.contactName || t.contactPhone
+                ? `<div class="muted" style="margin-top:6px;font-size:12px;">Contacto visita: <strong style="color:inherit;">${I.escapeHtml(
+                    [t.contactName, t.contactPhone].filter(Boolean).join(" · ")
+                  )}</strong></div>`
+                : ""
+            }
+          </div>
+
+          <div class="card">
+            <div class="muted" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;">Orden de Trabajo</div>
+            <p class="muted" style="margin:6px 0 10px;font-size:13px;line-height:1.4;">Equipo + fecha acordada con el cliente. El PDF incluye al inspector asignado.</p>
+            <div class="muted" style="font-size:12px;margin-bottom:10px;">Inspector: <strong style="color:inherit;">${I.escapeHtml(t.assignedToName || "Sin asignar")}</strong></div>
+            <label class="field" for="otTeam">Equipo de trabajo</label>
+            <input id="otTeam" type="text" placeholder="Ej. Gasfitería López" value="${I.escapeHtml(t.repairTeamName || "")}" ${done ? "readonly" : ""} />
+            <label class="field" for="otContact">Contacto (opcional)</label>
+            <input id="otContact" type="text" placeholder="Email o teléfono" value="${I.escapeHtml(t.repairTeamContact || "")}" ${done ? "readonly" : ""} />
+            <label class="field">Fecha acordada con el cliente</label>
+            <div id="otScheduleMount"></div>
+            ${
+              !done
+                ? `<button type="button" class="btn primary" id="otDownloadBtn" style="margin-top:12px;">Descargar OT (PDF)</button>`
+                : t.otGeneratedAt
+                  ? `<div class="muted" style="margin-top:8px;font-size:12px;">OT generada: ${I.escapeHtml((t.otGeneratedAt || "").slice(0, 16).replace("T", " "))}</div>`
+                  : ""
+            }
+            <div class="msg" id="otMsg"></div>
+          </div>
+
+          <div class="card">
+            <div class="muted" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Evidencia del reclamo</div>
+            ${
+              photos.filter((p) => p.hasPhoto).length
+                ? `<div class="evidence">${photos
+                    .filter((p) => p.hasPhoto)
+                    .map(
+                      (p) => `<figure>
+                      <img src="${I.escapeHtml(I.authPhotoUrl(p.photoUrl))}" alt="${I.escapeHtml(p.title || p.slotCode)}" loading="lazy" />
+                      <figcaption>${I.escapeHtml(p.title || p.slotCode)}</figcaption>
+                    </figure>`
+                    )
+                    .join("")}</div>`
+                : `<div class="muted" style="font-size:13px;">Sin fotos del propietario.</div>`
+            }
+          </div>
+
+          ${
+            done && (t.closeNote || t.closePhotoUrl)
+              ? `<div class="card">
+                  <div class="muted" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;">Cierre</div>
+                  ${t.closePhotoUrl ? `<img class="preview" src="${I.escapeHtml(I.authPhotoUrl(t.closePhotoUrl))}" alt="Foto de cierre" />` : ""}
+                  <p style="margin:10px 0 0;font-size:14px;line-height:1.45;">${I.escapeHtml(t.closeNote || "")}</p>
+                </div>`
+              : ""
+          }
+
+          <div class="actions-fixed" id="actions">
+            ${canStart ? `<button type="button" class="btn primary" id="startBtn">Iniciar ejecución</button>` : ""}
+            ${canClose ? `<button type="button" class="btn ok" id="closeBtn">Cerrar reclamo</button>` : ""}
+            ${!canStart && !canClose && !done ? `<div class="msg">Estado actual: ${I.escapeHtml(t.statusLabel || t.status)}. Usa el portal para otras etapas.</div>` : ""}
+            <div class="msg" id="msg"></div>
+          </div>
+        `;
+
+        const msg = document.getElementById("msg");
+        let otPicker = null;
+        const otScheduleMount = document.getElementById("otScheduleMount");
+        if (otScheduleMount && window.PvSchedulePicker) {
+          otPicker = window.PvSchedulePicker.mount(otScheduleMount, {
+            initialIso: t.scheduledAt || null,
+            disabled: done
+          });
+        }
+
+        const otBtn = document.getElementById("otDownloadBtn");
+        if (otBtn) {
+          otBtn.onclick = async () => {
+            const otMsg = document.getElementById("otMsg");
+            const team = (document.getElementById("otTeam")?.value || "").trim();
+            const contact = (document.getElementById("otContact")?.value || "").trim();
+            const scheduledAtIso = otPicker ? otPicker.getIso() : null;
+            if (!team) {
+              otMsg.textContent = "Indica el nombre del equipo.";
+              otMsg.className = "msg err";
+              return;
+            }
+            if (!scheduledAtIso) {
+              otMsg.textContent = "Elige fecha y hora en el calendario.";
+              otMsg.className = "msg err";
+              return;
+            }
+            otBtn.disabled = true;
+            otMsg.textContent = "Generando OT…";
+            otMsg.className = "msg";
+            try {
+              const saveRes = await I.portalFetch(
+                "/api/postventa/portal/tickets/" + encodeURIComponent(t.shortId) + "/ot",
+                {
+                  method: "POST",
+                  body: JSON.stringify({
+                    repairTeamName: team,
+                    repairTeamContact: contact,
+                    scheduledAt: scheduledAtIso
+                  })
+                }
+              );
+              const saveData = await saveRes.json();
+              if (!saveRes.ok || !saveData.ok) {
+                otMsg.textContent = saveData.message || "No se pudo guardar";
+                otMsg.className = "msg err";
+                otBtn.disabled = false;
+                return;
+              }
+              await I.downloadOtPdf(t.shortId, "OT-" + t.shortId + ".pdf");
+              otMsg.textContent = "OT descargada.";
+              otMsg.className = "msg";
+              await load();
+            } catch (err) {
+              otMsg.textContent = err?.message || "Error al descargar";
+              otMsg.className = "msg err";
+              otBtn.disabled = false;
+            }
+          };
+        }
+
+        const startBtn = document.getElementById("startBtn");
+        if (startBtn) {
+          startBtn.onclick = async () => {
+            startBtn.disabled = true;
+            msg.textContent = "Actualizando…";
+            msg.className = "msg";
+            const patch = await I.portalFetch(
+              "/api/postventa/portal/tickets/" + encodeURIComponent(t.shortId),
+              { method: "PATCH", body: JSON.stringify({ status: "en_ejecucion" }) }
+            );
+            const pj = await patch.json();
+            if (!patch.ok || !pj.ok) {
+              msg.textContent = pj.message || "No se pudo iniciar";
+              msg.className = "msg err";
+              startBtn.disabled = false;
+              return;
+            }
+            await load();
+          };
+        }
+
+        const closeBtn = document.getElementById("closeBtn");
+        if (closeBtn) {
+          closeBtn.onclick = () => openCloseSheet(t);
+        }
+      }
+
+      function openCloseSheet(t) {
+        const overlay = document.createElement("div");
+        overlay.className = "overlay";
+        overlay.innerHTML = `
+          <div class="sheet" role="dialog" aria-modal="true">
+            <h3>Cerrar reclamo</h3>
+            <p class="muted" style="margin:0 0 8px;font-size:13px;">Foto del arreglo (después) + nota obligatoria.</p>
+            <label class="field">Foto de cierre</label>
+            <input id="closePhoto" class="sr-only" type="file" accept="image/*" capture="environment" />
+            <button type="button" class="btn primary" id="takePhotoBtn">Tomar foto</button>
+            <img id="closePreview" class="preview" hidden alt="Vista previa" />
+            <label class="field" for="closeNote">Nota</label>
+            <textarea id="closeNote" placeholder="Qué se hizo / resultado de la visita"></textarea>
+            <button type="button" class="btn ok" id="confirmClose" style="margin-top:14px;">Confirmar cierre</button>
+            <button type="button" class="btn" id="cancelClose" style="margin-top:8px;">Cancelar</button>
+            <div class="msg" id="closeMsg"></div>
+          </div>`;
+        document.body.appendChild(overlay);
+
+        let picked = null;
+        const preview = overlay.querySelector("#closePreview");
+        const photoInput = overlay.querySelector("#closePhoto");
+        const takeBtn = overlay.querySelector("#takePhotoBtn");
+        takeBtn.onclick = () => photoInput.click();
+        photoInput.onchange = async (e) => {
+          const file = e.target.files && e.target.files[0];
+          if (!file) return;
+          picked = await I.fileToBase64(file);
+          preview.src = picked.dataUrl;
+          preview.hidden = false;
+          takeBtn.textContent = "Volver a tomar foto";
+        };
+        overlay.querySelector("#cancelClose").onclick = () => overlay.remove();
+        overlay.addEventListener("click", (e) => {
+          if (e.target === overlay) overlay.remove();
+        });
+
+        overlay.querySelector("#confirmClose").onclick = async () => {
+          const note = overlay.querySelector("#closeNote").value.trim();
+          const closeMsg = overlay.querySelector("#closeMsg");
+          const btn = overlay.querySelector("#confirmClose");
+          if (!picked) {
+            closeMsg.textContent = "Toma la foto de cierre.";
+            closeMsg.className = "msg err";
+            return;
+          }
+          if (!note) {
+            closeMsg.textContent = "Escribe una nota breve.";
+            closeMsg.className = "msg err";
+            return;
+          }
+          btn.disabled = true;
+          closeMsg.textContent = "Cerrando…";
+          closeMsg.className = "msg";
+          try {
+            const res = await I.portalFetch(
+              "/api/postventa/portal/tickets/" + encodeURIComponent(t.shortId) + "/close",
+              {
+                method: "POST",
+                body: JSON.stringify({
+                  note,
+                  photoBase64: picked.base64,
+                  mimeType: picked.mimeType
+                })
+              }
+            );
+            const data = await res.json();
+            if (!res.ok || !data.ok) {
+              closeMsg.textContent = data.message || "No se pudo cerrar";
+              closeMsg.className = "msg err";
+              btn.disabled = false;
+              return;
+            }
+            overlay.remove();
+            await load();
+          } catch {
+            closeMsg.textContent = "Error de red";
+            closeMsg.className = "msg err";
+            btn.disabled = false;
+          }
+        };
+      }
+
+      await load();
+    })();
+  </script>
+</body>
+</html>

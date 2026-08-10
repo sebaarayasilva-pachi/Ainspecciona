@@ -112,6 +112,85 @@
       color: #64748b;
     }
     .statConvDetail strong { color: #EAF0FF; font-weight: 800; }
+    .analyticsGrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+    @media (max-width: 1100px) {
+      .analyticsGrid { grid-template-columns: 1fr; }
+    }
+    .analyticsToolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-top: 20px;
+    }
+    .analyticsToolbar .muted { font-size: 13px; }
+    .funnelStep {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 56px;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .funnelStepLabel { font-size: 13px; color: #cbd5e1; }
+    .funnelBarTrack {
+      height: 22px;
+      background: #1e2b45;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #2a3a5c;
+    }
+    .funnelBarFill {
+      height: 100%;
+      background: linear-gradient(90deg, rgba(53, 208, 127, 0.35), #35d07f);
+      border-radius: 8px;
+      min-width: 2px;
+    }
+    .funnelCount { font-weight: 800; color: #eaf0ff; text-align: right; font-size: 13px; }
+    .geoRow {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) 48px;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+    .geoBarTrack {
+      height: 10px;
+      background: #1e2b45;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid #2a3a5c;
+    }
+    .geoBarFill {
+      height: 100%;
+      background: linear-gradient(90deg, #3b82f6, #60a5fa);
+      border-radius: 999px;
+      min-width: 2px;
+    }
+    .heatmapWrap { overflow-x: auto; max-width: 100%; margin-top: 8px; }
+    .heatmapTable {
+      border-collapse: collapse;
+      font-size: 10px;
+      color: #94a3b8;
+    }
+    .heatmapTable th, .heatmapTable td {
+      border: 1px solid #1e2b45;
+      padding: 2px 3px;
+      text-align: center;
+      min-width: 18px;
+    }
+    .heatmapTable th { background: #0b1424; color: #cbd5e1; font-weight: 700; }
+    .heatmapTable .rowLabel {
+      min-width: 34px;
+      font-weight: 700;
+      color: #cbd5e1;
+      background: #0b1424;
+    }
     .grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -383,11 +462,174 @@
     .pill.ok { background: rgba(53, 208, 127, 0.1); color: #35D07F; border-color: rgba(53, 208, 127, 0.3); }
     .pill.warn { background: rgba(234, 179, 8, 0.1); color: #EAB308; border-color: rgba(234, 179, 8, 0.3); }
     .pill.bad { background: rgba(239, 68, 68, 0.1); color: #EF4444; border-color: rgba(239, 68, 68, 0.3); }
+    .btn.danger { background: #991b1b; color: #fff; border: 1px solid #b91c1c; }
+    .btn.danger:hover { background: #b91c1c; }
+    .btn.danger.outline { background: transparent; color: #f87171; border: 1px solid rgba(248, 113, 113, 0.45); }
     .pill.plan { background: rgba(59, 130, 246, 0.1); color: #3B82F6; border-color: rgba(59, 130, 246, 0.3); }
     .pill.plan.starter { background: rgba(245, 158, 11, 0.1); color: #F59E0B; border-color: rgba(245, 158, 11, 0.3); }
     .thumbSmall {
       width: 64px; height: 64px; border-radius: 10px;
       border: 1px solid #1E2B45; object-fit: cover; margin-top: 6px;
+    }
+    /* Inspecciones: una fila compacta (scroll horizontal en pantallas angostas) */
+    #casesTable.casesDense {
+      min-width: 1180px;
+    }
+    #casesTable.casesDense tbody td {
+      vertical-align: middle;
+    }
+    .casesSolicitanteLine {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: baseline;
+      gap: 6px;
+      max-width: 260px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .casesSolicitanteLine .casesEmail {
+      font-size: 11px;
+      color: #94a3b8;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .casesCaseCell {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+    .thumbInline {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      border: 1px solid #1E2B45;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+    .casesCaseMeta {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: nowrap;
+    }
+    .casesCaseMeta strong {
+      font-variant-numeric: tabular-nums;
+    }
+    .casesReviewRow {
+      display: inline-flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: nowrap;
+    }
+    .casesReviewRow .btn {
+      padding: 5px 10px;
+      font-size: 11px;
+      margin-top: 0;
+    }
+    .inspectionActionsRow {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      flex-wrap: nowrap;
+      gap: 6px;
+    }
+    .inspectionActionsRow .btn,
+    .casesPlanRow {
+      display: inline-flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: nowrap;
+      max-width: 300px;
+    }
+    .correction-procedure {
+      margin-top: 20px;
+      border: 1px solid #1E3A5F;
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.6);
+    }
+    .correction-procedure summary {
+      cursor: pointer;
+      padding: 14px 16px;
+      font-weight: 700;
+      color: #E2E8F0;
+      list-style: none;
+    }
+    .correction-procedure summary::-webkit-details-marker { display: none; }
+    .correction-procedure__body {
+      padding: 0 16px 16px;
+      font-size: 13px;
+      color: #94a3b8;
+      line-height: 1.55;
+    }
+    .correction-procedure__body ol {
+      margin: 8px 0 0;
+      padding-left: 20px;
+    }
+    .correction-procedure__body li { margin-bottom: 8px; }
+    .correction-procedure__body strong { color: #CBD5E1; }
+    .correction-procedure__grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .correction-procedure__box {
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #1E2B45;
+      background: #0B1220;
+      font-size: 12px;
+    }
+    .correction-procedure__box h4 {
+      margin: 0 0 6px;
+      font-size: 12px;
+      color: #93C5FD;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .finding-examples-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-top: 12px;
+    }
+    .finding-examples-table th,
+    .finding-examples-table td {
+      border-bottom: 1px solid #1E2B45;
+      padding: 8px 6px;
+      text-align: left;
+      vertical-align: top;
+    }
+    .finding-examples-table th { color: #94a3b8; font-weight: 600; }
+    .finding-form-grid {
+      display: grid;
+      grid-template-columns: 140px 1fr 100px;
+      gap: 10px;
+      margin-top: 12px;
+      align-items: start;
+    }
+    .finding-form-grid textarea { min-height: 72px; }
+    @media (max-width: 720px) {
+      .finding-form-grid { grid-template-columns: 1fr; }
+    }
+    .casesTenantExec {
+      font-size: 11px;
+      line-height: 1.35;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      min-width: 0;
+      flex: 1;
+    }
+    .casesTenantExec .casesExecName {
+      color: #B9C7E2;
+      font-weight: 600;
     }
     .filters {
       display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
@@ -425,10 +667,15 @@
       <div class="asideTitle">Admin</div>
       <nav class="menu">
         <a class="active" data-section-link="dashboard" href="#dashboard">Dashboard</a>
+        <a href="/review">Review</a>
         <a data-section-link="score" href="#score">Score</a>
-        <a data-section-link="intelligence" href="#intelligence">Intelligence</a>
+        <a data-section-link="intelligence" href="#intelligence">Aintelligence</a>
+        <a data-section-link="taxonomia" href="#taxonomia">Taxonomía</a>
         <a data-section-link="tenants" href="#tenants">Corredoras</a>
         <a data-section-link="inspecciones" href="#inspecciones">Inspecciones</a>
+        <a data-section-link="capture-perf" href="#capture-perf">Fotos (Capture)</a>
+        <a data-section-link="postventa" href="#postventa">Postventa</a>
+        <a data-section-link="embajadores" href="#embajadores">Embajadores</a>
         <a data-section-link="proveedores" href="#proveedores">Proveedores</a>
       </nav>
     </aside>
@@ -499,6 +746,75 @@
         </div>
         <div style="position:relative; height:280px;">
           <canvas id="visitsChart"></canvas>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:24px;">
+        <h3>Exactitud Aintelligence</h3>
+        <p class="muted" style="font-size:12px; margin:0 0 12px;">
+          Por informe: <strong>(slots totales − slots corregidos) / slots totales</strong>.
+          Los informes completados sin reanálisis cuentan como <strong>100%</strong>.
+          Las correcciones (reanálisis o feedback PropertyCheck) actualizan la exactitud del informe.
+        </p>
+        <div style="display:flex; gap:12px; align-items:center; margin-bottom:12px; flex-wrap:wrap;">
+          <select class="smallInput" id="accuracyDaysSelect" style="width:auto;">
+            <option value="7">Últimos 7 días</option>
+            <option value="14">Últimos 14 días</option>
+            <option value="30" selected>Últimos 30 días</option>
+            <option value="60">Últimos 60 días</option>
+            <option value="90">Últimos 90 días</option>
+          </select>
+          <span class="muted" id="accuracySummary" style="font-size:13px;">--</span>
+        </div>
+        <div style="position:relative; height:280px;">
+          <canvas id="analysisAccuracyChart"></canvas>
+        </div>
+        <p class="muted" id="analysisAccuracyErr" style="font-size:12px; margin-top:8px; min-height:1em;"></p>
+      </div>
+
+      <div class="analyticsToolbar">
+        <label class="muted" for="analyticsDaysSelect" style="font-weight:700;">Periodo analíticas</label>
+        <select class="smallInput" id="analyticsDaysSelect" style="width:auto;">
+          <option value="7">Últimos 7 días</option>
+          <option value="14">Últimos 14 días</option>
+          <option value="30" selected>Últimos 30 días</option>
+          <option value="60">Últimos 60 días</option>
+          <option value="90">Últimos 90 días</option>
+        </select>
+        <span class="muted" id="analyticsPeriodHint">Funnel, inspecciones diarias, mapa regional y heatmap.</span>
+      </div>
+
+      <div class="analyticsGrid">
+        <div class="card">
+          <h3>Funnel Business (trial)</h3>
+          <p class="muted" id="funnelDisclaimer" style="font-size:12px; margin:0 0 12px;"></p>
+          <div id="funnelSteps"></div>
+          <div class="muted" id="funnelRates" style="font-size:12px; margin-top:12px;"></div>
+        </div>
+        <div class="card">
+          <h3>Inspecciones diarias</h3>
+          <p class="muted" style="font-size:12px; margin:0 0 8px;">Casos creados por día (total y completadas).</p>
+          <div style="position:relative; height:280px;">
+            <canvas id="inspectionsDailyChart"></canvas>
+          </div>
+          <p class="muted" id="inspectionsDailyErr" style="font-size:12px; margin-top:8px; min-height:1em;"></p>
+        </div>
+      </div>
+
+      <div class="analyticsGrid">
+        <div class="card">
+          <h3>Mapa regional (Chile)</h3>
+          <p class="muted" id="geoDisclaimer" style="font-size:12px; margin:0 0 8px;"></p>
+          <div class="muted" id="geoCoverage" style="font-size:12px; margin-bottom:10px;"></div>
+          <div id="geoRegionList"></div>
+        </div>
+        <div class="card">
+          <h3>Heatmap inspecciones</h3>
+          <p class="muted" id="heatmapTzNote" style="font-size:12px; margin:0 0 8px;"></p>
+          <p class="muted" id="heatmapErr" style="font-size:12px; margin:0 0 8px; min-height:1em;"></p>
+          <div class="heatmapWrap">
+            <table class="heatmapTable" id="heatmapTable" aria-label="Inspecciones por día y hora"></table>
+          </div>
         </div>
       </div>
     </section>
@@ -734,6 +1050,7 @@
 
       <div class="card">
         <h3>Rangos de badge</h3>
+        <div class="kpiSubtle">Define color del badge y estrellas (1–5). Rojo: bajo amarillo · Amarillo: entre ambos · Verde: desde verde. Estrellas: 1 en rojo, 2–3 en amarillo, 4–5 en verde.</div>
         <div class="row">
           <label for="badgeYellow">Amarillo desde</label>
           <input id="badgeYellow" type="number" step="1" min="0" max="100" />
@@ -773,9 +1090,107 @@
     </section>
 
     <section class="content" id="intelligence" data-section="intelligence" style="display: none;">
-      <h1>Prompts IA por KPI</h1>
-      <div class="muted">Plantillas de análisis de Inteligencia Artificial para cada KPI.</div>
-      
+      <h1>Aintelligence</h1>
+      <div class="muted">Capa de análisis y aprendizaje de hallazgos. La revisión de feedback ahora se hace en el <strong>Centro de Revisión ITO</strong>; aquí quedan las métricas, prompts y la biblioteca legada.</div>
+
+      <div class="card" style="margin-top:16px; border-color:#2563eb; background:rgba(37,99,235,.08);">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+          <div>
+            <strong style="color:#EAF0FF;">Centro de Revisión ITO</strong>
+            <div class="muted" style="margin-top:4px;">Cola unificada de Ainspecciona, Property-chk y Postventa. Cada veredicto (OK o corrección) nutre la base de conocimiento de la IA.</div>
+          </div>
+          <a class="btn" href="/review" style="text-decoration:none;">Abrir centro de revisión →</a>
+        </div>
+      </div>
+
+      <div class="statsGrid" style="margin-top:20px;">
+        <div class="statCard accent"><div class="statValue" id="aiFbStatQueue">—</div><div class="statLabel">Cola pendiente</div></div>
+        <div class="statCard"><div class="statValue" id="aiFbStatPending">—</div><div class="statLabel">En revisión</div></div>
+        <div class="statCard"><div class="statValue" id="aiFbStatApproved">—</div><div class="statLabel">Aprobados</div></div>
+        <div class="statCard"><div class="statValue" id="aiFbStatTotal">—</div><div class="statLabel">Total feedback</div></div>
+      </div>
+
+      <!-- Cola y detalle de feedback retirados de admin: la revisión vive en /review (centro ITO). -->
+      <div class="card" style="margin-top:20px; display:none;" id="aiFeedbackQueueCard">
+        <h3>Cola de feedback</h3>
+        <div class="muted" style="margin-bottom:12px;">Correcciones enviadas desde PropertyCheck (y otras fuentes). Aprueba para enseñar a la IA; rechaza si no aplica.</div>
+        <div class="filters" style="display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:14px;">
+          <label class="muted">Estado
+            <select class="smallInput" id="aiFbFilterStatus" style="min-width:160px;">
+              <option value="">Cola (draft + revisión)</option>
+              <option value="pending_review">En revisión</option>
+              <option value="draft">Borrador</option>
+              <option value="approved">Aprobados</option>
+              <option value="rejected">Rechazados</option>
+            </select>
+          </label>
+          <label class="muted">Fuente
+            <select class="smallInput" id="aiFbFilterSource" style="min-width:140px;">
+              <option value="">Todas</option>
+              <option value="PROPERTYCHECK">PropertyCheck</option>
+              <option value="AINSPECTA">Ainspecta</option>
+              <option value="POSTVENTA">Postventa</option>
+            </select>
+          </label>
+          <button type="button" class="btn outline" id="aiFbRefreshBtn">Actualizar</button>
+        </div>
+        <div class="muted" id="aiFbListSummary">Cargando…</div>
+        <div style="overflow-x:auto; margin-top:12px;">
+          <table class="table" id="aiFbTable" style="display:none;">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Fuente</th>
+                <th>KPI</th>
+                <th>Tipo</th>
+                <th>IA → Humano</th>
+                <th>Estado</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="aiFbBody"></tbody>
+          </table>
+        </div>
+        <div id="aiFbEmpty" style="display:none; padding:16px; text-align:center; color:#94a3b8;">Sin feedback en cola.</div>
+      </div>
+
+      <div class="card hidden" id="aiFbDetailCard" style="margin-top:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap;">
+          <div>
+            <h3 id="aiFbDetailTitle" style="margin:0 0 6px; font-size:18px; color:#EAF0FF;">Detalle feedback</h3>
+            <div class="muted" id="aiFbDetailMeta"></div>
+          </div>
+          <button type="button" class="btn outline" id="aiFbDetailClose">Cerrar</button>
+        </div>
+        <div style="display:grid; grid-template-columns: minmax(200px, 280px) 1fr; gap:16px; margin-top:14px;">
+          <div>
+            <img id="aiFbDetailImage" alt="Evidencia" style="width:100%; border-radius:12px; background:#0f172a; max-height:320px; object-fit:contain;" />
+            <p class="muted" id="aiFbDetailImageMissing" style="display:none; font-size:12px;">Sin imagen almacenada.</p>
+          </div>
+          <div>
+            <div class="kpiSubtle">Señal humana (editable al aprobar)</div>
+            <textarea id="aiFbEditSignal" rows="2" style="width:100%; margin-bottom:8px;"></textarea>
+            <div class="kpiSubtle">Severidad</div>
+            <select id="aiFbEditSeverity" class="smallInput" style="width:100%; margin-bottom:8px;">
+              <option value="">(sin cambio)</option>
+              <option value="low">Baja</option>
+              <option value="medium">Media</option>
+              <option value="high">Alta</option>
+              <option value="none">Ninguna</option>
+            </select>
+            <div class="kpiSubtle">Notas de revisión</div>
+            <textarea id="aiFbEditNotes" rows="2" style="width:100%;" placeholder="Opcional"></textarea>
+            <div id="aiFbDetailAi" class="kpiSubtle" style="margin-top:12px; white-space:pre-wrap;"></div>
+          </div>
+        </div>
+        <div class="actions" style="margin-top:14px;">
+          <button type="button" class="btn" id="aiFbApproveBtn">Aprobar → Biblioteca</button>
+          <button type="button" class="btn outline" id="aiFbRejectBtn">Rechazar</button>
+        </div>
+        <div class="note" id="aiFbDetailNote"></div>
+      </div>
+
+      <h2 style="margin-top:28px; font-size:20px; color:#EAF0FF;">Prompts IA por KPI</h2>
       <div class="card">
         <div class="promptGrid">
           <div>
@@ -816,9 +1231,279 @@
           </div>
         </div>
       </div>
+
+      <div class="card" style="margin-top:16px;" id="findingExamplesCard">
+        <h3 id="findingExamplesAnchor">Biblioteca de hallazgos (enseñar a la IA)</h3>
+        <div class="muted" style="margin-bottom:8px;">
+          Agrega criterios concretos que se inyectan al prompt en cada análisis/reanálisis.
+          Se guarda en la base de datos — <strong>sin deploy</strong>. Luego reanaliza los slots afectados en Inspecciones.
+        </div>
+        <div class="finding-form-grid">
+          <div>
+            <div class="kpiSubtle">KPI</div>
+            <select id="findingExampleKpi" class="smallInput" style="width:100%;">
+              <option value="MUROS_PINTURA">Muros y pintura</option>
+              <option value="HUMEDAD">Humedad visible</option>
+              <option value="PISOS">Pisos</option>
+              <option value="SANITARIOS">Sanitarios</option>
+              <option value="ELECTRICIDAD">Electricidad</option>
+              <option value="VENTANAS_CERRAMIENTOS">Ventanas</option>
+              <option value="PUERTAS_HERRAJES">Puertas</option>
+              <option value="MOBILIARIO_FIJO">Mobiliario fijo</option>
+            </select>
+            <div class="kpiSubtle" style="margin-top:8px;">Severidad sugerida</div>
+            <select id="findingExampleSeverity" class="smallInput" style="width:100%;">
+              <option value="">(opcional)</option>
+              <option value="low">Baja</option>
+              <option value="medium">Media</option>
+              <option value="high">Alta</option>
+              <option value="none">Ninguna / favorable</option>
+            </select>
+          </div>
+          <div>
+            <div class="kpiSubtle">Señal / hallazgo (qué buscar en la foto)</div>
+            <textarea id="findingExampleSignal" placeholder="Ej: discontinuidad en pintura en junta de placas (no es grieta estructural)"></textarea>
+            <div class="kpiSubtle" style="margin-top:8px;">Cómo debe analizarlo la IA</div>
+            <textarea id="findingExampleGuidance" placeholder="Ej: Describir como irregularidad de acabado; severidad baja salvo desprendimiento amplio."></textarea>
+          </div>
+          <div>
+            <button type="button" class="btn" id="findingExampleAddBtn" style="width:100%;">+ Agregar</button>
+          </div>
+        </div>
+        <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+          <label class="muted" style="display:flex;align-items:center;gap:6px;">
+            Filtrar KPI
+            <select id="findingExampleFilter" class="smallInput">
+              <option value="">Todos</option>
+              <option value="MUROS_PINTURA">Muros</option>
+              <option value="HUMEDAD">Humedad</option>
+              <option value="PISOS">Pisos</option>
+              <option value="SANITARIOS">Sanitarios</option>
+              <option value="ELECTRICIDAD">Electricidad</option>
+              <option value="VENTANAS_CERRAMIENTOS">Ventanas</option>
+              <option value="PUERTAS_HERRAJES">Puertas</option>
+              <option value="MOBILIARIO_FIJO">Mobiliario</option>
+            </select>
+          </label>
+          <span class="muted" id="findingExampleCount"></span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="finding-examples-table" id="findingExamplesTable">
+            <thead>
+              <tr>
+                <th>Activo</th>
+                <th>KPI</th>
+                <th>Señal</th>
+                <th>Sev.</th>
+                <th>Guía</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="findingExamplesBody"></tbody>
+          </table>
+        </div>
+        <p class="muted" id="findingExamplesEmpty" style="display:none; margin-top:12px;">Sin ejemplos. Agrega el primero arriba.</p>
+      </div>
       
       <div class="actions">
-        <button class="btn" id="saveIntelligenceBtn" type="button">Guardar prompts</button>
+        <button class="btn" id="saveIntelligenceBtn" type="button">Guardar prompts y enseñanzas</button>
+      </div>
+    </section>
+
+    <section class="content hidden" id="taxonomia" data-section="taxonomia">
+      <h1>Taxonomía KPI</h1>
+      <div class="muted">
+        Catálogo canónico para alinear Ainspecciona, Entrega y Postventa. Importa hallazgos desde <strong>public/KPI.xlsx</strong> como borradores,
+        revísalos aquí y aprueba uno a uno, o usa <strong>Aprobar Entrega (KPI.xlsx)</strong> para activar el catálogo en Entrega de una vez.
+      </div>
+
+      <div class="statsGrid" style="margin-top:16px;">
+        <div class="statCard accent"><div class="statValue" id="taxStatCount">—</div><div class="statLabel">Entradas</div></div>
+        <div class="statCard"><div class="statValue" id="taxStatDraft">—</div><div class="statLabel">Borrador</div></div>
+        <div class="statCard"><div class="statValue" id="taxStatApproved">—</div><div class="statLabel">Aprobadas</div></div>
+        <div class="statCard"><div class="statValue" id="taxStatUpdated">—</div><div class="statLabel">Última actualización</div></div>
+      </div>
+
+      <div class="card" style="margin-top:20px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap;">
+          <div>
+            <h3 id="taxFormTitle" style="margin:0 0 6px; font-size:18px; color:#EAF0FF;">Nueva entrada</h3>
+            <div class="muted" id="taxFormHint">Completa KPI + subfamilia; el id se genera automáticamente si lo dejas vacío.</div>
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button type="button" class="btn outline" id="taxImportKpiBtn">Importar KPI.xlsx</button>
+            <button type="button" class="btn" id="taxApproveEntregaBatchBtn" style="background:#35D07F;border:none;color:#0f172a;font-weight:700;">Aprobar Entrega (KPI.xlsx)</button>
+            <button type="button" class="btn outline" id="taxFormClearBtn">Restablecer plantilla</button>
+            <button type="button" class="btn outline" id="taxResetSeedBtn">Restaurar seed</button>
+          </div>
+        </div>
+
+        <input type="hidden" id="taxEditId" value="" />
+
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:14px; margin-top:16px;">
+          <div>
+            <div class="kpiSubtle">Grupo KPI (Excel)</div>
+            <input id="taxKpiGroup" class="smallInput" placeholder="CIELOS Y MUROS" style="width:100%;" />
+          </div>
+          <div>
+            <div class="kpiSubtle">Item (Excel)</div>
+            <input id="taxItem" class="smallInput" placeholder="PINTURA" style="width:100%;" />
+          </div>
+          <div>
+            <div class="kpiSubtle">Hallazgo</div>
+            <input id="taxHallazgo" class="smallInput" placeholder="Descripción del hallazgo" style="width:100%;" />
+          </div>
+          <div>
+            <div class="kpiSubtle">Requerimiento</div>
+            <input id="taxRequerimiento" class="smallInput" placeholder="Qué se debe hacer" style="width:100%;" />
+          </div>
+          <div>
+            <div class="kpiSubtle">Especialidades (coma)</div>
+            <input id="taxEspecialidades" class="smallInput" placeholder="Pintor, Yesero" style="width:100%;" />
+          </div>
+          <div>
+            <div class="kpiSubtle">Posible causa</div>
+            <input id="taxCausa" class="smallInput" placeholder="Causa probable" style="width:100%;" />
+          </div>
+          <div>
+            <div class="kpiSubtle">Criticidad</div>
+            <select id="taxCriticidad" class="smallInput" style="width:100%;">
+              <option value="">—</option>
+              <option value="Alta">Alta</option>
+              <option value="Media">Media</option>
+              <option value="Baja">Baja</option>
+            </select>
+          </div>
+          <div>
+            <div class="kpiSubtle">Garantía (años, coma)</div>
+            <input id="taxGarantiaAnios" class="smallInput" placeholder="3, 5, 10" style="width:100%;" />
+          </div>
+        </div>
+
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:14px; margin-top:16px;">
+          <div>
+            <div class="kpiSubtle">KPI canónico</div>
+            <select id="taxKpi" class="smallInput" style="width:100%;">
+              <option value="TERMINACIONES">TERMINACIONES</option>
+            </select>
+          </div>
+          <div>
+            <div class="kpiSubtle">Subfamilia (slug)</div>
+            <input id="taxSubfamilia" class="smallInput" value="pintura_muro" placeholder="pintura_muro" style="width:100%;" />
+          </div>
+          <div>
+            <div class="kpiSubtle">Etiqueta legible</div>
+            <input id="taxLabel" class="smallInput" value="Pintura en muros y cielos" placeholder="Pintura en muros y cielos" style="width:100%;" />
+          </div>
+          <div>
+            <div class="kpiSubtle">Id (opcional)</div>
+            <input id="taxId" class="smallInput" placeholder="terminaciones.pintura_muro (vacío = auto)" style="width:100%;" />
+          </div>
+          <div>
+            <div class="kpiSubtle">Estado</div>
+            <select id="taxStatus" class="smallInput" style="width:100%;">
+              <option value="draft">Borrador</option>
+              <option value="approved">Aprobada</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-top:14px;">
+          <div class="kpiSubtle">Miradas aplicables</div>
+          <div id="taxMiradasWrap" style="display:flex; gap:16px; flex-wrap:wrap; margin-top:6px;">
+            <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#B9C7E2;">
+              <input type="checkbox" value="EJECUCION_OBRA" checked /> Ejecución de obra (Entrega / Postventa)
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#B9C7E2;">
+              <input type="checkbox" value="DETERIORO_USO" checked /> Deterioro en el tiempo (Ainspecciona / Property-chk)
+            </label>
+          </div>
+        </div>
+
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:14px; margin-top:16px;">
+          <div>
+            <div class="kpiSubtle">Alias Ainspecciona (kpiKey)</div>
+            <input id="taxAliasAinspecciona" class="smallInput" value="MUROS_PINTURA" placeholder="MUROS_PINTURA" style="width:100%;" />
+          </div>
+          <div>
+            <div class="kpiSubtle">Alias Postventa (category)</div>
+            <input id="taxAliasPostventa" class="smallInput" value="pintura_muros_cielos" placeholder="pintura_muros_cielos" style="width:100%;" />
+          </div>
+          <div>
+            <div class="kpiSubtle">Alias Entrega (KPI legible)</div>
+            <input id="taxAliasEntregaKpi" class="smallInput" value="Terminaciones" placeholder="Terminaciones" style="width:100%;" />
+          </div>
+          <div>
+            <div class="kpiSubtle">Alias Entrega (especialidades)</div>
+            <input id="taxAliasEntregaEsp" class="smallInput" value="Pintor, Yesero" placeholder="Pintor, Yesero" style="width:100%;" />
+          </div>
+        </div>
+
+        <div class="grid" style="grid-template-columns: 1fr 1fr; gap:14px; margin-top:16px;">
+          <div>
+            <div class="kpiSubtle">Notas — ejecución de obra (Entrega / Postventa)</div>
+            <textarea id="taxNotasEjecucion" rows="3" placeholder="Qué mirar cuando es defecto de obra nueva…">Defecto de aplicación, adherencia o terminación en obra nueva.</textarea>
+          </div>
+          <div>
+            <div class="kpiSubtle">Notas — deterioro por uso (Ainspecciona / Property-chk)</div>
+            <textarea id="taxNotasDeterioro" rows="3" placeholder="Qué mirar cuando es desgaste en el tiempo…">Desgaste por uso, rayados o manchas; considerar antigüedad del inmueble.</textarea>
+          </div>
+        </div>
+
+        <div class="actions" style="margin-top:14px;">
+          <button type="button" class="btn" id="taxSaveBtn">Guardar entrada</button>
+        </div>
+        <div class="note" id="taxFormNote"></div>
+      </div>
+
+      <div class="card" style="margin-top:20px;">
+        <h3>Entradas del catálogo</h3>
+        <div class="filters" style="display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:14px;">
+          <label class="muted">KPI
+            <select class="smallInput" id="taxFilterKpi" style="min-width:180px;">
+              <option value="">Todos</option>
+            </select>
+          </label>
+          <label class="muted">Mirada
+            <select class="smallInput" id="taxFilterMirada" style="min-width:200px;">
+              <option value="">Todas</option>
+            </select>
+          </label>
+          <label class="muted">Estado
+            <select class="smallInput" id="taxFilterStatus" style="min-width:140px;">
+              <option value="">Todos</option>
+              <option value="draft">Borrador</option>
+              <option value="approved">Aprobada</option>
+            </select>
+          </label>
+          <label class="muted">Origen
+            <select class="smallInput" id="taxFilterSource" style="min-width:140px;">
+              <option value="">Todos</option>
+              <option value="KPI.xlsx">KPI.xlsx</option>
+              <option value="seed">Seed / manual</option>
+            </select>
+          </label>
+          <button type="button" class="btn outline" id="taxRefreshBtn">Actualizar</button>
+        </div>
+        <div class="muted" id="taxListSummary">Cargando…</div>
+        <div style="overflow-x:auto; margin-top:12px;">
+          <table class="table" id="taxTable" style="display:none;">
+            <thead>
+              <tr>
+                <th>Grupo</th>
+                <th>Item</th>
+                <th>Hallazgo</th>
+                <th>KPI</th>
+                <th>Especialidades</th>
+                <th>Criticidad</th>
+                <th>Estado</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="taxBody"></tbody>
+          </table>
+        </div>
+        <div id="taxEmpty" style="display:none; padding:16px; text-align:center; color:#94a3b8;">Sin entradas. Agrega la primera arriba o restaura el seed.</div>
       </div>
     </section>
 
@@ -874,6 +1559,34 @@
       <h1>Inspecciones</h1>
       <div class="muted">Listado global de inspecciones de todas las corredoras.</div>
 
+      <details class="correction-procedure" open>
+        <summary>Procedimiento de corrección de informes</summary>
+        <div class="correction-procedure__body">
+          <p>Use este flujo cuando un informe tenga hallazgos, puntajes o resumen incorrectos. Las correcciones por caso se hacen aquí; <strong>Intelligence</strong> y <strong>Score</strong> solo cuando el error se repite en muchos casos.</p>
+          <ol>
+            <li><strong>Revisar</strong> — Abrir <em>Ver informe</em> y anotar slots/KPIs con problema (severidad, texto, foto incorrecta).</li>
+            <li><strong>Reanalizar slots</strong> — <em>Corregir en informe</em> → marcar «Reanalizar» en cada slot con foto a corregir → <em>Reanalizar seleccionados</em> en la barra del informe. Los demás conservan su análisis.</li>
+            <li><strong>Validar puntaje</strong> — Recargar informe (Ctrl+F5). Revisar STI, badge, estrellas y penalizaciones por KPI.</li>
+            <li><strong>Resumen ejecutivo</strong> — Si el texto cita un STI viejo o no cuadra → botón <em>Resumen</em> (regenera con OpenAI).</li>
+            <li><strong>Aprobar</strong> — Business: columna Revisión → <em>Aprobar</em> cuando el informe esté OK (envía al ejecutivo/cliente según plan).</li>
+          </ol>
+          <div class="correction-procedure__grid">
+            <div class="correction-procedure__box">
+              <h4>Inspecciones (este panel)</h4>
+              Corrección por caso: reanalizar slots, regenerar resumen, aprobar informe.
+            </div>
+            <div class="correction-procedure__box">
+              <h4>Score</h4>
+              Penalizaciones 10/30/60, rangos badge 60/86, estrellas. Cambia cómo se calcula el puntaje, no el texto IA de un slot.
+            </div>
+            <div class="correction-procedure__box">
+              <h4>Intelligence</h4>
+              Prompts por KPI. Úsalo si la IA falla igual en muchos informes (ej. humedad siempre en bajo). Luego reanalizar los casos afectados.
+            </div>
+          </div>
+        </div>
+      </details>
+
       <div class="card" style="margin-top:24px;">
         <div class="filters">
           <label>Tenant:
@@ -894,12 +1607,12 @@
         <div class="muted" id="inspectionsSummary">Cargando…</div>
 
         <div style="overflow-x: auto;">
-          <table class="table" id="casesTable" style="display:none;">
+          <table class="table casesDense" id="casesTable" style="display:none;">
             <thead>
               <tr>
                 <th>Solicitante</th>
                 <th>Caso</th>
-                <th>Plan</th>
+                <th>Plan / Corredora</th>
                 <th>Inmueble</th>
                 <th>Estado</th>
                 <th>Revisión</th>
@@ -912,6 +1625,224 @@
         </div>
         <div id="casesEmpty" style="display:none; padding:16px; text-align:center; color:#94a3b8;">
           No hay casos.
+        </div>
+      </div>
+    </section>
+
+    <section class="content" id="capture-perf" data-section="capture-perf" style="display: none;">
+      <h1>Fotos (app Capture)</h1>
+      <div class="muted">Tiempo del request en servidor: recibir archivo + calidad local + slot-match (única IA bloqueante) + guardado en nube. El análisis KPI profundo corre después, en background.</div>
+
+      <div class="card" style="margin-top:20px;">
+        <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:14px;">
+          <label>Periodo:
+            <select class="smallInput" id="capturePerfDays" style="min-width:120px;">
+              <option value="7">7 días</option>
+              <option value="14" selected>14 días</option>
+              <option value="30">30 días</option>
+              <option value="60">60 días</option>
+            </select>
+          </label>
+          <button type="button" class="btn" id="capturePerfRefresh">Actualizar</button>
+        </div>
+        <div id="capturePerfSummary" class="muted" style="font-size:14px; margin-bottom:12px;">—</div>
+        <div style="overflow-x:auto;">
+          <table class="table" id="capturePerfTable" style="display:none;">
+            <thead>
+              <tr>
+                <th>Fecha (UTC)</th>
+                <th>Tiempo servidor</th>
+                <th>Resultado</th>
+                <th>Tamaño</th>
+                <th>Caso</th>
+                <th>Tenant</th>
+                <th>Slot</th>
+              </tr>
+            </thead>
+            <tbody id="capturePerfBody"></tbody>
+          </table>
+        </div>
+        <div id="capturePerfEmpty" style="display:none; padding:16px; text-align:center; color:#94a3b8;">
+          Sin datos en este periodo (o la migración aún no se aplicó en la base).
+        </div>
+        <p class="muted" id="capturePerfErr" style="font-size:12px; margin-top:10px; min-height:1em;"></p>
+      </div>
+    </section>
+
+    <section class="content hidden" id="postventa" data-section="postventa">
+      <h1>Postventa</h1>
+      <div class="muted">Solicitudes de postventa inmobiliaria: evidencia, informe IA y revisión operativa.</div>
+
+      <div class="statsGrid" style="margin-top:20px;">
+        <div class="statCard"><div class="statValue" id="pvStatTotal">—</div><div class="statLabel">Total solicitudes</div></div>
+        <div class="statCard"><div class="statValue" id="pvStatPendingPhotos">—</div><div class="statLabel">Pendiente fotos</div></div>
+        <div class="statCard"><div class="statValue" id="pvStatPendingAi">—</div><div class="statLabel">En análisis IA</div></div>
+        <div class="statCard accent"><div class="statValue" id="pvStatClassified">—</div><div class="statLabel">Clasificados (informe listo)</div></div>
+        <div class="statCard"><div class="statValue" id="pvStatInReview">—</div><div class="statLabel">En revisión</div></div>
+        <div class="statCard"><div class="statValue" id="pvStatClosed">—</div><div class="statLabel">Cerrados</div></div>
+        <div class="statCard"><div class="statValue" id="pvStatUrgent">—</div><div class="statLabel">Urgentes abiertas</div></div>
+        <div class="statCard"><div class="statValue" id="pvStatAging30">—</div><div class="statLabel">Aging &gt; 30 días</div></div>
+      </div>
+
+      <div class="card" style="margin-top:20px;">
+        <div class="filters" style="display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:14px;">
+          <label>Inmobiliaria:
+            <select class="smallInput" id="pvFilterTenant" style="min-width:200px;">
+              <option value="">Todas</option>
+            </select>
+          </label>
+          <label>Estado:
+            <select class="smallInput" id="pvFilterStatus" style="min-width:180px;">
+              <option value="">Todos</option>
+              <option value="pending_evidence">Pendiente fotos</option>
+              <option value="pending_ai_analysis">En análisis IA</option>
+              <option value="classified">Clasificado</option>
+              <option value="recibido">Recibido</option>
+              <option value="programado">Programado</option>
+              <option value="en_ejecucion">En ejecución</option>
+              <option value="terminado">Terminado</option>
+              <option value="in_review">En revisión</option>
+              <option value="routed">Derivado</option>
+              <option value="closed">Cerrado</option>
+              <option value="rejected">Rechazado</option>
+            </select>
+          </label>
+          <label>Buscar:
+            <input type="text" class="smallInput" id="pvFilterSearch" placeholder="PV-XXXX o texto" style="min-width:180px;" />
+          </label>
+          <button type="button" class="btn" id="pvRefreshBtn">Actualizar</button>
+        </div>
+        <div class="muted" id="pvTicketsSummary">Cargando…</div>
+        <div style="overflow-x:auto; margin-top:12px;">
+          <table class="table" id="pvTicketsTable" style="display:none;">
+            <thead>
+              <tr>
+                <th>Solicitud</th>
+                <th>Inmobiliaria</th>
+                <th>Propietario / Unidad</th>
+                <th>Categoría</th>
+                <th>Estado</th>
+                <th>IA</th>
+                <th>Fotos</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="pvTicketsBody"></tbody>
+          </table>
+        </div>
+        <div id="pvTicketsEmpty" style="display:none; padding:16px; text-align:center; color:#94a3b8;">No hay solicitudes.</div>
+      </div>
+
+      <div class="card hidden" id="pvDetailCard">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap;">
+          <div>
+            <h3 id="pvDetailTitle" style="margin:0 0 6px; font-size:18px; color:#EAF0FF;">Detalle</h3>
+            <div class="muted" id="pvDetailMeta"></div>
+          </div>
+          <button type="button" class="btn outline" id="pvDetailClose">Cerrar</button>
+        </div>
+        <p id="pvDetailSummary" style="margin:14px 0; color:#B9C7E2; font-size:14px;"></p>
+        <div id="pvDetailAnalysis" class="kpiSubtle" style="margin-bottom:14px;"></div>
+        <div class="actions">
+          <a class="btn outline" id="pvDetailReportLink" href="#" target="_blank" rel="noopener">Ver informe IA</a>
+          <button type="button" class="btn outline" data-pv-status="recibido">Recibido</button>
+          <button type="button" class="btn outline" data-pv-status="programado">Programado</button>
+          <button type="button" class="btn outline" data-pv-status="en_ejecucion">En ejecución</button>
+          <button type="button" class="btn" data-pv-status="terminado">Terminado</button>
+          <button type="button" class="btn outline" data-pv-status="in_review">En revisión</button>
+          <button type="button" class="btn outline" data-pv-status="routed">Derivar</button>
+          <button type="button" class="btn outline" data-pv-status="closed">Cerrar</button>
+          <button type="button" class="btn outline" id="pvReanalyzeBtn">Re-analizar IA</button>
+          <button type="button" class="btn danger outline" id="pvDeleteBtn">Borrar solicitud</button>
+        </div>
+        <div class="note" id="pvDetailNote"></div>
+      </div>
+    </section>
+
+    <section class="content hidden" id="embajadores" data-section="embajadores">
+      <h1>Embajadores</h1>
+      <div class="muted">Programa de awards: cada embajador tiene un <strong>código único</strong> que los referidos usan al activar trial Business.</div>
+
+      <div class="card" style="margin-top:24px;">
+        <h3>Nuevo embajador</h3>
+        <div class="kpiSubtle">
+          Podés definir el <strong>código de referencia</strong> a mano (solo letras minúsculas y números, ej. <code>premio2026</code>). Si lo dejás vacío, se asigna automático: primer nombre + número correlativo (<code>maria1</code>, <code>maria2</code>…).
+        </div>
+        <div id="embajadoresNote" class="note" style="display:none;"></div>
+        <div class="grid" style="grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap:14px; margin-top:14px; align-items:end;">
+          <div class="row">
+            <label for="embCode">Código ref. (opcional)</label>
+            <input id="embCode" class="smallInput" placeholder="ej. maria1 o premio2026" maxlength="64" autocomplete="off" spellcheck="false" />
+          </div>
+          <div class="row">
+            <label for="embFullName">Nombre</label>
+            <input id="embFullName" class="smallInput" placeholder="Nombre y apellido" autocomplete="name" />
+          </div>
+          <div class="row">
+            <label for="embRut">RUT</label>
+            <input id="embRut" class="smallInput" placeholder="12.345.678-9" inputmode="text" autocomplete="off" />
+          </div>
+          <div class="row">
+            <label for="embEmail">Email</label>
+            <input id="embEmail" type="email" class="smallInput" placeholder="correo@ejemplo.cl" autocomplete="email" />
+          </div>
+          <div class="row">
+            <label for="embPhone">Celular</label>
+            <input id="embPhone" class="smallInput" placeholder="+56 9 1234 5678" inputmode="tel" autocomplete="tel" />
+          </div>
+          <div>
+            <button type="button" class="btn" id="embAddBtn">Registrar embajador</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:20px;">
+        <h3>Registrados</h3>
+        <div class="kpiSubtle">Código asignado, datos de contacto y fecha de alta.</div>
+        <p class="muted" id="embajadoresListHint" style="margin:8px 0 0; font-size:13px; display:none;"></p>
+        <div style="overflow-x:auto; margin-top:12px;">
+          <table class="table" id="embajadoresTable" style="display:none;">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Nombre</th>
+                <th>RUT</th>
+                <th>Email</th>
+                <th>Celular</th>
+                <th>Alta</th>
+              </tr>
+            </thead>
+            <tbody id="embajadoresBody"></tbody>
+          </table>
+        </div>
+        <div id="embajadoresEmpty" style="display:none; padding:16px; text-align:center; color:#94a3b8;">No hay embajadores registrados.</div>
+      </div>
+
+      <div class="card" style="margin-top:20px;">
+        <h3>Liquidación mensual (comisión embajador)</h3>
+        <div class="kpiSubtle">
+          <strong>30%</strong> del neto Mercado Pago acreditado en el mes (pagos desde el dashboard del referido). Las devoluciones imputadas al mismo mes se restan.
+          La comisión aplica hasta <strong>3 meses calendario</strong> desde el mes del primer pago acreditado. El pago al embajador descuenta impuesto según boleta de honorarios o factura (liquidación fuera de este panel).
+        </div>
+        <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-top:12px;">
+          <label class="muted" for="embCommissionMonth">Mes</label>
+          <input type="month" id="embCommissionMonth" class="smallInput" style="width:auto;" />
+          <button type="button" class="btn outline" id="embCommissionLoadBtn">Cargar liquidación</button>
+        </div>
+        <p class="muted" id="embCommissionHint" style="margin:10px 0 0; font-size:13px; display:none;"></p>
+        <div style="overflow-x:auto; margin-top:12px;">
+          <table class="table" id="embCommissionTable" style="display:none;">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Embajador</th>
+                <th>Neto MP (CLP)</th>
+                <th>Comisión (CLP)</th>
+                <th>Pagos / devoluciones</th>
+              </tr>
+            </thead>
+            <tbody id="embCommissionBody"></tbody>
+          </table>
         </div>
       </div>
     </section>
@@ -1013,6 +1944,63 @@
       return res;
     }
 
+    function adminConfirmPermanentDelete(label, confirmId) {
+      const id = String(confirmId || '').trim();
+      if (!id) return false;
+      const ok = confirm(
+        'Se eliminará permanentemente ' +
+          label +
+          ' (' +
+          id +
+          ') y sus fotos.\n' +
+          'También se quitarán entradas del RAG/KB asociadas.\n\n' +
+          'Esta acción NO se puede deshacer.'
+      );
+      if (!ok) return false;
+      const typed = prompt('Escribe exactamente "' + id + '" para confirmar:');
+      return String(typed || '').trim() === id;
+    }
+
+    window.adminDeleteCase = async function (caseId, btnEl) {
+      if (!adminConfirmPermanentDelete('la inspección', caseId)) return;
+      if (btnEl) btnEl.disabled = true;
+      try {
+        const res = await adminFetch('/api/admin/cases/' + encodeURIComponent(caseId), { method: 'DELETE' });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) {
+          alert(data.message || data.error || 'No se pudo borrar la inspección.');
+          return;
+        }
+        await loadInspections();
+      } catch (e) {
+        alert(e?.message || 'Error de red');
+      } finally {
+        if (btnEl) btnEl.disabled = false;
+      }
+    };
+
+    window.adminDeletePostventaTicket = async function (shortId, btnEl) {
+      if (!adminConfirmPermanentDelete('la solicitud postventa', shortId)) return;
+      if (btnEl) btnEl.disabled = true;
+      try {
+        const res = await adminFetch('/api/admin/postventa/tickets/' + encodeURIComponent(shortId), {
+          method: 'DELETE'
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) {
+          alert(data.message || data.error || 'No se pudo borrar la solicitud.');
+          return;
+        }
+        pvSelectedShortId = null;
+        document.getElementById('pvDetailCard')?.classList.add('hidden');
+        await loadPostventaAdmin();
+      } catch (e) {
+        alert(e?.message || 'Error de red');
+      } finally {
+        if (btnEl) btnEl.disabled = false;
+      }
+    };
+
     const STORAGE_KEY = "ainspectaScoreConfig";
     const defaultConfig = {
       kpis: {
@@ -1066,9 +2054,11 @@
         LAUNDRY_WALLS_FLOOR: "HUMEDAD",
         ELECTRICAL_PANEL: "ELECTRICIDAD",
         PUERTA_ENTRADA: "PUERTAS_HERRAJES",
-        ELEVATOR: "ELECTRICIDAD",
+        ASCENSOR_CERTIFICADO_INSPECCION: "DOCUMENTOS_CUMPLIMIENTO",
+        ASCENSOR_CABINA: "DOCUMENTOS_CUMPLIMIENTO",
+        ELEVATOR: "DOCUMENTOS_CUMPLIMIENTO",
         ESTACIONAMIENTO: "PISOS",
-        CERTIFICADO_VERDE: "ELECTRICIDAD"
+        CERTIFICADO_VERDE: "DOCUMENTOS_CUMPLIMIENTO"
       },
       aiPrompts: {
         GENERAL: [
@@ -1205,6 +2195,8 @@
           "- sellos visibles deteriorados",
           "- corrosión u óxido visible en grifería",
           "- desalineación visible de artefactos (si es evidente)",
+          "",
+          "Cañerías pintadas (frecuente en entregas inmobiliarias): pintura sobre tubos visibles NO es por sí sola hallazgo; no confundir con corrosión, humedad o desgaste. Solo señalar si además hay grietas, goteo, óxido en metal expuesto o sellos deteriorados claramente visibles.",
           "",
           "Instrucciones estrictas:",
           "- Analiza únicamente lo que sea visible en la imagen.",
@@ -1366,7 +2358,13 @@
         YELLOW: "Se recomienda revisar y monitorear el estado observado.",
         RED: "Se recomienda una revisión técnica detallada del hallazgo."
       },
-      badge: { yellowFrom: 60, greenFrom: 85 }
+      badge: { yellowFrom: 60, greenFrom: 85 },
+      kpiWeights: {
+        HUMEDAD: 2,
+        SANITARIOS: 2,
+        ELECTRICIDAD: 2
+      },
+      aiFindingExamples: []
     };
 
     const fields = [
@@ -1540,8 +2538,105 @@
           greenFrom: Number.isFinite(input.badge.greenFrom) ? input.badge.greenFrom : next.badge.greenFrom
         };
       }
+      if (input.kpiWeights && typeof input.kpiWeights === "object") {
+        next.kpiWeights = {
+          ...next.kpiWeights,
+          ...Object.fromEntries(
+            Object.entries(input.kpiWeights).map(([k, v]) => [String(k).toUpperCase(), Number(v)]).filter(([, v]) => Number.isFinite(v) && v > 0)
+          )
+        };
+      }
+      if (Array.isArray(input.aiFindingExamples)) {
+        next.aiFindingExamples = input.aiFindingExamples
+          .filter((row) => row && row.kpiKey && row.signal)
+          .map((row) => ({
+            id: String(row.id || `ex_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`),
+            kpiKey: String(row.kpiKey).toUpperCase(),
+            signal: String(row.signal).trim(),
+            severity: String(row.severity || "").toLowerCase(),
+            guidance: String(row.guidance || "").trim(),
+            active: row.active !== false,
+            createdAt: row.createdAt || new Date().toISOString()
+          }));
+      }
       return next;
     }
+
+    let aiFindingExamples = [];
+
+    function kpiLabelShort(key) {
+      const o = KPI_OPTIONS.find((x) => x.value === key);
+      return o?.label || key;
+    }
+
+    function renderFindingExamples() {
+      const tbody = document.getElementById("findingExamplesBody");
+      const empty = document.getElementById("findingExamplesEmpty");
+      const countEl = document.getElementById("findingExampleCount");
+      const filter = document.getElementById("findingExampleFilter")?.value || "";
+      if (!tbody) return;
+      const rows = (aiFindingExamples || []).filter((r) => !filter || r.kpiKey === filter);
+      if (countEl) {
+        const active = (aiFindingExamples || []).filter((r) => r.active !== false).length;
+        countEl.textContent = `${active} activo(s) · ${(aiFindingExamples || []).length} total`;
+      }
+      if (!rows.length) {
+        tbody.innerHTML = "";
+        if (empty) empty.style.display = "block";
+        return;
+      }
+      if (empty) empty.style.display = "none";
+      tbody.innerHTML = rows.map((row) => `
+        <tr data-finding-id="${escapeHtml(row.id)}">
+          <td><input type="checkbox" class="finding-active-toggle" data-id="${escapeHtml(row.id)}" ${row.active !== false ? "checked" : ""} /></td>
+          <td>${escapeHtml(kpiLabelShort(row.kpiKey))}</td>
+          <td>${escapeHtml(row.signal)}</td>
+          <td>${escapeHtml(row.severity || "—")}</td>
+          <td>${escapeHtml(row.guidance || "—")}</td>
+          <td><button type="button" class="btn outline finding-remove-btn" data-id="${escapeHtml(row.id)}" style="padding:4px 8px;font-size:11px;">Eliminar</button></td>
+        </tr>
+      `).join("");
+      tbody.querySelectorAll(".finding-active-toggle").forEach((el) => {
+        el.addEventListener("change", () => {
+          const id = el.getAttribute("data-id");
+          const item = aiFindingExamples.find((x) => x.id === id);
+          if (item) item.active = el.checked;
+        });
+      });
+      tbody.querySelectorAll(".finding-remove-btn").forEach((el) => {
+        el.addEventListener("click", () => {
+          const id = el.getAttribute("data-id");
+          aiFindingExamples = aiFindingExamples.filter((x) => x.id !== id);
+          renderFindingExamples();
+        });
+      });
+    }
+
+    function addFindingExampleFromForm() {
+      const kpiKey = String(document.getElementById("findingExampleKpi")?.value || "").toUpperCase();
+      const signal = String(document.getElementById("findingExampleSignal")?.value || "").trim();
+      const guidance = String(document.getElementById("findingExampleGuidance")?.value || "").trim();
+      const severity = String(document.getElementById("findingExampleSeverity")?.value || "").toLowerCase();
+      if (!kpiKey || !signal) {
+        alert("Indica KPI y señal/hallazgo.");
+        return;
+      }
+      aiFindingExamples.push({
+        id: `ex_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+        kpiKey,
+        signal,
+        severity,
+        guidance,
+        active: true,
+        createdAt: new Date().toISOString()
+      });
+      document.getElementById("findingExampleSignal").value = "";
+      document.getElementById("findingExampleGuidance").value = "";
+      renderFindingExamples();
+    }
+
+    document.getElementById("findingExampleAddBtn")?.addEventListener("click", addFindingExampleFromForm);
+    document.getElementById("findingExampleFilter")?.addEventListener("change", renderFindingExamples);
 
     async function fetchConfig() {
       try {
@@ -1674,6 +2769,8 @@
         el.value = getByPath(cfg, path);
       });
       renderSlotMap(cfg);
+      aiFindingExamples = Array.isArray(cfg.aiFindingExamples) ? cfg.aiFindingExamples.slice() : [];
+      renderFindingExamples();
     }
 
     async function saveForm() {
@@ -1700,6 +2797,7 @@
         if (slotCode && value) slotMap[slotCode] = value;
       });
       cfg.slotKpiMap = slotMap;
+      cfg.aiFindingExamples = aiFindingExamples.slice();
       setLocalConfig(cfg);
       try {
         const res = await adminFetch("/api/admin/score-config", {
@@ -1745,6 +2843,21 @@
         link.classList.add('active');
         if (sectionId === 'inspecciones') {
           loadInspections();
+        }
+        if (sectionId === 'capture-perf') {
+          loadCapturePerf().catch(() => {});
+        }
+        if (sectionId === 'postventa') {
+          loadPostventaAdmin().catch(() => {});
+        }
+        if (sectionId === 'embajadores') {
+          loadEmbajadoresAdmin().catch(() => {});
+        }
+        if (sectionId === 'intelligence') {
+          loadAintelligenceFeedbackAdmin().catch(() => {});
+        }
+        if (sectionId === 'taxonomia') {
+          loadTaxonomyAdmin().catch(() => {});
         }
       });
     });
@@ -2215,6 +3328,79 @@
         select.appendChild(opt);
       });
     }
+
+    function formatMs(ms) {
+      const n = Number(ms) || 0;
+      if (n < 1000) return `${n} ms`;
+      return `${(n / 1000).toFixed(2)} s`;
+    }
+
+    async function loadCapturePerf() {
+      const summaryEl = document.getElementById('capturePerfSummary');
+      const table = document.getElementById('capturePerfTable');
+      const body = document.getElementById('capturePerfBody');
+      const empty = document.getElementById('capturePerfEmpty');
+      const errEl = document.getElementById('capturePerfErr');
+      const daysSel = document.getElementById('capturePerfDays');
+      if (!summaryEl || !table || !body || !empty || !errEl) return;
+      errEl.textContent = '';
+      const days = Number(daysSel?.value) || 14;
+      summaryEl.textContent = 'Cargando…';
+      try {
+        const res = await adminFetch(`/api/admin/capture-upload-metrics?days=${days}&limit=200`);
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) {
+          summaryEl.textContent = '—';
+          errEl.textContent = data?.error || `Error ${res.status}`;
+          table.style.display = 'none';
+          empty.style.display = 'block';
+          return;
+        }
+        const s = data.summary || {};
+        summaryEl.textContent = `Muestras: ${s.count || 0} · Promedio: ${formatMs(s.avgMs)} · Máximo: ${formatMs(s.maxMs)} · Aprobadas (passed): ${s.passedCount ?? 0} · Rechazadas: ${s.failedCount ?? 0}`;
+        const rows = data.rows || [];
+        if (rows.length === 0) {
+          table.style.display = 'none';
+          empty.style.display = 'block';
+          body.innerHTML = '';
+          return;
+        }
+        table.style.display = 'table';
+        empty.style.display = 'none';
+        body.innerHTML = '';
+        rows.forEach((r) => {
+          const dt = r.createdAt ? new Date(r.createdAt).toISOString().replace('T', ' ').slice(0, 19) : '—';
+          const sz = r.imageBytes != null ? `${Math.round(r.imageBytes / 1024)} KB` : '—';
+          const pass = r.passed ? '<span class="pill" style="background:#059669;color:#fff;">OK</span>' : '<span class="pill" style="background:#b45309;color:#fff;">Rechazo</span>';
+          body.insertAdjacentHTML('beforeend', `
+            <tr>
+              <td>${escapeHtml(dt)}</td>
+              <td><strong>${escapeHtml(String(r.durationMs))}</strong> ms</td>
+              <td>${pass}</td>
+              <td>${escapeHtml(sz)}</td>
+              <td>${r.caseLabel ? escapeHtml(r.caseLabel) : `<code style="font-size:11px;">${escapeHtml(r.caseId || '—')}</code>`}</td>
+              <td>${r.tenantName ? escapeHtml(r.tenantName) : `<code style="font-size:11px;">${escapeHtml(r.tenantId || '—')}</code>`}</td>
+              <td>${r.slotLabel ? escapeHtml(r.slotLabel) : `<code style="font-size:11px;">${escapeHtml(r.slotId || '—')}</code>`}</td>
+            </tr>
+          `);
+        });
+      } catch (e) {
+        summaryEl.textContent = '—';
+        errEl.textContent = e?.message || String(e);
+        table.style.display = 'none';
+        empty.style.display = 'block';
+      }
+    }
+
+    const capturePerfRefresh = document.getElementById('capturePerfRefresh');
+    if (capturePerfRefresh) {
+      capturePerfRefresh.addEventListener('click', () => loadCapturePerf().catch(() => {}));
+    }
+    const capturePerfDays = document.getElementById('capturePerfDays');
+    if (capturePerfDays) {
+      capturePerfDays.addEventListener('change', () => loadCapturePerf().catch(() => {}));
+    }
+
     async function loadInspections() {
       const summary = document.getElementById('inspectionsSummary');
       const table = document.getElementById('casesTable');
@@ -2243,65 +3429,150 @@
         const prop = `${c.propertyType || ''} · ${c.bedrooms ?? ''} dorm · ${c.bathrooms ?? ''} baños`;
         const progress = c.progress || { uploaded: 0, analyzed: 0, omitted: 0, rejected: 0, total: 0, pct: 0, openaiAnalyzed: 0 };
         const pill = statusPill(progress);
-        const reportUrl = `/cases/${encodeURIComponent(c.id)}/report?reviewer=1`;
-        const captureUrl = c.captureUrl || '';
+        const reportUrl = `/cases/${encodeURIComponent(c.id)}/report`;
         const openaiCount = progress.openaiAnalyzed ?? 0;
         const openaiText = openaiCount ? ` · IA: ${openaiCount}` : '';
         const firstPhotoUrl = c.firstPhotoUrl || '';
         const planType = c.planType || '—';
         const planCls = planType === 'Starter' ? 'plan starter' : 'plan';
+        const idEsc = escapeHtml(c.id);
+        const planEsc = escapeHtml(planType);
 
         let reviewCell = '<span class="muted">—</span>';
         const hasAnalyzedSlots = progress.analyzed > 0;
         if (c.reviewStatus === 'approved') {
-          reviewCell = '<span class="pill" style="background:#059669;color:#fff;">Aprobado</span>';
-        } else if (planType === 'Starter' && hasAnalyzedSlots) {
+          reviewCell =
+            '<div class="casesReviewRow"><span class="pill" style="background:#059669;color:#fff;">Aprobado</span>' +
+            `<button type="button" class="btn outline" style="padding:4px 10px;font-size:11px;" onclick="adminSendReportEmail('${idEsc}', this)">Enviar email</button></div>`;
+        } else if (hasAnalyzedSlots) {
           const statusLabel = c.reviewStatus === 'pending_review' ? 'Pendiente' : 'Sin revisar';
           const statusColor = c.reviewStatus === 'pending_review' ? '#d97706' : '#64748b';
-          reviewCell = `<span class="pill" style="background:${statusColor};color:#fff;font-size:11px;">${statusLabel}</span>
-            <button class="btn" style="margin-top:4px;font-size:11px;padding:4px 10px;background:#059669;border:none;color:#fff;border-radius:6px;cursor:pointer;" onclick="approveFromAdmin('${escapeHtml(c.id)}', this)">Aprobar</button>`;
+          // La aprobación pasa por el centro de revisión ITO (cada veredicto nutre la KB).
+          reviewCell = `<div class="casesReviewRow"><span class="pill" style="background:${statusColor};color:#fff;font-size:11px;">${statusLabel}</span><a class="btn" style="background:#2563eb;border:none;color:#fff;border-radius:6px;cursor:pointer;text-decoration:none;" href="/review?case=${encodeURIComponent(c.id)}">Revisar (ITO)</a></div>`;
         }
 
         const solicitante = c.contactName || c.tenantName || '—';
-        const contactInfo = c.contactEmail ? `<div class="muted" style="font-size:11px;">${escapeHtml(c.contactEmail)}</div>` : '';
+        const solicitanteLine = c.contactEmail
+          ? `<div class="casesSolicitanteLine"><strong>${escapeHtml(solicitante)}</strong><span class="casesEmail">${escapeHtml(c.contactEmail)}</span></div>`
+          : `<div class="casesSolicitanteLine"><strong>${escapeHtml(solicitante)}</strong></div>`;
+
+        const thumbHtml = firstPhotoUrl
+          ? `<img class="thumbInline" src="${escapeHtml(firstPhotoUrl)}" alt="" />`
+          : '';
+
+        const corredora = c.tenantName || '—';
+        const execName = c.assignedExecutiveName || '';
+        const tenantExecTitle = escapeHtml(execName ? `${corredora} · ${execName}` : String(corredora));
+        const tenantExecHtml = execName
+          ? `<span class="casesTenantExec" title="${tenantExecTitle}"><span class="muted">${escapeHtml(corredora)}</span><span class="muted"> · </span><span class="casesExecName">${escapeHtml(execName)}</span></span>`
+          : `<span class="casesTenantExec muted" title="${escapeHtml(corredora)}">${escapeHtml(corredora)}</span>`;
 
         body.insertAdjacentHTML('beforeend', `
           <tr>
-            <td data-label="Solicitante">
-              <div><strong>${escapeHtml(solicitante)}</strong></div>
-              ${contactInfo}
-            </td>
+            <td data-label="Solicitante">${solicitanteLine}</td>
             <td data-label="Caso">
-              <div><strong>${escapeHtml(c.id || '')}</strong></div>
-              <div class="muted">${escapeHtml(createdAt)}</div>
-              ${firstPhotoUrl ? `<img class="thumbSmall" src="${escapeHtml(firstPhotoUrl)}" alt="Primera foto" />` : ''}
+              <div class="casesCaseCell">
+                ${thumbHtml}
+                <div class="casesCaseMeta"><strong>${escapeHtml(c.id || '')}</strong><span class="muted" style="font-size:11px;">${escapeHtml(createdAt)}</span></div>
+              </div>
             </td>
-            <td data-label="Plan"><span class="pill ${planCls}">${escapeHtml(planType)}</span></td>
+            <td data-label="Plan">
+              <div class="casesPlanRow">
+                <span class="pill ${planCls}">${escapeHtml(planType)}</span>
+                ${tenantExecHtml}
+              </div>
+            </td>
             <td data-label="Inmueble">${escapeHtml(prop)}</td>
             <td data-label="Estado"><span class="pill ${pill.cls}">${pill.text}</span></td>
             <td data-label="Revisión">${reviewCell}</td>
             <td data-label="Progreso">${progress.uploaded}/${progress.total} · ${progress.pct}%${openaiText}</td>
             <td data-label="Acciones">
-              <div class="actions">
+              <div class="inspectionActionsRow">
                 <a class="btn" href="${escapeHtml(reportUrl)}" target="_blank" rel="noreferrer">Ver informe</a>
-                ${captureUrl ? `<a class="btn outline" style="margin-left:8px;" href="${escapeHtml(captureUrl)}" target="_blank" rel="noreferrer">Abrir captura</a>` : ''}
+                <a class="btn outline" href="${escapeHtml(reportUrl)}?corr=1" target="_blank" rel="noreferrer">Corregir en informe</a>
+                <button type="button" class="btn outline" onclick="adminRegenerateExecSummary('${idEsc}', this)">Resumen</button>
+                <button type="button" class="btn danger outline" onclick="adminDeleteCase('${idEsc}', this)">Borrar</button>
               </div>
             </td>
           </tr>
         `);
       });
     }
-    window.approveFromAdmin = async function(caseId, btnEl) {
-      if (!confirm('¿Aprobar este informe y enviarlo al cliente por email?')) return;
+
+    window.adminRegenerateExecSummary = async function(caseId, btnEl) {
+      btnEl.disabled = true;
+      const prev = btnEl.textContent;
+      btnEl.textContent = 'Generando…';
+      try {
+        const res = await adminFetch(`/api/cases/${encodeURIComponent(caseId)}/executive-summary?force=1`, { method: 'POST' });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data?.ok) {
+          btnEl.textContent = 'Listo';
+          setTimeout(() => {
+            btnEl.textContent = prev;
+            btnEl.disabled = false;
+          }, 1500);
+        } else {
+          const msg = data?.message
+            || (data?.error === 'OPENAI_NOT_CONFIGURED' ? 'OpenAI no está configurado (OPENAI_API_KEY).' : null)
+            || (data?.error === 'OPENAI_QUOTA_EXCEEDED' ? 'Cuota de OpenAI agotada. Revisa billing en platform.openai.com.' : null)
+            || data?.error
+            || 'No se pudo generar el resumen';
+          alert(msg);
+          btnEl.disabled = false;
+          btnEl.textContent = prev;
+        }
+      } catch (e) {
+        btnEl.disabled = false;
+        btnEl.textContent = prev;
+        alert(e?.message || String(e));
+      }
+    };
+
+    window.adminSendReportEmail = async function(caseId, btnEl) {
+      if (!confirm('¿Enviar el informe por email al corredor/ejecutivo (y contacto Starter si aplica)?')) return;
+      const prev = btnEl.textContent;
+      btnEl.disabled = true;
+      btnEl.textContent = 'Enviando…';
+      try {
+        const res = await adminFetch(`/api/cases/${encodeURIComponent(caseId)}/send-report-email`, { method: 'POST' });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data?.emailSent) {
+          const to = (data.sent || []).map((s) => s.email).join(', ');
+          btnEl.textContent = 'Enviado';
+          alert(to ? 'Email enviado a: ' + to : 'Email enviado.');
+          setTimeout(() => { btnEl.textContent = prev; btnEl.disabled = false; }, 2000);
+        } else {
+          alert(data?.message || data?.error || 'No se pudo enviar el email. Revisa SMTP y el email del ejecutivo.');
+          btnEl.textContent = prev;
+          btnEl.disabled = false;
+        }
+      } catch (e) {
+        alert(e?.message || String(e));
+        btnEl.textContent = prev;
+        btnEl.disabled = false;
+      }
+    };
+
+    window.approveFromAdmin = async function(caseId, btnEl, planType) {
+      const isBusiness = planType && planType !== 'Starter';
+      const msg = isBusiness
+        ? '¿Aprobar este informe? Se enviará un correo al ejecutivo asignado con el informe.'
+        : '¿Aprobar este informe y enviarlo por email?';
+      if (!confirm(msg)) return;
       btnEl.disabled = true;
       btnEl.textContent = 'Aprobando...';
       try {
-        const res = await fetch(`/api/cases/${encodeURIComponent(caseId)}/approve`, { method: 'POST' });
+        const res = await adminFetch(`/api/cases/${encodeURIComponent(caseId)}/approve`, { method: 'POST' });
         const data = await res.json().catch(() => ({}));
         if (res.ok && data?.ok) {
           const parent = btnEl.parentElement;
+          const to = (data.sent || []).map((s) => s.email).join(', ');
           parent.innerHTML = '<span class="pill" style="background:#059669;color:#fff;">Aprobado</span>' +
-            (data.emailSent ? '<div class="muted" style="font-size:11px;margin-top:4px;">Email enviado</div>' : '');
+            (data.emailSent
+              ? `<div class="muted" style="font-size:11px;margin-top:4px;">Email: ${escapeHtml(to || 'enviado')}</div>`
+              : '<div class="muted" style="font-size:11px;margin-top:4px;">Sin email (revisa SMTP / destinatario)</div>') +
+            `<button type="button" class="btn outline" style="padding:4px 10px;font-size:11px;margin-top:4px;" onclick="adminSendReportEmail('${escapeHtml(caseId)}', this)">Enviar email</button>`;
         } else {
           btnEl.textContent = 'Error';
           btnEl.disabled = false;
@@ -2559,19 +3830,1144 @@
       loadPresencialOrdersAdmin().catch(() => {});
     }
 
+    function embDefaultMonth() {
+      const d = new Date();
+      return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0");
+    }
+
+    async function loadEmbajadoresCommissionMonth() {
+      const inp = document.getElementById("embCommissionMonth");
+      const hint = document.getElementById("embCommissionHint");
+      const table = document.getElementById("embCommissionTable");
+      const body = document.getElementById("embCommissionBody");
+      if (!inp || !table || !body) return;
+      const ym = (inp.value || embDefaultMonth()).trim();
+      if (hint) hint.style.display = "none";
+      try {
+        const res = await adminFetch("/api/admin/ambassador-commission/month/" + encodeURIComponent(ym));
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          if (hint) {
+            hint.style.display = "block";
+            hint.textContent = data.message || data.error || "No se pudo cargar la liquidación.";
+          }
+          table.style.display = "none";
+          body.innerHTML = "";
+          return;
+        }
+        const rows = data.ambassadors || [];
+        if (rows.length === 0) {
+          if (hint) {
+            hint.style.display = "block";
+            hint.textContent = "Sin movimientos de comisión en " + ym + ".";
+          }
+          table.style.display = "none";
+          body.innerHTML = "";
+          return;
+        }
+        if (hint) {
+          hint.style.display = "block";
+          hint.textContent = data.note || "";
+        }
+        table.style.display = "table";
+        body.innerHTML = rows.map((r) => {
+          const a = r.ambassador;
+          const pay = r.paymentLines != null ? r.paymentLines : 0;
+          const ref = r.refundLines != null ? r.refundLines : 0;
+          return `<tr>
+            <td><code style="color:#35D07F;font-weight:600;">${escapeHtml(a.code)}</code></td>
+            <td>${escapeHtml(a.fullName)}</td>
+            <td>${Number(r.netTotalClp || 0).toLocaleString("es-CL")}</td>
+            <td><strong>${Number(r.commissionTotalClp || 0).toLocaleString("es-CL")}</strong></td>
+            <td class="muted">${pay} / ${ref}</td>
+          </tr>`;
+        }).join("");
+      } catch (e) {
+        if (hint) {
+          hint.style.display = "block";
+          hint.textContent = "Error al cargar liquidación.";
+        }
+        table.style.display = "none";
+      }
+    }
+
+    async function loadEmbajadoresAdmin() {
+      const monthInp = document.getElementById("embCommissionMonth");
+      if (monthInp && !monthInp.value) monthInp.value = embDefaultMonth();
+      const table = document.getElementById("embajadoresTable");
+      const body = document.getElementById("embajadoresBody");
+      const empty = document.getElementById("embajadoresEmpty");
+      const hint = document.getElementById("embajadoresListHint");
+      if (!table || !body || !empty) return;
+      try {
+        const res = await adminFetch("/api/admin/ambassadors");
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          if (hint) {
+            hint.style.display = "block";
+            hint.textContent =
+              data.error === "MIGRATION_REQUIRED"
+                ? "Falta migración: ejecuta npx prisma migrate deploy (tabla Ambassador)."
+                : data.message || "No se pudo cargar la lista.";
+          }
+          table.style.display = "none";
+          empty.style.display = "block";
+          empty.textContent = "—";
+          return;
+        }
+        if (hint) hint.style.display = "none";
+        const list = data.ambassadors || [];
+        if (list.length === 0) {
+          table.style.display = "none";
+          empty.style.display = "block";
+          empty.textContent = "No hay embajadores registrados.";
+          return;
+        }
+        empty.style.display = "none";
+        table.style.display = "table";
+        body.innerHTML = list.map((a) => {
+          const d = a.createdAt ? new Date(a.createdAt) : null;
+          const fecha = d && !Number.isNaN(d.getTime())
+            ? `${String(d.getDate()).padStart(2, "0")}-${String(d.getMonth() + 1).padStart(2, "0")}-${d.getFullYear()}`
+            : "—";
+          return `<tr>
+            <td><code style="color:#35D07F;font-weight:600;">${escapeHtml(a.code || "")}</code></td>
+            <td>${escapeHtml(a.fullName || "")}</td>
+            <td>${escapeHtml(a.rut || "")}</td>
+            <td>${escapeHtml(a.email || "")}</td>
+            <td>${escapeHtml(a.phone || "—")}</td>
+            <td class="muted">${fecha}</td>
+          </tr>`;
+        }).join("");
+      } catch (e) {
+        if (hint) {
+          hint.style.display = "block";
+          hint.textContent = "Error al cargar embajadores.";
+        }
+        table.style.display = "none";
+        empty.style.display = "block";
+      }
+    }
+
+    document.getElementById("embCommissionLoadBtn")?.addEventListener("click", () =>
+      loadEmbajadoresCommissionMonth().catch(() => {})
+    );
+
+    document.getElementById("embAddBtn")?.addEventListener("click", async () => {
+      const codeRaw = document.getElementById("embCode")?.value?.trim() || "";
+      const fullName = document.getElementById("embFullName")?.value?.trim() || "";
+      const rut = document.getElementById("embRut")?.value?.trim() || "";
+      const email = document.getElementById("embEmail")?.value?.trim() || "";
+      const phone = document.getElementById("embPhone")?.value?.trim() || "";
+      const note = document.getElementById("embajadoresNote");
+      if (!fullName) {
+        alert("Indica el nombre.");
+        return;
+      }
+      if (!rut) {
+        alert("Indica el RUT.");
+        return;
+      }
+      if (!email) {
+        alert("Indica el email.");
+        return;
+      }
+      const btn = document.getElementById("embAddBtn");
+      if (btn) btn.disabled = true;
+      if (note) {
+        note.style.display = "none";
+        note.textContent = "";
+      }
+      try {
+        const payload = { fullName, rut, email, phone: phone || null };
+        if (codeRaw) payload.code = codeRaw;
+        const res = await adminFetch("/api/admin/ambassadors", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          const msg = data.message || data.error || "No se pudo registrar";
+          if (note) {
+            note.style.display = "block";
+            note.style.color = "#f87171";
+            note.textContent = msg;
+          } else {
+            alert(msg);
+          }
+          return;
+        }
+        const codeEl = document.getElementById("embCode");
+        const nameEl = document.getElementById("embFullName");
+        const rutEl = document.getElementById("embRut");
+        const emailEl = document.getElementById("embEmail");
+        const phoneEl = document.getElementById("embPhone");
+        if (codeEl) codeEl.value = "";
+        if (nameEl) nameEl.value = "";
+        if (rutEl) rutEl.value = "";
+        if (emailEl) emailEl.value = "";
+        if (phoneEl) phoneEl.value = "";
+        const amb = data.ambassador;
+        if (note && amb?.code) {
+          note.style.display = "block";
+          note.style.color = "#35D07F";
+          note.textContent = "Registrado con código: " + amb.code;
+        }
+        await loadEmbajadoresAdmin();
+      } catch (e) {
+        if (note) {
+          note.style.display = "block";
+          note.style.color = "#f87171";
+          note.textContent = "Error de red o servidor.";
+        }
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    });
+
+    let pvSelectedShortId = null;
+
+    function pvStatusPill(status) {
+      const map = {
+        pending_evidence: { cls: 'warn', text: 'Pend. fotos' },
+        pending_ai_analysis: { cls: 'warn', text: 'Análisis IA' },
+        classified: { cls: 'ok', text: 'Clasificado' },
+        recibido: { cls: 'plan', text: 'Recibido' },
+        programado: { cls: 'warn', text: 'Programado' },
+        en_ejecucion: { cls: 'warn', text: 'En ejecución' },
+        terminado: { cls: 'ok', text: 'Terminado' },
+        in_review: { cls: 'plan', text: 'En revisión' },
+        routed: { cls: 'ok', text: 'Derivado' },
+        closed: { cls: 'ok', text: 'Cerrado' },
+        rejected: { cls: 'bad', text: 'Rechazado' },
+        draft: { cls: 'warn', text: 'Borrador' }
+      };
+      return map[status] || { cls: '', text: status || '—' };
+    }
+
+    function pvSeverityPill(sev) {
+      if (!sev) return '<span class="muted">—</span>';
+      const s = String(sev).toLowerCase();
+      const cls = s === 'critical' || s === 'high' ? 'bad' : s === 'medium' ? 'warn' : 'ok';
+      return `<span class="pill ${cls}">${escapeHtml(s)}</span>`;
+    }
+
+    async function loadPostventaAdmin() {
+      const summary = document.getElementById('pvTicketsSummary');
+      const table = document.getElementById('pvTicketsTable');
+      const body = document.getElementById('pvTicketsBody');
+      const empty = document.getElementById('pvTicketsEmpty');
+      try {
+        const statsRes = await adminFetch('/api/admin/postventa/stats');
+        const stats = await statsRes.json();
+        if (stats.ok) {
+          const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+          set('pvStatTotal', stats.total);
+          set('pvStatPendingPhotos', stats.pendingEvidence);
+          set('pvStatPendingAi', stats.pendingAi);
+          set('pvStatClassified', stats.classified);
+          set('pvStatInReview', stats.inReview);
+          set('pvStatClosed', stats.closed);
+          set('pvStatUrgent', stats.urgentOpen);
+          set('pvStatAging30', stats.agingOver30);
+        }
+
+        const tenantSel = document.getElementById('pvFilterTenant');
+        if (tenantSel && tenantSel.options.length <= 1) {
+          const tRes = await adminFetch('/api/admin/postventa/tenants');
+          const tData = await tRes.json();
+          (tData.tenants || []).forEach((t) => {
+            const opt = document.createElement('option');
+            opt.value = t.slug;
+            opt.textContent = `${t.name} (${t.ticketCount})`;
+            tenantSel.appendChild(opt);
+          });
+        }
+
+        const params = new URLSearchParams();
+        const st = document.getElementById('pvFilterStatus')?.value || '';
+        const tenant = document.getElementById('pvFilterTenant')?.value || '';
+        const search = document.getElementById('pvFilterSearch')?.value?.trim() || '';
+        if (st) params.set('status', st);
+        if (tenant) params.set('tenantSlug', tenant);
+        if (search) params.set('search', search);
+
+        const res = await adminFetch('/api/admin/postventa/tickets?' + params.toString());
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          if (summary) summary.textContent = data.message || 'Error al cargar solicitudes';
+          if (table) table.style.display = 'none';
+          if (empty) empty.style.display = 'block';
+          return;
+        }
+
+        const tickets = data.tickets || [];
+        if (summary) summary.textContent = `Solicitudes: ${tickets.length}`;
+        if (!tickets.length) {
+          if (table) table.style.display = 'none';
+          if (empty) empty.style.display = 'block';
+          if (body) body.innerHTML = '';
+          return;
+        }
+
+        if (table) table.style.display = 'table';
+        if (empty) empty.style.display = 'none';
+        if (body) {
+          body.innerHTML = '';
+          tickets.forEach((t) => {
+            const pill = pvStatusPill(t.status);
+            const created = t.createdAt ? new Date(t.createdAt).toLocaleString() : '—';
+            const photos = t.photos ? `${t.photos.withPhoto}/${t.photos.total}` : '—';
+            const ia = t.analysisStatus === 'completed'
+              ? pvSeverityPill(t.analysisSeverity)
+              : (t.analysisStatus === 'running' || t.status === 'pending_ai_analysis'
+                ? '<span class="pill warn">Procesando</span>'
+                : '<span class="muted">—</span>');
+            body.insertAdjacentHTML('beforeend', `
+              <tr data-pv-short="${escapeHtml(t.shortId)}">
+                <td><strong>${escapeHtml(t.shortId)}</strong><div class="muted" style="font-size:11px;">${escapeHtml(created)}</div></td>
+                <td>${escapeHtml(t.tenantName || '—')}</td>
+                <td>
+                  <div>${escapeHtml(t.ownerName || '—')}</div>
+                  <div class="muted" style="font-size:11px;">${escapeHtml(t.unitLabel || '')}</div>
+                </td>
+                <td>${escapeHtml(t.categoryLabel || t.category || '—')}</td>
+                <td><span class="pill ${pill.cls}">${escapeHtml(pill.text)}</span></td>
+                <td>${ia}</td>
+                <td>${escapeHtml(String(photos))}</td>
+                <td>
+                  <button type="button" class="btn outline pv-open-btn" data-short="${escapeHtml(t.shortId)}">Ver</button>
+                  <a class="btn outline" href="${escapeHtml(t.reportUrl)}" target="_blank" rel="noopener" style="margin-left:6px;">Informe</a>
+                  <button type="button" class="btn danger outline pv-delete-btn" data-short="${escapeHtml(t.shortId)}" style="margin-left:6px;">Borrar</button>
+                </td>
+              </tr>
+            `);
+          });
+        }
+      } catch (e) {
+        if (summary) summary.textContent = e?.message || 'Error de red';
+      }
+    }
+
+    async function openPostventaDetail(shortId) {
+      pvSelectedShortId = shortId;
+      const card = document.getElementById('pvDetailCard');
+      const note = document.getElementById('pvDetailNote');
+      if (note) note.textContent = 'Cargando detalle…';
+      if (card) card.classList.remove('hidden');
+      try {
+        const res = await adminFetch('/api/admin/postventa/tickets/' + encodeURIComponent(shortId));
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          if (note) note.textContent = data.message || 'No se pudo cargar el detalle';
+          return;
+        }
+        const t = data.ticket;
+        const a = data.analysis;
+        document.getElementById('pvDetailTitle').textContent = t.shortId + ' · ' + (t.categoryLabel || '');
+        document.getElementById('pvDetailMeta').textContent = [
+          t.statusLabel,
+          t.tenantName,
+          t.ownerName,
+          t.unit ? [t.unit.projectName, t.unit.comuna, t.unit.tower ? 'Torre ' + t.unit.tower : '', 'Depto ' + t.unit.unitNumber].filter(Boolean).join(' · ') : null
+        ].filter(Boolean).join(' · ');
+        document.getElementById('pvDetailSummary').textContent = t.summary || '';
+        const reportLink = document.getElementById('pvDetailReportLink');
+        if (reportLink) reportLink.href = '/postventa/report/' + encodeURIComponent(t.shortId);
+        const analysisEl = document.getElementById('pvDetailAnalysis');
+        if (analysisEl) {
+          if (a && a.status === 'completed') {
+            analysisEl.innerHTML = `<strong>Informe IA:</strong> ${escapeHtml(a.summaryText || '—')} ${pvSeverityPill(a.severity)}`;
+          } else if (a && a.status === 'failed') {
+            analysisEl.innerHTML = `<span class="pill bad">Análisis fallido</span> ${escapeHtml(a.errorMessage || '')}`;
+          } else {
+            analysisEl.textContent = 'Informe IA en proceso o pendiente.';
+          }
+        }
+        if (note) note.textContent = '';
+      } catch (e) {
+        if (note) note.textContent = e?.message || 'Error';
+      }
+    }
+
+    async function patchPostventaStatus(status) {
+      if (!pvSelectedShortId) return;
+      const note = document.getElementById('pvDetailNote');
+      const res = await adminFetch('/api/admin/postventa/tickets/' + encodeURIComponent(pvSelectedShortId), {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      const data = await res.json();
+      if (note) {
+        note.style.color = data.ok ? '#35D07F' : '#f87171';
+        note.textContent = data.ok ? `Estado actualizado a ${data.statusLabel}` : (data.message || 'Error');
+      }
+      if (data.ok) loadPostventaAdmin().catch(() => {});
+    }
+
+    document.getElementById('pvRefreshBtn')?.addEventListener('click', () => loadPostventaAdmin().catch(() => {}));
+    document.getElementById('pvFilterStatus')?.addEventListener('change', () => loadPostventaAdmin().catch(() => {}));
+    document.getElementById('pvFilterTenant')?.addEventListener('change', () => loadPostventaAdmin().catch(() => {}));
+    document.getElementById('pvFilterSearch')?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') loadPostventaAdmin().catch(() => {});
+    });
+    document.getElementById('pvTicketsBody')?.addEventListener('click', (e) => {
+      const delBtn = e.target.closest('.pv-delete-btn');
+      if (delBtn) {
+        adminDeletePostventaTicket(delBtn.getAttribute('data-short'), delBtn).catch(() => {});
+        return;
+      }
+      const btn = e.target.closest('.pv-open-btn');
+      if (!btn) return;
+      openPostventaDetail(btn.getAttribute('data-short')).catch(() => {});
+    });
+    document.getElementById('pvDetailClose')?.addEventListener('click', () => {
+      document.getElementById('pvDetailCard')?.classList.add('hidden');
+      pvSelectedShortId = null;
+    });
+    document.querySelectorAll('[data-pv-status]').forEach((btn) => {
+      btn.addEventListener('click', () => patchPostventaStatus(btn.getAttribute('data-pv-status')).catch(() => {}));
+    });
+    document.getElementById('pvReanalyzeBtn')?.addEventListener('click', async () => {
+      if (!pvSelectedShortId) return;
+      const note = document.getElementById('pvDetailNote');
+      const res = await adminFetch('/api/admin/postventa/tickets/' + encodeURIComponent(pvSelectedShortId) + '/analyze', { method: 'POST' });
+      const data = await res.json();
+      if (note) {
+        note.style.color = data.ok ? '#35D07F' : '#f87171';
+        note.textContent = data.ok ? 'Re-análisis encolado. Actualiza en unos segundos.' : (data.message || 'Error');
+      }
+      if (data.ok) setTimeout(() => loadPostventaAdmin().catch(() => {}), 3000);
+    });
+    document.getElementById('pvDeleteBtn')?.addEventListener('click', (e) => {
+      if (!pvSelectedShortId) return;
+      adminDeletePostventaTicket(pvSelectedShortId, e.currentTarget).catch(() => {});
+    });
+
+    let aiFbSelectedId = null;
+
+    function aiFbStatusLabel(status) {
+      const map = {
+        draft: 'Borrador',
+        pending_review: 'En revisión',
+        approved: 'Aprobado',
+        rejected: 'Rechazado',
+        archived: 'Archivado'
+      };
+      return map[status] || status || '—';
+    }
+
+    function aiFbSourceLabel(source) {
+      const map = { PROPERTYCHECK: 'PropertyCheck', AINSPECTA: 'Ainspecta', POSTVENTA: 'Postventa' };
+      return map[source] || source || '—';
+    }
+
+    function aiFbCompareLabel(item) {
+      const ai = (item.aiSignals && item.aiSignals.length)
+        ? item.aiSignals.slice(0, 2).join(', ')
+        : (item.aiDescription || '—').slice(0, 60);
+      const human = item.humanSignal || '—';
+      return escapeHtml(String(ai).slice(0, 50)) + ' → ' + escapeHtml(String(human).slice(0, 50));
+    }
+
+    async function loadAintelligenceFeedbackAdmin() {
+      const summary = document.getElementById('aiFbListSummary');
+      const table = document.getElementById('aiFbTable');
+      const body = document.getElementById('aiFbBody');
+      const empty = document.getElementById('aiFbEmpty');
+      try {
+        const statsRes = await adminFetch('/api/admin/aintelligence/feedback/stats');
+        const statsData = await statsRes.json().catch(() => ({}));
+        if (statsData.ok && statsData.stats) {
+          const s = statsData.stats;
+          const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+          set('aiFbStatQueue', s.queue);
+          set('aiFbStatPending', s.pendingReview);
+          set('aiFbStatApproved', s.approved);
+          set('aiFbStatTotal', s.total);
+        }
+
+        const statusFilter = document.getElementById('aiFbFilterStatus')?.value ?? 'queue';
+        const sourceFilter = document.getElementById('aiFbFilterSource')?.value ?? '';
+        const params = new URLSearchParams();
+        params.set('status', statusFilter || 'queue');
+        if (sourceFilter) params.set('source', sourceFilter);
+        params.set('limit', '50');
+
+        const res = await adminFetch('/api/admin/aintelligence/feedback?' + params.toString());
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) {
+          if (summary) summary.textContent = data.message || 'Error al cargar feedback.';
+          return;
+        }
+
+        const items = data.items || [];
+        if (summary) summary.textContent = items.length + ' de ' + (data.total || 0) + ' registro(s).';
+
+        if (!body || !table || !empty) return;
+        body.innerHTML = '';
+        if (!items.length) {
+          table.style.display = 'none';
+          empty.style.display = 'block';
+          return;
+        }
+        empty.style.display = 'none';
+        table.style.display = 'table';
+
+        items.forEach((item) => {
+          const tr = document.createElement('tr');
+          const dateStr = item.submittedAt || item.createdAt;
+          tr.innerHTML =
+            '<td>' + escapeHtml(formatDateShort(dateStr)) + '</td>' +
+            '<td>' + escapeHtml(aiFbSourceLabel(item.source)) + '</td>' +
+            '<td>' + escapeHtml(item.kpiKey || '—') + '</td>' +
+            '<td>' + escapeHtml(item.feedbackType || '—') + '</td>' +
+            '<td style="max-width:280px;font-size:12px;">' + aiFbCompareLabel(item) + '</td>' +
+            '<td>' + escapeHtml(aiFbStatusLabel(item.status)) + '</td>' +
+            '<td><button type="button" class="btn outline ai-fb-open-btn" data-id="' + escapeHtml(item.id) + '">Ver</button></td>';
+          body.appendChild(tr);
+        });
+      } catch (e) {
+        if (summary) summary.textContent = e?.message || String(e);
+      }
+    }
+
+    async function openAintelligenceFeedbackDetail(id) {
+      aiFbSelectedId = id;
+      const card = document.getElementById('aiFbDetailCard');
+      const note = document.getElementById('aiFbDetailNote');
+      if (note) note.textContent = '';
+      try {
+        const res = await adminFetch('/api/admin/aintelligence/feedback/' + encodeURIComponent(id));
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok || !data.item) {
+          if (note) { note.style.color = '#f87171'; note.textContent = data.message || 'No se pudo cargar.'; }
+          return;
+        }
+        const item = data.item;
+        const title = document.getElementById('aiFbDetailTitle');
+        const meta = document.getElementById('aiFbDetailMeta');
+        const img = document.getElementById('aiFbDetailImage');
+        const imgMissing = document.getElementById('aiFbDetailImageMissing');
+        const aiBox = document.getElementById('aiFbDetailAi');
+        const signalEl = document.getElementById('aiFbEditSignal');
+        const sevEl = document.getElementById('aiFbEditSeverity');
+        const notesEl = document.getElementById('aiFbEditNotes');
+
+        if (title) title.textContent = (item.planItemId || 'Feedback') + ' · ' + aiFbSourceLabel(item.source);
+        if (meta) {
+          meta.textContent = [
+            item.externalInspectionId,
+            item.captureId,
+            aiFbStatusLabel(item.status)
+          ].filter(Boolean).join(' · ');
+        }
+        if (signalEl) signalEl.value = item.humanSignal || '';
+        if (sevEl) sevEl.value = item.humanSeverity || '';
+        if (notesEl) notesEl.value = '';
+
+        if (img && imgMissing) {
+          if (item.imageUrl) {
+            img.src = item.imageUrl;
+            img.style.display = '';
+            imgMissing.style.display = 'none';
+          } else {
+            img.removeAttribute('src');
+            img.style.display = 'none';
+            imgMissing.style.display = 'block';
+          }
+        }
+
+        if (aiBox) {
+          const snap = item.aiSnapshot || {};
+          aiBox.textContent = [
+            'IA — descripción: ' + (snap.description || '—'),
+            'KPI análisis: ' + (snap.kpi_analysis || '—'),
+            'Señales: ' + ((snap.signals_detected || []).join(', ') || '—'),
+            'Severidad IA: ' + (snap.final_severity || snap.proposed_severity || '—'),
+            'Tipo feedback: ' + (item.humanLabel?.feedbackType || item.feedbackType || '—')
+          ].join('\n');
+        }
+
+        const approveBtn = document.getElementById('aiFbApproveBtn');
+        const rejectBtn = document.getElementById('aiFbRejectBtn');
+        if (approveBtn) approveBtn.disabled = item.status === 'approved';
+        if (rejectBtn) rejectBtn.disabled = item.status === 'approved';
+
+        if (card) card.classList.remove('hidden');
+      } catch (e) {
+        if (note) { note.style.color = '#f87171'; note.textContent = e?.message || String(e); }
+      }
+    }
+
+    document.getElementById('aiFbRefreshBtn')?.addEventListener('click', () => {
+      loadAintelligenceFeedbackAdmin().catch(() => {});
+    });
+    document.getElementById('aiFbFilterStatus')?.addEventListener('change', () => {
+      loadAintelligenceFeedbackAdmin().catch(() => {});
+    });
+    document.getElementById('aiFbFilterSource')?.addEventListener('change', () => {
+      loadAintelligenceFeedbackAdmin().catch(() => {});
+    });
+    document.getElementById('aiFbBody')?.addEventListener('click', (e) => {
+      const btn = e.target.closest('.ai-fb-open-btn');
+      if (!btn) return;
+      openAintelligenceFeedbackDetail(btn.getAttribute('data-id')).catch(() => {});
+    });
+    document.getElementById('aiFbDetailClose')?.addEventListener('click', () => {
+      document.getElementById('aiFbDetailCard')?.classList.add('hidden');
+      aiFbSelectedId = null;
+    });
+    document.getElementById('aiFbApproveBtn')?.addEventListener('click', async () => {
+      if (!aiFbSelectedId) return;
+      const note = document.getElementById('aiFbDetailNote');
+      const payload = {
+        signal: document.getElementById('aiFbEditSignal')?.value?.trim() || undefined,
+        severity: document.getElementById('aiFbEditSeverity')?.value || undefined,
+        notes: document.getElementById('aiFbEditNotes')?.value?.trim() || undefined
+      };
+      const btn = document.getElementById('aiFbApproveBtn');
+      const prev = btn?.textContent;
+      if (btn) { btn.disabled = true; btn.textContent = 'Aprobando…'; }
+      try {
+        const res = await adminFetch('/api/admin/aintelligence/feedback/' + encodeURIComponent(aiFbSelectedId) + '/approve', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json().catch(() => ({}));
+        if (note) {
+          note.style.color = data.ok ? '#35d07f' : '#f87171';
+          note.textContent = data.message || (data.ok ? 'Aprobado.' : 'Error');
+        }
+        if (data.ok) {
+          await loadForm().catch(() => {});
+          await loadAintelligenceFeedbackAdmin().catch(() => {});
+          await openAintelligenceFeedbackDetail(aiFbSelectedId).catch(() => {});
+        }
+      } catch (e) {
+        if (note) { note.style.color = '#f87171'; note.textContent = e?.message || String(e); }
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = prev || 'Aprobar → Biblioteca'; }
+      }
+    });
+    document.getElementById('aiFbRejectBtn')?.addEventListener('click', async () => {
+      if (!aiFbSelectedId) return;
+      const note = document.getElementById('aiFbDetailNote');
+      const payload = { notes: document.getElementById('aiFbEditNotes')?.value?.trim() || undefined };
+      const btn = document.getElementById('aiFbRejectBtn');
+      const prev = btn?.textContent;
+      if (btn) { btn.disabled = true; btn.textContent = 'Rechazando…'; }
+      try {
+        const res = await adminFetch('/api/admin/aintelligence/feedback/' + encodeURIComponent(aiFbSelectedId) + '/reject', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json().catch(() => ({}));
+        if (note) {
+          note.style.color = data.ok ? '#35d07f' : '#f87171';
+          note.textContent = data.message || (data.ok ? 'Rechazado.' : 'Error');
+        }
+        if (data.ok) {
+          await loadAintelligenceFeedbackAdmin().catch(() => {});
+          await openAintelligenceFeedbackDetail(aiFbSelectedId).catch(() => {});
+        }
+      } catch (e) {
+        if (note) { note.style.color = '#f87171'; note.textContent = e?.message || String(e); }
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = prev || 'Rechazar'; }
+      }
+    });
+
     function setActiveSection() {
       const hash = String(window.location.hash || "").replace("#", "");
       const section = hash || "dashboard";
       document.querySelectorAll("[data-section]").forEach((el) => {
         const key = el.getAttribute("data-section");
-        el.classList.toggle("hidden", key !== section);
+        const on = key === section;
+        el.classList.toggle("hidden", !on);
+        el.style.display = on ? "block" : "none";
       });
       document.querySelectorAll("[data-section-link]").forEach((el) => {
         const key = el.getAttribute("data-section-link");
         el.classList.toggle("active", key === section);
       });
       if (section === "proveedores") loadProveedoresSection();
+      if (section === "embajadores") loadEmbajadoresAdmin().catch(() => {});
+      if (section === "postventa") loadPostventaAdmin().catch(() => {});
+      if (section === "intelligence") loadAintelligenceFeedbackAdmin().catch(() => {});
+      if (section === "taxonomia") loadTaxonomyAdmin().catch(() => {});
     }
+
+    let taxCatalogMeta = { kpis: [], miradas: [] };
+    let taxTemplatesByKpi = {};
+    let taxEditingId = '';
+    let taxFormInitialized = false;
+    let taxEntriesCache = [];
+
+    const TAX_KPI_FALLBACKS = {
+      TERMINACIONES: { subfamilia: 'pintura_muro', label: 'Terminaciones generales', aliasEntregaKpi: 'Terminaciones', aliasEntregaEspecialidades: 'Pintor, Yesero', miradas: ['EJECUCION_OBRA', 'DETERIORO_USO'] },
+      SANITARIOS: { subfamilia: 'griferia_filtracion', label: 'Instalaciones sanitarias', aliasAinspecciona: 'SANITARIOS', aliasPostventa: 'sanitarios', aliasEntregaKpi: 'Instalaciones Sanitarias', aliasEntregaEspecialidades: 'Gasfiter', miradas: ['EJECUCION_OBRA', 'DETERIORO_USO'] },
+      ELECTRICIDAD: { subfamilia: 'instalacion_visible', label: 'Instalación eléctrica visible', aliasAinspecciona: 'ELECTRICIDAD', aliasPostventa: 'electricidad_visible', aliasEntregaKpi: 'Instalaciones Eléctricas', aliasEntregaEspecialidades: 'Electricista', miradas: ['EJECUCION_OBRA', 'DETERIORO_USO'] },
+      HUMEDAD: { subfamilia: 'filtracion', label: 'Filtración / humedad', aliasAinspecciona: 'HUMEDAD', aliasPostventa: 'humedad_filtracion', aliasEntregaKpi: 'Instalaciones Sanitarias', aliasEntregaEspecialidades: 'Gasfiter, Impermeabilizador', miradas: ['EJECUCION_OBRA', 'DETERIORO_USO'] },
+      PISOS: { subfamilia: 'revestimiento', label: 'Pisos y revestimientos', aliasAinspecciona: 'PISOS', aliasPostventa: 'pisos', aliasEntregaKpi: 'Terminaciones', aliasEntregaEspecialidades: 'Instalador de cerámica', miradas: ['EJECUCION_OBRA', 'DETERIORO_USO'] },
+      VENTANAS_CERRAMIENTOS: { subfamilia: 'sello_cerramiento', label: 'Ventanas y cerramientos', aliasAinspecciona: 'VENTANAS_CERRAMIENTOS', aliasPostventa: 'ventanas_sellos', aliasEntregaKpi: 'Ventanas y Cerramientos', aliasEntregaEspecialidades: 'Aluminiero, Sellador', miradas: ['EJECUCION_OBRA', 'DETERIORO_USO'] },
+      PUERTAS_HERRAJES: { subfamilia: 'cerradura_herraje', label: 'Puertas y herrajes', aliasAinspecciona: 'PUERTAS_HERRAJES', aliasPostventa: 'puertas_cerraduras', aliasEntregaKpi: 'Terminaciones', aliasEntregaEspecialidades: 'Carpintero terminaciones', miradas: ['EJECUCION_OBRA', 'DETERIORO_USO'] },
+      MOBILIARIO_FIJO: { subfamilia: 'fijo_cocina', label: 'Mobiliario fijo', aliasAinspecciona: 'MOBILIARIO_FIJO', aliasPostventa: 'muebles_closets_cocina', aliasEntregaKpi: 'Terminaciones', aliasEntregaEspecialidades: 'Mueblista', miradas: ['EJECUCION_OBRA', 'DETERIORO_USO'] },
+      ESTRUCTURA: { subfamilia: 'grieta_estructural', label: 'Estructura', aliasEntregaKpi: 'Estructura', miradas: ['EJECUCION_OBRA', 'DETERIORO_USO'] },
+      GAS: { subfamilia: 'instalacion_gas', label: 'Instalación de gas', aliasEntregaKpi: 'Instalaciones de Gas', aliasEntregaEspecialidades: 'Instalador de gas', miradas: ['EJECUCION_OBRA'] },
+      FACHADAS_EXTERIORES: { subfamilia: 'terminacion_exterior', label: 'Fachadas exteriores', aliasEntregaKpi: 'Fachadas y Terminaciones Exteriores', miradas: ['EJECUCION_OBRA', 'DETERIORO_USO'] },
+      CLIMATIZACION: { subfamilia: 'equipo_climatizacion', label: 'Climatización', aliasPostventa: 'climatizacion', miradas: ['EJECUCION_OBRA', 'DETERIORO_USO'] },
+      IMPERMEABILIZACION: { subfamilia: 'terraza', label: 'Impermeabilización', aliasPostventa: 'impermeabilizacion', aliasEntregaKpi: 'Fachadas y Terminaciones Exteriores', aliasEntregaEspecialidades: 'Impermeabilizador', miradas: ['EJECUCION_OBRA'] },
+      DOCUMENTOS_CUMPLIMIENTO: { subfamilia: 'documentacion', label: 'Documentos y cumplimiento', miradas: ['EJECUCION_OBRA'] },
+      AREAS_COMUNES: { subfamilia: 'areas_comunes', label: 'Áreas comunes', miradas: ['EJECUCION_OBRA', 'DETERIORO_USO'] },
+      OTROS: { subfamilia: 'otros', label: 'Otros', miradas: ['EJECUCION_OBRA', 'DETERIORO_USO'] }
+    };
+
+    function taxIndexTemplates(templates) {
+      taxTemplatesByKpi = {};
+      (templates || []).forEach((t) => {
+        if (t?.kpi && !taxTemplatesByKpi[t.kpi]) taxTemplatesByKpi[t.kpi] = t;
+      });
+    }
+
+    function taxTemplateForKpi(kpi) {
+      const key = String(kpi || '').trim().toUpperCase();
+      return taxTemplatesByKpi[key] || TAX_KPI_FALLBACKS[key] || TAX_KPI_FALLBACKS.TERMINACIONES;
+    }
+
+    function taxApplyMiradas(miradas) {
+      const set = new Set(miradas || []);
+      document.querySelectorAll('#taxMiradasWrap input[type=checkbox]').forEach((el) => {
+        el.checked = set.has(el.value);
+      });
+    }
+
+    function taxPrefillNewForm(kpi) {
+      taxEditingId = '';
+      const tpl = taxTemplateForKpi(kpi || document.getElementById('taxKpi')?.value || 'TERMINACIONES');
+      const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val ?? ''; };
+      set('taxEditId', '');
+      set('taxId', '');
+      set('taxKpi', kpi || tpl.kpi || 'TERMINACIONES');
+      set('taxSubfamilia', tpl.subfamilia || '');
+      set('taxLabel', tpl.label || '');
+      set('taxStatus', 'draft');
+      set('taxAliasAinspecciona', tpl.aliasAinspecciona || '');
+      set('taxAliasPostventa', tpl.aliasPostventa || '');
+      set('taxAliasEntregaKpi', tpl.aliasEntregaKpi || '');
+      set('taxAliasEntregaEsp', tpl.aliasEntregaEspecialidades || '');
+      set('taxNotasEjecucion', tpl.notasEjecucion || '');
+      set('taxNotasDeterioro', tpl.notasDeterioro || '');
+      taxApplyMiradas(tpl.miradas || ['EJECUCION_OBRA', 'DETERIORO_USO']);
+      const title = document.getElementById('taxFormTitle');
+      const hint = document.getElementById('taxFormHint');
+      const btn = document.getElementById('taxSaveBtn');
+      if (title) title.textContent = 'Nueva entrada';
+      if (hint) hint.textContent = 'Plantilla precargada — ajusta subfamilia/aliases y guarda. Id vacío = se genera solo.';
+      if (btn) btn.textContent = 'Guardar entrada';
+      const note = document.getElementById('taxFormNote');
+      if (note) { note.textContent = ''; note.style.color = ''; }
+    }
+
+    function taxClearForm() {
+      taxPrefillNewForm(document.getElementById('taxKpi')?.value || 'TERMINACIONES');
+    }
+
+    function taxEsc(s) {
+      return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function taxFillSelect(selectEl, items, { valueKey, labelKey, allLabel } = {}) {
+      if (!selectEl) return;
+      const current = selectEl.value;
+      selectEl.innerHTML = allLabel ? `<option value="">${allLabel}</option>` : '';
+      (items || []).forEach((item) => {
+        const val = valueKey ? item[valueKey] : item;
+        const label = labelKey ? item[labelKey] : item;
+        const opt = document.createElement('option');
+        opt.value = val;
+        opt.textContent = label;
+        selectEl.appendChild(opt);
+      });
+      if ([...selectEl.options].some((o) => o.value === current)) selectEl.value = current;
+    }
+
+    function taxRenderMiradaCheckboxes(miradas) {
+      const wrap = document.getElementById('taxMiradasWrap');
+      if (!wrap) return;
+      wrap.innerHTML = (miradas || []).map((m) => {
+        const id = `taxMirada_${m.id}`;
+        return `<label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#B9C7E2;">
+          <input type="checkbox" id="${id}" value="${taxEsc(m.id)}" /> ${taxEsc(m.label || m.id)}
+        </label>`;
+      }).join('');
+    }
+
+    function taxGetMiradasChecked() {
+      return [...document.querySelectorAll('#taxMiradasWrap input[type=checkbox]:checked')].map((el) => el.value);
+    }
+
+    function taxFillForm(entry) {
+      taxEditingId = entry.id || '';
+      const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val ?? ''; };
+      set('taxEditId', entry.id || '');
+      set('taxId', entry.id || '');
+      set('taxKpiGroup', entry.kpiGroup || '');
+      set('taxItem', entry.item || '');
+      set('taxHallazgo', entry.hallazgo || entry.label || '');
+      set('taxRequerimiento', entry.requerimiento || '');
+      set('taxEspecialidades', Array.isArray(entry.especialidades) ? entry.especialidades.join(', ') : (entry.aliasEntregaEspecialidades || ''));
+      set('taxCausa', entry.causa || '');
+      set('taxCriticidad', entry.criticidad || '');
+      set('taxGarantiaAnios', Array.isArray(entry.garantiaAnios) ? entry.garantiaAnios.join(', ') : '');
+      set('taxKpi', entry.kpi || '');
+      set('taxSubfamilia', entry.subfamilia || '');
+      set('taxLabel', entry.label || '');
+      set('taxStatus', entry.status || 'draft');
+      set('taxAliasAinspecciona', entry.aliasAinspecciona || '');
+      set('taxAliasPostventa', entry.aliasPostventa || '');
+      set('taxAliasEntregaKpi', entry.aliasEntregaKpi || '');
+      set('taxAliasEntregaEsp', entry.aliasEntregaEspecialidades || '');
+      set('taxNotasEjecucion', entry.notasEjecucion || '');
+      set('taxNotasDeterioro', entry.notasDeterioro || '');
+      taxApplyMiradas(entry.miradas || []);
+      const title = document.getElementById('taxFormTitle');
+      const hint = document.getElementById('taxFormHint');
+      const btn = document.getElementById('taxSaveBtn');
+      if (title) title.textContent = 'Editar entrada';
+      if (hint) hint.textContent = `Editando ${entry.id}`;
+      if (btn) btn.textContent = 'Actualizar entrada';
+      const note = document.getElementById('taxFormNote');
+      if (note) { note.textContent = ''; note.style.color = ''; }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function taxParseList(raw) {
+      return String(raw || '')
+        .split(/[,;/|]/)
+        .map((s) => s.trim())
+        .filter(Boolean);
+    }
+
+    function taxParseGarantia(raw) {
+      return taxParseList(raw)
+        .map((s) => Number(s))
+        .filter((n) => [3, 5, 10].includes(n));
+    }
+
+    function taxCollectPayload() {
+      const idEl = document.getElementById('taxId');
+      const especialidades = taxParseList(document.getElementById('taxEspecialidades')?.value || '');
+      const garantiaAnios = taxParseGarantia(document.getElementById('taxGarantiaAnios')?.value || '');
+      const hallazgo = document.getElementById('taxHallazgo')?.value || '';
+      const payload = {
+        kpi: document.getElementById('taxKpi')?.value || '',
+        subfamilia: document.getElementById('taxSubfamilia')?.value || '',
+        label: document.getElementById('taxLabel')?.value || hallazgo,
+        miradas: taxGetMiradasChecked(),
+        aliasAinspecciona: document.getElementById('taxAliasAinspecciona')?.value || '',
+        aliasPostventa: document.getElementById('taxAliasPostventa')?.value || '',
+        aliasEntregaKpi: document.getElementById('taxAliasEntregaKpi')?.value || '',
+        aliasEntregaEspecialidades: document.getElementById('taxAliasEntregaEsp')?.value || especialidades.join(', '),
+        notasEjecucion: document.getElementById('taxNotasEjecucion')?.value || '',
+        notasDeterioro: document.getElementById('taxNotasDeterioro')?.value || '',
+        status: document.getElementById('taxStatus')?.value || 'draft',
+        kpiGroup: document.getElementById('taxKpiGroup')?.value || '',
+        item: document.getElementById('taxItem')?.value || '',
+        hallazgo,
+        requerimiento: document.getElementById('taxRequerimiento')?.value || '',
+        especialidades,
+        causa: document.getElementById('taxCausa')?.value || '',
+        criticidad: document.getElementById('taxCriticidad')?.value || '',
+        garantiaAnios
+      };
+      const manualId = String(idEl?.value || '').trim();
+      if (manualId) payload.id = manualId;
+      return payload;
+    }
+
+    function taxRenderTable(entries) {
+      const tbody = document.getElementById('taxBody');
+      const table = document.getElementById('taxTable');
+      const empty = document.getElementById('taxEmpty');
+      const summary = document.getElementById('taxListSummary');
+      if (!tbody) return;
+      if (!entries.length) {
+        tbody.innerHTML = '';
+        if (table) table.style.display = 'none';
+        if (empty) empty.style.display = 'block';
+        if (summary) summary.textContent = '0 entradas';
+        return;
+      }
+      if (table) table.style.display = 'table';
+      if (empty) empty.style.display = 'none';
+      if (summary) summary.textContent = `${entries.length} entrada${entries.length === 1 ? '' : 's'}`;
+      tbody.innerHTML = entries.map((e) => {
+        const esp = Array.isArray(e.especialidades) && e.especialidades.length
+          ? e.especialidades.join(', ')
+          : (e.aliasEntregaEspecialidades || '—');
+        const hallazgo = e.hallazgo || e.label || '—';
+        const statusBadge = e.status === 'approved'
+          ? '<span style="color:#35D07F;">aprobada</span>'
+          : '<span style="color:#94a3b8;">borrador</span>';
+        const approveBtn = e.status === 'approved'
+          ? ''
+          : `<button type="button" class="btn outline tax-approve-btn" data-id="${taxEsc(e.id)}" style="padding:4px 10px;font-size:12px;color:#35D07F;border-color:#35D07F;">Aprobar</button>`;
+        return `<tr>
+          <td style="font-size:12px;">${taxEsc(e.kpiGroup || '—')}</td>
+          <td style="font-size:12px;">${taxEsc(e.item || '—')}</td>
+          <td>${taxEsc(hallazgo)}</td>
+          <td>${taxEsc(e.kpi)}</td>
+          <td style="font-size:12px;color:#94a3b8;">${taxEsc(esp)}</td>
+          <td>${taxEsc(e.criticidad || '—')}</td>
+          <td>${statusBadge}</td>
+          <td style="white-space:nowrap;">
+            ${approveBtn}
+            <button type="button" class="btn outline tax-edit-btn" data-id="${taxEsc(e.id)}" style="padding:4px 10px;font-size:12px;">Editar</button>
+            <button type="button" class="btn outline tax-del-btn" data-id="${taxEsc(e.id)}" style="padding:4px 10px;font-size:12px;color:#f87171;border-color:#f87171;">Eliminar</button>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    function taxUpdateStats(entries, updatedAt) {
+      const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      set('taxStatCount', entries.length);
+      set('taxStatDraft', entries.filter((e) => e.status !== 'approved').length);
+      set('taxStatApproved', entries.filter((e) => e.status === 'approved').length);
+      if (updatedAt) {
+        const d = new Date(updatedAt);
+        set('taxStatUpdated', Number.isNaN(d.getTime()) ? '—' : d.toLocaleString('es-CL'));
+      } else {
+        set('taxStatUpdated', '—');
+      }
+    }
+
+    async function loadTaxonomyAdmin() {
+      const kpi = document.getElementById('taxFilterKpi')?.value || '';
+      const mirada = document.getElementById('taxFilterMirada')?.value || '';
+      const status = document.getElementById('taxFilterStatus')?.value || '';
+      const params = new URLSearchParams();
+      if (kpi) params.set('kpi', kpi);
+      if (mirada) params.set('mirada', mirada);
+      if (status) params.set('status', status);
+      const qs = params.toString();
+      const summary = document.getElementById('taxListSummary');
+      if (summary) summary.textContent = 'Cargando…';
+      try {
+        const res = await adminFetch('/api/admin/taxonomy' + (qs ? '?' + qs : ''));
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
+        taxEntriesCache = data.entries || [];
+        const catalog = data.catalog || {};
+        taxCatalogMeta = { kpis: catalog.kpis || [], miradas: catalog.miradas || [] };
+        taxIndexTemplates(data.templates || []);
+        taxFillSelect(document.getElementById('taxKpi'), taxCatalogMeta.kpis, { allLabel: null });
+        taxFillSelect(document.getElementById('taxFilterKpi'), taxCatalogMeta.kpis, { allLabel: 'Todos' });
+        taxFillSelect(document.getElementById('taxFilterMirada'), taxCatalogMeta.miradas, { valueKey: 'id', labelKey: 'label', allLabel: 'Todas' });
+        taxRenderMiradaCheckboxes(taxCatalogMeta.miradas);
+        if (!taxEditingId) {
+          const kpi = document.getElementById('taxKpi')?.value || 'TERMINACIONES';
+          if (!taxFormInitialized) {
+            taxPrefillNewForm(kpi);
+            taxFormInitialized = true;
+          } else {
+            taxApplyMiradas(taxTemplateForKpi(kpi).miradas || ['EJECUCION_OBRA', 'DETERIORO_USO']);
+          }
+        }
+        const entries = (data.entries || []).filter((e) => {
+          const src = document.getElementById('taxFilterSource')?.value || '';
+          if (!src) return true;
+          if (src === 'KPI.xlsx') return e.source === 'KPI.xlsx';
+          return e.source !== 'KPI.xlsx';
+        });
+        taxRenderTable(entries);
+        taxUpdateStats(data.entries || [], catalog.updatedAt);
+      } catch (e) {
+        if (summary) summary.textContent = e?.message || String(e);
+      }
+    }
+
+    async function saveTaxonomyEntry() {
+      const note = document.getElementById('taxFormNote');
+      const btn = document.getElementById('taxSaveBtn');
+      const payload = taxCollectPayload();
+      if (!payload.kpi || !payload.subfamilia) {
+        if (note) { note.style.color = '#f87171'; note.textContent = 'KPI y subfamilia son obligatorios.'; }
+        return;
+      }
+      const prev = btn?.textContent;
+      if (btn) { btn.disabled = true; btn.textContent = 'Guardando…'; }
+      try {
+        const url = taxEditingId
+          ? `/api/admin/taxonomy/${encodeURIComponent(taxEditingId)}`
+          : '/api/admin/taxonomy';
+        const res = await adminFetch(url, {
+          method: taxEditingId ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
+        if (note) { note.style.color = '#35D07F'; note.textContent = taxEditingId ? 'Entrada actualizada.' : 'Entrada creada.'; }
+        taxClearForm();
+        await loadTaxonomyAdmin();
+      } catch (e) {
+        if (note) { note.style.color = '#f87171'; note.textContent = e?.message || String(e); }
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = prev || 'Guardar entrada'; }
+      }
+    }
+
+    document.getElementById('taxSaveBtn')?.addEventListener('click', () => saveTaxonomyEntry().catch(() => {}));
+    document.getElementById('taxFormClearBtn')?.addEventListener('click', taxClearForm);
+    document.getElementById('taxKpi')?.addEventListener('change', (ev) => {
+      if (!taxEditingId) taxPrefillNewForm(ev.target.value);
+    });
+    document.getElementById('taxRefreshBtn')?.addEventListener('click', () => loadTaxonomyAdmin().catch(() => {}));
+    document.getElementById('taxFilterKpi')?.addEventListener('change', () => loadTaxonomyAdmin().catch(() => {}));
+    document.getElementById('taxFilterMirada')?.addEventListener('change', () => loadTaxonomyAdmin().catch(() => {}));
+    document.getElementById('taxFilterStatus')?.addEventListener('change', () => loadTaxonomyAdmin().catch(() => {}));
+    document.getElementById('taxFilterSource')?.addEventListener('change', () => loadTaxonomyAdmin().catch(() => {}));
+    document.getElementById('taxImportKpiBtn')?.addEventListener('click', async () => {
+      const replace = confirm(
+        '¿Importar hallazgos desde public/KPI.xlsx?\n\n' +
+        'OK = fusionar (no toca entradas ya aprobadas)\n' +
+        'Cancelar = abortar\n\n' +
+        'Para reemplazar borradores previos de KPI.xlsx, usa el script CLI con --replace.'
+      );
+      if (!replace) return;
+      const note = document.getElementById('taxFormNote');
+      const btn = document.getElementById('taxImportKpiBtn');
+      const prev = btn?.textContent;
+      if (btn) { btn.disabled = true; btn.textContent = 'Importando…'; }
+      try {
+        const res = await adminFetch('/api/admin/taxonomy/import-kpi', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ replaceExisting: false })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
+        const s = data.stats || {};
+        if (note) {
+          note.style.color = '#35D07F';
+          note.textContent = `Import OK: ${data.hallazgosParsed || 0} hallazgos · +${s.created || 0} nuevas · ${s.updated || 0} actualizadas · ${s.skipped || 0} omitidas (aprobadas) · total ${data.totalEntries || '?'}`;
+        }
+        await loadTaxonomyAdmin();
+      } catch (e) {
+        if (note) { note.style.color = '#f87171'; note.textContent = e?.message || String(e); }
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = prev || 'Importar KPI.xlsx'; }
+      }
+    });
+    document.getElementById('taxApproveEntregaBatchBtn')?.addEventListener('click', async () => {
+      const pending = (taxEntriesCache || []).filter((e) =>
+        e.status !== 'approved' &&
+        e.source === 'KPI.xlsx' &&
+        ((e.miradasProducto && e.miradasProducto.entrega) || (Array.isArray(e.miradas) && e.miradas.includes('EJECUCION_OBRA') && e.aliasEntregaKpi))
+      );
+      if (!pending.length) {
+        alert('No hay hallazgos Entrega pendientes de KPI.xlsx para aprobar.');
+        return;
+      }
+      if (!confirm(
+        `¿Aprobar ${pending.length} hallazgo(s) de Entrega importados desde KPI.xlsx?\n\n` +
+        'Entrega usará este catálogo de inmediato (KPI + especialidades).\n' +
+        'Las entradas seed y otras fuentes no se modifican.'
+      )) return;
+      const note = document.getElementById('taxFormNote');
+      const btn = document.getElementById('taxApproveEntregaBatchBtn');
+      const prev = btn?.textContent;
+      if (btn) { btn.disabled = true; btn.textContent = 'Aprobando…'; }
+      try {
+        const res = await adminFetch('/api/admin/taxonomy/approve-batch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ source: 'KPI.xlsx', entregaOnly: true })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
+        if (note) {
+          note.style.color = '#35D07F';
+          note.textContent = `Aprobación masiva OK: ${data.approved || 0} entradas Entrega · ${data.alreadyApproved || 0} ya estaban aprobadas.`;
+        }
+        await loadTaxonomyAdmin();
+      } catch (e) {
+        if (note) { note.style.color = '#f87171'; note.textContent = e?.message || String(e); }
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = prev || 'Aprobar Entrega (KPI.xlsx)'; }
+      }
+    });
+    document.getElementById('taxResetSeedBtn')?.addEventListener('click', async () => {
+      if (!confirm('¿Restaurar el catálogo seed? Se reemplazarán todas las entradas actuales.')) return;
+      const note = document.getElementById('taxFormNote');
+      try {
+        const res = await adminFetch('/api/admin/taxonomy/reset-seed', { method: 'POST' });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
+        if (note) { note.style.color = '#35D07F'; note.textContent = `Seed restaurado (${data.count || 0} entradas).`; }
+        taxClearForm();
+        await loadTaxonomyAdmin();
+      } catch (e) {
+        if (note) { note.style.color = '#f87171'; note.textContent = e?.message || String(e); }
+      }
+    });
+    document.getElementById('taxBody')?.addEventListener('click', async (ev) => {
+      const editBtn = ev.target.closest('.tax-edit-btn');
+      const delBtn = ev.target.closest('.tax-del-btn');
+      const approveBtn = ev.target.closest('.tax-approve-btn');
+      if (approveBtn) {
+        const id = approveBtn.getAttribute('data-id');
+        if (!confirm(`¿Aprobar "${id}"?`)) return;
+        const note = document.getElementById('taxFormNote');
+        try {
+          const res = await adminFetch(`/api/admin/taxonomy/${encodeURIComponent(id)}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'approved' })
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
+          if (note) { note.style.color = '#35D07F'; note.textContent = `Entrada aprobada: ${id}`; }
+          await loadTaxonomyAdmin();
+        } catch (e) {
+          if (note) { note.style.color = '#f87171'; note.textContent = e?.message || String(e); }
+        }
+        return;
+      }
+      if (editBtn) {
+        const id = editBtn.getAttribute('data-id');
+        try {
+          const res = await adminFetch(`/api/admin/taxonomy/${encodeURIComponent(id)}`);
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
+          taxFillForm(data.entry || {});
+        } catch (e) {
+          const note = document.getElementById('taxFormNote');
+          if (note) { note.style.color = '#f87171'; note.textContent = e?.message || String(e); }
+        }
+        return;
+      }
+      if (delBtn) {
+        const id = delBtn.getAttribute('data-id');
+        if (!confirm(`¿Eliminar "${id}"?`)) return;
+        try {
+          const res = await adminFetch(`/api/admin/taxonomy/${encodeURIComponent(id)}`, { method: 'DELETE' });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
+          if (taxEditingId === id) taxClearForm();
+          await loadTaxonomyAdmin();
+        } catch (e) {
+          const note = document.getElementById('taxFormNote');
+          if (note) { note.style.color = '#f87171'; note.textContent = e?.message || String(e); }
+        }
+      }
+    });
 
     async function loadDashboardStats() {
       try {
@@ -2690,6 +5086,455 @@
       daysSelect.addEventListener("change", () => loadVisitsChart(parseInt(daysSelect.value) || 30));
     }
     loadVisitsChart(30);
+
+    // --- Dashboard analytics (funnel, daily, geo, heatmap) ---
+    let inspectionsDailyChart = null;
+    const DOW_LABELS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+
+    function hmCell(matrix, d, h) {
+      const row = matrix[d] || matrix[String(d)];
+      if (!row) return 0;
+      const v = row[h];
+      if (v != null) return Number(v) || 0;
+      return Number(row[String(h)]) || 0;
+    }
+
+    /** @param {Response} res @param {any} d */
+    function analyticsProblemHtml(res, d) {
+      if (res.status === 404) {
+        return (
+          '<span class="muted">Las rutas <code>/api/admin/analytics/*</code> no están registradas (404). ' +
+          "Detén el proceso <strong>npm start</strong> en la carpeta <code>ainspecta_web</code> y vuelve a iniciarlo para cargar la última versión de <code>server.js</code>.</span>"
+        );
+      }
+      if (res.status === 401) {
+        return '<span class="muted">No autorizado (revisa usuario y contraseña admin).</span>';
+      }
+      if (d && d.error === "DB_ERROR") {
+        return '<span class="muted">Error de base de datos al calcular esta analítica.</span>';
+      }
+      return '<span class="muted">No se pudo cargar esta sección.</span>';
+    }
+
+    async function loadFunnelAnalytics(days) {
+      const disc = document.getElementById("funnelDisclaimer");
+      const stepsEl = document.getElementById("funnelSteps");
+      const ratesEl = document.getElementById("funnelRates");
+      if (!stepsEl) return;
+      try {
+        const res = await adminFetch("/api/admin/analytics/funnel-business?days=" + days);
+        const d = await res.json().catch(() => ({}));
+        if (res.status !== 200 || !d.ok) {
+          stepsEl.innerHTML = analyticsProblemHtml(res, d);
+          if (ratesEl) ratesEl.textContent = "";
+          if (disc) disc.textContent = "";
+          return;
+        }
+        if (disc) disc.textContent = d.disclaimer || "";
+        const max = Math.max(1, ...(d.steps || []).map((s) => s.count || 0));
+        stepsEl.innerHTML = (d.steps || [])
+          .map((s) => {
+            const pct = Math.round(((s.count || 0) / max) * 1000) / 10;
+            return (
+              '<div class="funnelStep">' +
+              '<div><div class="funnelStepLabel">' +
+              escapeHtml(s.label) +
+              '</div><div class="funnelBarTrack"><div class="funnelBarFill" style="width:' +
+              pct +
+              '%"></div></div></div>' +
+              '<div class="funnelCount">' +
+              (s.count ?? 0) +
+              "</div></div>"
+            );
+          })
+          .join("");
+        if (ratesEl) {
+          const labelByKey = {};
+          (d.steps || []).forEach((s) => {
+            labelByKey[s.key] = s.label;
+          });
+          const parts = (d.rates || [])
+            .map((r) => {
+              const p = r.pct == null ? "—" : r.pct + "%";
+              const a = labelByKey[r.from] || r.from;
+              const b = labelByKey[r.to] || r.to;
+              return escapeHtml(a) + " → " + escapeHtml(b) + ": " + p;
+            })
+            .join(" · ");
+          ratesEl.textContent = parts ? "Tasas paso a paso: " + parts : "";
+        }
+      } catch (e) {
+        stepsEl.innerHTML = '<span class="muted">Error al cargar funnel.</span>';
+      }
+    }
+
+    async function loadInspectionsDailyChart(days) {
+      const ctx = document.getElementById("inspectionsDailyChart");
+      const errEl = document.getElementById("inspectionsDailyErr");
+      if (!ctx) return;
+      if (errEl) errEl.innerHTML = "";
+      try {
+        const res = await adminFetch("/api/admin/analytics/inspections-daily?days=" + days);
+        const d = await res.json().catch(() => ({}));
+        if (res.status !== 200 || !d.ok) {
+          if (inspectionsDailyChart) {
+            inspectionsDailyChart.destroy();
+            inspectionsDailyChart = null;
+          }
+          if (errEl) errEl.innerHTML = analyticsProblemHtml(res, d);
+          return;
+        }
+        const series = d.series || [];
+        const allDays = [];
+        const now = new Date();
+        for (let i = days - 1; i >= 0; i--) {
+          const dt = new Date(now);
+          dt.setDate(dt.getDate() - i);
+          allDays.push(dt.toISOString().slice(0, 10));
+        }
+        const dataMap = {};
+        series.forEach((s) => {
+          dataMap[s.day] = s;
+        });
+        const labels = allDays.map((day) => {
+          const p = day.split("-");
+          return p[2] + "/" + p[1];
+        });
+        const totalData = allDays.map((day) => (dataMap[day] ? dataMap[day].total : 0) || 0);
+        const doneData = allDays.map((day) => (dataMap[day] ? dataMap[day].done : 0) || 0);
+        if (inspectionsDailyChart) inspectionsDailyChart.destroy();
+        inspectionsDailyChart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels,
+            datasets: [
+              {
+                label: "Casos creados",
+                data: totalData,
+                borderColor: "#35D07F",
+                backgroundColor: "rgba(53, 208, 127, 0.12)",
+                borderWidth: 2,
+                tension: 0.25,
+                fill: true,
+                pointRadius: 2
+              },
+              {
+                label: "Completadas (DONE)",
+                data: doneData,
+                borderColor: "#3B82F6",
+                backgroundColor: "rgba(59, 130, 246, 0.08)",
+                borderWidth: 2,
+                tension: 0.25,
+                fill: true,
+                pointRadius: 2
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: "index", intersect: false },
+            plugins: {
+              legend: { labels: { color: "#94a3b8", font: { size: 11 } } },
+              tooltip: {
+                backgroundColor: "#0F1A2E",
+                borderColor: "#1E2B45",
+                borderWidth: 1,
+                titleColor: "#EAF0FF",
+                bodyColor: "#B9C7E2"
+              }
+            },
+            scales: {
+              x: {
+                ticks: { color: "#64748b", font: { size: 10 }, maxRotation: 45 },
+                grid: { color: "rgba(30,43,69,0.5)" }
+              },
+              y: {
+                beginAtZero: true,
+                ticks: { color: "#64748b", font: { size: 11 }, stepSize: 1 },
+                grid: { color: "rgba(30,43,69,0.5)" }
+              }
+            }
+          }
+        });
+      } catch (e) {}
+    }
+
+    async function loadGeoAnalytics(days) {
+      const cov = document.getElementById("geoCoverage");
+      const list = document.getElementById("geoRegionList");
+      const disc = document.getElementById("geoDisclaimer");
+      if (!list) return;
+      try {
+        const res = await adminFetch("/api/admin/analytics/inspections-geo?days=" + days);
+        const d = await res.json().catch(() => ({}));
+        if (res.status !== 200 || !d.ok) {
+          list.innerHTML = analyticsProblemHtml(res, d);
+          if (cov) cov.textContent = "";
+          if (disc) disc.textContent = "";
+          return;
+        }
+        if (disc) disc.textContent = d.disclaimer || "";
+        const parsed = d.parsed || 0;
+        const total = d.total || 0;
+        const covPct = d.coverage != null ? d.coverage + "%" : "—";
+        if (cov) {
+          cov.textContent =
+            "Cobertura parseada: " +
+            parsed +
+            " / " +
+            total +
+            " direcciones distintas (" +
+            covPct +
+            "). Datos estimados por dirección libre.";
+        }
+        const rows = d.byRegion || [];
+        const sinReg = Math.max(0, total - parsed);
+        const maxBar = Math.max(1, sinReg, ...rows.map((r) => r.count || 0));
+        let html = "";
+        for (const r of rows) {
+          const w = Math.round(((r.count || 0) / maxBar) * 1000) / 10;
+          html +=
+            '<div class="geoRow"><div>' +
+            escapeHtml(r.region) +
+            '</div><div class="geoBarTrack"><div class="geoBarFill" style="width:' +
+            w +
+            '%"></div></div><div style="text-align:right;font-weight:800;color:#eaf0ff">' +
+            (r.count || 0) +
+            "</div></div>";
+        }
+        if (sinReg > 0) {
+          const w = Math.round((sinReg / maxBar) * 1000) / 10;
+          html +=
+            '<div class="geoRow"><div>Sin región / no parseable</div><div class="geoBarTrack"><div class="geoBarFill" style="width:' +
+            w +
+            '%;background:linear-gradient(90deg,#64748b,#94a3b8)"></div></div><div style="text-align:right;font-weight:800;color:#eaf0ff">' +
+            sinReg +
+            "</div></div>";
+        }
+        if (!html) html = '<span class="muted">Sin direcciones con región en este periodo.</span>';
+        list.innerHTML = html;
+        const top = d.topCommunes || [];
+        if (top.length) {
+          let topHtml =
+            '<div class="muted" style="margin-top:14px;font-weight:700;font-size:12px;">Top comunas (inferidas)</div>';
+          for (const c of top.slice(0, 8)) {
+            topHtml +=
+              '<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#cbd5e1;padding:6px 0;border-bottom:1px solid #1e2b45">' +
+              "<span>" +
+              escapeHtml(c.label) +
+              '</span><span style="font-weight:800;color:#eaf0ff">' +
+              c.count +
+              "</span></div>";
+          }
+          list.innerHTML += topHtml;
+        }
+      } catch (e) {
+        list.innerHTML = '<span class="muted">Error al cargar mapa regional.</span>';
+      }
+    }
+
+    async function loadHeatmapAnalytics(days) {
+      const tbl = document.getElementById("heatmapTable");
+      const note = document.getElementById("heatmapTzNote");
+      const errHm = document.getElementById("heatmapErr");
+      if (!tbl) return;
+      if (errHm) errHm.innerHTML = "";
+      try {
+        const res = await adminFetch("/api/admin/analytics/inspections-heatmap?days=" + days);
+        const d = await res.json().catch(() => ({}));
+        if (res.status !== 200 || !d.ok) {
+          tbl.innerHTML = "";
+          if (note) note.textContent = "";
+          if (errHm) errHm.innerHTML = analyticsProblemHtml(res, d);
+          return;
+        }
+        const hm = d.heatmap || {};
+        const matrix = hm.matrix || {};
+        const max = hm.max || 0;
+        if (note) note.textContent = hm.tzNote || "";
+        let head = "<tr><th class='rowLabel'></th>";
+        for (let h = 0; h < 24; h++) head += "<th>" + h + "</th>";
+        head += "</tr>";
+        let body = "";
+        for (let dow = 0; dow < 7; dow++) {
+          body += "<tr><th class='rowLabel'>" + DOW_LABELS[dow] + "</th>";
+          for (let h = 0; h < 24; h++) {
+            const v = hmCell(matrix, dow, h);
+            const a = max > 0 ? 0.15 + 0.85 * (v / max) : 0;
+            const bg = "rgba(53,208,127," + a + ")";
+            body +=
+              '<td style="background:' +
+              bg +
+              ';color:' +
+              (a > 0.45 ? "#052e1a" : "#94a3b8") +
+              '" title="' +
+              v +
+              ' casos">' +
+              (v || "") +
+              "</td>";
+          }
+          body += "</tr>";
+        }
+        tbl.innerHTML = head + body;
+      } catch (e) {
+        tbl.innerHTML = "";
+      }
+    }
+
+    function loadDashboardAnalyticsBundle(days) {
+      const n = parseInt(days, 10) || 30;
+      loadFunnelAnalytics(n);
+      loadInspectionsDailyChart(n);
+      loadAnalysisAccuracyChart(n);
+      loadGeoAnalytics(n);
+      loadHeatmapAnalytics(n);
+    }
+
+    let analysisAccuracyChart = null;
+
+    async function loadAnalysisAccuracyChart(days) {
+      const ctx = document.getElementById("analysisAccuracyChart");
+      const errEl = document.getElementById("analysisAccuracyErr");
+      const summaryEl = document.getElementById("accuracySummary");
+      if (!ctx) return;
+      if (errEl) errEl.innerHTML = "";
+      try {
+        const res = await adminFetch("/api/admin/analytics/analysis-accuracy?days=" + days);
+        const d = await res.json().catch(() => ({}));
+        if (res.status !== 200 || !d.ok) {
+          if (analysisAccuracyChart) {
+            analysisAccuracyChart.destroy();
+            analysisAccuracyChart = null;
+          }
+          if (errEl) errEl.innerHTML = analyticsProblemHtml(res, d);
+          if (summaryEl) summaryEl.textContent = "Sin datos";
+          return;
+        }
+        const series = d.series || [];
+        const summary = d.summary || {};
+        if (summaryEl) {
+          if (summary.reports > 0 && summary.accuracyPct != null) {
+            summaryEl.textContent =
+              "Periodo: " +
+              summary.accuracyPct +
+              "% exactitud · " +
+              summary.reports +
+              " informe(s) · " +
+              (summary.reportsComplete100 || 0) +
+              " al 100% · " +
+              (summary.reportsCorrected || 0) +
+              " corregido(s) · " +
+              summary.slotsCorrected +
+              "/" +
+              summary.slotsTotal +
+              " slots";
+          } else {
+            summaryEl.textContent = "Sin informes en el periodo.";
+          }
+        }
+        const allDays = [];
+        const now = new Date();
+        for (let i = days - 1; i >= 0; i--) {
+          const dt = new Date(now);
+          dt.setDate(dt.getDate() - i);
+          allDays.push(dt.toISOString().slice(0, 10));
+        }
+        const dataMap = {};
+        series.forEach((s) => {
+          dataMap[s.day] = s;
+        });
+        const labels = allDays.map((day) => {
+          const p = day.split("-");
+          return p[2] + "/" + p[1];
+        });
+        const accuracyData = allDays.map((day) => {
+          const row = dataMap[day];
+          return row && row.accuracyPct != null ? row.accuracyPct : null;
+        });
+        if (analysisAccuracyChart) analysisAccuracyChart.destroy();
+        analysisAccuracyChart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels,
+            datasets: [
+              {
+                label: "Exactitud (%)",
+                data: accuracyData,
+                borderColor: "#A78BFA",
+                backgroundColor: "rgba(167, 139, 250, 0.12)",
+                borderWidth: 2,
+                tension: 0.25,
+                fill: true,
+                pointRadius: 3,
+                spanGaps: false
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: "index", intersect: false },
+            plugins: {
+              legend: { labels: { color: "#94a3b8", font: { size: 11 } } },
+              tooltip: {
+                backgroundColor: "#0F1A2E",
+                borderColor: "#1E2B45",
+                borderWidth: 1,
+                titleColor: "#EAF0FF",
+                bodyColor: "#B9C7E2",
+                callbacks: {
+                  afterLabel: (ctx) => {
+                    const day = allDays[ctx.dataIndex];
+                    const row = dataMap[day];
+                    if (!row) return "";
+                    return (
+                      row.reports +
+                      " informe(s) · " +
+                      (row.reportsComplete100 || 0) +
+                      " al 100% · " +
+                      row.slotsCorrected +
+                      " slot(s) corregido(s) de " +
+                      row.slotsTotal
+                    );
+                  }
+                }
+              }
+            },
+            scales: {
+              x: {
+                ticks: { color: "#64748b", maxTicksLimit: 12 },
+                grid: { color: "rgba(30, 43, 69, 0.6)" }
+              },
+              y: {
+                min: 0,
+                max: 100,
+                ticks: { color: "#64748b", callback: (v) => v + "%" },
+                grid: { color: "rgba(30, 43, 69, 0.6)" }
+              }
+            }
+          }
+        });
+      } catch (e) {
+        if (errEl) errEl.textContent = e?.message || String(e);
+      }
+    }
+
+    const accuracyDaysSelect = document.getElementById("accuracyDaysSelect");
+    if (accuracyDaysSelect) {
+      accuracyDaysSelect.addEventListener("change", () =>
+        loadAnalysisAccuracyChart(parseInt(accuracyDaysSelect.value, 10) || 30)
+      );
+    }
+    loadAnalysisAccuracyChart(30);
+
+    const analyticsDaysSelect = document.getElementById("analyticsDaysSelect");
+    if (analyticsDaysSelect) {
+      analyticsDaysSelect.addEventListener("change", () =>
+        loadDashboardAnalyticsBundle(parseInt(analyticsDaysSelect.value, 10) || 30)
+      );
+    }
+    loadDashboardAnalyticsBundle(30);
 
     window.addEventListener("hashchange", setActiveSection);
     setActiveSection();

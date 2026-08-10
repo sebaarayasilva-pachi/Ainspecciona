@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TOC TOC · Accesos demo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh;
+      font-family: "Source Sans 3", "Segoe UI", sans-serif;
+      background: #0f1419; color: #e8eef4;
+      padding: 32px 20px 48px;
+    }
+    .wrap { max-width: 560px; margin: 0 auto; }
+    h1 { font-size: 28px; font-weight: 800; margin: 0 0 8px; }
+    .muted { color: #8b9aab; font-size: 14px; line-height: 1.45; margin: 0 0 24px; }
+    .card {
+      border: 1px solid #2a3542; border-radius: 14px; padding: 16px 18px; margin-bottom: 12px;
+      background: #1a222c;
+    }
+    .card h2 { margin: 0 0 6px; font-size: 16px; font-weight: 800; }
+    .card p { margin: 0 0 10px; font-size: 13px; color: #8b9aab; word-break: break-all; }
+    .card a {
+      display: inline-block; font-weight: 700; color: #062415; background: #2bb673;
+      text-decoration: none; padding: 8px 14px; border-radius: 10px; font-size: 14px;
+    }
+    .pwd { margin-top: 20px; font-size: 13px; color: #8b9aab; }
+    .pwd code { color: #e8eef4; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>TOC TOC · Accesos demo</h1>
+    <p class="muted">
+      Preferido: <strong>login único</strong> de plataforma (todos los productos).
+      También puedes entrar a cada producto con su login legacy.
+    </p>
+
+    <div class="card">
+      <h2>Plataforma (recomendado)</h2>
+      <p>plataforma@toctoc.ainspecciona.com<br />Control: control@ainspecciona.com</p>
+      <a href="/login">Login único → /app</a>
+    </div>
+    <div class="card">
+      <h2>Capture (corredora)</h2>
+      <p>corredora-toctoc-pruebas@ainspecciona.com<br />o ejecutivo: capture@toctoc.ainspecciona.com</p>
+      <a href="/">Ir a Capture</a>
+    </div>
+    <div class="card">
+      <h2>Postventa</h2>
+      <p>postventa@toctoc.ainspecciona.com</p>
+      <a href="/postventa/login">Login Postventa</a>
+    </div>
+    <div class="card">
+      <h2>Recepción / Entrega</h2>
+      <p>recepcion@toctoc.ainspecciona.com</p>
+      <a href="/entrega/login">Login Entrega</a>
+    </div>
+    <div class="card">
+      <h2>In &amp; Out</h2>
+      <p>inout@toctoc.ainspecciona.com</p>
+      <a href="/inout/portal/login">Login In &amp; Out</a>
+    </div>
+
+    <p class="pwd">Clave demo: <code>ToctocDemo2026!</code></p>
+  </div>
+</body>
+</html>

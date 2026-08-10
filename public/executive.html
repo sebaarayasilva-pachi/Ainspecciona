@@ -4,6 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>App Ejecutivo · Ainspecciona</title>
+  <link rel="manifest" href="/manifest-executive.json" />
+  <meta name="theme-color" content="#0b121b" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Ainspecciona" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="apple-touch-icon" href="/icons/icon.svg" />
   <link rel="stylesheet" href="/assets/header.css" />
   <style>
     * { box-sizing: border-box; }
@@ -74,7 +80,48 @@
       background: #35D07F;
       width: 0%;
     }
-    .hidden { display: none; }
+    .hidden { display: none !important; }
+    .linkbtn {
+      background: none;
+      border: none;
+      color: #93c5fd;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      padding: 0;
+      text-decoration: underline;
+      font-family: inherit;
+    }
+    .linkbtn:hover { color: #bfdbfe; }
+    .forgotPanel {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid #334155;
+      background: #0b1220;
+    }
+    .forgotPanel .muted { margin-bottom: 10px; line-height: 1.45; }
+    #execPwdOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: rgba(0, 0, 0, 0.72);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    #execPwdOverlay.hidden { display: none !important; }
+    #execPwdOverlay .card { margin: 0; max-width: 420px; width: 100%; }
+    .tt-hub-link {
+      display: inline-block;
+      margin: 0 0 12px;
+      color: #93c5fd;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .tt-hub-link:hover { color: #bfdbfe; }
   </style>
 </head>
 <body>
@@ -93,6 +140,7 @@
     <div class="card" id="loginCard">
       <h2>Ingreso ejecutivo</h2>
       <div class="muted">Accede a tus inspecciones asignadas.</div>
+      <p class="muted hidden" id="executiveIosHint" style="margin-top:10px;font-size:12px;line-height:1.45"></p>
       <div class="row">
         <label for="loginEmail">Email</label>
         <input id="loginEmail" type="email" placeholder="correo@empresa.com" />
@@ -102,7 +150,35 @@
         <input id="loginPass" type="password" placeholder="Tu clave" />
       </div>
       <button class="btn" id="loginBtn" type="button">Ingresar</button>
+      <p style="margin:10px 0 0;">
+        <button type="button" class="linkbtn" id="toggleForgotBtn">¿Olvidaste tu clave?</button>
+      </p>
+      <div id="forgotPanel" class="forgotPanel hidden">
+        <div class="muted">
+          Te enviaremos una <strong style="color:#cbd5e1">clave temporal</strong> por correo. Luego inicia sesión con esa clave;
+          te pediremos una clave definitiva aquí o en la app Capture.
+        </div>
+        <button class="btn" id="sendRecoveryBtn" type="button" style="margin-top:10px;width:100%;">Enviar correo de recuperación</button>
+        <div class="muted" id="forgotNote" style="margin-top:8px;"></div>
+      </div>
       <div class="muted" id="loginNote"></div>
+    </div>
+
+    <div id="execPwdOverlay" class="hidden">
+      <div class="card">
+        <h2 style="margin-top:0;">Nueva clave</h2>
+        <div class="muted">Ingresaste con una clave temporal. Define tu clave definitiva (mín. 8 caracteres, 1 mayúscula y 1 número).</div>
+        <div class="row">
+          <label for="execPwd1">Nueva clave</label>
+          <input id="execPwd1" type="password" autocomplete="new-password" />
+        </div>
+        <div class="row">
+          <label for="execPwd2">Confirmar</label>
+          <input id="execPwd2" type="password" autocomplete="new-password" />
+        </div>
+        <button class="btn" id="execPwdSaveBtn" type="button">Guardar y continuar</button>
+        <div class="muted" id="execPwdNote" style="margin-top:8px;color:#f87171;"></div>
+      </div>
     </div>
 
     <div class="card hidden" id="casesCard">
@@ -113,7 +189,41 @@
   </main>
 
   <script>
+    (async function loadExecutiveIosHint() {
+      var el = document.getElementById("executiveIosHint");
+      if (!el) return;
+      try {
+        var res = await fetch("/api/public/executive-app");
+        if (!res.ok) return;
+        var data = await res.json();
+        if (data.appStoreUrl) {
+          el.innerHTML =
+            '¿iPhone o iPad? Descarga <strong style="color:#e5eef7">Ainspecciona Capture</strong> en el ' +
+            '<a href="' +
+            data.appStoreUrl.replace(/"/g, "&quot;") +
+            '" target="_blank" rel="noopener noreferrer" style="color:#4ade80;font-weight:600">App Store</a>.';
+          el.classList.remove("hidden");
+        } else if (data.iosPwaGuideUrl) {
+          el.innerHTML =
+            '¿iPhone o iPad? Si no tienes enlace a la tienda, puedes usar la ' +
+            '<a href="' +
+            String(data.iosPwaGuideUrl).replace(/"/g, "&quot;") +
+            '" style="color:#4ade80;font-weight:600">guía app web (PWA)</a>.';
+          el.classList.remove("hidden");
+        }
+      } catch (_) {}
+    })();
+
     function getExecToken() {
+      try {
+        const bridge = new URLSearchParams(window.location.search).get("tt_bridge");
+        if (bridge) {
+          localStorage.setItem("exec_session_token", bridge);
+          const clean = new URL(window.location.href);
+          clean.searchParams.delete("tt_bridge");
+          window.history.replaceState({}, "", clean.pathname + clean.search + clean.hash);
+        }
+      } catch (_) {}
       return localStorage.getItem("exec_session_token") || "";
     }
 
@@ -216,6 +326,13 @@
         if (data?.token) {
           localStorage.setItem("exec_session_token", data.token);
         }
+        if (data?.user?.mustChangePassword) {
+          document.getElementById("execPwdOverlay").classList.remove("hidden");
+          document.getElementById("loginCard").classList.add("hidden");
+          document.getElementById("casesCard").classList.add("hidden");
+          document.getElementById("logoutBtn").classList.remove("hidden");
+          return;
+        }
         await loadApp();
       } catch (error) {
         note.textContent = "Error de conexión. Intenta nuevamente.";
@@ -227,10 +344,20 @@
       const loginCard = document.getElementById("loginCard");
       const casesCard = document.getElementById("casesCard");
       const logoutBtn = document.getElementById("logoutBtn");
+      const pwdOverlay = document.getElementById("execPwdOverlay");
+      pwdOverlay.classList.add("hidden");
+
       if (!user) {
         loginCard.classList.remove("hidden");
         casesCard.classList.add("hidden");
         logoutBtn.classList.add("hidden");
+        return;
+      }
+      if (user.mustChangePassword) {
+        pwdOverlay.classList.remove("hidden");
+        loginCard.classList.add("hidden");
+        casesCard.classList.add("hidden");
+        logoutBtn.classList.remove("hidden");
         return;
       }
       loginCard.classList.add("hidden");
@@ -242,6 +369,77 @@
     }
 
     document.getElementById("loginBtn").addEventListener("click", handleLogin);
+    document.getElementById("toggleForgotBtn").addEventListener("click", () => {
+      document.getElementById("forgotPanel").classList.toggle("hidden");
+      document.getElementById("forgotNote").textContent = "";
+    });
+    document.getElementById("sendRecoveryBtn").addEventListener("click", async () => {
+      const email = document.getElementById("loginEmail").value.trim().toLowerCase();
+      const fn = document.getElementById("forgotNote");
+      fn.textContent = "";
+      if (!email) {
+        fn.textContent = "Ingresa tu correo arriba.";
+        return;
+      }
+      const btn = document.getElementById("sendRecoveryBtn");
+      btn.disabled = true;
+      try {
+        const res = await fetch("/api/executive/forgot-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+          credentials: "include"
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          fn.textContent = "No se pudo enviar. Intenta más tarde.";
+          return;
+        }
+        fn.textContent = data.emailSent
+          ? "Revisa tu correo (y spam) con la clave temporal."
+          : "Si el correo está registrado, recibirás el mail en breve.";
+      } catch (_) {
+        fn.textContent = "Error de conexión.";
+      } finally {
+        btn.disabled = false;
+      }
+    });
+    document.getElementById("execPwdSaveBtn").addEventListener("click", async () => {
+      const a = document.getElementById("execPwd1").value;
+      const b = document.getElementById("execPwd2").value;
+      const note = document.getElementById("execPwdNote");
+      note.textContent = "";
+      if (!a || !b) {
+        note.textContent = "Completa ambos campos.";
+        return;
+      }
+      if (a !== b) {
+        note.textContent = "Las claves no coinciden.";
+        return;
+      }
+      const btn = document.getElementById("execPwdSaveBtn");
+      btn.disabled = true;
+      try {
+        const res = await fetch("/api/executive/password-after-recovery", {
+          method: "POST",
+          headers: authHeaders({ "Content-Type": "application/json" }),
+          body: JSON.stringify({ newPassword: a }),
+          credentials: "include"
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          note.textContent = data.message || data.error || "No se pudo guardar.";
+          return;
+        }
+        document.getElementById("execPwd1").value = "";
+        document.getElementById("execPwd2").value = "";
+        await loadApp();
+      } catch (_) {
+        note.textContent = "Error de conexión.";
+      } finally {
+        btn.disabled = false;
+      }
+    });
     document.getElementById("logoutBtn").addEventListener("click", async () => {
       await fetch("/api/executive/logout", {
         method: "POST",
@@ -253,6 +451,10 @@
     });
 
     loadApp().catch(() => {});
+
+    if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
+      navigator.serviceWorker.register("/sw-executive.js").catch(function () {});
+    }
   </script>
 </body>
 </html>

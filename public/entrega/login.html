@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <script>(function(){try{var t=localStorage.getItem("entrega-theme");document.documentElement.setAttribute("data-theme",t==="light"?"light":"dark");}catch(e){document.documentElement.setAttribute("data-theme","dark");}})();</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ingresar · Ainspecciona Recepción</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/entrega/assets/entrega.css" />
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background:
+        radial-gradient(900px 420px at 10% -10%, rgba(91, 91, 214, 0.16), transparent 55%),
+        radial-gradient(700px 380px at 100% 0%, rgba(34, 197, 94, 0.10), transparent 50%),
+        var(--bg);
+    }
+    .login-card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 32px 28px 28px;
+    }
+    .login-brand {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin: 0 0 8px;
+    }
+    .login-card h1 {
+      margin: 0 0 6px;
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .login-card .sub {
+      margin: 0 0 22px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      margin: 0 0 6px;
+    }
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 14px;
+      font-family: inherit;
+      margin-bottom: 14px;
+      background: var(--surface);
+      color: var(--text);
+    }
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-tint);
+    }
+    .btn-login {
+      width: 100%;
+      border: none;
+      border-radius: 10px;
+      padding: 13px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      background: linear-gradient(135deg, var(--primary), var(--primary-600));
+      margin-top: 4px;
+    }
+    .btn-login:disabled { opacity: 0.65; cursor: wait; }
+    .err {
+      display: none;
+      margin: 0 0 14px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: #FEF2F2;
+      color: #B91C1C;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .err.show { display: block; }
+    .foot {
+      margin: 18px 0 0;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted-2);
+    }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <p class="login-brand">Ainspecciona Recepción</p>
+    <h1>Ingresar</h1>
+    <p class="sub">Acceso para inmobiliarias. Usa tu correo corporativo.</p>
+    <div class="err" id="err"></div>
+    <form id="form" autocomplete="on">
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" required autocomplete="username" placeholder="nombre@inmobiliaria.cl" />
+      <label for="password">Clave</label>
+      <input id="password" name="password" type="password" required autocomplete="current-password" placeholder="••••••••" />
+      <button class="btn-login" type="submit" id="btn">Entrar</button>
+    </form>
+    <p class="foot">Entrega técnica · constructora → inmobiliaria</p>
+  </div>
+  <script>
+    (function () {
+      const form = document.getElementById("form");
+      const err = document.getElementById("err");
+      const btn = document.getElementById("btn");
+      const params = new URLSearchParams(location.search);
+      const nextRaw = params.get("next") || "/entrega";
+      const next = nextRaw.startsWith("/entrega") ? nextRaw : "/entrega";
+
+      (function checkExisting() {
+        const headers = {};
+        try {
+          const t = sessionStorage.getItem("entrega_session");
+          if (t) headers["x-entrega-session"] = t;
+        } catch (_) {}
+        fetch("/api/entrega/me", { credentials: "same-origin", cache: "no-store", headers })
+          .then((r) => (r.ok ? r.json() : null))
+          .then((data) => {
+            if (data && data.ok) location.replace(next);
+          })
+          .catch(() => {});
+      })();
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        err.classList.remove("show");
+        err.textContent = "";
+        btn.disabled = true;
+        try {
+          const res = await fetch("/api/entrega/login", {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: document.getElementById("email").value.trim(),
+              password: document.getElementById("password").value
+            })
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || !data.ok) {
+            err.textContent = data.message || "No se pudo iniciar sesión.";
+            err.classList.add("show");
+            btn.disabled = false;
+            return;
+          }
+          if (data.token) {
+            try { sessionStorage.setItem("entrega_session", data.token); } catch (_) {}
+          }
+          location.replace(next);
+        } catch (ex) {
+          err.textContent = "Error de red. Intenta de nuevo.";
+          err.classList.add("show");
+          btn.disabled = false;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

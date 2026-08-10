@@ -754,6 +754,7 @@
     function formatSlotStatus(status) {
       const st = String(status || "").toUpperCase();
       if (st === "ANALYZED") return { text: "Completada", cls: "done" };
+      if (st === "UPLOADED") return { text: "Subida OK (analizando)", cls: "done" };
       if (st === "NOT_CAPTURABLE") return { text: "Omitida", cls: "done" };
       if (st === "REJECTED") return { text: "Rechazada", cls: "rejected" };
       return { text: "Pendiente", cls: "pending" };

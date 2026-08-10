@@ -4,17 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Precios · Ainspecciona</title>
-  <meta name="description" content="Planes de inspección técnica inmobiliaria. Créditos individuales y bolsa para corredores, oficinas y administradores. Informe en 24 horas." />
+  <meta name="description" content="Inspección individual y packs de créditos para corredores y oficinas. Sin suscripción mensual. Informe en 24 horas." />
   <link rel="canonical" href="https://ainspecciona.com/precios" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://ainspecciona.com/precios" />
   <meta property="og:title" content="Precios · Ainspecciona" />
-  <meta property="og:description" content="Planes de inspección técnica inmobiliaria. Créditos individuales y bolsa para corredores, oficinas y administradores." />
+  <meta property="og:description" content="Inspección individual y packs de créditos para corredores y oficinas. Sin suscripción mensual." />
   <meta property="og:image" content="https://ainspecciona.com/assets/certificado-4O7KF9GX.jpg" />
   <meta property="og:locale" content="es_CL" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Precios · Ainspecciona" />
-  <meta name="twitter:description" content="Planes de inspección técnica inmobiliaria. Créditos individuales y bolsa." />
+  <meta name="twitter:description" content="Inspección individual y packs de créditos. Sin suscripción mensual." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -29,6 +29,9 @@
       min-height: 100vh;
     }
     .page { max-width: 1400px; margin: 0 auto; padding: 0 48px 80px; }
+    @media (max-width: 720px) {
+      .page { padding: 0 20px 64px; }
+    }
     .hero {
       padding: 40px 0 24px;
       position: relative;
@@ -43,23 +46,44 @@
       pointer-events: none;
     }
     .hero .h1 { font: 800 36px/1.2 Inter, system-ui; color: #ECF2FF; margin: 0 0 8px; }
-    .hero .sub { font: 400 16px/1.5 Inter, system-ui; color: #A9B6DD; margin: 0; }
+    .hero .sub { font: 400 16px/1.5 Inter, system-ui; color: #A9B6DD; margin: 0; max-width: 640px; }
+
+    .sectionTitle {
+      margin: 56px 0 8px;
+      font: 800 22px/1.3 Inter, system-ui;
+      color: #ECF2FF;
+    }
+    .sectionSub {
+      margin: 0 0 24px;
+      font: 500 14px/1.5 Inter, system-ui;
+      color: #9AA7CF;
+      max-width: 720px;
+    }
+
+    .starterWrap {
+      position: relative;
+      margin-top: 32px;
+      max-width: 520px;
+      filter: drop-shadow(0 18px 18px rgba(0,0,0,0.55));
+    }
 
     .cardsWrap {
       position: relative;
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 40px;
-      margin-top: 32px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 8px;
       filter: drop-shadow(0 18px 18px rgba(0,0,0,0.55));
+      align-items: end;
     }
-    @media (max-width: 1100px) {
-      .cardsWrap { grid-template-columns: 1fr; }
+    @media (max-width: 1000px) {
+      .cardsWrap { grid-template-columns: 1fr; align-items: stretch; }
+      .card.featured { margin-top: 0 !important; }
     }
 
     .card {
       border-radius: 20px;
-      padding: 30px;
+      padding: 28px;
       display: flex;
       flex-direction: column;
       position: relative;
@@ -68,11 +92,19 @@
       background: linear-gradient(180deg, #0E1632 0%, #0A1022 100%);
       border: 1px solid #1E2A52;
     }
-    .card.business {
-      background: linear-gradient(180deg, #0B1B2E 0%, #081223 100%);
-      border: 1px solid #214B5F;
+    .card.pack {
+      background: linear-gradient(180deg, #0E1632 0%, #0A1022 100%);
+      border: 1.2px solid #1E2A52;
+      min-height: 280px;
     }
-    .card.business::before {
+    .card.featured {
+      background: linear-gradient(180deg, #0F1B3D 0%, #0A1022 100%);
+      border: 2.2px solid rgba(124,58,237,0.6);
+      min-height: 300px;
+      margin-top: -10px;
+      box-shadow: 0 0 40px rgba(124,58,237,0.22);
+    }
+    .card.featured::before {
       content: "";
       position: absolute;
       top: 0; left: 0; right: 0;
@@ -80,6 +112,7 @@
       background: linear-gradient(90deg, #7C3AED, #22D3EE);
       border-radius: 20px 20px 0 0;
     }
+
     .pill {
       display: inline-block;
       padding: 6px 14px;
@@ -88,25 +121,35 @@
       color: #CFE4FF;
       letter-spacing: 1.2px;
       margin-bottom: 16px;
+      width: fit-content;
     }
-    .card.starter .pill {
+    .card.starter .pill,
+    .card.pack .pill {
       background: #0B1226;
       border: 1px solid #223057;
     }
-    .card.business .pill {
-      background: #071827;
-      border: 1px solid #1E4C5E;
+    .card.featured .pill {
+      background: linear-gradient(135deg, #7C3AED, #22D3EE);
+      color: #0A1022;
+      letter-spacing: 0.8px;
+      border: none;
     }
 
     .plan { font: 800 22px Inter, system-ui; color: #ECF2FF; margin: 0 0 8px; }
     .price { font: 900 38px Inter, system-ui; color: #ECF2FF; margin: 0; }
     .muted { font: 500 14px Inter, system-ui; color: #9AA7CF; margin: 0 0 16px; }
+    .credits { font: 900 52px/1 Inter, system-ui; color: #39E6B6; letter-spacing: -0.8px; }
+    .card.featured .credits { font-size: 56px; }
+    .label { font: 700 14px/1 Inter, system-ui; color: #A9B6DD; margin: 0 0 16px; }
+    .unit { font: 600 13px/1 Inter, system-ui; color: #8FA0CB; margin: 4px 0 0; }
+    .hint { font: 600 13px/1.4 Inter, system-ui; color: #B8C6EE; margin: 0; }
+
     .cardSep {
       height: 1px;
       background: #1B2649;
       margin: 20px 0;
     }
-    .card.business .cardSep { background: #143347; }
+    .card.featured .cardSep { background: #143347; }
 
     .features { list-style: none; padding: 0; margin: 0 0 24px; }
     .features li {
@@ -124,15 +167,9 @@
       display: flex;
       align-items: center;
       justify-content: center;
-    }
-    .card.starter .checkIcon {
       background: #0B2030;
     }
-    .card.starter .checkIcon svg { stroke: #22D3EE; }
-    .card.business .checkIcon {
-      background: #140D2A;
-    }
-    .card.business .checkIcon svg { stroke: #7C3AED; }
+    .checkIcon svg { stroke: #22D3EE; }
 
     .btn {
       display: inline-flex;
@@ -144,7 +181,8 @@
       text-decoration: none;
       cursor: pointer;
       border: none;
-      width: 240px;
+      width: 100%;
+      max-width: 280px;
       height: 50px;
       margin-top: auto;
     }
@@ -159,6 +197,48 @@
       color: #0A1022;
     }
     .btnAccent:hover { opacity: 0.95; }
+
+    .bizNote {
+      margin-top: 28px;
+      padding: 20px 22px;
+      border-radius: 16px;
+      background: #0B1226;
+      border: 1px solid #1E2A52;
+      font: 500 14px/1.55 Inter, system-ui;
+      color: #A9B6DD;
+    }
+    .bizNote strong { color: #ECF2FF; font-weight: 700; }
+    .bizNote a { color: #22D3EE; text-decoration: none; font-weight: 700; }
+    .bizNote a:hover { text-decoration: underline; }
+
+    .trialCta {
+      margin-top: 36px;
+      padding: 28px 30px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(124,58,237,0.18) 0%, rgba(34,211,238,0.12) 100%);
+      border: 1px solid rgba(124,58,237,0.45);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .trialCta h3 {
+      margin: 0 0 6px;
+      font: 800 22px/1.25 Inter, system-ui;
+      color: #ECF2FF;
+    }
+    .trialCta p {
+      margin: 0;
+      font: 500 14px/1.5 Inter, system-ui;
+      color: #B8C6EE;
+      max-width: 520px;
+    }
+    .trialCta .btn {
+      width: auto;
+      min-width: 240px;
+      padding: 14px 28px;
+    }
 
     .footer {
       margin-top: 80px;
@@ -198,16 +278,15 @@
   <main class="page">
     <section class="hero">
       <h1 class="h1">Precios</h1>
-      <p class="sub">Inspección individual o gestión profesional.</p>
+      <p class="sub">Inspección individual o packs de créditos para equipos. Sin suscripción mensual: pagas solo lo que usas.</p>
     </section>
 
-    <div class="cardsWrap">
-      <!-- STARTER -->
+    <div class="starterWrap">
       <div class="card starter">
         <span class="pill">STARTER</span>
         <h2 class="plan">Inspección individual</h2>
-        <p class="price">$15.000</p>
-        <p class="muted">por inspección</p>
+        <p class="price">$14.990</p>
+        <p class="muted">por inspección · IVA incluido</p>
         <div class="cardSep"></div>
         <ul class="features">
           <li>
@@ -235,65 +314,55 @@
             Soporte estándar
           </li>
         </ul>
-        <a href="/pago?plan=starter" class="btn btnOutline">COMPRAR</a>
+        <a href="/inspeccionar" class="btn btnOutline">COMPRAR</a>
       </div>
+    </div>
 
-      <!-- BUSINESS -->
-      <div class="card business">
-        <span class="pill">BUSINESS</span>
-        <h2 class="plan">Gestión profesional</h2>
-        <p class="price">$39.990</p>
-        <p class="muted">mensual</p>
-        <p class="muted" style="margin-top: -8px;">Incluye 2 inspecciones</p>
+    <h2 class="sectionTitle">Packs de créditos · Business</h2>
+    <p class="sectionSub">Para corredoras y oficinas. Cada crédito = 1 inspección. Sin cobro recurrente: compras el pack cuando lo necesitas. Créditos válidos 6 meses. Precios con IVA incluido.</p>
+
+    <div class="cardsWrap">
+      <div class="card pack">
+        <span class="pill">PACK</span>
+        <span class="credits">10</span>
+        <span class="label">créditos</span>
+        <span class="price">$139.990</span>
+        <span class="unit">$13.990 c/u</span>
         <div class="cardSep"></div>
-        <ul class="features">
-          <li>
-            <span class="checkIcon"><svg width="12" height="10" viewBox="0 0 12 10" fill="none" stroke-width="2"><path d="M1 5 L4 8 L11 1"/></svg></span>
-            Inspección con IA
-          </li>
-          <li>
-            <span class="checkIcon"><svg width="12" height="10" viewBox="0 0 12 10" fill="none" stroke-width="2"><path d="M1 5 L4 8 L11 1"/></svg></span>
-            Informe descargable
-          </li>
-          <li>
-            <span class="checkIcon"><svg width="12" height="10" viewBox="0 0 12 10" fill="none" stroke-width="2"><path d="M1 5 L4 8 L11 1"/></svg></span>
-            Certificado QR público
-          </li>
-          <li>
-            <span class="checkIcon"><svg width="12" height="10" viewBox="0 0 12 10" fill="none" stroke-width="2"><path d="M1 5 L4 8 L11 1"/></svg></span>
-            Dashboard de gestión
-          </li>
-          <li>
-            <span class="checkIcon"><svg width="12" height="10" viewBox="0 0 12 10" fill="none" stroke-width="2"><path d="M1 5 L4 8 L11 1"/></svg></span>
-            Multiusuario
-          </li>
-          <li>
-            <span class="checkIcon"><svg width="12" height="10" viewBox="0 0 12 10" fill="none" stroke-width="2"><path d="M1 5 L4 8 L11 1"/></svg></span>
-            Gestión por sucursal
-          </li>
-          <li>
-            <span class="checkIcon"><svg width="12" height="10" viewBox="0 0 12 10" fill="none" stroke-width="2"><path d="M1 5 L4 8 L11 1"/></svg></span>
-            Control de consumo por equipo
-          </li>
-          <li>
-            <span class="checkIcon"><svg width="12" height="10" viewBox="0 0 12 10" fill="none" stroke-width="2"><path d="M1 5 L4 8 L11 1"/></svg></span>
-            Cuenta corriente avanzada
-          </li>
-          <li>
-            <span class="checkIcon"><svg width="12" height="10" viewBox="0 0 12 10" fill="none" stroke-width="2"><path d="M1 5 L4 8 L11 1"/></svg></span>
-            Acceso preferencial a inspección presencial
-          </li>
-          <li>
-            <span class="checkIcon"><svg width="12" height="10" viewBox="0 0 12 10" fill="none" stroke-width="2"><path d="M1 5 L4 8 L11 1"/></svg></span>
-            Precios preferenciales en créditos
-          </li>
-          <li>
-            <span class="checkIcon"><svg width="12" height="10" viewBox="0 0 12 10" fill="none" stroke-width="2"><path d="M1 5 L4 8 L11 1"/></svg></span>
-            Cancelación inmediata on request
-          </li>
-        </ul>
-        <a href="/business/activar?mode=direct" class="btn btnAccent">CONTRATAR AHORA</a>
+        <span class="hint">Volumen puntual</span>
       </div>
+      <div class="card pack featured">
+        <span class="pill">RECOMENDADO</span>
+        <span class="credits">50</span>
+        <span class="label">créditos</span>
+        <span class="price">$649.500</span>
+        <span class="unit">$12.990 c/u</span>
+        <div class="cardSep"></div>
+        <span class="hint">Equilibra eficiencia y flexibilidad</span>
+      </div>
+      <div class="card pack">
+        <span class="pill">PACK</span>
+        <span class="credits">100</span>
+        <span class="label">créditos</span>
+        <span class="price">$1.199.000</span>
+        <span class="unit">$11.990 c/u</span>
+        <div class="cardSep"></div>
+        <span class="hint">Para oficinas activas</span>
+      </div>
+    </div>
+
+    <div class="bizNote">
+      <strong>Incluye portal Business:</strong> dashboard, multiusuario, control de consumo y cuenta corriente.
+      Los packs se compran desde el dashboard (<a href="/">ingresa aquí</a>).
+      ¿Equipo grande? <a href="/contacto.html">Contáctanos</a>.
+    </div>
+
+    <div class="trialCta">
+      <div>
+        <h3>Probar Free Trial</h3>
+        <p>1 inspección gratis. Sin tarjeta ni cobro automático. Activa tu cuenta y prueba el flujo completo.</p>
+      </div>
+      <a href="/?trial=1" class="btn btnAccent">PROBAR FREE TRIAL · 1 GRATIS</a>
     </div>
 
     <footer class="footer">

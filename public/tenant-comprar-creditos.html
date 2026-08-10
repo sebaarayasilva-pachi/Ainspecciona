@@ -207,30 +207,30 @@
     </section>
 
     <div class="cardsWrap">
-      <div class="card normal" data-plan="credits-5" data-credits="5" data-price="64950">
+      <div class="card normal" data-plan="credits-10" data-credits="10" data-price="139990">
         <span class="pill">PACK</span>
-        <span class="credits">5</span>
+        <span class="credits">10</span>
         <span class="label">créditos</span>
-        <span class="price">$64.950</span>
-        <span class="unit">$12.990 c/u</span>
+        <span class="price">$139.990</span>
+        <span class="unit">$13.990 c/u</span>
         <div class="cardSep"></div>
         <span class="hint">Volumen puntual</span>
       </div>
-      <div class="card featured" data-plan="credits-10" data-credits="10" data-price="119900">
+      <div class="card featured" data-plan="credits-50" data-credits="50" data-price="649500">
         <span class="pill">OPTIMIZA TU OPERACIÓN</span>
-        <span class="credits">10</span>
+        <span class="credits">50</span>
         <span class="label">créditos</span>
-        <span class="price">$119.900</span>
-        <span class="unit">$11.990 c/u</span>
+        <span class="price">$649.500</span>
+        <span class="unit">$12.990 c/u</span>
         <div class="cardSep"></div>
         <span class="hint">Equilibra eficiencia y flexibilidad</span>
       </div>
-      <div class="card normal" data-plan="credits-20" data-credits="20" data-price="219800">
+      <div class="card normal" data-plan="credits-100" data-credits="100" data-price="1199000">
         <span class="pill">PACK</span>
-        <span class="credits">20</span>
+        <span class="credits">100</span>
         <span class="label">créditos</span>
-        <span class="price">$219.800</span>
-        <span class="unit">$10.990 c/u</span>
+        <span class="price">$1.199.000</span>
+        <span class="unit">$11.990 c/u</span>
         <div class="cardSep"></div>
         <span class="hint">Para oficinas activas</span>
       </div>
@@ -249,7 +249,7 @@
       <button type="button" class="btnComprar" id="btnComprar" disabled>CONTINUAR</button>
     </div>
     <div class="note" id="note"></div>
-    <p class="footerNote">Los packs están disponibles solo con Business activo.</p>
+    <p class="footerNote">Sin suscripción mensual. Al pagar, los créditos se cargan a tu cuenta (válidos 6 meses). IVA incluido.</p>
   </main>
 
   <script>
@@ -261,6 +261,27 @@
       const h = { ...extra };
       if (token) h.Authorization = 'Bearer ' + token;
       return h;
+    }
+
+    function selectCard(card) {
+      if (!card) return;
+      document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      selectedPlan = card.dataset.plan;
+      const credits = card.dataset.credits;
+      const price = Number(card.dataset.price).toLocaleString('es-CL');
+      document.getElementById('btnComprar').disabled = false;
+      document.getElementById('btnComprar').textContent = `CONTINUAR CON ${credits} CRÉDITOS`;
+      document.getElementById('ctaLabel').textContent = `${credits} créditos · $${price}`;
+    }
+
+    function preselectFromQuery() {
+      try {
+        const plan = new URLSearchParams(window.location.search).get('plan');
+        if (!plan) return;
+        const card = document.querySelector('.card[data-plan="' + plan + '"]');
+        if (card) selectCard(card);
+      } catch (_) {}
     }
 
     (async function init() {
@@ -275,15 +296,18 @@
             const data = await retry.json();
             tenant = data.tenant;
             renderBilling();
+            preselectFromQuery();
             return;
           }
         }
-        window.location.href = '/tenant';
+        const next = encodeURIComponent(window.location.pathname + window.location.search);
+        window.location.href = '/?login=1&next=' + next;
         return;
       }
       const data = await res.json();
       tenant = data.tenant;
       renderBilling();
+      preselectFromQuery();
     })();
 
     function renderBilling() {
@@ -296,16 +320,7 @@
     }
 
     document.querySelectorAll('.card').forEach(card => {
-      card.addEventListener('click', () => {
-        document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
-        card.classList.add('selected');
-        selectedPlan = card.dataset.plan;
-        const credits = card.dataset.credits;
-        const price = Number(card.dataset.price).toLocaleString('es-CL');
-        document.getElementById('btnComprar').disabled = false;
-        document.getElementById('btnComprar').textContent = `CONTINUAR CON ${credits} CRÉDITOS`;
-        document.getElementById('ctaLabel').textContent = `${credits} créditos · $${price}`;
-      });
+      card.addEventListener('click', () => selectCard(card));
     });
 
     document.getElementById('btnComprar').addEventListener('click', async () => {

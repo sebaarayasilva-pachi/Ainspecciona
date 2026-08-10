@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0B1220" />
+  <title>Informe postventa · Ainspecta</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f1f5f9;
+      color: #0f172a;
+      line-height: 1.55;
+    }
+    .header {
+      background: #0b1220;
+      color: #fff;
+      padding: 20px 16px 24px;
+    }
+    .header h1 { margin: 0 0 6px; font-size: 20px; }
+    .header p { margin: 0; color: #94a3b8; font-size: 13px; }
+    main { max-width: 820px; margin: 0 auto; padding: 16px 16px 48px; }
+    .card {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 14px;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+    }
+    .title { font-size: 16px; font-weight: 700; margin: 0 0 10px; }
+    .muted { color: #64748b; font-size: 14px; }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .badge-low { background: #dcfce7; color: #166534; }
+    .badge-medium { background: #fef9c3; color: #854d0e; }
+    .badge-high { background: #fee2e2; color: #991b1b; }
+    .badge-critical { background: #7f1d1d; color: #fff; }
+    .badge-pending { background: #e0e7ff; color: #3730a3; }
+    .badge-failed { background: #fecaca; color: #991b1b; }
+    ul { margin: 8px 0 0; padding-left: 20px; }
+    li { margin-bottom: 6px; }
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .photo-grid img {
+      width: 100%;
+      aspect-ratio: 4/3;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      background: #000;
+    }
+    .photo-grid figcaption { font-size: 11px; color: #64748b; margin-top: 4px; }
+    .disclaimer {
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 12px;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      color: #92400e;
+      font-size: 13px;
+    }
+    .hidden { display: none !important; }
+    .loader { text-align: center; padding: 40px; color: #64748b; }
+    .error { color: #b91c1c; }
+    .kv { display: grid; gap: 6px; font-size: 14px; }
+    .kv strong { color: #334155; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1 id="pageTitle">Informe técnico preliminar</h1>
+    <p id="pageSub">Postventa · Ainspecta</p>
+  </div>
+  <main>
+    <div id="loader" class="loader">Cargando informe…</div>
+    <div id="errorBox" class="card hidden">
+      <p class="title error">No se pudo cargar</p>
+      <p class="muted" id="errorText"></p>
+    </div>
+    <div id="content" class="hidden">
+      <div class="card">
+        <p class="title" id="ticketId"></p>
+        <div class="kv" id="ticketMeta"></div>
+      </div>
+      <div class="card" id="analysisPending">
+        <p class="title">Análisis en curso</p>
+        <p class="muted">Las fotos fueron recibidas. La IA está armando el informe preliminar. Actualiza esta página en unos segundos.</p>
+      </div>
+      <div id="analysisBlock" class="hidden">
+        <div class="card">
+          <p class="title">Resumen ejecutivo</p>
+          <p id="executiveSummary"></p>
+          <p style="margin-top:12px"><span id="severityBadge" class="badge"></span></p>
+        </div>
+        <div class="card">
+          <p class="title">Hallazgo</p>
+          <p id="findingDescription"></p>
+          <p class="title" style="margin-top:16px">Señales visibles</p>
+          <ul id="signalsList"></ul>
+        </div>
+        <div class="card">
+          <p class="title">Revisión de evidencia</p>
+          <div id="evidenceReview"></div>
+          <div class="photo-grid" id="photoGrid"></div>
+        </div>
+        <div class="card">
+          <p class="title">Garantía (prevalidación)</p>
+          <p id="warrantyBlock"></p>
+        </div>
+        <div class="card">
+          <p class="title">Derivación sugerida</p>
+          <p id="routing"></p>
+          <p class="title" style="margin-top:16px">Acciones recomendadas</p>
+          <ul id="actionsList"></ul>
+          <p class="title" style="margin-top:16px">Brechas de evidencia</p>
+          <ul id="gapsList"></ul>
+        </div>
+        <p class="disclaimer" id="disclaimer"></p>
+      </div>
+    </div>
+  </main>
+  <script>
+(function () {
+  var parts = window.location.pathname.replace(/\/+$/, '').split('/');
+  var shortId = decodeURIComponent(parts[parts.length - 1] || '');
+  var pollTimer = null;
+
+  function el(id) { return document.getElementById(id); }
+  function show(n) { n.classList.remove('hidden'); }
+  function hide(n) { n.classList.add('hidden'); }
+
+  function severityClass(sev) {
+    var s = String(sev || '').toLowerCase();
+    if (s === 'critical') return 'badge-critical';
+    if (s === 'high') return 'badge-high';
+    if (s === 'medium') return 'badge-medium';
+    return 'badge-low';
+  }
+
+  function renderReport(data) {
+    var t = data.ticket;
+    var a = data.analysis;
+    el('pageSub').textContent = (t.tenantName || 'Postventa') + ' · ' + t.shortId;
+    el('ticketId').textContent = 'Solicitud ' + t.shortId;
+    el('ticketMeta').innerHTML = [
+      '<div><strong>Categoría:</strong> ' + (t.categoryLabel || t.category) + '</div>',
+      '<div><strong>Estado:</strong> ' + (t.statusLabel || t.status) + '</div>',
+      t.unit ? '<div><strong>Unidad:</strong> ' + [t.unit.projectName, t.unit.address, t.unit.comuna, t.unit.tower ? 'Torre ' + t.unit.tower : '', 'Depto ' + t.unit.unitNumber].filter(Boolean).join(' · ') + '</div>' : '',
+      t.ownerName ? '<div><strong>Propietario:</strong> ' + t.ownerName + '</div>' : '',
+      t.roomHint ? '<div><strong>Recinto:</strong> ' + t.roomHint + '</div>' : '',
+      '<div><strong>Reclamo:</strong> ' + t.summary + '</div>',
+      t.warrantyStatusLabel ? '<div><strong>Garantía registrada:</strong> ' + t.warrantyStatusLabel + '</div>' : ''
+    ].filter(Boolean).join('');
+
+    show(el('content'));
+    hide(el('loader'));
+
+    if (!a || a.status === 'running' || a.status === 'pending') {
+      show(el('analysisPending'));
+      hide(el('analysisBlock'));
+      var pendingTitle = el('analysisPending').querySelector('.title');
+      var pendingMsg = el('analysisPending').querySelector('.muted');
+      if (pendingTitle) pendingTitle.textContent = 'Análisis en curso';
+      if (pendingMsg) {
+        pendingMsg.textContent = (t.status === 'evidence_received' || t.status === 'pending_ai_analysis')
+          ? 'Las fotos fueron recibidas. La IA está armando el informe preliminar. Actualiza esta página en unos segundos.'
+          : 'Generando informe preliminar…';
+      }
+      return false;
+    }
+
+    if (t.status === 'pending_ai_analysis' && !a) {
+      show(el('analysisPending'));
+      hide(el('analysisBlock'));
+      return false;
+    }
+
+    hide(el('analysisPending'));
+
+    if (a.status === 'failed') {
+      el('analysisPending').classList.remove('hidden');
+      el('analysisPending').querySelector('.title').textContent = 'Análisis no disponible';
+      el('analysisPending').querySelector('.muted').textContent = a.errorMessage || 'Hubo un error al generar el informe.';
+      return true;
+    }
+
+    if (a.status !== 'completed' || !a.report) return false;
+
+    show(el('analysisBlock'));
+    var r = a.report;
+    el('executiveSummary').textContent = r.executive_summary || a.summaryText || '—';
+    el('findingDescription').textContent = r.finding_description || '—';
+
+    var badge = el('severityBadge');
+    badge.textContent = 'Severidad: ' + (r.severity || a.severity || '—');
+    badge.className = 'badge ' + severityClass(r.severity || a.severity);
+
+    el('signalsList').innerHTML = (r.visible_signals || []).map(function (s) {
+      return '<li>' + s + '</li>';
+    }).join('') || '<li>Sin señales adicionales</li>';
+
+    var evHtml = (r.evidence_review || []).map(function (e) {
+      return '<p><strong>' + e.slot_title + '</strong> — ' + e.observation +
+        (e.matches_expectation ? '' : ' <em>(foto no coincide del todo con lo esperado)</em>') + '</p>';
+    }).join('');
+    el('evidenceReview').innerHTML = evHtml || '<p class="muted">Sin detalle por slot.</p>';
+
+    el('photoGrid').innerHTML = (r.photos || []).filter(function (p) { return p.photoUrl; }).map(function (p) {
+      return '<figure><img src="' + p.photoUrl + '" alt="' + p.title + '" loading="lazy" /><figcaption>' + p.title + '</figcaption></figure>';
+    }).join('');
+
+    var w = r.warranty_assessment || {};
+    el('warrantyBlock').textContent = (w.ai_notes || '—') +
+      (w.requires_human_review ? ' Se recomienda revisión humana antes de responder al propietario.' : '');
+
+    el('routing').textContent = r.recommended_routing || '—';
+    el('actionsList').innerHTML = (r.recommended_actions || []).map(function (x) { return '<li>' + x + '</li>'; }).join('') || '<li>Sin acciones adicionales</li>';
+    el('gapsList').innerHTML = (r.evidence_gaps || []).map(function (x) { return '<li>' + x + '</li>'; }).join('') || '<li>Ninguna brecha relevante</li>';
+    el('disclaimer').textContent = (r.meta && r.meta.disclaimer) || 'Informe preliminar generado por IA. Requiere revisión humana.';
+    return true;
+  }
+
+  async function load() {
+    try {
+      var res = await fetch('/api/postventa/tickets/' + encodeURIComponent(shortId) + '/report');
+      var data = await res.json();
+      if (!res.ok || !data.ok) {
+        hide(el('loader'));
+        show(el('errorBox'));
+        el('errorText').textContent = data.message || 'Solicitud no encontrada.';
+        return;
+      }
+      var done = renderReport(data);
+      if (!done && !pollTimer) {
+        pollTimer = setInterval(load, 4000);
+      } else if (done && pollTimer) {
+        clearInterval(pollTimer);
+        pollTimer = null;
+      }
+    } catch (e) {
+      hide(el('loader'));
+      show(el('errorBox'));
+      el('errorText').textContent = 'Error de conexión.';
+    }
+  }
+
+  if (!shortId) {
+    hide(el('loader'));
+    show(el('errorBox'));
+    el('errorText').textContent = 'Falta número de solicitud en la URL.';
+  } else {
+    load();
+  }
+})();
+  </script>
+</body>
+</html>

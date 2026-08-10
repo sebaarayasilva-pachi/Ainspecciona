@@ -188,6 +188,95 @@
     }
     .heroCtaGhost:hover { border-color: rgba(56, 189, 248, 0.8); color: #dbeafe; }
     .heroCtaRow { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
+    /* Huincha logos (home): Alianzas / Media Partners / Clientes */
+    .logo-marquee-section {
+      background: linear-gradient(180deg, #050a18 0%, #070f1f 50%, #050a18 100%);
+      border-top: 1px solid rgba(30, 58, 95, 0.45);
+      border-bottom: 1px solid rgba(30, 58, 95, 0.45);
+      padding: 22px 0 26px;
+      overflow: hidden;
+    }
+    .logo-marquee-section .logo-marquee-inner {
+      max-width: 1700px;
+      margin: 0 auto;
+      padding: 0 48px;
+      box-sizing: border-box;
+    }
+    .logo-marquee-label {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(226, 232, 240, 0.75);
+      margin: 0 0 14px;
+      padding-left: 2px;
+    }
+    .logo-marquee-viewport {
+      overflow: hidden;
+      mask-image: linear-gradient(90deg, transparent, #000 2%, #000 98%, transparent);
+      -webkit-mask-image: linear-gradient(90deg, transparent, #000 2%, #000 98%, transparent);
+    }
+    .logo-marquee-track {
+      display: flex;
+      width: max-content;
+      will-change: transform;
+      animation: logoMarqueeScroll 90s linear infinite;
+    }
+    @keyframes logoMarqueeScroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .logo-marquee-track { animation: none !important; }
+    }
+    .logo-marquee-group {
+      display: flex;
+      align-items: center;
+      gap: clamp(10px, 1.8vw, 28px);
+      padding-right: clamp(10px, 1.8vw, 28px);
+      flex-shrink: 0;
+    }
+    .logo-marquee-item {
+      flex-shrink: 0;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.88;
+      transition: opacity 0.2s ease;
+    }
+    .logo-marquee-item:hover { opacity: 1; }
+    .logo-marquee-item img {
+      height: 32px;
+      width: auto;
+      max-width: 160px;
+      object-fit: contain;
+    }
+    .logo-marquee-item--propertycheck {
+      height: 58px;
+    }
+    .logo-marquee-item--propertycheck img {
+      height: 54px;
+      max-width: 200px;
+      object-fit: contain;
+    }
+    .logo-marquee-item--citify {
+      height: 92px;
+    }
+    .logo-marquee-item--citify img {
+      height: 88px;
+      max-width: 480px;
+      object-fit: contain;
+    }
+    .logo-marquee-item svg {
+      height: 28px;
+      width: auto;
+      max-width: 130px;
+      display: block;
+    }
+    @media (max-width: 900px) {
+      .logo-marquee-section .logo-marquee-inner { padding: 0 24px; }
+    }
     .pill {
       display: inline-flex;
       gap: 8px;
@@ -245,6 +334,27 @@
       padding: 20px;
     }
     .trial-modal-overlay.open { display: flex; }
+    .trial-modal-overlay.sticky {
+      align-items: flex-start;
+      padding: 0;
+      background: rgba(2, 8, 23, 0.92);
+    }
+    .trial-modal-overlay.sticky .trial-modal {
+      width: 100%;
+      max-width: 760px;
+      margin: 0 auto;
+      min-height: 100vh;
+      max-height: none;
+      border-radius: 0;
+      border-left: none;
+      border-right: none;
+      padding: 28px 22px 40px;
+    }
+    .trial-modal-overlay.sticky .trial-btn-secondary { display: none; }
+    body.trial-sticky-lock {
+      overflow: hidden;
+      height: 100%;
+    }
     .trial-modal {
       width: min(760px, 100%);
       max-height: calc(100vh - 40px);
@@ -319,7 +429,7 @@
       padding: 0 48px;
       box-sizing: border-box;
       display: grid;
-      grid-template-columns: 1.2fr 1fr 1fr 1fr;
+      grid-template-columns: 1.2fr 1fr 1fr minmax(160px, 1.35fr);
       gap: 24px;
       align-items: start;
     }
@@ -331,9 +441,26 @@
     .footerBrand img { height: 36px; width: auto; object-fit: contain; }
     .footerTitle { font-weight: 800; font-size: 16px; }
     .footerDesc { color: #94a3b8; font-size: 14px; line-height: 1.5; }
+    .footerCol { min-width: 0; }
     .footerCol h4 { margin: 0 0 10px; font-size: 14px; }
     .footerCol a { color: #cbd5e1; text-decoration: none; font-size: 14px; display: block; margin-bottom: 8px; }
     .footerCol a:hover { color: #ffffff; }
+    .footerPartners {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: flex-start;
+      min-width: 0;
+    }
+    .footerPartners img {
+      display: block;
+      width: auto;
+      max-width: 100%;
+      height: auto;
+      max-height: 92px;
+      object-fit: contain;
+      object-position: left center;
+    }
     .footerCta {
       display: inline-flex;
       align-items: center;
@@ -717,8 +844,7 @@
           <li>Acelera la decisión y cierra más rápido</li>
         </ul>
         <div class="heroCtaRow">
-          <a class="heroCta" href="/inspeccionar">Realizar una inspección</a>
-          <button class="heroCtaGhost" id="openTrialModalBtn" type="button">Probar Free Trial Business</button>
+          <button class="heroCta" id="openTrialModalBtn" type="button">Probar Free Trial</button>
         </div>
       </div>
       <div class="heroVideoWrap">
@@ -814,6 +940,71 @@
         .ai-badge { top:-2px !important; }
       }
     </style>
+  </section>
+
+  <!-- Logos ecosistema proptech: /public/assets/Logos Banner/Alianzas/ (espacios en URL como %20) -->
+  <section class="logo-marquee-section" aria-label="Ecosistema Proptech">
+    <div class="logo-marquee-inner">
+      <p class="logo-marquee-label">Ecosistema Proptech</p>
+      <div class="logo-marquee-viewport">
+        <div class="logo-marquee-track">
+          <div class="logo-marquee-group">
+            <span class="logo-marquee-item logo-marquee-item--propertycheck"><img src="/assets/Logos%20Banner/Alianzas/logo%20propertycheck-white.png" alt="PropertyCheck" loading="lazy" decoding="async" height="54" /></span>
+            <span class="logo-marquee-item logo-marquee-item--citify"><img src="/assets/Logos%20Banner/Alianzas/logo-citify-white.png" alt="Citify" loading="lazy" decoding="async" height="88" /></span>
+            <span class="logo-marquee-item"><img src="/assets/Logos%20Banner/Alianzas/logo-comos.png" alt="Comos" loading="lazy" decoding="async" height="32" /></span>
+            <span class="logo-marquee-item"><img src="/assets/Logos%20Banner/Alianzas/logo-propicheck-white.png" alt="Propicheck" loading="lazy" decoding="async" height="32" /></span>
+            <span class="logo-marquee-item"><img src="/assets/Logos%20Banner/Alianzas/logo-t4angible-white.png" alt="T4angible" loading="lazy" decoding="async" height="32" /></span>
+            <span class="logo-marquee-item logo-marquee-item--propertycheck"><img src="/assets/Logos%20Banner/Alianzas/logo%20propertycheck-white.png" alt="" loading="lazy" decoding="async" height="54" aria-hidden="true" /></span>
+            <span class="logo-marquee-item logo-marquee-item--citify"><img src="/assets/Logos%20Banner/Alianzas/logo-citify-white.png" alt="" loading="lazy" decoding="async" height="88" aria-hidden="true" /></span>
+            <span class="logo-marquee-item"><img src="/assets/Logos%20Banner/Alianzas/logo-comos.png" alt="" loading="lazy" decoding="async" height="32" aria-hidden="true" /></span>
+            <span class="logo-marquee-item"><img src="/assets/Logos%20Banner/Alianzas/logo-propicheck-white.png" alt="" loading="lazy" decoding="async" height="32" aria-hidden="true" /></span>
+            <span class="logo-marquee-item"><img src="/assets/Logos%20Banner/Alianzas/logo-t4angible-white.png" alt="" loading="lazy" decoding="async" height="32" aria-hidden="true" /></span>
+            <span class="logo-marquee-item logo-marquee-item--propertycheck"><img src="/assets/Logos%20Banner/Alianzas/logo%20propertycheck-white.png" alt="" loading="lazy" decoding="async" height="54" aria-hidden="true" /></span>
+            <span class="logo-marquee-item logo-marquee-item--citify"><img src="/assets/Logos%20Banner/Alianzas/logo-citify-white.png" alt="" loading="lazy" decoding="async" height="88" aria-hidden="true" /></span>
+            <span class="logo-marquee-item"><img src="/assets/Logos%20Banner/Alianzas/logo-comos.png" alt="" loading="lazy" decoding="async" height="32" aria-hidden="true" /></span>
+            <span class="logo-marquee-item"><img src="/assets/Logos%20Banner/Alianzas/logo-propicheck-white.png" alt="" loading="lazy" decoding="async" height="32" aria-hidden="true" /></span>
+            <span class="logo-marquee-item"><img src="/assets/Logos%20Banner/Alianzas/logo-t4angible-white.png" alt="" loading="lazy" decoding="async" height="32" aria-hidden="true" /></span>
+            <span class="logo-marquee-item logo-marquee-item--propertycheck"><img src="/assets/Logos%20Banner/Alianzas/logo%20propertycheck-white.png" alt="" loading="lazy" decoding="async" height="54" aria-hidden="true" /></span>
+            <span class="logo-marquee-item logo-marquee-item--citify"><img src="/assets/Logos%20Banner/Alianzas/logo-citify-white.png" alt="" loading="lazy" decoding="async" height="88" aria-hidden="true" /></span>
+            <span class="logo-marquee-item"><img src="/assets/Logos%20Banner/Alianzas/logo-comos.png" alt="" loading="lazy" decoding="async" height="32" aria-hidden="true" /></span>
+            <span class="logo-marquee-item"><img src="/assets/Logos%20Banner/Alianzas/logo-propicheck-white.png" alt="" loading="lazy" decoding="async" height="32" aria-hidden="true" /></span>
+            <span class="logo-marquee-item"><img src="/assets/Logos%20Banner/Alianzas/logo-t4angible-white.png" alt="" loading="lazy" decoding="async" height="32" aria-hidden="true" /></span>
+            <span class="logo-marquee-item logo-marquee-item--propertycheck"><img src="/assets/Logos%20Banner/Alianzas/logo%20propertycheck-white.png" alt="" loading="lazy" decoding="async" height="54" aria-hidden="true" /></span>
+            <span class="logo-marquee-item logo-marquee-item--citify"><img src="/assets/Logos%20Banner/Alianzas/logo-citify-white.png" alt="" loading="lazy" decoding="async" height="88" aria-hidden="true" /></span>
+            <span class="logo-marquee-item"><img src="/assets/Logos%20Banner/Alianzas/logo-comos.png" alt="" loading="lazy" decoding="async" height="32" aria-hidden="true" /></span>
+            <span class="logo-marquee-item"><img src="/assets/Logos%20Banner/Alianzas/logo-propicheck-white.png" alt="" loading="lazy" decoding="async" height="32" aria-hidden="true" /></span>
+            <span class="logo-marquee-item"><img src="/assets/Logos%20Banner/Alianzas/logo-t4angible-white.png" alt="" loading="lazy" decoding="async" height="32" aria-hidden="true" /></span>
+          </div>
+          <div class="logo-marquee-group" aria-hidden="true">
+            <span class="logo-marquee-item logo-marquee-item--propertycheck"><img src="/assets/Logos%20Banner/Alianzas/logo%20propertycheck-white.png" alt="" height="54" decoding="async" /></span>
+            <span class="logo-marquee-item logo-marquee-item--citify"><img src="/assets/Logos%20Banner/Alianzas/logo-citify-white.png" alt="" height="88" decoding="async" /></span>
+            <span class="logo-marquee-item"><img src="/assets/Logos%20Banner/Alianzas/logo-comos.png" alt="" height="32" decoding="async" /></span>
+            <span class="logo-marquee-item"><img src="/assets/Logos%20Banner/Alianzas/logo-propicheck-white.png" alt="" height="32" decoding="async" /></span>
+            <span class="logo-marquee-item"><img src="/assets/Logos%20Banner/Alianzas/logo-t4angible-white.png" alt="" height="32" decoding="async" /></span>
+            <span class="logo-marquee-item logo-marquee-item--propertycheck"><img src="/assets/Logos%20Banner/Alianzas/logo%20propertycheck-white.png" alt="" height="54" decoding="async" /></span>
+            <span class="logo-marquee-item logo-marquee-item--citify"><img src="/assets/Logos%20Banner/Alianzas/logo-citify-white.png" alt="" height="88" decoding="async" /></span>
+            <span class="logo-marquee-item"><img src="/assets/Logos%20Banner/Alianzas/logo-comos.png" alt="" height="32" decoding="async" /></span>
+            <span class="logo-marquee-item"><img src="/assets/Logos%20Banner/Alianzas/logo-propicheck-white.png" alt="" height="32" decoding="async" /></span>
+            <span class="logo-marquee-item"><img src="/assets/Logos%20Banner/Alianzas/logo-t4angible-white.png" alt="" height="32" decoding="async" /></span>
+            <span class="logo-marquee-item logo-marquee-item--propertycheck"><img src="/assets/Logos%20Banner/Alianzas/logo%20propertycheck-white.png" alt="" height="54" decoding="async" /></span>
+            <span class="logo-marquee-item logo-marquee-item--citify"><img src="/assets/Logos%20Banner/Alianzas/logo-citify-white.png" alt="" height="88" decoding="async" /></span>
+            <span class="logo-marquee-item"><img src="/assets/Logos%20Banner/Alianzas/logo-comos.png" alt="" height="32" decoding="async" /></span>
+            <span class="logo-marquee-item"><img src="/assets/Logos%20Banner/Alianzas/logo-propicheck-white.png" alt="" height="32" decoding="async" /></span>
+            <span class="logo-marquee-item"><img src="/assets/Logos%20Banner/Alianzas/logo-t4angible-white.png" alt="" height="32" decoding="async" /></span>
+            <span class="logo-marquee-item logo-marquee-item--propertycheck"><img src="/assets/Logos%20Banner/Alianzas/logo%20propertycheck-white.png" alt="" height="54" decoding="async" /></span>
+            <span class="logo-marquee-item logo-marquee-item--citify"><img src="/assets/Logos%20Banner/Alianzas/logo-citify-white.png" alt="" height="88" decoding="async" /></span>
+            <span class="logo-marquee-item"><img src="/assets/Logos%20Banner/Alianzas/logo-comos.png" alt="" height="32" decoding="async" /></span>
+            <span class="logo-marquee-item"><img src="/assets/Logos%20Banner/Alianzas/logo-propicheck-white.png" alt="" height="32" decoding="async" /></span>
+            <span class="logo-marquee-item"><img src="/assets/Logos%20Banner/Alianzas/logo-t4angible-white.png" alt="" height="32" decoding="async" /></span>
+            <span class="logo-marquee-item logo-marquee-item--propertycheck"><img src="/assets/Logos%20Banner/Alianzas/logo%20propertycheck-white.png" alt="" height="54" decoding="async" /></span>
+            <span class="logo-marquee-item logo-marquee-item--citify"><img src="/assets/Logos%20Banner/Alianzas/logo-citify-white.png" alt="" height="88" decoding="async" /></span>
+            <span class="logo-marquee-item"><img src="/assets/Logos%20Banner/Alianzas/logo-comos.png" alt="" height="32" decoding="async" /></span>
+            <span class="logo-marquee-item"><img src="/assets/Logos%20Banner/Alianzas/logo-propicheck-white.png" alt="" height="32" decoding="async" /></span>
+            <span class="logo-marquee-item"><img src="/assets/Logos%20Banner/Alianzas/logo-t4angible-white.png" alt="" height="32" decoding="async" /></span>
+          </div>
+        </div>
+      </div>
+    </div>
   </section>
 
   <section id="report">
@@ -1136,13 +1327,13 @@
         Empresas del ecosistema inmobiliario que colaboran con Ainspecciona.
       </text>
       <rect x="160" y="170" width="220" height="70" rx="18" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.08)"/>
-      <image href="/assets/LOGO_COMUNIDADFELIZ.png" x="185" y="185" width="170" height="40" filter="url(#monoWhite_alianzas)" opacity="0.75"/>
+      <text x="270" y="212" text-anchor="middle" fill="rgba(255,255,255,0.88)" font-family="Inter, sans-serif" font-size="15" font-weight="600">Comunidad Feliz</text>
       <rect x="410" y="170" width="220" height="70" rx="18" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.08)"/>
-      <image href="/assets/LOGO_PROPITEQ.png" x="435" y="185" width="170" height="40" filter="url(#monoWhite_alianzas)" opacity="0.75"/>
+      <text x="520" y="212" text-anchor="middle" fill="rgba(255,255,255,0.88)" font-family="Inter, sans-serif" font-size="15" font-weight="600">Propiteq</text>
       <rect x="660" y="170" width="220" height="70" rx="18" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.08)"/>
-      <image href="/assets/LOGO_HOUSEPRICING.png" x="685" y="185" width="170" height="40" filter="url(#monoWhite_alianzas)" opacity="0.75"/>
+      <text x="770" y="212" text-anchor="middle" fill="rgba(255,255,255,0.88)" font-family="Inter, sans-serif" font-size="15" font-weight="600">HousePricing</text>
       <rect x="910" y="170" width="220" height="70" rx="18" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.08)"/>
-      <image href="/assets/LOGO_ACODEF.png" x="935" y="180" width="170" height="45" filter="url(#monoWhite_alianzas)" opacity="0.75"/>
+      <text x="1020" y="212" text-anchor="middle" fill="rgba(255,255,255,0.88)" font-family="Inter, sans-serif" font-size="15" font-weight="600">ACODEF</text>
       <text x="160" y="265" fill="rgba(255,255,255,0.4)" font-family="Inter, sans-serif" font-size="12">
         Acuerdos de colaboración tecnológica y comercial.
       </text>
@@ -1236,6 +1427,10 @@
         <a href="/contacto.html">Contacto</a>
         <a href="/precios">Precios</a>
       </div>
+      <div class="footerCol footerPartners" aria-label="Referencias técnicas">
+        <h4>Referencias técnicas</h4>
+        <img src="/assets/footer-referencias-tecnicas.png" alt="Referencias técnicas (NCH, CDT, CChC, ICC)" loading="lazy" decoding="async" />
+      </div>
     </div>
     <div class="footerBottom">
       <div>© 2026 Ainspecciona. Todos los derechos reservados.</div>
@@ -1244,8 +1439,8 @@
 
   <div class="trial-modal-overlay" id="trialModal" aria-hidden="true">
     <div class="trial-modal" role="dialog" aria-labelledby="trialModalTitle">
-      <h3 id="trialModalTitle">Iniciar Free Trial Business (14 días)</h3>
-      <p class="desc">Completa tus datos para validar elegibilidad. Luego podrás registrar tarjeta en MercadoPago sin cobro inmediato.</p>
+      <h3 id="trialModalTitle">Inspección gratis con código</h3>
+      <p class="desc">Regístrate con un código promo y te dejamos 1 inspección. Sin tarjeta ni cobro automático. Para más, entra al dashboard y compra créditos.</p>
       <form id="trialForm">
         <div class="trial-grid">
           <div class="full">
@@ -1269,18 +1464,25 @@
             <input id="trialApellido" type="text" placeholder="Apellido" required />
           </div>
           <div class="full">
-            <label for="trialEmail">Email corporativo *</label>
-            <input id="trialEmail" type="email" placeholder="contacto@tuempresa.cl" required />
+            <label for="trialEmail">Email *</label>
+            <input id="trialEmail" type="email" placeholder="tu@correo.cl" required />
           </div>
           <div class="full">
-            <label for="trialPartnerCode">Código de referido (opcional)</label>
-            <input id="trialPartnerCode" type="text" placeholder="Ej: si un influencer o alianza te compartió un código" autocomplete="off" />
-            <span class="fieldHint" style="font-size:12px;color:#64748b;">Con código válido: 30 días de prueba y 1 inspección extra.</span>
+            <label for="trialPartnerCode">Código promo o de referido *</label>
+            <input id="trialPartnerCode" type="text" placeholder="Ej. IRE2026 o tu código Rewards" autocomplete="off" required />
+            <span class="fieldHint" style="font-size:12px;color:#64748b;">Promo = 1 crédito. Código de referido = 2 créditos para ti; el invitante recibe +1.</span>
+          </div>
+          <div>
+            <label for="trialPassword">Clave de acceso *</label>
+            <input id="trialPassword" type="password" placeholder="Mín. 8, 1 mayúscula y 1 número" required minlength="8" autocomplete="new-password" />
+          </div>
+          <div>
+            <label for="trialPasswordRepeat">Repetir clave *</label>
+            <input id="trialPasswordRepeat" type="password" placeholder="Repite tu clave" required minlength="8" autocomplete="new-password" />
           </div>
         </div>
-        <p class="trial-note">No se efectuará cobro hoy. El cobro automático de $39.990 se ejecuta al finalizar el período de prueba si no cancelas antes (14 días por defecto; 30 días con código partner).</p>
         <div class="trial-btn-row">
-          <button class="trial-btn-primary" id="trialSubmitBtn" type="submit">Continuar con Free Trial</button>
+          <button class="trial-btn-primary" id="trialSubmitBtn" type="submit">Obtener inspección gratis</button>
           <button class="trial-btn-secondary" id="closeTrialModalBtn" type="button">Cancelar</button>
         </div>
         <div class="trial-error" id="trialError"></div>
@@ -1308,19 +1510,19 @@
 
   <div class="login-modal-overlay" id="loginModal" aria-hidden="true">
     <div class="login-modal" role="dialog" aria-labelledby="loginModalTitle">
-      <h3 id="loginModalTitle">Ingreso corredores</h3>
+      <h3 id="loginModalTitle">Ingresar a Ainspecciona</h3>
+      <p class="muted" style="font-size:13px; margin:-4px 0 14px; line-height:1.4;">Un acceso para todos tus productos.</p>
       <form id="tenantLoginForm">
         <div class="formGroup">
           <label for="tenantEmail">Email o RUT</label>
-          <input id="tenantEmail" type="text" placeholder="tu@corredora.cl o RUT (ej. 12.345.678-9)" required autocomplete="username" />
+          <input id="tenantEmail" type="text" placeholder="tú@empresa.com o RUT" required autocomplete="username" />
         </div>
         <div class="formGroup">
           <label for="tenantPass">Clave</label>
           <input id="tenantPass" type="password" placeholder="Tu clave" required />
         </div>
         <div class="note" id="loginNote"></div>
-        <p class="muted" style="font-size:12px; margin-top:8px;">¿Primera vez? Crea tu cuenta <a href="#" id="openRegisterModal" style="color:#35D07F;">acá</a>.</p>
-        <p class="muted" style="font-size:12px; margin-top:4px;">¿Olvidaste tu clave? <a href="#" id="openForgotModal" style="color:#35D07F;">Recuperar cuenta</a></p>
+        <p class="muted" style="font-size:12px; margin-top:8px;">¿Olvidaste tu clave? <a href="#" id="openForgotModal" style="color:#35D07F;">Recuperar cuenta</a></p>
         <div class="btnRow">
           <button type="submit">Entrar</button>
           <button type="button" id="loginModalClose">Cancelar</button>
@@ -1374,34 +1576,65 @@
     const trialSubmitBtn = document.getElementById("trialSubmitBtn");
     const trialError = document.getElementById("trialError");
 
-    function openTrialModal() {
+    let trialStickyMode = false;
+    function openTrialModal(opts) {
       if (!trialModal) return;
+      const sticky = !!(opts && opts.sticky);
+      trialStickyMode = sticky;
+      trialModal.classList.toggle("sticky", sticky);
       trialModal.classList.add("open");
       trialModal.setAttribute("aria-hidden", "false");
+      document.body.classList.toggle("trial-sticky-lock", sticky);
       if (trialError) trialError.textContent = "";
     }
     function closeTrialModal() {
-      if (!trialModal) return;
-      trialModal.classList.remove("open");
+      if (!trialModal || trialStickyMode) return;
+      trialModal.classList.remove("open", "sticky");
       trialModal.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("trial-sticky-lock");
       if (trialError) trialError.textContent = "";
     }
-    if (openTrialModalBtn) openTrialModalBtn.addEventListener("click", openTrialModal);
+    if (openTrialModalBtn) openTrialModalBtn.addEventListener("click", () => openTrialModal());
     if (closeTrialModalBtn) closeTrialModalBtn.addEventListener("click", closeTrialModal);
     if (trialModal) {
       trialModal.addEventListener("click", (e) => {
-        if (e.target === trialModal) closeTrialModal();
+        if (e.target === trialModal && !trialStickyMode) closeTrialModal();
       });
     }
+    // Prefill código desde ?ref= (sticky) o abrir modal desde ?trial=1 (Precios CTA)
+    (function trialPartnerCodePrefill() {
+      try {
+        const q = new URLSearchParams(window.location.search);
+        const ref = q.get("ref");
+        const trial = q.get("trial") === "1";
+        if (!ref && !trial) return;
+        const input = document.getElementById("trialPartnerCode");
+        if (ref && input && !input.value) input.value = ref;
+        openTrialModal({ sticky: !!ref });
+        setTimeout(() => {
+          try {
+            const first = document.getElementById(ref ? "trialRazonSocial" : "trialPartnerCode");
+            if (first) first.focus();
+          } catch (_) {}
+        }, 50);
+      } catch (_) {}
+    })();
+
     if (trialForm) {
       trialForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         if (trialError) trialError.textContent = "";
         if (trialSubmitBtn) {
           trialSubmitBtn.disabled = true;
-          trialSubmitBtn.textContent = "Validando elegibilidad...";
+          trialSubmitBtn.textContent = "Canjeando...";
         }
         try {
+          const promoCode = (document.getElementById("trialPartnerCode")?.value || "").trim();
+          const password = document.getElementById("trialPassword")?.value || "";
+          const passwordRepeat = document.getElementById("trialPasswordRepeat")?.value || "";
+          if (!promoCode) throw new Error("Ingresa el código promo o de referido.");
+          if (!password) throw new Error("Crea una clave de acceso.");
+          if (password !== passwordRepeat) throw new Error("Las claves no coinciden.");
           const body = {
             razonSocial: document.getElementById("trialRazonSocial").value.trim(),
             rut: document.getElementById("trialRut").value.trim(),
@@ -1409,9 +1642,10 @@
             telefono: document.getElementById("trialTelefono").value.trim() || null,
             contactNombre: document.getElementById("trialNombre").value.trim(),
             contactApellido: document.getElementById("trialApellido").value.trim(),
-            startTrial: true
+            promoCode,
+            password
           };
-          const res = await fetch("/api/business/activate", {
+          const res = await fetch("/api/promo/redeem", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(body),
@@ -1419,34 +1653,24 @@
           });
           const data = await res.json().catch(() => ({}));
           if (!res.ok) {
-            if (res.status === 409 && data?.error === "TRIAL_NOT_ELIGIBLE") {
-              const reasonMap = {
-                STARTER_HISTORY_BLOCK: "Trial bloqueado: existe historial Starter para esta empresa.",
-                CORPORATE_EMAIL_REQUIRED: "Trial bloqueado: usa un correo corporativo (no personal).",
-                TRIAL_KEY_ALREADY_USED: "Trial bloqueado: la combinación RUT + dominio ya usó un trial."
-              };
-              throw new Error(reasonMap[data?.reason] || data?.message || "El free trial no está disponible para esta cuenta.");
+            throw new Error((data && data.message) || (data && data.error) || "No fue posible canjear el código.");
+          }
+          const token = data && data.token;
+          if (token) {
+            try { localStorage.setItem("tenant_session", token); } catch (_) {}
+            if (data.tenantId) {
+              try { localStorage.setItem("tenant_id", data.tenantId); } catch (_) {}
             }
-            throw new Error(data?.message || data?.error || "No fue posible iniciar el free trial.");
+            window.location.replace("/tenant?t=" + encodeURIComponent(token));
+            return;
           }
-          if (!data?.trialSetup || !data?.tenantId) {
-            throw new Error("No fue posible preparar el free trial. Intenta nuevamente.");
-          }
-          sessionStorage.setItem("trial_checkout_tenant_id", data.tenantId);
-          sessionStorage.setItem("trial_checkout_payer_email", body.email);
-          const partnerCode = (document.getElementById("trialPartnerCode")?.value || "").trim();
-          sessionStorage.setItem("trial_checkout_context", JSON.stringify({
-            durationDays: data?.trial?.durationDays || 14,
-            includedInspections: data?.trial?.realInspectionsIncluded ?? 1,
-            partnerCode: partnerCode || undefined
-          }));
-          window.location.href = "/business/trial/pago";
+          window.location.replace((data && data.redirectUrl) || "/tenant");
         } catch (err) {
-          if (trialError) trialError.textContent = err?.message || "Error al iniciar el trial.";
+          if (trialError) trialError.textContent = (err && err.message) ? err.message : "Error al canjear el código.";
         } finally {
           if (trialSubmitBtn) {
             trialSubmitBtn.disabled = false;
-            trialSubmitBtn.textContent = "Continuar con Free Trial";
+            trialSubmitBtn.textContent = "Obtener inspección gratis";
           }
         }
       });
@@ -1470,11 +1694,15 @@
         forgotModal.setAttribute("aria-hidden", "false");
       });
     }
+    function closeForgotModal() {
+      if (!forgotModal) return;
+      forgotModal.classList.remove("open");
+      forgotModal.setAttribute("aria-hidden", "true");
+      if (forgotNote) forgotNote.textContent = "";
+    }
     if (forgotModalClose && forgotModal) {
       forgotModalClose.addEventListener("click", () => {
-        forgotModal.classList.remove("open");
-        forgotModal.setAttribute("aria-hidden", "true");
-        if (forgotNote) forgotNote.textContent = "";
+        closeForgotModal();
       });
     }
     if (forgotForm) {
@@ -1506,6 +1734,17 @@
               forgotNote.style.color = "#35D07F";
             }
           }
+          if (res.ok && data.emailSent === true) {
+            closeForgotModal();
+            if (forgotForm) forgotForm.reset();
+            if (loginModal) {
+              loginModal.classList.add("open");
+              loginModal.setAttribute("aria-hidden", "false");
+            }
+            if (loginNote) {
+              loginNote.textContent = "Te enviamos una clave temporal al correo. Ingrésala para continuar.";
+            }
+          }
         } catch (err) {
           if (forgotNote) {
             forgotNote.textContent = "Error de conexión. Intenta de nuevo más tarde.";
@@ -1521,28 +1760,29 @@
         loginModal.setAttribute("aria-hidden", "false");
       });
     }
+    // Desde /precios → comprar créditos sin sesión: ?login=1&next=...
+    (function openLoginFromQuery() {
+      try {
+        const q = new URLSearchParams(window.location.search);
+        if (q.get("login") !== "1" || !loginModal) return;
+        loginModal.classList.add("open");
+        loginModal.setAttribute("aria-hidden", "false");
+        if (loginNote) {
+          loginNote.textContent = "Ingresa para comprar el pack de créditos.";
+          loginNote.style.color = "#94a3b8";
+        }
+      } catch (_) {}
+    })();
     if (loginModalClose && loginModal) {
       loginModalClose.addEventListener("click", () => {
         loginModal.classList.remove("open");
         loginModal.setAttribute("aria-hidden", "true");
       });
     }
-    const openRegisterModal = document.getElementById("openRegisterModal");
     const registerModal = document.getElementById("registerModal");
     const registerModalClose = document.getElementById("registerModalClose");
     const registerForm = document.getElementById("tenantRegisterForm");
     const registerNote = document.getElementById("registerNote");
-    if (openRegisterModal && registerModal) {
-      openRegisterModal.addEventListener("click", (e) => {
-        e.preventDefault();
-        if (loginModal) {
-          loginModal.classList.remove("open");
-          loginModal.setAttribute("aria-hidden", "true");
-        }
-        registerModal.classList.add("open");
-        registerModal.setAttribute("aria-hidden", "false");
-      });
-    }
     if (registerModalClose && registerModal) {
       registerModalClose.addEventListener("click", () => {
         registerModal.classList.remove("open");
@@ -1635,8 +1875,8 @@
             return;
           }
           let msg = "Error al crear cuenta. Intenta más tarde.";
-          if (data?.error === "EMAIL_ALREADY_EXISTS") msg = "Ya existe una cuenta con ese email.";
-          else if (data?.error === "PASSWORD_INVALID") msg = "Clave: " + (data.message || "8 caracteres, 1 mayúscula, 1 número.");
+          if (data && data.error === "EMAIL_ALREADY_EXISTS") msg = "Ya existe una cuenta con ese email.";
+          else if (data && data.error === "PASSWORD_INVALID") msg = "Clave: " + (data.message || "8 caracteres, 1 mayúscula, 1 número.");
           if (registerNote) registerNote.textContent = msg;
         } catch (err) {
           if (registerNote) registerNote.textContent = "Error de conexión. Intenta más tarde.";
@@ -1667,35 +1907,39 @@
           const debug = new URLSearchParams(window.location.search).get("debug") === "1";
           const headers = { "Content-Type": "application/json" };
           if (debug) headers["X-Debug"] = "1";
-          const res = await fetch("/api/tenant/login", {
+
+          // Único acceso: login de plataforma → /app
+          const res = await fetch("/api/auth/login", {
             method: "POST",
             headers,
-            body: JSON.stringify({ email: identifier, rut: identifier, password }),
+            body: JSON.stringify({ email: identifier, identifier, rut: identifier, password }),
             credentials: "include"
           });
           if (res.ok) {
-            const data = await res.json();
-            const token = data.token;
-            loginModal.classList.remove("open");
-            if (token) {
-              localStorage.setItem("tenant_session", token);
-              window.location.replace("/tenant?t=" + encodeURIComponent(token));
-            } else {
-              window.location.replace("/tenant");
+            const data = await res.json().catch(() => ({}));
+            if (data && data.ok && data.token) {
+              try { sessionStorage.setItem("platform_session", data.token); } catch (_) {}
+              loginModal.classList.remove("open");
+              let nextPath = "/app";
+              try {
+                const n = new URLSearchParams(window.location.search).get("next");
+                if (n && n.startsWith("/") && !n.startsWith("//")) nextPath = n;
+              } catch (_) {}
+              window.location.replace(nextPath);
+              return;
             }
-            return;
           }
           let msg = "Email/RUT o clave incorrectos. Si no recuerdas la clave, usa «Recuperar cuenta».";
           try {
             const data = await res.json();
-            if (data?.error === "PASSWORD_NOT_SET") {
-              msg = "Clave no configurada para esta corredora. Un administrador debe definir la clave en el panel Admin.";
-            } else if (data?.error === "EMAIL_AND_PASSWORD_REQUIRED") {
-              msg = "Completa email y clave.";
-            } else if (data?.error === "DATABASE_UNAVAILABLE") {
-              msg = data?.hint ? "Servicio no disponible: " + data.hint : "Servicio temporalmente no disponible. Intenta más tarde.";
-            } else if (data?.error === "LOGIN_FAILED" || res.status >= 500) {
-              msg = data?.message || "Error del servidor. Intenta más tarde.";
+            if (data && data.error === "MISSING_FIELDS") {
+              msg = "Completa email/RUT y clave.";
+            } else if (data && data.error === "DATABASE_UNAVAILABLE") {
+              msg = "Servicio temporalmente no disponible. Intenta más tarde.";
+            } else if (data && data.message) {
+              msg = data.message;
+            } else if (res.status >= 500) {
+              msg = "Error del servidor. Intenta más tarde.";
             }
           } catch {}
           if (loginNote) loginNote.textContent = msg;
@@ -1753,6 +1997,7 @@
       poster.addEventListener('click', function(e) { if (e.target === playBtn || (playBtn && playBtn.contains(e.target))) return; hidePosterAndPlay(); });
     })();
   </script>
+  <script src="/assets/elevenlabs-home.js" defer></script>
   <script src="/assets/tracker.js" defer></script>
 </body>
 </html>

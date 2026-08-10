@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Postventa · Prueba de voz (Plan C)</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --card: #131c2e;
+      --border: #243049;
+      --text: #e8edf6;
+      --muted: #94a3b8;
+      --accent: #4f8cff;
+      --accent-2: #22c55e;
+      --danger: #f87171;
+      --warn: #fbbf24;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: radial-gradient(1200px 600px at 50% -10%, #16233d, var(--bg));
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      width: 100%;
+      max-width: 620px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 26px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+    }
+    h1 { font-size: 20px; margin: 0 0 4px; }
+    h2 { font-size: 13px; margin: 24px 0 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .sub { color: var(--muted); font-size: 13px; margin: 0 0 18px; }
+    .layer-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--accent-2);
+      background: rgba(34, 197, 94, 0.12);
+      border: 1px solid rgba(34, 197, 94, 0.35);
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin-bottom: 14px;
+    }
+    label { display: block; font-size: 13px; color: var(--muted); margin: 14px 0 6px; }
+    textarea, select {
+      width: 100%;
+      background: #0e1626;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 11px 13px;
+      font-size: 14px;
+      font-family: inherit;
+      resize: vertical;
+    }
+    textarea { min-height: 60px; }
+    button {
+      background: linear-gradient(135deg, var(--accent), #6aa0ff);
+      color: #fff;
+      border: 0;
+      border-radius: 12px;
+      padding: 13px 18px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.08s ease, opacity 0.2s ease;
+    }
+    button:hover { transform: translateY(-1px); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    button.secondary { background: #1e293b; border: 1px solid var(--border); }
+    button.danger { background: linear-gradient(135deg, var(--danger), #ff8a8a); }
+    button.go { background: linear-gradient(135deg, var(--accent-2), #34d399); }
+    .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+    .btn-row button { flex: 1; min-width: 120px; }
+    .status { margin-top: 12px; font-size: 13px; color: var(--muted); min-height: 18px; }
+    .status.err { color: var(--danger); }
+    .status.ok { color: var(--accent-2); }
+    audio { width: 100%; margin-top: 14px; }
+    .meta { margin-top: 12px; font-size: 12px; color: var(--muted); line-height: 1.6; }
+    hr { border: 0; border-top: 1px solid var(--border); margin: 24px 0 0; }
+    code { color: #cbd5e1; }
+
+    /* Mic */
+    .mic-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; margin: 10px 0 4px; }
+    .mic-btn {
+      width: 104px; height: 104px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #6aa0ff);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 40px; border: 0; color: #fff; cursor: pointer;
+      box-shadow: 0 10px 30px rgba(79, 140, 255, 0.4);
+      transition: transform 0.1s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+    .mic-btn:active { transform: scale(0.96); }
+    .mic-btn.listening { background: linear-gradient(135deg, var(--danger), #ff8a8a); animation: pulse 1.2s infinite; }
+    .mic-btn.speaking { background: linear-gradient(135deg, var(--accent-2), #34d399); }
+    .mic-btn.thinking { background: #475569; cursor: wait; }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.5); }
+      70% { box-shadow: 0 0 0 18px rgba(248, 113, 113, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0); }
+    }
+    .mic-hint { font-size: 13px; color: var(--muted); text-align: center; }
+    .toggle { display: flex; align-items: center; gap: 8px; justify-content: center; margin-top: 6px; font-size: 12px; color: var(--muted); }
+
+    /* Case state panel */
+    .case-panel {
+      margin-top: 16px; border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px;
+      background: #0e1626; display: none;
+    }
+    .case-panel.show { display: block; }
+    .case-row { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; padding: 3px 0; }
+    .case-row .k { color: var(--muted); }
+    .case-row .v { color: var(--text); font-weight: 600; text-align: right; }
+    .capture-cta { margin-top: 12px; display: none; }
+    .capture-cta.show { display: block; }
+    .capture-cta a {
+      display: block; text-align: center; text-decoration: none;
+      background: linear-gradient(135deg, var(--warn), #fcd34d); color: #1a1a1a;
+      padding: 13px; border-radius: 12px; font-weight: 700;
+    }
+
+    /* Chat */
+    .chat { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; max-height: 300px; overflow-y: auto; }
+    .bubble { padding: 10px 13px; border-radius: 14px; font-size: 14px; line-height: 1.45; max-width: 85%; }
+    .bubble.user { align-self: flex-end; background: var(--accent); color: #fff; border-bottom-right-radius: 4px; }
+    .bubble.assistant { align-self: flex-start; background: #0e1626; border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+    .bubble.partial { opacity: 0.55; font-style: italic; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <span class="layer-tag">Plan C · cliente de voz postventa</span>
+    <h1>Asistente de voz Postventa</h1>
+    <p class="sub">Cliente de voz propio (API ElevenLabs, sin widget). Llamada manos libres con flujo real: busca tu unidad, valida garantía, crea el ticket y te entrega el enlace para subir fotos.</p>
+
+    <!-- Llamada -->
+    <div class="mic-wrap">
+      <button id="mic" class="mic-btn" title="Micrófono">🎙️</button>
+      <div class="mic-hint" id="micHint">Pulsa “Llamar” para empezar</div>
+      <div class="toggle">
+        <input type="checkbox" id="bargeIn" />
+        <label for="bargeIn" style="margin:0;">Permitir interrumpir hablando (usa audífonos)</label>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button id="startCall" class="go">📞 Llamar</button>
+      <button id="endCall" class="danger" disabled>■ Colgar</button>
+    </div>
+    <div class="status" id="convStatus"></div>
+
+    <!-- Estado del caso -->
+    <div class="case-panel" id="casePanel">
+      <div class="case-row"><span class="k">Unidad</span><span class="v" id="csUnit">—</span></div>
+      <div class="case-row"><span class="k">Proyecto</span><span class="v" id="csProject">—</span></div>
+      <div class="case-row"><span class="k">Categoría</span><span class="v" id="csCategory">—</span></div>
+      <div class="case-row"><span class="k">Garantía</span><span class="v" id="csWarranty">—</span></div>
+      <div class="case-row"><span class="k">Ticket</span><span class="v" id="csTicket">—</span></div>
+      <div class="capture-cta" id="captureCta"><a id="captureLink" href="#" target="_blank" rel="noopener">📷 Subir fotos del problema</a></div>
+    </div>
+
+    <!-- Chat -->
+    <div class="chat" id="chat"></div>
+
+    <hr />
+
+    <!-- Capa 1: TTS suelto -->
+    <h2>Probar TTS suelto</h2>
+    <label for="text">Texto a leer</label>
+    <textarea id="text">Hola, soy la asistente de postventa de Ainspecciona. ¿En qué puedo ayudarte hoy?</textarea>
+    <label for="model">Modelo TTS</label>
+    <select id="model">
+      <option value="eleven_turbo_v2_5">eleven_turbo_v2_5 (rápido)</option>
+      <option value="eleven_multilingual_v2">eleven_multilingual_v2 (calidad)</option>
+      <option value="eleven_flash_v2_5">eleven_flash_v2_5</option>
+    </select>
+    <div class="btn-row">
+      <button id="play">▶ Reproducir</button>
+    </div>
+    <div class="status" id="status"></div>
+    <audio id="audio" controls preload="none"></audio>
+    <div class="meta">Voz: <code>Maya (LatAm)</code> · El audio se descarga completo antes de reproducir (sin entrecortar).</div>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const CONV_TTS_MODEL = 'eleven_turbo_v2_5';
+    const GREETING = 'Hola, soy la asistente de postventa de Ainspecciona. Para ayudarte, ¿me dices tu nombre?';
+
+    /* ---------- TTS + audio helpers ---------- */
+    async function fetchTts(text, modelId) {
+      const res = await fetch('/api/postventa/public/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, modelId })
+      });
+      if (!res.ok) {
+        let detail = '';
+        try { detail = JSON.stringify(await res.json()); } catch (e) {}
+        throw new Error('TTS ' + res.status + ' ' + detail);
+      }
+      return res.blob();
+    }
+
+    /* ---------- Capa 1: TTS suelto ---------- */
+    const statusEl = $('status');
+    const audioEl = $('audio');
+    const playBtn = $('play');
+    function setStatus(msg, kind) { statusEl.textContent = msg || ''; statusEl.className = 'status' + (kind ? ' ' + kind : ''); }
+
+    playBtn.addEventListener('click', async () => {
+      const text = $('text').value.trim();
+      const modelId = $('model').value;
+      if (!text) { setStatus('Escribe un texto.', 'err'); return; }
+      playBtn.disabled = true;
+      setStatus('Generando audio…');
+      const t0 = performance.now();
+      try {
+        const blob = await fetchTts(text, modelId);
+        const ms = Math.round(performance.now() - t0);
+        setStatus('Audio listo en ' + ms + ' ms (' + Math.round(blob.size / 1024) + ' KB).', 'ok');
+        const url = URL.createObjectURL(blob);
+        audioEl.src = url;
+        audioEl.onended = () => URL.revokeObjectURL(url);
+        audioEl.play().catch(() => {});
+      } catch (err) {
+        setStatus(err.message || String(err), 'err');
+      } finally {
+        playBtn.disabled = false;
+      }
+    });
+
+    /* ---------- Capa 2/3/4: Llamada manos libres ---------- */
+    const micBtn = $('mic');
+    const micHint = $('micHint');
+    const chatEl = $('chat');
+    const convStatus = $('convStatus');
+    const startCallBtn = $('startCall');
+    const endCallBtn = $('endCall');
+    const bargeInChk = $('bargeIn');
+    const convAudio = new Audio();
+
+    let messages = [];      // {role, content} user/assistant
+    let caseState = {};     // estado del caso devuelto por el backend
+    let callActive = false;
+    let phase = 'idle';     // idle | speaking | listening | thinking
+    let recognition = null;
+    let recognizing = false;
+    let restartTimer = null;
+
+    function setConvStatus(msg, kind) { convStatus.textContent = msg || ''; convStatus.className = 'status' + (kind ? ' ' + kind : ''); }
+
+    function setPhase(p) {
+      phase = p;
+      micBtn.classList.remove('listening', 'speaking', 'thinking');
+      if (p === 'listening') { micBtn.classList.add('listening'); micBtn.textContent = '🎧'; micHint.textContent = 'Escuchando… habla'; }
+      else if (p === 'speaking') { micBtn.classList.add('speaking'); micBtn.textContent = '🔊'; micHint.textContent = 'Hablando… (toca para interrumpir)'; }
+      else if (p === 'thinking') { micBtn.classList.add('thinking'); micBtn.textContent = '…'; micHint.textContent = 'Procesando…'; }
+      else { micBtn.textContent = '🎙️'; micHint.textContent = callActive ? 'En llamada' : 'Pulsa “Llamar” para empezar'; }
+    }
+
+    function addBubble(role, text, partial) {
+      const div = document.createElement('div');
+      div.className = 'bubble ' + role + (partial ? ' partial' : '');
+      div.textContent = text;
+      chatEl.appendChild(div);
+      chatEl.scrollTop = chatEl.scrollHeight;
+      return div;
+    }
+
+    function renderCase() {
+      const has = caseState && (caseState.unitLabel || caseState.ticketShortId || caseState.preliminaryCategory);
+      $('casePanel').classList.toggle('show', !!has);
+      $('csUnit').textContent = caseState.unitLabel || '—';
+      $('csProject').textContent = caseState.projectName || '—';
+      $('csCategory').textContent = caseState.preliminaryCategory || '—';
+      $('csWarranty').textContent = caseState.warrantyStatus || '—';
+      $('csTicket').textContent = caseState.ticketShortId || '—';
+      const cta = $('captureCta');
+      if (caseState.captureUrl) {
+        $('captureLink').href = caseState.captureUrl;
+        cta.classList.add('show');
+      } else {
+        cta.classList.remove('show');
+      }
+    }
+
+    function stopAudio() {
+      try { convAudio.pause(); convAudio.currentTime = 0; } catch (e) {}
+    }
+
+    function speak(text) {
+      return new Promise(async (resolve) => {
+        try {
+          const blob = await fetchTts(text, CONV_TTS_MODEL);
+          const url = URL.createObjectURL(blob);
+          convAudio.src = url;
+          convAudio.onended = () => { URL.revokeObjectURL(url); resolve(); };
+          convAudio.onerror = () => { URL.revokeObjectURL(url); resolve(); };
+          setPhase('speaking');
+          convAudio.play().catch(() => resolve());
+          if (bargeInChk.checked) startRecognition(); // barge-in en vivo (con audífonos)
+        } catch (err) {
+          setConvStatus(err.message || String(err), 'err');
+          resolve();
+        }
+      });
+    }
+
+    function buildRecognition() {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) return null;
+      const r = new SR();
+      r.lang = 'es-CL';
+      r.interimResults = true;
+      r.continuous = false;
+      r.maxAlternatives = 1;
+      return r;
+    }
+
+    function startRecognition() {
+      if (!callActive || recognizing) return;
+      recognition = buildRecognition();
+      if (!recognition) { setConvStatus('Tu navegador no soporta reconocimiento de voz. Usa Chrome.', 'err'); endCall(); return; }
+
+      let finalText = '';
+      let partialBubble = null;
+      recognizing = true;
+      if (phase !== 'speaking') setPhase('listening');
+
+      recognition.onresult = (e) => {
+        let interim = '';
+        finalText = '';
+        for (let i = 0; i < e.results.length; i++) {
+          const t = e.results[i][0].transcript;
+          if (e.results[i].isFinal) finalText += t; else interim += t;
+        }
+        // Barge-in: si la asistente está hablando y el usuario habla, corta el audio.
+        if (phase === 'speaking') { stopAudio(); setPhase('listening'); }
+        const show = (finalText + ' ' + interim).trim();
+        if (show) {
+          if (!partialBubble) partialBubble = addBubble('user', show, true);
+          else partialBubble.textContent = show;
+          chatEl.scrollTop = chatEl.scrollHeight;
+        }
+      };
+      recognition.onerror = (e) => {
+        // no-speech / aborted: reintento suave si seguimos en llamada
+        if (e.error !== 'no-speech' && e.error !== 'aborted') {
+          setConvStatus('Mic: ' + e.error, 'err');
+        }
+      };
+      recognition.onend = () => {
+        recognizing = false;
+        const text = finalText.trim();
+        if (partialBubble) {
+          if (text) { partialBubble.classList.remove('partial'); partialBubble.textContent = text; }
+          else partialBubble.remove();
+        }
+        if (!callActive) return;
+        if (text) {
+          handleUtterance(text);
+        } else if (phase !== 'speaking' && phase !== 'thinking') {
+          // Silencio: seguimos escuchando
+          scheduleListen(400);
+        }
+      };
+      try { recognition.start(); } catch (e) { recognizing = false; }
+    }
+
+    function scheduleListen(delay) {
+      clearTimeout(restartTimer);
+      restartTimer = setTimeout(() => { if (callActive && !recognizing) startRecognition(); }, delay || 200);
+    }
+
+    async function handleUtterance(userText) {
+      setPhase('thinking');
+      setConvStatus('');
+      messages.push({ role: 'user', content: userText });
+      try {
+        const res = await fetch('/api/postventa/public/voice-chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages, state: caseState })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error(data.error || ('HTTP ' + res.status));
+        if (data.state) { caseState = data.state; renderCase(); }
+        const reply = data.reply;
+        messages.push({ role: 'assistant', content: reply });
+        addBubble('assistant', reply);
+        await speak(reply);
+        if (callActive) scheduleListen(250);
+      } catch (err) {
+        setConvStatus(err.message || String(err), 'err');
+        if (callActive) scheduleListen(800);
+      }
+    }
+
+    async function startCall() {
+      callActive = true;
+      messages = [{ role: 'assistant', content: GREETING }];
+      caseState = {};
+      chatEl.innerHTML = '';
+      renderCase();
+      startCallBtn.disabled = true;
+      endCallBtn.disabled = false;
+      bargeInChk.disabled = true;
+      addBubble('assistant', GREETING);
+      setConvStatus('Conectando…');
+      await speak(GREETING);
+      if (callActive) scheduleListen(250);
+    }
+
+    function endCall() {
+      callActive = false;
+      clearTimeout(restartTimer);
+      try { if (recognition && recognizing) recognition.stop(); } catch (e) {}
+      recognizing = false;
+      stopAudio();
+      setPhase('idle');
+      startCallBtn.disabled = false;
+      endCallBtn.disabled = true;
+      bargeInChk.disabled = false;
+      setConvStatus('Llamada finalizada.');
+    }
+
+    // Tocar el mic durante la llamada = interrumpir y hablar ya.
+    micBtn.addEventListener('click', () => {
+      if (!callActive) { startCall(); return; }
+      if (phase === 'speaking') { stopAudio(); startRecognition(); }
+      else if (!recognizing) { startRecognition(); }
+    });
+
+    startCallBtn.addEventListener('click', startCall);
+    endCallBtn.addEventListener('click', endCall);
+  </script>
+</body>
+</html>

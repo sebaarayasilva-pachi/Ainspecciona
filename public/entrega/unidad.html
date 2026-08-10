@@ -1,0 +1,751 @@
+�<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <script>(function(){try{var t=localStorage.getItem("entrega-theme");document.documentElement.setAttribute("data-theme",t==="light"?"light":"dark");}catch(e){document.documentElement.setAttribute("data-theme","dark");}})();</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Unidad · Ainspecciona Recepción</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/entrega/assets/entrega.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    .ev-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .ev-tile { aspect-ratio: 1; border-radius: 9px; background: linear-gradient(135deg,#E2E8F0,#CBD5E1); display: grid; place-items: center; color: #64748B; position: relative; overflow: hidden; }
+    .ev-tile span { position: absolute; bottom: 4px; left: 6px; font-size: 9px; color: #475569; background: rgba(255,255,255,.7); padding: 1px 5px; border-radius: 5px; }
+    .recinto-zone text { pointer-events: none; }
+    .plano-real { position: relative; width: 100%; overflow: hidden; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); }
+    .plano-real img { position: absolute; top: 0; left: 0; }
+    .recinto-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+    .recinto-chip { font-size: 11px; font-weight: 600; padding: 4px 9px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); cursor: pointer; }
+    .recinto-chip .cdot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin-right: 5px; vertical-align: middle; }
+    .recinto-chip.has-crit { border-color: #FCA5A5; }
+    .plan-zone { cursor: pointer; }
+    .plan-zone .apt-fill { transition: fill-opacity .12s ease, stroke-width .12s ease; }
+    .plan-zone:hover .apt-fill { fill-opacity: 0.46 !important; stroke-width: 2.4; }
+    .plan-zone.selected .apt-fill { fill-opacity: 0.54 !important; stroke-width: 2.8; }
+    .recinto-chip.orphan { border-style: dashed; border-color: #CBD5E1; }
+    .plan-heat-note { font-size: 10.5px; color: var(--muted); margin-top: 6px; }
+    .plan-ref .plan-wrap { max-width: 100%; }
+
+    /* Seguimiento fotográfico R0 · Resuelto */
+    .rec-group { margin-bottom: 18px; }
+    .rec-group-head { display:flex; align-items:center; gap:8px; font-weight:800; font-size:13px; color:var(--text); margin:2px 0 10px; padding-bottom:7px; border-bottom:1px solid var(--border); }
+    .rg-dot { width:9px; height:9px; border-radius:50%; }
+    .rg-count { font-weight:600; font-size:11px; color:var(--muted); }
+    .round-row { border:1px solid var(--border); border-radius:13px; padding:13px; margin-bottom:12px; background:var(--surface); }
+    .round-row-head { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:11px; }
+    .round-row-head .rr-kpi { font-size:12.5px; font-weight:800; color:var(--text); }
+    .round-row-head .rr-desc { color:var(--muted); font-size:12px; flex:1 1 200px; }
+    .rr-prog-wrap { display:flex; align-items:center; gap:8px; }
+    .rr-prog { width:120px; height:7px; border-radius:99px; background:var(--border); overflow:hidden; }
+    .rr-prog > span { display:block; height:100%; background:linear-gradient(90deg,#6366F1,#22C55E); }
+    .rr-prog-val { font-size:11px; font-weight:700; color:var(--muted); min-width:30px; }
+    .rounds-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:11px; }
+    .rc-label { display:flex; align-items:center; justify-content:space-between; font-size:11px; font-weight:800; margin-bottom:5px; color:var(--text); }
+    .rc-tag { font-size:8.5px; font-weight:800; padding:2px 7px; border-radius:99px; letter-spacing:.04em; }
+    .rc-tag.t-open { background:#FEE2E2; color:#B91C1C; }
+    .rc-tag.t-prog { background:#FFEDD5; color:#C2410C; }
+    .rc-tag.t-done { background:#DCFCE7; color:#15803D; }
+    .rc-tag.t-wait { background:#F1F5F9; color:#64748B; }
+    .ph-photo { position:relative; aspect-ratio:4/3; border-radius:9px; overflow:hidden; border:1px solid var(--border); }
+    .ph-photo img.ph-real { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; }
+    .ph-photo.empty { display:grid; place-items:center; background:repeating-linear-gradient(45deg,var(--surface-2),var(--surface-2) 9px,var(--border) 9px,var(--border) 18px); color:var(--muted-2); font-size:10.5px; font-weight:700; text-align:center; padding:10px; }
+    .ph-scene { position:absolute; inset:0; }
+    .ph-grain { position:absolute; inset:0; opacity:.10; mix-blend-mode:multiply; background-image:radial-gradient(circle at 20% 30%, #000 0.5px, transparent 0.6px), radial-gradient(circle at 70% 60%, #000 0.5px, transparent 0.6px); background-size:7px 7px, 9px 9px; }
+    .ph-defect { position:absolute; border-radius:2px; background:rgba(60,40,30,.32); filter:blur(.4px); }
+    .ph-tag { position:absolute; left:6px; bottom:6px; font-size:8.5px; font-weight:700; color:#fff; background:rgba(15,23,42,.6); padding:2px 6px; border-radius:5px; }
+    .ph-target { position:absolute; width:38px; height:38px; transform:translate(-50%,-50%); pointer-events:none; filter:drop-shadow(0 1px 2px rgba(0,0,0,.55)); animation:pulseTgt 1.9s ease-in-out infinite; }
+    @keyframes pulseTgt { 0%,100% { opacity:.92 } 50% { opacity:.42 } }
+    .ph-check { position:absolute; right:6px; top:6px; width:22px; height:22px; border-radius:50%; background:#22C55E; display:grid; place-items:center; color:#fff; box-shadow:0 1px 3px rgba(0,0,0,.3); }
+    .rc-desc { font-size:10.5px; color:var(--muted); margin-top:6px; line-height:1.4; }
+    .rc-desc b { color:var(--text); }
+    @media (max-width: 900px) { .rounds-grid { grid-template-columns:1fr; } }
+
+    /* Lista de thumbnails al lado del plano */
+    .rounds-scroll { max-height: 600px; overflow-y: auto; padding-right: 8px; margin-right: -4px; }
+    .rounds-scroll::-webkit-scrollbar { width: 8px; }
+    .rounds-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+    .rounds-scroll .round-row { padding: 10px; margin-bottom: 10px; }
+    .rounds-scroll .round-row-head { gap: 7px; margin-bottom: 8px; }
+    .rounds-scroll .rr-desc { flex-basis: 100%; order: 3; }
+    .rounds-scroll .rr-prog { width: 86px; }
+    .rounds-scroll .rounds-grid { gap: 7px; }
+    .rounds-scroll .rc-label { font-size: 9.5px; }
+    .rounds-scroll .rc-tag { font-size: 7.5px; padding: 2px 5px; }
+    .rounds-scroll .ph-tag { font-size: 7.5px; padding: 1px 4px; }
+    .rounds-scroll .ph-target { width: 26px; height: 26px; }
+    .rounds-scroll .rc-desc { font-size: 9.5px; margin-top: 4px; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div id="sidebar"></div>
+    <div class="main">
+      <header class="topbar">
+        <div class="titles">
+          <h1 id="uTitle">Unidad</h1>
+          <div class="crumb" id="crumb"></div>
+        </div>
+        <div class="spacer"></div>
+        <div class="topbar-actions">
+          <div id="projSelector"></div>
+          <div class="topbar-unit">
+            <span class="topbar-unit-label" id="unitSelectorLabel">Unidad</span>
+            <div id="unitSelectorWrap"></div>
+          </div>
+          <div id="dateChip"></div>
+        </div>
+      </header>
+      <div class="content">
+        <div class="tabs" id="tabs">
+          <button data-tab="resumen" class="active">Resumen</button>
+          <button data-tab="hallazgos">Hallazgos</button>
+          <button data-tab="ot">OT</button>
+          <button data-tab="historial">Historial</button>
+        </div>
+        <div id="tabContent"></div>
+      </div>
+    </div>
+  </div>
+  <div id="otPrintArea"></div>
+
+  <script src="/entrega/assets/entrega-app.js"></script>
+  <script>
+    (async function () {
+      const E = window.Entrega;
+      const tabContent = document.getElementById("tabContent");
+      function showError(title, err) {
+        console.error("[unidad]", err);
+        tabContent.innerHTML = `<div class="card pad-lg"><div class="card-title">${title}</div><p class="muted" style="margin-top:8px">${E.escapeHtml(String(err && err.message ? err.message : err))}</p><p class="muted" style="margin-top:8px;font-size:12px">Recarga con Ctrl+F5. Si persiste, revisa la consola del navegador.</p></div>`;
+      }
+
+      try {
+      if (!E) throw new Error("No se cargó entrega-app.js");
+      const seed = await E.loadSeed();
+      const kpiCatalog = await E.loadKpiCatalog(seed);
+      const project = E.getProject(seed, E.currentProjectId());
+      if (!project) throw new Error("Proyecto Demo no encontrado");
+      E.setProject(project.id);
+      let ref = E.qs("u", "") || "301";
+      if (!E.qs("u", "")) {
+        const url = new URL(location.href);
+        url.searchParams.set("u", ref);
+        history.replaceState(null, "", url.toString());
+      }
+
+      document.getElementById("sidebar").innerHTML = E.renderSidebar("unidades", project, seed);
+      document.getElementById("projSelector").innerHTML = E.projectSelector(seed, project);
+      document.getElementById("dateChip").innerHTML = E.dateChip(project);
+      const unitList = E.unitsForUnitSelector(project, seed, { floorId: E.qs("f", "") || null });
+      document.getElementById("unitSelectorWrap").innerHTML = E.unitSelectorHtml(unitList, ref);
+      E.bindProjectSelector();
+      E.bindUnitSelector();
+      E.ensureChartDefaults();
+      tabContent.innerHTML = `<div class="card pad-lg"><p class="muted">Cargando unidad ${ref}⬦</p></div>`;
+
+      const unitKey = `${project.id}:${ref}`;
+      let liveFindings = [];
+      let liveOk = false;
+      try {
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 20000);
+        const r = await (window.Entrega && window.Entrega.entregaFetch ? window.Entrega.entregaFetch.bind(window.Entrega) : fetch)(`/api/entrega/units/${encodeURIComponent(unitKey)}/findings`, { cache: "no-store", signal: ctrl.signal });
+        clearTimeout(timer);
+        if (r.ok) {
+          const j = await r.json();
+          if (j && Array.isArray(j.findings)) {
+            liveFindings = j.findings;
+            liveOk = true;
+          }
+        }
+      } catch (e) { /* prototipo / timeout */ }
+
+      let unit = E.resolveUnitRecord(seed, project, ref);
+      if (!unit && (liveOk || liveFindings.length)) {
+        const pisoNum = parseInt(String(ref).charAt(0), 10);
+        unit = {
+          ref: String(ref),
+          projectId: project.id,
+          tipo: "Departamento",
+          piso: Number.isFinite(pisoNum) ? pisoNum : null,
+          floorId: Number.isFinite(pisoNum) ? `piso-${pisoNum}` : "piso-?",
+          estado: "no_inspeccionado",
+          estadoLabel: "No inspeccionado",
+          recintos: E.defaultUnitRecintos(),
+          hallazgos: [],
+          metrics: { avance: 0, verificados: 0, totalVerificables: 0, hallazgosTotales: 0, abiertos: 0, cerrados: 0, criticos: 0, otActivas: 0 },
+          resumenTecnico: "",
+          accionesRecomendadas: [],
+        };
+      }
+      document.getElementById("uTitle").innerHTML = unit && unit.tipoUnidad ? `Unidad ${unit.tipoUnidad}` : `Unidad ${ref}`;
+      if (!unit) {
+        document.getElementById("crumb").textContent = `${project.name}`;
+        document.getElementById("tabContent").innerHTML = `<div class="card pad-lg"><div class="card-title">Unidad sin detalle</div><p class="muted">No hay datos para la unidad <b>${ref}</b>. Captura hallazgos en <a class="link" href="${E.withProject("/entrega/captura", project.id)}&u=${encodeURIComponent(ref)}">Captura</a>.</p></div>`;
+        return;
+      }
+      // API OK (incl. []): fuente de verdad. No caer al seed.
+      let hallazgos = liveOk ? liveFindings : (liveFindings.length ? liveFindings : (unit.hallazgos || []));
+      const merged = E.mergeUnitSummaryWithFindings(
+        {
+          ref: unit.ref || ref,
+          piso: unit.piso,
+          tipo: unit.tipo || "Departamento",
+          estado: liveOk ? "no_inspeccionado" : unit.estado,
+          avance: liveOk ? 0 : (unit.metrics && unit.metrics.avance) || unit.avance || 0,
+          hallazgos: 0,
+          criticas: 0,
+        },
+        hallazgos,
+        { authoritative: liveOk }
+      );
+      unit = {
+        ...unit,
+        ...merged,
+        estadoLabel: E.STATE_LABELS[merged.estado] || merged.estado,
+        recintos: E.mergeRecintosFromHallazgos(unit.recintos || E.defaultUnitRecintos(), hallazgos),
+      };
+      document.getElementById("crumb").innerHTML = `${project.name} � ${unit.floorId ? unit.floorId.replace("piso-", "Piso ") : "Unidad"} � Unidad ${ref} &nbsp; <span class="badge ${unit.estado}">${unit.estadoLabel || E.STATE_LABELS[unit.estado] || unit.estado}</span>`;
+
+      const fotosReales = (hallazgos || []).filter((h) => h.fotoUrl);
+      let recFilter = null;
+
+      function metricsFromHallazgos(list, base, catalog, unitRef) {
+        const rows = list || [];
+        const abiertos = rows.filter((h) => h.estado !== "cerrado").length;
+        const cerrados = rows.filter((h) => h.estado === "cerrado").length;
+        const criticos = rows.filter((h) => h.severidad === "critica" && h.estado !== "cerrado").length;
+        const ots = catalog && unitRef ? E.otsFromHallazgos(rows, catalog, unitRef) : [];
+        const b = base || {};
+        const avanceCierre = rows.length ? Math.round((cerrados / rows.length) * 100) : b.avance;
+        return {
+          avance: rows.length ? avanceCierre : b.avance,
+          verificados: b.verificados,
+          totalVerificables: b.totalVerificables,
+          hallazgosTotales: rows.length,
+          abiertos,
+          cerrados,
+          criticos,
+          otActivas: ots.length || b.otActivas,
+        };
+      }
+
+      const m = metricsFromHallazgos(hallazgos, unit.metrics || {}, kpiCatalog, ref);
+      const resumen = E.buildUnitResumen({ ...unit, ref }, hallazgos, kpiCatalog);
+
+      let syncingRec = false;
+
+      function hallazgoMatchesRec(h, rec) {
+        if (!rec) return true;
+        const a = String(h.recinto || "").trim().toLowerCase();
+        const b = String(rec).trim().toLowerCase();
+        return a === b || a.includes(b) || b.includes(a);
+      }
+
+      /** Color e intensidad heatmap por recinto (peor severidad abierta + cantidad). */
+      function recintoHeat(recintoName) {
+        const matched = hallazgos.filter((h) => hallazgoMatchesRec(h, recintoName));
+        const open = matched.filter((h) => h.estado !== "cerrado");
+        if (!open.length) {
+          const hasClosed = matched.some((h) => h.estado === "cerrado");
+          return {
+            color: E.STATE_COLORS.lista,
+            opacity: hasClosed ? 0.18 : 0.10,
+            estado: "lista",
+            count: matched.length,
+            label: E.STATE_LABELS.lista,
+          };
+        }
+        const sevRank = { critica: 3, intermedia: 2, menor: 1 };
+        let worst = "menor";
+        open.forEach((h) => {
+          if ((sevRank[h.severidad] || 0) > (sevRank[worst] || 0)) worst = h.severidad;
+        });
+        const sevToState = { critica: "critico", intermedia: "pendiente_intermedio", menor: "pendiente_menor" };
+        const st = sevToState[worst] || "pendiente_menor";
+        return {
+          color: E.STATE_COLORS[st],
+          opacity: Math.min(0.52, 0.26 + open.length * 0.05),
+          estado: st,
+          count: open.length,
+          label: E.STATE_LABELS[st],
+        };
+      }
+
+      function recintoChipHtml(name, heat, opts) {
+        opts = opts || {};
+        const esc = name.replace(/'/g, "\\'");
+        const cls = opts.orphan ? "recinto-chip orphan" : "recinto-chip";
+        const title = opts.orphan ? " · sin zona en plano" : "";
+        return `<span class="${cls}" data-rec="${name.replace(/"/g, "&quot;")}" onclick="window.__selRec('${esc}')"><span class="cdot" style="background:${heat.color}"></span>${name}${heat.count ? ` (${heat.count})` : ""}${title}</span>`;
+      }
+
+      function filteredHallazgos(limit) {
+        const list = recFilter ? hallazgos.filter((h) => hallazgoMatchesRec(h, recFilter)) : hallazgos;
+        return limit ? list.slice(0, limit) : list;
+      }
+
+      function emptyRecintoRow(rec) {
+        return [{ recinto: rec, descripcion: "Sin hallazgos en este recinto", kpi: "�", especialidad: "�", severidad: "menor", estado: "cerrado", apertura: null, cierre: null }];
+      }
+
+      function selectRecinto(rec) {
+        if (rec == null) {
+          recFilter = null;
+        } else {
+          recFilter = recFilter === rec ? null : rec;
+        }
+        syncRecintoFilterUI();
+      }
+      window.__selRec = selectRecinto;
+
+      function syncRecintoFilterUI() {
+        if (syncingRec) return;
+        syncingRec = true;
+        try {
+        document.querySelectorAll("#unitPlan .plan-zone, #unitPlan .recinto-zone").forEach((z) => {
+          z.classList.toggle("selected", recFilter && z.getAttribute("data-rec") === recFilter);
+        });
+        document.querySelectorAll("#unitPlan .recinto-chip").forEach((c) => {
+          c.style.background = recFilter && c.getAttribute("data-rec") === recFilter ? "var(--primary-tint)" : "var(--surface)";
+        });
+
+        const list = filteredHallazgos();
+        const preview = recFilter ? list : filteredHallazgos(6);
+        const rows = preview.length ? preview : (recFilter ? emptyRecintoRow(recFilter) : []);
+
+        const tbl = document.getElementById("hTable");
+        if (tbl) tbl.innerHTML = hTableHtml(rows);
+
+        const tblFull = document.getElementById("hTableFull");
+        if (tblFull) tblFull.innerHTML = hTableHtml(list.length ? list : (recFilter ? emptyRecintoRow(recFilter) : []));
+
+        const rs = document.getElementById("roundsScroll");
+        if (rs) {
+          rs.innerHTML = list.length
+            ? roundsHtml(list)
+            : `<p class="muted">${recFilter ? "Sin hallazgos en " + recFilter + "." : "Sin hallazgos registrados en esta unidad."}</p>`;
+        }
+
+        const title = document.getElementById("hallazgosTitle");
+        if (title) {
+          title.textContent = recFilter
+            ? `Hallazgos · ${recFilter} (${list.length})`
+            : `Hallazgos de la unidad (${hallazgos.length})`;
+        }
+
+        const bar = document.getElementById("recFilterBar");
+        if (bar) bar.style.display = recFilter ? "flex" : "none";
+        const lbl = document.getElementById("recFilterLabel");
+        if (lbl && recFilter) lbl.textContent = recFilter;
+
+        renderUnitCharts(filteredHallazgos());
+        } finally {
+          syncingRec = false;
+        }
+      }
+
+      const unitCharts = {};
+
+      function renderUnitCharts(list) {
+        try {
+          const kpiData = E.hallazgosPorKpi(list, kpiCatalog.kpis);
+          const recData = E.hallazgosPorRecinto(list);
+          const lineData = E.hallazgosTimeline(list) || (unit.charts && unit.charts.lineaTiempo);
+          const pairs = [
+            ["chRec", "bar", recData],
+            ["chKpi", "donut", kpiData],
+            ["chLine", "line", lineData],
+          ];
+          pairs.forEach(([id, type, data]) => {
+            const el = document.getElementById(id);
+            if (!el || !data) return;
+            if (unitCharts[id]) {
+              unitCharts[id].destroy();
+              unitCharts[id] = null;
+            }
+            if (type === "bar") unitCharts[id] = E.barChart(el, data);
+            else if (type === "donut") unitCharts[id] = E.donutChart(el, data);
+            else if (type === "line" && data.labels) unitCharts[id] = E.lineChart(el, data);
+          });
+        } catch (err) {
+          console.error("[unidad] charts", err);
+        }
+      }
+
+      function renderResumen() {
+        tabContent.innerHTML = `
+          <div class="kpi-row">
+            <div class="kpi"><div class="k-label">% Avance unidad</div><div class="k-value">${m.avance}%</div><div class="k-sub">${m.verificados}/${m.totalVerificables} verificados</div></div>
+            <div class="kpi"><div class="k-label">Hallazgos totales</div><div class="k-value">${m.hallazgosTotales}</div></div>
+            <div class="kpi"><div class="k-label">Abiertos</div><div class="k-value">${m.abiertos}</div></div>
+            <div class="kpi"><div class="k-label">Cerrados</div><div class="k-value">${m.cerrados}</div></div>
+            <div class="kpi"><div class="k-label">�xa� Críticos</div><div class="k-value crit">${m.criticos}</div></div>
+            <div class="kpi"><div class="k-label">�x� OT activas</div><div class="k-value">${m.otActivas}</div></div>
+          </div>
+          <div class="cols-3 plan-ref" style="grid-template-columns:1.15fr 1fr;margin-bottom:16px;align-items:start">
+            <div class="card" style="position:sticky;top:12px"><div class="card-title">Planta Unidad ${ref} <span class="hint">referencia</span></div><div class="plan-wrap" id="unitPlan"></div>
+              <div class="legend">${legendDot("#22C55E","Cerrado / Lista")}${legendDot("#FACC15","Pendiente menor")}${legendDot("#F97316","Pendiente intermedio")}${legendDot("#EF4444","Crítico / Abierto")}</div></div>
+            <div class="card pad-lg">
+              <div class="card-title" style="margin:0">Fotos del hallazgo <span class="hint">R0 · Resuelto</span></div>
+              ${fotosReales.length ? `<div class="muted" style="font-size:12px;margin-bottom:8px">${fotosReales.length} foto${fotosReales.length > 1 ? "s" : ""} de inspección capturada${fotosReales.length > 1 ? "s" : ""}</div>` : `<div class="muted" style="font-size:12px;margin-bottom:8px">${liveFindings.length ? "Sin fotos aún en los hallazgos capturados." : "Datos demo � captura hallazgos en Captura para ver fotos reales."}</div>`}
+              <div class="rounds-scroll mt" id="roundsScroll"></div>
+            </div>
+          </div>
+
+          <div class="card pad-lg" style="margin-bottom:16px">
+            <div class="ai-summary"><div class="ai-ico">${E.svgIcon("kpi")}</div><div><div class="card-title" style="margin-bottom:6px">Resumen técnico generado por IA</div><p>${E.escapeHtml(resumen.resumenTecnico)}</p>
+            <div class="mt">${resumen.accionesRecomendadas.map((a) => `<div class="action-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg><span>${E.escapeHtml(a)}</span></div>`).join("")}</div></div></div>
+          </div>
+
+          <div class="card pad-lg" style="margin-bottom:16px">
+            <div id="recFilterBar" class="flex between" style="display:none;margin-bottom:10px;padding:8px 12px;background:var(--primary-tint);border-radius:10px;font-size:13px">
+              <span>Mostrando hallazgos de <b id="recFilterLabel"></b></span>
+              <a class="link" href="#" onclick="window.__selRec(null);return false">Ver todos los recintos</a>
+            </div>
+            <div class="flex between"><div class="card-title" style="margin:0" id="hallazgosTitle">Hallazgos de la unidad (${hallazgos.length})</div><a class="link" href="#" onclick="document.querySelector('[data-tab=hallazgos]').click();return false">Ver tabla completa →</a></div>
+            <div class="tbl-scroll"><table class="tbl" id="hTable"></table></div>
+          </div>
+
+          <div class="charts-3">
+            <div class="card"><div class="card-title">Hallazgos por recinto</div><div class="chart-box sm"><canvas id="chRec"></canvas></div></div>
+            <div class="card"><div class="card-title">Hallazgos por KPI${kpiCatalog.source === "taxonomy" ? "" : ' <span class="hint">catálogo estático</span>'}</div><div class="chart-box sm"><canvas id="chKpi"></canvas></div></div>
+            <div class="card"><div class="card-title">Aperturas vs cierres</div><div class="chart-box sm"><canvas id="chLine"></canvas></div></div>
+          </div>`;
+        if (kpiCatalog.message) {
+          const note = document.createElement("div");
+          note.className = "muted";
+          note.style.cssText = "font-size:12px;margin:-8px 0 14px";
+          note.textContent = kpiCatalog.message;
+          tabContent.querySelector(".charts-3")?.before(note);
+        }
+
+        renderUnitPlan();
+        syncRecintoFilterUI();
+      }
+
+      function renderHallazgos() {
+        tabContent.innerHTML = `
+          <div class="cols-3 plan-ref" style="grid-template-columns:1fr 1.4fr;margin-bottom:16px;align-items:start">
+            <div class="card" style="position:sticky;top:12px">
+              <div class="card-title">Planta Unidad ${ref} <span class="hint">toca una zona</span></div>
+              <div class="plan-wrap" id="unitPlan"></div>
+            </div>
+            <div class="card pad-lg">
+              <div id="recFilterBar" class="flex between" style="display:none;margin-bottom:10px;padding:8px 12px;background:var(--primary-tint);border-radius:10px;font-size:13px">
+                <span>Mostrando hallazgos de <b id="recFilterLabel"></b></span>
+                <a class="link" href="#" onclick="window.__selRec(null);return false">Ver todos los recintos</a>
+              </div>
+              <div class="card-title" id="hallazgosTitle">Hallazgos de la unidad (${hallazgos.length})</div>
+              <div class="tbl-scroll tbl-scroll-lg"><table class="tbl" id="hTableFull"></table></div>
+            </div>
+          </div>`;
+        renderUnitPlan();
+        syncRecintoFilterUI();
+      }
+
+      function renderOt() {
+        const ots = E.otsFromHallazgos(hallazgos, kpiCatalog, ref);
+        const printCtx = {
+          project,
+          tenant: seed.tenant,
+          emittedAt: new Date().toLocaleDateString("es-CL", { day: "2-digit", month: "2-digit", year: "numeric" }),
+        };
+        window.__printUnitOt = function (idx) {
+          const ot = ots[idx];
+          if (!ot) return;
+          E.printOtDocuments(E.otPrintSheetHtml({ ...ot, unidad: ref, piso: unit.piso }, printCtx));
+        };
+        window.__printAllUnitOt = function () {
+          E.printOtDocuments(
+            E.otPrintAllHtml(
+              ots.map((ot) => ({ ...ot, unidad: ref, piso: unit.piso })),
+              printCtx
+            )
+          );
+        };
+        if (!ots.length) {
+          tabContent.innerHTML = `<div class="card pad-lg"><div class="card-title">�rdenes de Trabajo</div>
+            <p class="muted" style="margin-top:8px">No hay OT activas en esta unidad. Las OT se generan a partir de hallazgos abiertos agrupados por especialidad.</p>
+            <a class="btn mt" href="#" onclick="document.querySelector('[data-tab=hallazgos]').click();return false">Ver hallazgos</a></div>`;
+          return;
+        }
+        const rows = ots
+          .map((ot, i) => {
+            const esc = E.escapeHtml;
+            const estadoCls = (ot.estado && ot.estado.cls) || "pendiente_menor";
+            const estadoLabel = (ot.estado && ot.estado.label) || "�";
+            return (
+              `<tr class="clickable ot-row" data-ot="${i}"><td><b>${esc(ot.id)}</b></td><td>${esc(ot.kpi)}</td><td>${esc(ot.especialidad)}</td><td class="num">${ot.count || 0}</td><td>${esc(ot.asignado)}</td><td><span class="badge ${estadoCls}">${esc(estadoLabel)}</span></td><td><button class="btn" style="padding:4px 10px;font-size:11px" onclick="event.stopPropagation();window.__printUnitOt(${i})">Imprimir</button></td></tr>` +
+              `<tr class="ot-detail" id="otDetail${i}" style="display:none"><td colspan="7" style="padding:0;background:#FAFBFD"></td></tr>`
+            );
+          })
+          .join("");
+        window.__unitOts = ots.map((ot) => ({ ...ot, unidad: ref, piso: unit.piso }));
+        tabContent.innerHTML = `<div class="card pad-lg"><div class="flex between" style="margin-bottom:12px"><div><div class="card-title" style="margin:0">�rdenes de Trabajo (${ots.length} activa${ots.length > 1 ? "s" : ""})</div><p class="muted" style="font-size:12px;margin:4px 0 0">Agrupadas por especialidad · imprime la OT para la cuadrilla</p></div><button class="btn primary" onclick="window.__printAllUnitOt()">Imprimir todas</button></div>
+          <table class="tbl mt"><thead><tr><th>OT</th><th>KPI</th><th>Especialidad</th><th>Hallazgos</th><th>Asignado</th><th>Estado</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+        tabContent.querySelectorAll(".ot-row").forEach((row) => {
+          row.addEventListener("click", () => {
+            const idx = row.dataset.ot;
+            const det = document.getElementById("otDetail" + idx);
+            if (!det) return;
+            const td = det.querySelector("td");
+            if (td && !td.dataset.loaded) {
+              td.innerHTML = E.otHallazgosDetailHtml(window.__unitOts[idx].hallazgos);
+              td.dataset.loaded = "1";
+            }
+            det.style.display = det.style.display === "none" ? "" : "none";
+          });
+        });
+      }
+
+      function renderHistorial() {
+        tabContent.innerHTML = `<div class="card pad-lg"><div class="card-title">Historial</div>
+          <table class="tbl mt"><thead><tr><th>Fecha</th><th>Evento</th><th>Usuario</th></tr></thead><tbody>
+          <tr><td>${fmtDateTime(unit.lastUpdate)}</td><td>Actualización de hallazgos</td><td>${unit.inspector}</td></tr>
+          <tr><td>${fmtDate(unit.fechaInspeccion)}</td><td>Inspección realizada (${m.hallazgosTotales} hallazgos)</td><td>${unit.inspector}</td></tr>
+          </tbody></table></div>`;
+      }
+
+      function renderUnitPlan() {
+        if (unit.plano && unit.plano.image) {
+          const p = unit.plano;
+
+          if (p.zones && p.zones.length) {
+            const zoneNames = p.zones.map((z) => z.recinto);
+            const zonesSvg = p.zones
+              .map((z) => {
+                const heat = recintoHeat(z.recinto);
+                const n = hallazgos.filter((h) => hallazgoMatchesRec(h, z.recinto)).length;
+                const shape = z.path
+                  ? `<path class="apt-fill" d="${z.path}" transform="translate(${z.ox || 0}, ${z.oy || 0})" fill="${heat.color}" fill-opacity="${heat.opacity}" stroke="${heat.color}" stroke-width="1.8" stroke-linejoin="round"/>`
+                  : `<rect class="apt-fill" x="${z.x}" y="${z.y}" width="${z.w}" height="${z.h}" rx="6" fill="${heat.color}" fill-opacity="${heat.opacity}" stroke="${heat.color}" stroke-width="1.8"/>`;
+                const lx = z.cx != null ? z.cx : (z.x != null ? z.x + (z.w || 0) / 2 : (z.ox || 0));
+                const ly = z.cy != null ? z.cy : (z.y != null ? z.y + (z.h || 0) / 2 : (z.oy || 0));
+                const label = `<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="middle" font-size="13" font-weight="700" fill="var(--plan-ink)" paint-order="stroke" stroke="var(--surface)" stroke-width="2.8" style="pointer-events:none">${z.recinto}</text>`;
+                return `<g class="plan-zone" data-rec="${z.recinto}" onclick="window.__selRec('${z.recinto.replace(/'/g, "")}')">${shape}${label}<title>${z.recinto} � ${heat.label}${n ? " · " + n + " hallazgo(s)" : ""}</title></g>`;
+              })
+              .join("");
+            const chips = (unit.recintos || zoneNames)
+              .filter((r, i, arr) => arr.indexOf(r) === i)
+              .map((r) => recintoChipHtml(r, recintoHeat(r)))
+              .join("");
+            const orphans = [...new Set(hallazgos.map((h) => String(h.recinto || "").trim()).filter(Boolean))].filter(
+              (r) => !zoneNames.some((z) => hallazgoMatchesRec({ recinto: r }, z))
+            );
+            const orphanChips = orphans.map((r) => recintoChipHtml(r, recintoHeat(r), { orphan: true })).join("");
+            const ix = p.imgX || 0, iy = p.imgY || 0, iw = p.imgW || null, ih = p.imgH || null;
+            const imgEl = iw && ih
+              ? `<image href="${p.image}" x="${ix}" y="${iy}" width="${iw}" height="${ih}" preserveAspectRatio="none"/>`
+              : `<image href="${p.image}" x="0" y="0" width="100%" height="100%" preserveAspectRatio="none"/>`;
+            document.getElementById("unitPlan").innerHTML = `
+              <svg viewBox="${p.viewBox}" preserveAspectRatio="xMidYMid meet" style="width:100%;height:auto;display:block">${imgEl}${zonesSvg}</svg>
+              <div class="recinto-chips">${chips}${orphanChips}</div>
+              <div class="plan-heat-note">Intensidad del color = cantidad de hallazgos abiertos en el recinto</div>
+              <div class="muted" style="font-size:11px;margin-top:8px">Plano ${unit.tipoUnidad || ref}${unit.dormitorios ? " · " + unit.dormitorios + " dorm" : ""}${unit.superficie ? " · " + unit.superficie.total + " m²" : ""} · toca una zona para filtrar hallazgos</div>`;
+
+            window.__selRec = selectRecinto;
+            return;
+          }
+        }
+
+        const layout = [
+          { name: "Terraza", x: 12, y: 12, w: 90, h: 70 },
+          { name: "Living - Comedor", x: 110, y: 12, w: 150, h: 110 },
+          { name: "Cocina", x: 268, y: 12, w: 90, h: 60 },
+          { name: "Dormitorio 2", x: 366, y: 12, w: 110, h: 90 },
+          { name: "Dormitorio 1", x: 366, y: 110, w: 110, h: 100 },
+          { name: "Baño 2", x: 268, y: 150, w: 70, h: 60 },
+          { name: "Baño 1", x: 200, y: 150, w: 60, h: 60 },
+          { name: "Pasillo", x: 110, y: 130, w: 150, h: 14 },
+        ];
+        const layoutNames = layout.map((r) => r.name);
+        const g = layout
+          .map((r) => {
+            const heat = recintoHeat(r.name);
+            const n = hallazgos.filter((h) => hallazgoMatchesRec(h, r.name)).length;
+            const esc = r.name.replace(/'/g, "\\'");
+            return `<g class="recinto-zone plan-zone" data-rec="${r.name}" onclick="window.__selRec('${esc}')" style="cursor:pointer"><rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" rx="8" fill="${heat.color}" fill-opacity="${Math.min(0.55, heat.opacity + 0.08)}" stroke="${heat.color}" stroke-width="1.8"/>
+              <text x="${r.x + r.w / 2}" y="${r.y + r.h / 2}" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--plan-muted)" style="pointer-events:none">${r.name}</text>
+              <title>${r.name} � ${heat.label}${n ? " · " + n + " hallazgo(s)" : ""}</title></g>`;
+          })
+          .join("");
+        const chips = layout.map((r) => recintoChipHtml(r.name, recintoHeat(r.name))).join("");
+        const orphans = [...new Set(hallazgos.map((h) => String(h.recinto || "").trim()).filter(Boolean))].filter(
+          (r) => !layoutNames.some((z) => hallazgoMatchesRec({ recinto: r }, z))
+        );
+        const orphanChips = orphans.map((r) => recintoChipHtml(r, recintoHeat(r), { orphan: true })).join("");
+        document.getElementById("unitPlan").innerHTML = `<svg viewBox="0 0 490 224" preserveAspectRatio="xMidYMid meet">${g}</svg><div class="recinto-chips">${chips}${orphanChips}</div><div class="plan-heat-note">Intensidad del color = cantidad de hallazgos abiertos</div><div class="muted" style="font-size:11px;margin-top:8px">Toca una zona para ver sus hallazgos</div>`;
+        window.__selRec = selectRecinto;
+      }
+
+      function roundsHtml(items) {
+        if (!items || !items.length) return `<p class="muted">Sin hallazgos registrados en esta unidad.</p>`;
+        const sevColor = { critica: "#EF4444", intermedia: "#F97316", menor: "#FACC15" };
+        const groups = {}, order = [];
+        items.forEach((h) => { if (!groups[h.recinto]) { groups[h.recinto] = []; order.push(h.recinto); } groups[h.recinto].push(h); });
+        return order.map((rec) => {
+          const list = groups[rec].slice().sort((a, b) => String(a.kpi || "").localeCompare(String(b.kpi || "")));
+          const rank = { critica: 3, intermedia: 2, menor: 1 };
+          const worst = list.reduce((acc, h) => ((rank[h.severidad] || 0) > (rank[acc] || 0) ? h.severidad : acc), "menor");
+          return `<div class="rec-group">
+            <div class="rec-group-head"><span class="rg-dot" style="background:${sevColor[worst] || "#22C55E"}"></span>${rec}<span class="rg-count">· ${list.length} hallazgo${list.length > 1 ? "s" : ""}</span></div>
+            ${list.map((h, i) => roundRow(h, i)).join("")}
+          </div>`;
+        }).join("");
+      }
+
+      function roundRow(h, i) {
+        const hash = hashStr(h.id || (h.recinto + i));
+        const resolved = h.estado === "cerrado";
+        const prog = resolved ? 100 : (h.fotoUrl || h.foto ? 50 : 0);
+        const tx = 32 + (hash % 36), ty = 34 + ((hash >> 3) % 28);
+        const d0 = h.apertura, dF = h.cierre || addDays(d0, 13);
+
+        const r0 = roundCol(
+          "R0 · Levantamiento",
+          resolved ? "t-done" : "t-open",
+          photo(h, "r0", { tx, ty, target: "#EF4444" }),
+          `<b>Hallazgo detectado.</b> ${h.descripcion}. <span class="muted">${fmtDate(d0)}</span>`
+        );
+
+        const resuelto = resolved
+          ? roundCol(
+              "Resuelto",
+              "t-done",
+              photo(h, "resuelto", { check: true }),
+              `<b>Reparación verificada.</b> ${h.especialidad}. <span class="muted">${fmtDate(dF)}</span>`
+            )
+          : roundCol(
+              "Resuelto",
+              "t-wait",
+              emptyPhoto("Pendiente de cierre"),
+              `Foto de cierre cuando la especialidad termine la reparación.`
+            );
+
+        return `<div class="round-row">
+          <div class="round-row-head">
+            <span class="badge ${h.severidad}">${h.severidad}</span>
+            <span class="rr-kpi">${h.kpi}</span>
+            <span class="rr-desc">· ${h.especialidad}</span>
+            <span class="rr-prog-wrap"><span class="rr-prog"><span style="width:${prog}%"></span></span><span class="rr-prog-val">${prog}%</span></span>
+          </div>
+          <div class="rounds-grid">${r0}${resuelto}</div>
+        </div>`;
+      }
+
+      function roundCol(label, tagCls, photoHtml, descHtml) {
+        const tagText = { "t-open": "ABIERTO", "t-prog": "EN PROCESO", "t-done": "OK", "t-wait": "PENDIENTE" }[tagCls] || "";
+        return `<div class="round-col">
+          <div class="rc-label"><span>${label}</span><span class="rc-tag ${tagCls}">${tagText}</span></div>
+          ${photoHtml}
+          <div class="rc-desc">${descHtml}</div>
+        </div>`;
+      }
+
+      function emptyPhoto(txt) { return `<div class="ph-photo empty">${txt}</div>`; }
+
+      function photo(h, round, opts) {
+        opts = opts || {};
+        const resolvedUrl = h.fotoResueltaUrl || h.fotoCierreUrl;
+
+        if (round === "r0" && h.fotoUrl) {
+          const tx = h.target ? h.target.x * 100 : (opts.tx || 50);
+          const ty = h.target ? h.target.y * 100 : (opts.ty || 50);
+          const target = h.target ? targetSvg(tx, ty, "#EF4444") : opts.target ? targetSvg(opts.tx, opts.ty, opts.target) : "";
+          const tag = h.origen === "agente" ? "R0 · inspección" : "R0 · registro";
+          return `<div class="ph-photo"><img class="ph-real" src="${h.fotoUrl}" alt="" loading="lazy"/><div class="ph-grain"></div>${target}<span class="ph-tag">�x� ${tag}</span></div>`;
+        }
+
+        if (round === "resuelto" && resolvedUrl) {
+          const tx = h.targetResuelto ? h.targetResuelto.x * 100 : (opts.tx || 50);
+          const ty = h.targetResuelto ? h.targetResuelto.y * 100 : (opts.ty || 50);
+          const target = h.targetResuelto ? targetSvg(tx, ty, "#22C55E") : "";
+          const check = `<div class="ph-check"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4"><path d="M20 6 9 17l-5-5"/></svg></div>`;
+          return `<div class="ph-photo"><img class="ph-real" src="${resolvedUrl}" alt="" loading="lazy"/><div class="ph-grain"></div>${target}${check}<span class="ph-tag">�x� Resuelto</span></div>`;
+        }
+
+        const sc = sceneFor(h.recinto, round);
+        const defect = round === "resuelto" ? "" : `<div class="ph-defect" style="left:${(opts.tx || 50) - 6}%;top:${(opts.ty || 50) - 4}%;width:22px;height:8px"></div>`;
+        const target = round === "r0" && opts.target ? targetSvg(opts.tx, opts.ty, opts.target) : "";
+        const check = round === "resuelto" && opts.check ? `<div class="ph-check"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4"><path d="M20 6 9 17l-5-5"/></svg></div>` : "";
+        const tag = round === "r0" ? "R0 · simulada" : "Resuelto · simulada";
+        return `<div class="ph-photo"><div class="ph-scene" style="background:${sc}"></div><div class="ph-grain"></div>${defect}${target}${check}<span class="ph-tag">�x� ${tag}</span></div>`;
+      }
+
+      function targetSvg(x, y, col) {
+        return `<svg class="ph-target" viewBox="0 0 100 100" style="left:${x}%;top:${y}%">
+          <circle cx="50" cy="50" r="30" fill="none" stroke="${col}" stroke-width="5"/>
+          <circle cx="50" cy="50" r="15" fill="none" stroke="${col}" stroke-width="5"/>
+          <circle cx="50" cy="50" r="3" fill="${col}"/>
+          <line x1="50" y1="4" x2="50" y2="26" stroke="${col}" stroke-width="5"/>
+          <line x1="50" y1="74" x2="50" y2="96" stroke="${col}" stroke-width="5"/>
+          <line x1="4" y1="50" x2="26" y2="50" stroke="${col}" stroke-width="5"/>
+          <line x1="74" y1="50" x2="96" y2="50" stroke="${col}" stroke-width="5"/>
+        </svg>`;
+      }
+
+      function sceneFor(recinto, round) {
+        const palette = [["#E9E3D8","#CDBFA8"],["#E4E9EF","#C2CAD6"],["#ECE6E1","#CFC0B2"],["#E3EAE5","#BFD0C5"],["#ECE8F1","#CBC2D6"],["#EAE6DC","#CDC3A8"]];
+        const p = palette[hashStr(recinto) % palette.length];
+        const wall = round === "resuelto" ? lighten(p[0]) : p[0];
+        return `linear-gradient(180deg, ${wall} 0%, ${wall} 60%, ${p[1]} 60%, ${p[1]} 100%)`;
+      }
+
+      function lighten(hex) {
+        const n = parseInt(hex.slice(1), 16);
+        const r = Math.min(255, (n >> 16) + 12), g = Math.min(255, ((n >> 8) & 255) + 12), b = Math.min(255, (n & 255) + 12);
+        return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+      }
+
+      function hashStr(s) { s = String(s); let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return h; }
+      function addDays(d, n) { if (!d) return null; const x = new Date(d); x.setDate(x.getDate() + n); return x.toISOString().slice(0, 10); }
+
+      function hTableHtml(list) {
+        return (
+          `<thead><tr><th>Recinto</th><th>Descripción</th><th>KPI</th><th>Especialidad</th><th>Severidad</th><th>Estado</th><th>Apertura</th><th>Cierre</th></tr></thead><tbody>` +
+          list
+            .map(
+              (h) =>
+                `<tr${h.origen === "agente" ? ' class="tbl-row-live"' : ""}><td>${h.recinto}</td><td>${h.descripcion}${h.origen === "agente" ? ' <span class="hint">· captura</span>' : ""}</td><td>${h.kpi}</td><td>${h.especialidad}</td><td><span class="badge ${h.severidad}">${h.severidad}</span></td><td><span class="badge ${h.estado}">${h.estado}</span></td><td>${fmtDate(h.apertura)}</td><td>${fmtDate(h.cierre)}</td></tr>`
+            )
+            .join("") +
+          `</tbody>`
+        );
+      }
+
+      function kvRow(k, v) { return `<div class="flex between" style="padding:7px 0;border-bottom:1px solid var(--border);font-size:12.5px"><span class="muted">${k}</span><b>${v}</b></div>`; }
+
+      const tabs = {
+        resumen: renderResumen,
+        hallazgos: renderHallazgos,
+        ot: renderOt,
+        historial: renderHistorial,
+      };
+
+      document.getElementById("tabs").addEventListener("click", (e) => {
+        const b = e.target.closest("button[data-tab]");
+        if (!b) return;
+        document.querySelectorAll("#tabs button").forEach((x) => x.classList.toggle("active", x === b));
+        tabs[b.dataset.tab]();
+      });
+      const initialTab = E.qs("tab", "resumen");
+      if (tabs[initialTab]) {
+        document.querySelectorAll("#tabs button").forEach((x) => x.classList.toggle("active", x.dataset.tab === initialTab));
+        tabs[initialTab]();
+      } else {
+        renderResumen();
+      }
+
+      } catch (err) {
+        showError("Error al cargar la unidad", err);
+      }
+    })();
+
+    function legendDot(color, label) { return `<span><i class="dot" style="background:${color}"></i>${label}</span>`; }
+    function fmtDate(d) { if (!d) return "�"; const x = new Date(d); return x.toLocaleDateString("es-CL", { day: "2-digit", month: "2-digit", year: "numeric" }); }
+    function fmtDateTime(d) { if (!d) return "�"; const x = new Date(d); return x.toLocaleString("es-CL", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }); }
+  </script>
+</body>
+</html>

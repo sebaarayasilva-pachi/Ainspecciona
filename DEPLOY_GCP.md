@@ -88,6 +88,47 @@ gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregi
 npm install
 ```
 
+### `deploy.ps1` (Windows)
+
+Desde `ainspecta_web/`:
+
+```powershell
+.\deploy.ps1
+```
+
+El script despliega **Cloud Run** (`ainspecciona-api`) y, si está configurado, **Firebase Hosting**. Antes ejecuta **`migrate.ps1`** (subproceso), que lee `DATABASE_URL` desde **Secret Manager** y se conecta por **TCP a `127.0.0.1:3307`**.
+
+**Si `migrate.ps1` falla:** `deploy.ps1` **se detiene** y **no** sube la revisión nueva (evita código Prisma que espera columnas que aún no existen en Cloud SQL). Para omitir migración solo en emergencia: `DEPLOY_ALLOW_NO_MIGRATE=1 .\deploy.ps1` (no recomendado).
+
+**Si la migración falla con `P1001: Can't reach database server at 127.0.0.1:3307`:** no llegará el deploy hasta corregirlo. Hay que:
+
+1. **Terminal 1** — Cloud SQL Auth Proxy (mismo puerto que `migrate.ps1`, por defecto `3307`):
+
+```powershell
+cloud-sql-proxy ainspecciona:southamerica-west1:ainspecciona-mysql --port=3307
+```
+
+(o `.\cloud-sql-proxy.exe` si usas el binario local).
+
+2. **Terminal 2** — migraciones:
+
+```powershell
+cd ainspecta_web
+.\migrate.ps1
+```
+
+3. Opcional: volver a ejecutar `.\deploy.ps1` si quieres un ciclo completo tras migrar.
+
+El servidor puede crear columnas puntuales con `ensure*` al arrancar, pero **conviene aplicar siempre `prisma migrate deploy`** para historial y paridad entre entornos.
+
+**Si `migrate deploy` falla con `Duplicate column` / objeto ya creado por `ensure*`:** el esquema ya está bien; solo falta alinear la tabla `_prisma_migrations`. Con el proxy en `3307` y `DATABASE_URL` apuntando al túnel:
+
+```powershell
+npx prisma migrate resolve --applied NOMBRE_MIGRACION
+```
+
+Ejemplo: `20260403120000_peer_referral`. Luego `npx prisma migrate status` debe decir *up to date*.
+
 **Run DB migrations (Cloud SQL):**
 ```bash
 # Use Cloud SQL connector socket in DATABASE_URL (sin puerto :3306 para socket)
@@ -136,23 +177,25 @@ Open:
 
 ---
 
-## 4) (Optional) Firebase Hosting as frontend
-This repo includes a `firebase.json` that maps:
-- `/formulario` → `/formulario.html`
-- `/capture/**` → `/capture.html`
-- `/cases/**/report` → `/report.html`
+## 4) Firebase Hosting (frontend + proxy a Cloud Run)
 
-To proxy API calls from Hosting → Cloud Run, add rewrites like:
+El `firebase.json` del repo define **rewrites en orden**: primero rutas concretas a HTML en `public/`, y al final un catch‑all `**` hacia el servicio Cloud Run `ainspecciona-api` (región `southamerica-west1`).
 
-```json
-{ "source": "/api/**", "run": { "serviceId": "ainspecciona-api", "region": "southamerica-west1" } }
+Incluye entre otras:
+- `/` → `corredores.html`
+- `/precios` → `precios.html`
+- **`/whatsapp-test` → `whatsapp-test.html`** (chat de prueba del bot; sin pasar por Cloud Run si esta regla está desplegada)
+- **`/api/**` → Cloud Run** (API explícita; el HTML de prueba llama a `/api/whatsapp/test/...`)
+- `**` → Cloud Run (resto de rutas que no sean estáticas)
+
+Tras cambiar `firebase.json` o archivos en `public/`:
+
+```bash
+cd ainspecta_web
+firebase deploy --only hosting
 ```
 
-and (because the UI uses `/cases` as API for now):
-
-```json
-{ "source": "/cases/**", "run": { "serviceId": "ainspecciona-api", "region": "southamerica-west1" } }
-```
+(Proyecto Firebase y CLI ya configurados con `firebase login`.)
 
 ---
 
@@ -216,3 +259,52 @@ gcloud secrets versions add DATABASE_URL --data-file=$env:TEMP\dburl.txt
 ```
 
 Luego redeploy con `.\deploy.ps1`.
+
+## Troubleshooting: `/whatsapp-test` devuelve `404` JSON de Fastify
+
+**Síntoma:** En el navegador ves algo como  
+`{"message":"Route GET:/whatsapp-test not found","error":"Not Found","statusCode":404}`  
+(es la respuesta por defecto de Fastify en **Cloud Run**).
+
+**Causa:** La petición está llegando al **backend** sin que exista esa ruta en la revisión desplegada, o **Firebase Hosting** no está aplicando la regla estática y todo cae en el catch‑all `**` → Cloud Run.
+
+**Qué hacer (las dos cosas):**
+
+1. **Hosting** — desplegar reglas y estáticos actuales (incluye la rewrite a `whatsapp-test.html`):
+   ```powershell
+   cd ainspecta_web
+   firebase deploy --only hosting
+   ```
+
+2. **Cloud Run** — imagen nueva con el `server.js` actual (incluye `GET /whatsapp-test` que lee `public/whatsapp-test.html`):
+   ```powershell
+   .\deploy.ps1
+   ```
+
+Después probá `https://ainspecciona.web.app/whatsapp-test` (y tu dominio custom si Hosting lo tiene enlazado al mismo proyecto).
+
+**Variables:** `WHATSAPP_TEST_MODE=1` en Cloud Run solo habilita **`/api/whatsapp/test/*`**; no crea la ruta HTML. Si la página carga pero la API falla, revisá esa variable y el resto de secretos.
+
+## Troubleshooting: `WhatsAppProcessedEvent` / tabla no existe (Prisma)
+
+**Síntoma:** Al usar `/whatsapp-test`, error del tipo *The table `WhatsAppProcessedEvent` does not exist*.
+
+**Causa:** En Cloud SQL **no se aplicó** la migración `prisma/migrations/20260410120000_whatsapp_tables` (u otras posteriores).
+
+**Solución:** Conectar a la misma BD que usa producción y ejecutar migraciones:
+
+1. **Terminal 1** — Cloud SQL Auth Proxy (deja corriendo):
+   ```powershell
+   cloud-sql-proxy ainspecciona:southamerica-west1:ainspecciona-mysql --port=3307
+   ```
+   (O `.\cloud-sql-proxy.exe` con la misma instancia y puerto.)
+
+2. **Terminal 2** — desde `ainspecta_web`:
+   ```powershell
+   .\migrate.ps1
+   ```
+   (`migrate.ps1` lee `DATABASE_URL` desde Secret Manager y lo adapta a `127.0.0.1:3307` cuando el secreto usa socket Unix.)
+
+3. Verificá: `npx prisma migrate status` (con el mismo `DATABASE_URL` que usa `migrate.ps1`).
+
+Sin el proxy en marcha verás `P1001: Can't reach database server at 127.0.0.1:3307`.

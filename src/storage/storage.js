@@ -31,12 +31,14 @@ export function createStorage() {
 
     return {
       driver: 'gcs',
-      async saveImageBuffer({ buffer, contentType, ext, caseId, tenantId }) {
+      async saveImageBuffer({ buffer, contentType, ext, caseId, tenantId, storageKey }) {
         const id = crypto.randomUUID();
         const safeExt = String(ext || '').replace('.', '');
-        const object = tenantId
-          ? `tenants/${tenantId}/logo.${safeExt}`
-          : `cases/${caseId}/${id}.${safeExt}`;
+        const object = storageKey
+          ? String(storageKey)
+          : tenantId
+            ? `tenants/${tenantId}/logo.${safeExt}`
+            : `cases/${caseId}/${id}.${safeExt}`;
 
         await bucket.file(object).save(buffer, {
           contentType,
@@ -71,6 +73,26 @@ export function createStorage() {
         if (isHttpUrl(filePath)) return filePath;
         // If someone stored a relative path accidentally, return it as /path
         return String(filePath).startsWith('/') ? filePath : `/${filePath}`;
+      },
+      async deleteFile(filePath) {
+        if (!filePath) return false;
+        if (isHttpUrl(filePath)) {
+          const match = filePath.match(
+            new RegExp(`https://storage\\.googleapis\\.com/${gcsBucket.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/(.+)`)
+          );
+          if (match) {
+            const object = decodeURIComponent(match[1].replace(/\/+/g, '/'));
+            await bucket.file(object).delete({ ignoreNotFound: true });
+            return true;
+          }
+          return false;
+        }
+        const object = String(filePath).replace(/^[/\\]+/, '');
+        if (object.startsWith('cases/') || object.startsWith('postventa/') || object.startsWith('tenants/')) {
+          await bucket.file(object).delete({ ignoreNotFound: true });
+          return true;
+        }
+        return false;
       }
     };
   }
@@ -81,10 +103,14 @@ export function createStorage() {
 
   return {
     driver: 'local',
-    async saveImageBuffer({ buffer, contentType, ext, caseId, tenantId }) {
+    async saveImageBuffer({ buffer, contentType, ext, caseId, tenantId, storageKey }) {
       const id = crypto.randomUUID();
       const safeExt = String(ext || '').replace('.', '');
-      const storedFileName = tenantId ? `tenants-${tenantId}-logo.${safeExt}` : `${id}.${safeExt}`;
+      const storedFileName = storageKey
+        ? String(storageKey).replace(/\//g, '-')
+        : tenantId
+          ? `tenants-${tenantId}-logo.${safeExt}`
+          : `${id}.${safeExt}`;
       const absPath = join(dir, storedFileName);
       await fs.promises.writeFile(absPath, buffer);
       const filePath = `uploads/${storedFileName}`;
@@ -107,6 +133,18 @@ export function createStorage() {
       if (!filePath) return null;
       if (isHttpUrl(filePath)) return filePath;
       return String(filePath).startsWith('/') ? filePath : `/${filePath}`;
+    },
+    async deleteFile(filePath) {
+      if (!filePath || isHttpUrl(filePath)) return false;
+      const p = String(filePath).replace(/^[/\\]+/, '');
+      const absPath = join(process.cwd(), p);
+      try {
+        await fs.promises.unlink(absPath);
+        return true;
+      } catch (err) {
+        if (err && err.code === 'ENOENT') return false;
+        throw err;
+      }
     }
   };
 }

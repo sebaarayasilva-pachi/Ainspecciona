@@ -39,6 +39,10 @@
     .step { flex: 1; text-align: center; padding: 12px 8px; font-size: 13px; font-weight: 700; color: #64748b; border-bottom: 3px solid #1e293b; }
     .step.active { color: #10b981; border-color: #10b981; }
     .step.done { color: #059669; border-color: #059669; }
+    .facturacionToggle { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; }
+    .facturacionToggle.visible { max-height: 640px; }
+    .formCheck { display: flex; align-items: center; gap: 10px; font-weight: 600; color: #94a3b8; cursor: pointer; margin-bottom: 12px; }
+    .formCheck input { width: auto; }
   </style>
 </head>
 <body>
@@ -79,6 +83,54 @@
           <div class="formGroup">
             <label for="contactRut">RUT *</label>
             <input id="contactRut" required placeholder="Ej: 12.345.678-9" />
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Facturación (opcional)</h2>
+          <p class="muted" style="margin:0 0 12px;font-size:14px">Si necesitas boleta o factura electrónica SII, completa los datos. Mismo criterio que en el flujo de pago.</p>
+          <label class="formCheck">
+            <input type="checkbox" id="necesitaFactura" />
+            <span>Necesito boleta o factura electrónica</span>
+          </label>
+          <div class="facturacionToggle" id="facturacionCampos">
+            <div class="formGroup">
+              <label for="facturaTipoDte">Tipo de documento</label>
+              <select id="facturaTipoDte">
+                <option value="39">Boleta electrónica (39)</option>
+                <option value="33">Factura electrónica (33)</option>
+              </select>
+            </div>
+            <div class="formGroup">
+              <label for="factRazonSocial">Razón social *</label>
+              <input id="factRazonSocial" placeholder="Empresa S.A." />
+            </div>
+            <div class="formGroup">
+              <label for="factRut">RUT receptor *</label>
+              <input id="factRut" placeholder="12.345.678-9" />
+            </div>
+            <div class="formGroup">
+              <label for="factDireccion">Dirección *</label>
+              <input id="factDireccion" placeholder="Calle y número" />
+            </div>
+            <div class="formRow">
+              <div class="formGroup">
+                <label for="factComuna">Comuna *</label>
+                <input id="factComuna" placeholder="Ej: Providencia" />
+              </div>
+              <div class="formGroup">
+                <label for="factCiudad">Ciudad *</label>
+                <input id="factCiudad" placeholder="Ej: Santiago" />
+              </div>
+            </div>
+            <div class="formGroup">
+              <label for="factGiro">Giro *</label>
+              <input id="factGiro" placeholder="Ej: Servicios inmobiliarios" />
+            </div>
+            <div class="formGroup">
+              <label for="factEmail">Email para envío del DTE</label>
+              <input type="email" id="factEmail" placeholder="Si lo dejas vacío, usamos tu email de contacto" />
+            </div>
           </div>
         </div>
 
@@ -143,14 +195,6 @@
             <label for="propertySurface">Superficie (m²)</label>
             <input id="propertySurface" placeholder="Ej: 45" />
           </div>
-          <div class="checks">
-            <label><input type="checkbox" id="hasPatio" /> Tiene patio</label>
-            <label><input type="checkbox" id="hasAttic" /> Tiene entretecho</label>
-            <label><input type="checkbox" id="hasLaundry" /> Tiene loggia</label>
-            <label><input type="checkbox" id="hasElevator" /> Tiene ascensor</label>
-            <label><input type="checkbox" id="hasParking" /> Tiene estacionamiento</label>
-            <label><input type="checkbox" id="hasGreenCertificate" /> Certificado verde</label>
-          </div>
         </div>
 
         <button type="submit" class="btn" id="submitBtn">Generar Photo Plan</button>
@@ -164,6 +208,11 @@
       const form = document.getElementById('caseForm');
       const note = document.getElementById('note');
       const submitBtn = document.getElementById('submitBtn');
+      const necesitaFactura = document.getElementById('necesitaFactura');
+      const facturacionCampos = document.getElementById('facturacionCampos');
+      necesitaFactura.addEventListener('change', () => {
+        facturacionCampos.classList.toggle('visible', necesitaFactura.checked);
+      });
 
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -178,6 +227,21 @@
           note.textContent = 'Completa nombre, email y RUT.';
           note.className = 'note err';
           return;
+        }
+
+        const needFact = necesitaFactura.checked;
+        if (needFact) {
+          const factRazon = document.getElementById('factRazonSocial').value.trim();
+          const factRut = document.getElementById('factRut').value.trim();
+          const factDir = document.getElementById('factDireccion').value.trim();
+          const factComuna = document.getElementById('factComuna').value.trim();
+          const factCiudad = document.getElementById('factCiudad').value.trim();
+          const factGiro = document.getElementById('factGiro').value.trim();
+          if (!factRazon || !factRut || !factDir || !factComuna || !factCiudad || !factGiro) {
+            note.textContent = 'Completa todos los campos de facturación o desmarca la casilla.';
+            note.className = 'note err';
+            return;
+          }
         }
 
         submitBtn.disabled = true;
@@ -204,13 +268,22 @@
           propertyType: document.getElementById('propertyType').value,
           bathroomsCount: Number(document.getElementById('bathroomsCount').value || 1),
           bedroomsCount: Number(document.getElementById('bedroomsCount').value || 1),
-          hasPatio: document.getElementById('hasPatio').checked,
-          hasAttic: document.getElementById('hasAttic').checked,
-          hasLaundry: document.getElementById('hasLaundry').checked,
-          hasElevator: document.getElementById('hasElevator').checked,
-          hasParking: document.getElementById('hasParking').checked,
-          hasGreenCertificate: document.getElementById('hasGreenCertificate').checked
+          hasLaundry: true,
+          hasElevator: true,
+          hasGreenCertificate: true
         };
+        if (needFact) {
+          payload.necesitaFactura = true;
+          payload.facturaRazonSocial = document.getElementById('factRazonSocial').value.trim();
+          payload.facturaRut = document.getElementById('factRut').value.trim();
+          payload.facturaDireccion = document.getElementById('factDireccion').value.trim();
+          payload.facturaComuna = document.getElementById('factComuna').value.trim();
+          payload.facturaCiudad = document.getElementById('factCiudad').value.trim();
+          payload.facturaGiro = document.getElementById('factGiro').value.trim();
+          const fe = document.getElementById('factEmail').value.trim();
+          if (fe) payload.facturaEmail = fe;
+          payload.facturaTipoDte = Number(document.getElementById('facturaTipoDte').value) || 39;
+        }
 
         try {
           const res = await fetch('/api/starter/create-draft', {

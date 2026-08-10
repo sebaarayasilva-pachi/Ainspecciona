@@ -1,0 +1,71 @@
+{
+  "units": {
+    "cuvee-2:301": [
+      {
+        "id": "H-301-01",
+        "recinto": "Dormitorio 1",
+        "descripcion": "Retoque de pintura en muro",
+        "kpi": "Terminaciones",
+        "especialidad": "Pintor",
+        "severidad": "menor",
+        "estado": "cerrado",
+        "apertura": "2024-05-21",
+        "cierre": "2024-06-02",
+        "fotoUrl": "/entrega/assets/demo-hallazgo.jpg",
+        "origen": "agente"
+      },
+      {
+        "id": "H-301-02",
+        "recinto": "Terraza",
+        "descripcion": "Sello deficiente en ventana termopanel",
+        "kpi": "Terminaciones",
+        "especialidad": "Sellador de juntas y silicona",
+        "severidad": "intermedia",
+        "estado": "abierto",
+        "apertura": "2024-05-21",
+        "cierre": null,
+        "fotoUrl": "/entrega/assets/demo-hallazgo.jpg",
+        "origen": "agente"
+      },
+      {
+        "id": "H-301-03",
+        "recinto": "Logia",
+        "descripcion": "Gres porcelánico con trizadura",
+        "kpi": "Terminaciones",
+        "especialidad": "Instalador de porcelanato",
+        "severidad": "intermedia",
+        "estado": "abierto",
+        "apertura": "2024-05-21",
+        "cierre": null,
+        "fotoUrl": "/entrega/assets/demo-hallazgo.jpg",
+        "origen": "agente"
+      },
+      {
+        "id": "H-301-04",
+        "recinto": "Living Comedor Cocina",
+        "descripcion": "Rayado en cubierta de cuarzo",
+        "kpi": "Terminaciones",
+        "especialidad": "Mueblista",
+        "severidad": "menor",
+        "estado": "abierto",
+        "apertura": "2024-05-21",
+        "cierre": null,
+        "fotoUrl": "/entrega/assets/demo-hallazgo.jpg",
+        "origen": "agente"
+      },
+      {
+        "id": "H-301-05",
+        "recinto": "Baño Suite",
+        "descripcion": "Filtración bajo lavamanos",
+        "kpi": "Instalaciones Sanitarias",
+        "especialidad": "Gasfiter",
+        "severidad": "critica",
+        "estado": "abierto",
+        "apertura": "2024-05-21",
+        "cierre": null,
+        "fotoUrl": "/entrega/assets/demo-hallazgo.jpg",
+        "origen": "agente"
+      }
+    ]
+  }
+}

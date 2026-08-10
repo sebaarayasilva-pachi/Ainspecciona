@@ -58,7 +58,7 @@
     .modal .modal-title { font-size: 22px; font-weight: 800; color: #F8FAFC; margin-bottom: 8px; }
     .modal .modal-desc { font-size: 14px; color: #94a3b8; margin-bottom: 24px; line-height: 1.6; }
     .modal .modal-price { font-size: 36px; font-weight: 800; color: #F8FAFC; margin-bottom: 4px; }
-    .modal .modal-price-note { font-size: 13px; color: #64748b; margin-bottom: 28px; }
+    .modal .modal-price-note { font-size: 13px; color: #64748b; margin-bottom: 22px; }
     .modal .btn {
       display: inline-block; padding: 16px 32px; border-radius: 12px; border: none;
       background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: #fff;
@@ -128,7 +128,7 @@
       </div>
       <div class="modal-title">Photo Plan generado</div>
       <div class="modal-desc">Tu plan incluye <strong id="modalSlotCount">0</strong> fotos distribuidas por zona. Compra tu inspección para recibir el link de captura.</div>
-      <div class="modal-price">$15.000 CLP</div>
+      <div class="modal-price">$14.990 CLP</div>
       <div class="modal-price-note">Inspección completa con informe técnico</div>
       <button class="btn" id="buyBtn">Comprar inspección</button>
       <button class="btn-secondary" id="closeModalBtn">Ver Photo Plan primero</button>
@@ -137,7 +137,7 @@
 
   <!-- Sticky buy button -->
   <div class="sticky-buy hidden" id="stickyBuy">
-    <button class="btn" id="stickyBuyBtn">Comprar inspección · $15.000 CLP</button>
+    <button class="btn" id="stickyBuyBtn">Comprar inspección · $14.990 CLP</button>
   </div>
 
   <script>
@@ -165,18 +165,19 @@
       }
 
       const ZONE_MAP = {
-        CERTIFICADO: { label: 'Certificación verde', icon: '🌱', order: 0 },
-        PUERTA: { label: 'Entrada', icon: '🚪', order: 1 },
-        ELECTRICAL: { label: 'Electricidad', icon: '⚡', order: 2 },
-        KITCHEN: { label: 'Cocina', icon: '🍳', order: 3 },
-        LAUNDRY: { label: 'Loggia', icon: '🧺', order: 4 },
-        LIVING: { label: 'Living', icon: '🛋️', order: 5 },
+        CERTIFICADO: { label: 'Certificación verde', icon: '🌱', order: 1 },
+        ASCENSOR: { label: 'Ascensor', icon: '🛗', order: 2 },
+        ELEVATOR: { label: 'Ascensor', icon: '🛗', order: 2 },
+        PUERTA: { label: 'Entrada', icon: '🚪', order: 3 },
+        ELECTRICAL: { label: 'Electricidad', icon: '⚡', order: 4 },
+        KITCHEN: { label: 'Cocina', icon: '🍳', order: 5 },
+        LAUNDRY: { label: 'Loggia', icon: '🧺', order: 6 },
+        LIVING: { label: 'Living', icon: '🛋️', order: 7 },
         BEDROOM: { label: 'Dormitorio', icon: '🛏️', order: 6 },
         BATHROOM: { label: 'Baño', icon: '🚿', order: 7 },
         HALLWAY: { label: 'Pasillo / Hall', icon: '🚪', order: 8 },
         PATIO: { label: 'Patio', icon: '🌿', order: 9 },
         ATTIC: { label: 'Entretecho', icon: '🏠', order: 10 },
-        ELEVATOR: { label: 'Ascensor', icon: '🛗', order: 11 },
         PARKING: { label: 'Estacionamiento', icon: '🅿️', order: 12 }
       };
 

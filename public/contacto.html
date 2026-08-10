@@ -97,6 +97,22 @@
     .footerCol h4 { margin: 0 0 10px; font-size: 14px; }
     .footerCol a { color: #cbd5e1; text-decoration: none; font-size: 14px; display: block; margin-bottom: 8px; }
     .footerCol a:hover { color: #ffffff; }
+    .footerPartners {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: flex-start;
+      min-width: 0;
+    }
+    .footerPartners img {
+      display: block;
+      width: auto;
+      max-width: 100%;
+      height: auto;
+      max-height: 92px;
+      object-fit: contain;
+      object-position: left center;
+    }
     .footerCta {
       display: inline-flex;
       align-items: center;
@@ -152,16 +168,18 @@
       <div class="grid">
         <div class="card">
           <h3>Escríbenos</h3>
-          <form>
+          <form id="contactForm">
             <label for="name">Nombre</label>
-            <input id="name" name="name" type="text" placeholder="Tu nombre" />
+            <input id="name" name="name" type="text" placeholder="Tu nombre" required />
             <label for="email">Email</label>
-            <input id="email" name="email" type="email" placeholder="tu@empresa.com" />
+            <input id="email" name="email" type="email" placeholder="tu@empresa.com" required />
             <label for="company">Empresa</label>
             <input id="company" name="company" type="text" placeholder="Nombre de tu empresa" />
             <label for="message">Mensaje</label>
-            <textarea id="message" name="message" placeholder="Describe tu caso de uso"></textarea>
-            <button class="btn" type="button">Enviar</button>
+            <textarea id="message" name="message" placeholder="Describe tu caso de uso" required></textarea>
+            <input type="text" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;opacity:0;" aria-hidden="true" />
+            <button class="btn" id="contactSubmit" type="submit">Enviar</button>
+            <p id="contactStatus" role="status" style="margin:10px 0 0;font-size:14px;display:none;"></p>
           </form>
         </div>
         <div class="card">
@@ -192,12 +210,58 @@
         <a href="/contacto.html">Contacto</a>
         <a href="/precios">Precios</a>
       </div>
+      <div class="footerCol footerPartners" aria-label="Referencias técnicas">
+        <h4>Referencias técnicas</h4>
+        <img src="/assets/footer-referencias-tecnicas.png" alt="Referencias técnicas (NCH, CDT, CChC, ICC)" loading="lazy" decoding="async" />
+      </div>
     </div>
     <div class="footerBottom">
       <div>© 2026 Ainspecciona. Todos los derechos reservados.</div>
       <div>Audit-ready · Evidencia por slot · White-label</div>
     </div>
   </footer>
+  <script src="/assets/site-shell.js" defer></script>
   <script src="/assets/tracker.js" defer></script>
+  <script>
+    (function () {
+      const form = document.getElementById('contactForm');
+      const btn = document.getElementById('contactSubmit');
+      const status = document.getElementById('contactStatus');
+
+      function showStatus(text, ok) {
+        status.textContent = text;
+        status.style.color = ok ? '#15803d' : '#b91c1c';
+        status.style.display = 'block';
+      }
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        status.style.display = 'none';
+        btn.disabled = true;
+        const originalLabel = btn.textContent;
+        btn.textContent = 'Enviando…';
+        try {
+          const data = Object.fromEntries(new FormData(form).entries());
+          const res = await fetch('/api/contacto', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+          });
+          const body = await res.json().catch(function () { return {}; });
+          if (res.ok && body.ok) {
+            form.reset();
+            showStatus('¡Mensaje enviado! Te responderemos en menos de 24 horas hábiles.', true);
+          } else {
+            showStatus(body.error || 'No pudimos enviar tu mensaje. Escríbenos a contacto@ainspecciona.com.', false);
+          }
+        } catch (err) {
+          showStatus('Error de conexión. Escríbenos a contacto@ainspecciona.com.', false);
+        } finally {
+          btn.disabled = false;
+          btn.textContent = originalLabel;
+        }
+      });
+    })();
+  </script>
 </body>
 </html>

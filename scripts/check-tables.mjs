@@ -1,6 +1,12 @@
 import { PrismaClient } from '@prisma/client';
 const p = new PrismaClient();
-const names = ['ReferralPartner', 'PartnerCommissionAccrual', 'Supplier', 'PresencialOrder'];
+const names = [
+  'ReferralPartner',
+  'PartnerCommissionAccrual',
+  'PeerReferralAttribution',
+  'Supplier',
+  'PresencialOrder'
+];
 for (const t of names) {
   const rows = await p.$queryRawUnsafe(
     `SELECT COUNT(*) AS c FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '${t}'`

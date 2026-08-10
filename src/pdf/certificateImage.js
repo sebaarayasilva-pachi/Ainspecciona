@@ -2,15 +2,10 @@ import sharp from 'sharp';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { starsFromScore } from '../scoring/scoringV2_2.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const LOGO_PATH = path.join(__dirname, '../../public/assets/Logo 2 ainspecciona.png');
-
-function starsFromScore(score) {
-  const s = Math.max(0, Math.min(100, Number(score) || 0));
-  if (s <= 0) return 1;
-  return Math.min(5, Math.max(1, Math.ceil(s / 20)));
-}
 
 function badgeBannerGradientId(badge) {
   const b = String(badge || '').toUpperCase();
@@ -24,8 +19,8 @@ function badgeBannerGradientId(badge) {
  * @param {{ score: number, badge: string, shortId: string, reportUrl: string, qrDataUri?: string }} opts
  * @returns {Promise<Buffer>} JPG buffer
  */
-export async function generateCertificateImage({ score, badge, shortId, reportUrl, qrDataUri }) {
-  const stars = starsFromScore(score);
+export async function generateCertificateImage({ score, badge, shortId, reportUrl, qrDataUri, scoreConfig }) {
+  const stars = starsFromScore(score, scoreConfig);
   const bannerId = badgeBannerGradientId(badge);
 
   let logoDataUri = '';

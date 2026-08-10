@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard · In &amp; Out</title>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/inout/assets/inout.css" />
+</head>
+<body class="io-shell">
+  <div class="io-layout">
+    <div id="shell"></div>
+    <main class="io-main">
+      <h1>Aperturas y cierres</h1>
+      <p class="sub">
+        Dos etapas: <strong>IN</strong> (apertura / línea base) → <strong>OUT</strong> (cierre con ghost overlay).
+        Opera la captura desde tu cuenta, sin links sueltos.
+      </p>
+
+      <div class="card" style="margin-bottom:16px">
+        <h2 style="margin:0 0 8px;font-size:16px">Hub de captura</h2>
+        <p class="sub" style="margin-bottom:12px">
+          Lista aperturas en curso, inicia un IN nuevo o elige cuál cerrar (OUT).
+        </p>
+        <a class="btn" id="btnCapturaHub" href="/inout/captura">Ir a Captura</a>
+      </div>
+
+      <div class="kpi-grid" id="kpis">
+        <div class="kpi"><div class="n">—</div><div class="l">Total ciclos</div></div>
+        <div class="kpi warn"><div class="n">—</div><div class="l">Aperturas IN</div></div>
+        <div class="kpi ok"><div class="n">—</div><div class="l">Para cerrar OUT</div></div>
+        <div class="kpi warn"><div class="n">—</div><div class="l">OUT / revisión</div></div>
+        <div class="kpi"><div class="n">—</div><div class="l">Cerrados</div></div>
+      </div>
+
+      <div class="card">
+        <h2 style="margin:0 0 12px;font-size:16px">Ciclos recientes</h2>
+        <table class="table" id="table">
+          <thead>
+            <tr>
+              <th>Propiedad</th>
+              <th>Arrendatario</th>
+              <th>Estado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <p id="empty" class="sub" hidden>Aún no hay ciclos. Abre el hub de Captura para iniciar un IN.</p>
+      </div>
+
+      <p class="disclaimer">
+        Herramienta de documentación y apoyo técnico. No constituye peritaje judicial ni determina responsabilidades legales.
+      </p>
+    </main>
+  </div>
+  <script src="/inout/portal/assets/inout-app.js?v=20260809-cap1"></script>
+  <script>
+    const Io = window.IoPortal;
+    if (!Io) {
+      document.body.innerHTML =
+        '<p style="padding:24px;font-family:sans-serif">No se pudo cargar In &amp; Out. <a href="/inout/portal/login">Ir al login</a></p>';
+      throw new Error("IoPortal missing");
+    }
+
+    async function boot() {
+      try {
+        const me = await Io.ensureAuth();
+        if (!me) return;
+        const shell = document.getElementById("shell");
+        if (shell) shell.outerHTML = Io.renderShell("overview", me);
+        Io.bindShell();
+        const hubBtn = document.getElementById("btnCapturaHub");
+        if (hubBtn) hubBtn.href = Io.capturaHubHref();
+        await load();
+      } catch (err) {
+        console.error(err);
+        const main = document.querySelector(".io-main");
+        if (main) {
+          main.insertAdjacentHTML(
+            "afterbegin",
+            '<p class="sub" style="color:#e85d5d">Error al abrir el dashboard. <a href="/inout/portal/login">Ir al login</a></p>'
+          );
+        }
+      }
+    }
+
+    function renderKpis(leases) {
+      const k = Io.computeKpis(leases);
+      const root = document.getElementById("kpis");
+      root.innerHTML = `
+        <div class="kpi"><div class="n">${k.total}</div><div class="l">Total ciclos</div></div>
+        <div class="kpi warn"><div class="n">${k.inProgress}</div><div class="l">Aperturas IN</div></div>
+        <div class="kpi ok"><div class="n">${k.outReady}</div><div class="l">Para cerrar OUT</div></div>
+        <div class="kpi warn"><div class="n">${k.outProgress + k.underReview}</div><div class="l">OUT / revisión</div></div>
+        <div class="kpi"><div class="n">${k.closed}</div><div class="l">Cerrados</div></div>`;
+    }
+
+    function actionLabel(lease) {
+      const st = String(lease.cycleStatus || "");
+      if (st === "draft" || st === "in_in_progress") return "Continuar IN";
+      if (st === "out_ready" || st === "in_completed") return "Cerrar OUT";
+      if (st === "out_in_progress") return "Continuar OUT";
+      return "Captura";
+    }
+
+    async function load() {
+      const res = await Io.ioFetch("/api/inout/leases");
+      const data = await res.json();
+      const leases = data.leases || [];
+      renderKpis(leases);
+      const tb = document.querySelector("#table tbody");
+      const empty = document.getElementById("empty");
+      tb.innerHTML = "";
+      empty.hidden = leases.length > 0;
+      leases.forEach((l) => {
+        const tr = document.createElement("tr");
+        const href = Io.appHref("/inout/portal/lease?id=" + encodeURIComponent(l.id));
+        const hub = Io.capturaHubHref();
+        tr.innerHTML = `
+          <td>${Io.escapeHtml(l.property?.address || "—")}${
+            l.property?.comuna
+              ? '<br><span class="badge">' + Io.escapeHtml(l.property.comuna) + "</span>"
+              : ""
+          }</td>
+          <td>${Io.escapeHtml(l.tenantName || "—")}</td>
+          <td><span class="badge ${Io.badgeClass(l.cycleStatus)}">${Io.escapeHtml(
+            Io.statusLabel(l.cycleStatus)
+          )}</span></td>
+          <td style="white-space:nowrap">
+            <a href="${hub}">${Io.escapeHtml(actionLabel(l))}</a>
+            · <a href="${href}">Gestionar</a>
+          </td>`;
+        tb.appendChild(tr);
+      });
+    }
+
+    boot();
+  </script>
+</body>
+</html>

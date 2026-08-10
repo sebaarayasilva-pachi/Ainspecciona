@@ -131,6 +131,7 @@
       padding: 28px 28px 80px;
     }
     .content.hidden { display: none; }
+    .hidden { display: none !important; }
     .card {
       background: #0F1A2E;
       border: 1px solid #1E2B45;
@@ -352,9 +353,83 @@
       .userGrid { grid-template-columns: 1fr; }
       .inspectionGrid { grid-template-columns: 1fr; }
     }
+    .tenant-pwd-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100000;
+      background: rgba(7, 11, 18, 0.92);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .tenant-pwd-modal {
+      width: 100%;
+      max-width: 420px;
+      background: #0f1a2e;
+      border: 1px solid #1e2b45;
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
+    }
+    .tenant-pwd-modal h3 {
+      margin: 0 0 10px;
+      font-size: 20px;
+      font-weight: 800;
+      color: #eaf0ff;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    .tenant-pwd-modal .desc {
+      font-size: 14px;
+      color: #94a3b8;
+      line-height: 1.5;
+      margin: 0 0 16px;
+    }
+    .tenant-pwd-modal label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #cbd5e1;
+      margin-bottom: 6px;
+    }
+    .tenant-pwd-modal input[type="password"] {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid #334155;
+      background: #0b1220;
+      color: #e2e8f0;
+      font-size: 15px;
+      margin-bottom: 12px;
+      box-sizing: border-box;
+    }
+    .tenant-pwd-modal .tenant-pwd-err {
+      color: #f87171;
+      font-size: 13px;
+      min-height: 20px;
+      margin-bottom: 8px;
+    }
+    .tenant-pwd-modal .btn-wide {
+      width: 100%;
+      margin-top: 4px;
+      justify-content: center;
+    }
   </style>
 </head>
 <body>
+  <div id="tenantPasswordRecoveryOverlay" class="tenant-pwd-overlay hidden" aria-hidden="true">
+    <div class="tenant-pwd-modal" role="dialog" aria-labelledby="tenantPwdRecoveryTitle">
+      <h3 id="tenantPwdRecoveryTitle">Nueva clave</h3>
+      <p class="desc">Ingresaste con una clave temporal enviada por correo. Por seguridad, define ahora tu clave definitiva para continuar en el panel.</p>
+      <label for="tenantPwdRecovery1">Nueva clave</label>
+      <input id="tenantPwdRecovery1" type="password" autocomplete="new-password" />
+      <label for="tenantPwdRecovery2">Confirmar clave</label>
+      <input id="tenantPwdRecovery2" type="password" autocomplete="new-password" />
+      <div id="tenantPwdRecoveryErr" class="tenant-pwd-err"></div>
+      <button type="button" class="btn btn-wide" id="tenantPwdRecoverySubmit">Guardar y continuar</button>
+    </div>
+  </div>
   <header class="site-header">
     <div class="nav">
       <a class="brand" href="/">
@@ -391,6 +466,7 @@
         <a data-section-link="cuenta" href="#cuenta">Cuenta</a>
         <a data-section-link="users" href="#users">Usuarios</a>
         <a data-section-link="inspections" href="#inspections">Inspecciones</a>
+        <a data-section-link="rewards" href="#rewards">Ainspecciona Rewards</a>
         <a data-section-link="credits" href="#credits">Cuenta corriente</a>
       </nav>
     </aside>
@@ -504,9 +580,64 @@
         <p style="font-size:13px; color:#94a3b8; margin:16px 0 0; line-height:1.5;">
           Cada inspección consume créditos según tu operación. El detalle de movimientos está en <a href="#credits">Cuenta corriente</a>.
         </p>
-        <p style="font-size:13px; color:#94a3b8; margin:12px 0 0; line-height:1.5;">
-          ¿Querés pasar a cobro mensual con plan Business? <a href="/business/activar">Activar plan Business</a>
-        </p>
+      </div>
+    </section>
+
+    <section class="content hidden" id="rewards" data-section="rewards">
+      <h1>Ainspecciona Rewards</h1>
+      <div class="muted">Programa de referidos para corredoras: invita con tu código y suma créditos.</div>
+
+      <div class="card" style="margin-top:16px; max-width:720px; border-color:rgba(124,58,237,0.35);">
+        <h3 style="color:#A78BFA; margin-top:0;">Tu cuenta</h3>
+        <p class="muted" style="margin:0 0 12px; font-size:14px; line-height:1.6;">Comparte tu código Rewards. Cuando una corredora nueva lo use al crear su cuenta, ella recibe créditos y tú sumas <strong style="color:#EAF0FF;">1 crédito</strong>.</p>
+      </div>
+
+      <div class="card hidden peer-referral-root" style="margin-top:16px; max-width:720px;" id="rewardsCodeCard">
+        <h3 style="margin-top:0;">Tu código y enlace</h3>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px;">
+          <code data-peer-code class="peer-ref-code" style="font-size:15px;padding:8px 12px;background:rgba(255,255,255,0.06);border-radius:6px;">—</code>
+          <button type="button" class="btn outline" data-copy-peer="code">Copiar código</button>
+          <button type="button" class="btn outline" data-copy-peer="link">Copiar enlace</button>
+        </div>
+        <p class="muted" style="font-size:13px;margin:0 0 8px;">Enlace: <span data-peer-link class="peer-ref-link" style="word-break:break-all;">—</span></p>
+        <p class="muted" style="font-size:12px;margin:0;line-height:1.5;">Tu referido lo ingresa en el mismo campo del canje en la home (código promo o de referido).</p>
+      </div>
+
+      <div id="rewardsNoCode" class="card hidden" style="margin-top:16px; max-width:720px;">
+        <p class="muted" style="margin:0;">Tu código de referido se mostrará aquí cuando esté disponible. Si acabas de crear la cuenta, recarga en unos segundos o vuelve a iniciar sesión.</p>
+      </div>
+
+      <div class="card" style="margin-top:16px; max-width:720px;">
+        <h3>Reglas del canje (un solo campo)</h3>
+        <ul class="rewardsInfoList muted" style="margin:12px 0 0; padding-left:20px; line-height:1.6; font-size:14px;">
+          <li><strong>Código promo</strong>: la cuenta nueva recibe <strong>1 crédito</strong></li>
+          <li><strong>Tu código Rewards</strong>: la cuenta nueva recibe <strong>2 créditos</strong> (1 bienvenida + 1 por referido)</li>
+          <li>Tú (invitante) recibes <strong>+1 crédito</strong> cuando usan tu código Rewards</li>
+        </ul>
+      </div>
+
+      <div class="card" style="margin-top:16px; max-width:720px;">
+        <h3>¿Qué recibe tu referido?</h3>
+        <ul class="rewardsInfoList muted" style="margin:12px 0 0; padding-left:20px; line-height:1.6; font-size:14px;">
+          <li>Su propia cuenta tenant y dashboard</li>
+          <li><strong>2 créditos</strong> al usar tu código Rewards</li>
+        </ul>
+      </div>
+
+      <div class="card" style="margin-top:16px; max-width:720px;">
+        <h3>¿Qué obtienes tú?</h3>
+        <ul class="rewardsInfoList muted" style="margin:12px 0 0; padding-left:20px; line-height:1.6; font-size:14px;">
+          <li><strong>1 crédito</strong> por cada referido que cree su cuenta con tu código</li>
+        </ul>
+      </div>
+
+      <div class="card" style="margin-top:16px; max-width:720px;">
+        <h3>¿Qué es un referido válido?</h3>
+        <p class="muted" style="margin:8px 0 6px; font-size:14px;">Una corredora nueva (RUT/email nuevos) que:</p>
+        <ul class="rewardsInfoList muted" style="margin:0; padding-left:20px; line-height:1.6; font-size:14px;">
+          <li>ingresa tu código en el canje de la home</li>
+          <li>completa el registro y queda con dashboard activo</li>
+        </ul>
       </div>
     </section>
 
@@ -657,6 +788,7 @@
         <h3>Saldo actual</h3>
         <div id="creditsBalance" style="font-size:28px; font-weight:800; color:#35D07F;">—</div>
         <a href="/tenant/comprar-creditos" class="btn outline" style="margin-top:12px; display:inline-block;">Comprar créditos</a>
+        <p class="muted" style="margin:16px 0 0; font-size:13px;">Programa de referidos: <a href="#rewards">Ainspecciona Rewards</a></p>
       </div>
       <div class="card" style="margin-top:16px;">
         <h3>Historial de movimientos</h3>
@@ -756,8 +888,88 @@
         countEl.textContent = credits;
         badge.classList.toggle("low", credits < 1);
       }
+      const t = data?.tenant;
+      const hasPeer = Boolean(t?.peerReferralCode && t?.peerReferralInviteUrl);
+      document.querySelectorAll(".peer-referral-root").forEach((root) => {
+        root.classList.toggle("hidden", !hasPeer);
+        if (!hasPeer) return;
+        root.querySelectorAll("[data-peer-code]").forEach((el) => {
+          el.textContent = t.peerReferralCode;
+        });
+        root.querySelectorAll("[data-peer-link]").forEach((el) => {
+          el.textContent = t.peerReferralInviteUrl;
+        });
+      });
+      const rewardsNoCode = document.getElementById("rewardsNoCode");
+      if (rewardsNoCode) rewardsNoCode.classList.toggle("hidden", hasPeer);
+      updateTenantPasswordRecoveryOverlay(data?.tenant);
       return data?.tenant;
     }
+
+    let tenantPwdOverlayWasOpen = false;
+    function updateTenantPasswordRecoveryOverlay(tenant) {
+      const overlay = document.getElementById("tenantPasswordRecoveryOverlay");
+      if (!overlay) return;
+      const need = Boolean(tenant && tenant.mustChangePassword);
+      const justOpened = need && !tenantPwdOverlayWasOpen;
+      tenantPwdOverlayWasOpen = need;
+      overlay.classList.toggle("hidden", !need);
+      overlay.setAttribute("aria-hidden", need ? "false" : "true");
+      if (justOpened) {
+        const err = document.getElementById("tenantPwdRecoveryErr");
+        const a = document.getElementById("tenantPwdRecovery1");
+        const b = document.getElementById("tenantPwdRecovery2");
+        if (err) err.textContent = "";
+        if (a) a.value = "";
+        if (b) b.value = "";
+      }
+    }
+
+    (function bindTenantPasswordRecovery() {
+      const btn = document.getElementById("tenantPwdRecoverySubmit");
+      if (!btn) return;
+      btn.addEventListener("click", async () => {
+        const errEl = document.getElementById("tenantPwdRecoveryErr");
+        const a = document.getElementById("tenantPwdRecovery1");
+        const b = document.getElementById("tenantPwdRecovery2");
+        if (errEl) errEl.textContent = "";
+        const p1 = a && a.value ? String(a.value) : "";
+        const p2 = b && b.value ? String(b.value) : "";
+        if (!p1 || !p2) {
+          if (errEl) errEl.textContent = "Completa ambos campos.";
+          return;
+        }
+        if (p1 !== p2) {
+          if (errEl) errEl.textContent = "Las claves no coinciden.";
+          return;
+        }
+        btn.disabled = true;
+        try {
+          const res = await fetch("/api/tenant/password-after-recovery", {
+            method: "POST",
+            headers: authHeaders({ "Content-Type": "application/json" }),
+            body: JSON.stringify({ newPassword: p1 }),
+            credentials: "include"
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            if (errEl) {
+              errEl.textContent =
+                data.message ||
+                (data.error === "WEAK_PASSWORD"
+                  ? "La clave debe tener al menos 8 caracteres, 1 mayúscula y 1 número."
+                  : data.error || "No se pudo guardar.");
+            }
+            return;
+          }
+          await loadTenant();
+        } catch (e) {
+          if (errEl) errEl.textContent = "Error de conexión.";
+        } finally {
+          btn.disabled = false;
+        }
+      });
+    })();
 
     async function loadUsers() {
       const res = await fetch("/api/tenant/users", { credentials: "include", headers: authHeaders() });
@@ -773,6 +985,39 @@
       if (!res.ok) return [];
       const data = await res.json();
       return data?.inspections || [];
+    }
+
+    async function tenantSendReportEmail(caseId, btnEl) {
+      if (!confirm("¿Enviar el informe por email al ejecutivo asignado (o al email de la corredora)?")) return;
+      const prev = btnEl.textContent;
+      btnEl.disabled = true;
+      btnEl.textContent = "Enviando…";
+      try {
+        const res = await fetch(`/api/cases/${encodeURIComponent(caseId)}/send-report-email`, {
+          method: "POST",
+          credentials: "include",
+          headers: authHeaders()
+        });
+        if (handleUnauthorized(res)) return;
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data?.emailSent) {
+          const to = (data.sent || []).map((s) => s.email).join(", ");
+          btnEl.textContent = "Enviado";
+          alert(to ? "Email enviado a: " + to : "Email enviado.");
+          setTimeout(() => {
+            btnEl.textContent = prev;
+            btnEl.disabled = false;
+          }, 2000);
+        } else {
+          alert(data?.message || data?.error || "No se pudo enviar. Revisa que haya ejecutivo con email o email de la corredora.");
+          btnEl.textContent = prev;
+          btnEl.disabled = false;
+        }
+      } catch (e) {
+        alert(e?.message || String(e));
+        btnEl.textContent = prev;
+        btnEl.disabled = false;
+      }
     }
 
     async function renderUsers() {
@@ -992,8 +1237,14 @@
         certLink.href = `/cases/${encodeURIComponent(c.id)}/certificate${currentTenantId ? "?tenantId=" + encodeURIComponent(currentTenantId) : ""}`;
         certLink.target = "_blank";
         certLink.rel = "noreferrer";
+        const emailBtn = document.createElement("button");
+        emailBtn.type = "button";
+        emailBtn.className = "btn outline";
+        emailBtn.textContent = "Enviar email";
+        emailBtn.addEventListener("click", () => tenantSendReportEmail(c.id, emailBtn));
         actions.appendChild(reportLink);
         actions.appendChild(certLink);
+        actions.appendChild(emailBtn);
 
         list.appendChild(address);
         list.appendChild(exec);
@@ -1530,6 +1781,20 @@
         setLabel();
       });
     }
+
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-copy-peer]");
+      if (!btn) return;
+      const root = btn.closest(".peer-referral-root");
+      const kind = btn.getAttribute("data-copy-peer");
+      if (kind === "code") {
+        const c = root?.querySelector("[data-peer-code]")?.textContent?.trim();
+        if (c && c !== "—") navigator.clipboard.writeText(c).catch(() => {});
+      } else if (kind === "link") {
+        const u = root?.querySelector("[data-peer-link]")?.textContent?.trim();
+        if (u && u !== "—") navigator.clipboard.writeText(u).catch(() => {});
+      }
+    });
 
     window.addEventListener("hashchange", setActiveSection);
     setActiveSection();

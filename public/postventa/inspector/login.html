@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#070b10" />
+  <title>Inspector · Ingresar</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/postventa/inspector/assets/inspector.css?v=1" />
+</head>
+<body>
+  <div class="wrap">
+    <div class="brand">Ainspecciona <small>Inspector · terreno</small></div>
+    <h1 class="h1" style="margin-top:24px;">Ingresar</h1>
+    <p class="sub">Usa tu usuario del portal postventa.</p>
+    <div class="card">
+      <form id="loginForm">
+        <label class="field" for="email">Email</label>
+        <input id="email" type="email" required autocomplete="username" placeholder="inspector@inmobiliaria.cl" />
+        <label class="field" for="password">Clave</label>
+        <input id="password" type="password" required autocomplete="current-password" />
+        <button class="btn primary" type="submit" style="margin-top:16px;" id="btn">Entrar</button>
+        <div class="msg" id="msg"></div>
+      </form>
+    </div>
+    <p class="muted" style="font-size:12px;text-align:center;">
+      ¿Eres mesa? Usa el <a href="/postventa/login">portal escritorio</a>.
+    </p>
+  </div>
+  <script src="/postventa/inspector/assets/inspector-app.js?v=5"></script>
+  <script>
+    (async function () {
+      const I = window.PvInspector;
+      try {
+        const me = await I.portalFetch("/api/postventa/portal/me");
+        if (me.ok) {
+          const next = I.qs("next", "/postventa/inspector");
+          location.replace(next.startsWith("/postventa/inspector") ? next : "/postventa/inspector");
+          return;
+        }
+      } catch (_) {}
+
+      document.getElementById("loginForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById("btn");
+        const msg = document.getElementById("msg");
+        btn.disabled = true;
+        msg.textContent = "Ingresando…";
+        msg.className = "msg";
+        const result = await I.login(
+          document.getElementById("email").value.trim(),
+          document.getElementById("password").value
+        );
+        if (!result.ok) {
+          msg.textContent = result.message;
+          msg.className = "msg err";
+          btn.disabled = false;
+          return;
+        }
+        const next = I.qs("next", "/postventa/inspector");
+        location.replace(next.startsWith("/postventa/inspector") ? next : "/postventa/inspector");
+      });
+    })();
+  </script>
+</body>
+</html>
