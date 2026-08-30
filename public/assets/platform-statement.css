@@ -15,7 +15,7 @@
 .platform-statement__inner {
   max-width: var(--ps-max);
   margin: 0 auto;
-  padding: 72px 80px 120px;
+  padding: 16px 80px 96px;
   box-sizing: border-box;
 }
 
@@ -120,7 +120,7 @@
 
 .platform-statement__stages {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 0;
   list-style: none;
   margin: 0;
@@ -157,8 +157,8 @@
 .platform-statement__stage-name {
   display: block;
   margin-top: 12px;
-  max-width: 150px;
-  font-size: 14px;
+  max-width: 100%;
+  font-size: 13px;
   line-height: 1.35;
   color: var(--ps-muted);
   transition: color 180ms ease;
@@ -241,6 +241,8 @@
 .platform-statement.is-visible .platform-statement__stage:nth-child(2) { animation-delay: 560ms; }
 .platform-statement.is-visible .platform-statement__stage:nth-child(3) { animation-delay: 640ms; }
 .platform-statement.is-visible .platform-statement__stage:nth-child(4) { animation-delay: 720ms; }
+.platform-statement.is-visible .platform-statement__stage:nth-child(5) { animation-delay: 800ms; }
+.platform-statement.is-visible .platform-statement__stage:nth-child(6) { animation-delay: 880ms; }
 
 @keyframes psFadeIn {
   from { opacity: 0; }
@@ -284,7 +286,7 @@
 /* ——— Tablet ——— */
 @media (max-width: 1024px) {
   .platform-statement__inner {
-    padding: 64px 40px 96px;
+    padding: 28px 40px 96px;
   }
 
   .platform-statement__header {
@@ -321,7 +323,7 @@
 /* ——— Mobile ——— */
 @media (max-width: 768px) {
   .platform-statement__inner {
-    padding: 48px 20px 72px;
+    padding: 24px 20px 72px;
   }
 
   .platform-statement__title {

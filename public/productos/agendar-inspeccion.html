@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Agendar inspección · Ainspecciona</title>
+  <meta name="description" content="Reserva una inspección presencial: elige horario y paga con MercadoPago." />
+  <link rel="canonical" href="https://ainspecciona.com/agendar-inspeccion" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/header.css" />
+  <link rel="stylesheet" href="/assets/home-hero.css" />
+  <link rel="stylesheet" href="/assets/product-page.css" />
+  <link rel="stylesheet" href="/assets/full-check/full-check.css" />
+  <link rel="stylesheet" href="/assets/site-footer.css" />
+  <link rel="stylesheet" href="/assets/home-responsive.css" />
+</head>
+<body class="platform-page product-page" data-theme="blue">
+  <div class="platform-canvas">
+    <header class="site-header site-header-v2">
+      <div class="nav">
+        <a class="brand" href="/">
+          <img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" />
+        </a>
+      </div>
+    </header>
+
+    <main class="landing agendar-page" id="main-content">
+      <section class="agendar-page__main" aria-labelledby="agendar-heading">
+        <div class="agendar-page__inner">
+          <p class="pp-eyebrow agendar-page__eyebrow">04 · Inspección Full Check</p>
+          <h1 id="agendar-heading" class="agendar-page__title">Agendar inspección</h1>
+          <p class="agendar-page__lead">
+            Completa los pasos, elige fecha en el calendario y paga con MercadoPago.
+            Un inspector tomará tu visita y recibirás el informe validado por email.
+          </p>
+          <p class="agendar-page__back-wrap">
+            <a href="/productos/inspeccion-full-check.html" class="agendar-page__back">← Volver a Full Check</a>
+          </p>
+          <div class="agendar-page__wizard" id="fc-booking-root"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer"><div id="site-footer-root"></div></footer>
+  </div>
+
+  <div class="login-modal-overlay" id="loginModal" aria-hidden="true">
+    <div class="login-modal" role="dialog" aria-labelledby="loginModalTitle">
+      <h3 id="loginModalTitle">Iniciar sesión</h3>
+      <form id="tenantLoginForm">
+        <div class="formGroup">
+          <label for="tenantEmail">Email o RUT</label>
+          <input id="tenantEmail" type="text" placeholder="tu@corredora.cl o RUT" required autocomplete="username" />
+        </div>
+        <div class="formGroup">
+          <label for="tenantPass">Clave</label>
+          <input id="tenantPass" type="password" placeholder="Tu clave" required />
+        </div>
+        <div class="note" id="loginNote"></div>
+        <div class="btnRow">
+          <button type="submit">Entrar</button>
+          <button type="button" id="loginModalClose">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/assets/site-shell.js" defer></script>
+  <script src="/assets/footer-config.js" defer></script>
+  <script src="/assets/site-footer.js" defer></script>
+  <script src="/assets/platform-login.js" defer></script>
+  <script type="module" src="/assets/full-check/booking-wizard.js"></script>
+</body>
+</html>

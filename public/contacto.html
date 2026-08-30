@@ -4,233 +4,448 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Contacto · Ainspecciona</title>
-  <meta name="description" content="Contacta a Ainspecciona para inspección técnica inmobiliaria. Corredores, oficinas, administradores y propietarios." />
-  <link rel="canonical" href="https://ainspecciona.com/contacto.html" />
+  <meta name="description" content="Contacta a Ainspecciona para solicitar una demostración o consulta sobre inspección técnica inmobiliaria." />
+  <link rel="canonical" href="https://ainspecciona.com/contacto" />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://ainspecciona.com/contacto.html" />
+  <meta property="og:url" content="https://ainspecciona.com/contacto" />
   <meta property="og:title" content="Contacto · Ainspecciona" />
-  <meta property="og:description" content="Contacta a Ainspecciona para inspección técnica inmobiliaria." />
+  <meta property="og:description" content="Solicita una demostración o consulta sobre inspección técnica inmobiliaria." />
   <meta property="og:image" content="https://ainspecciona.com/assets/certificado-4O7KF9GX.jpg" />
   <meta property="og:locale" content="es_CL" />
   <link rel="stylesheet" href="/assets/header.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
-    * { box-sizing: border-box; }
-    body {
+    * { 
+      box-sizing: border-box;
       margin: 0;
-      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #F6F7F9;
-      color: #0f172a;
+      padding: 0;
     }
-    .ctaAgendar {
+    body {
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #07090d;
+      color: #f7f4ee;
+      line-height: 1.6;
+    }
+    
+    .contact-page {
+      position: relative;
+      min-height: 100vh;
+    }
+    
+    .contact-page::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: 
+        linear-gradient(rgba(56, 189, 248, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(56, 189, 248, 0.03) 1px, transparent 1px);
+      background-size: 80px 80px;
+      mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+      -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    .contact-hero {
+      position: relative;
+      padding: clamp(80px, 12vw, 140px) clamp(20px, 3.5vw, 56px) clamp(60px, 8vw, 100px);
+      background:
+        radial-gradient(ellipse 55% 65% at 50% 40%, rgba(56, 189, 248, 0.18), transparent 65%),
+        radial-gradient(ellipse 40% 50% at 10% 85%, rgba(59, 130, 246, 0.12), transparent 55%),
+        #06080c;
+      text-align: center;
+    }
+    
+    .contact-hero__eyebrow {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 12px 20px;
-      border-radius: 999px;
-      background: linear-gradient(135deg, #39c6ff 0%, #2c7bff 100%);
-      color: #fff;
-      text-decoration: none;
-      font-weight: 800;
-      font-size: 14px;
-      margin-top: 8px;
+      margin-bottom: 20px;
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(125, 211, 252, 0.88);
     }
-    .ctaAgendar:hover { opacity: 0.95; }
-    .section {
-      max-width: 1000px;
+    
+    .contact-hero__eyebrow::before {
+      content: '';
+      width: 24px;
+      height: 2px;
+      background: #7dd3fc;
+    }
+    
+    .contact-hero__title {
+      margin: 0 auto 24px;
+      max-width: 16ch;
+      font-size: clamp(40px, 5.5vw, 68px);
+      font-weight: 600;
+      letter-spacing: -0.042em;
+      line-height: 1.05;
+      background: linear-gradient(135deg, #f7f4ee 0%, rgba(247, 244, 238, 0.7) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .contact-hero__lead {
       margin: 0 auto;
-      padding: 48px 20px;
+      max-width: 48ch;
+      font-size: clamp(17px, 2vw, 20px);
+      line-height: 1.5;
+      color: rgba(169, 175, 180, 0.88);
     }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 18px;
-    }
-    .card {
-      background: #fff;
-      border: 1px solid #e5e7eb;
-      border-radius: 16px;
-      padding: 18px;
-      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
-    }
-    label { display: block; font-weight: 600; margin: 12px 0 6px; }
-    input, textarea {
-      width: 100%;
-      padding: 10px 12px;
-      border-radius: 12px;
-      border: 1px solid #e5e7eb;
-      font-family: inherit;
-    }
-    textarea { min-height: 120px; resize: vertical; }
-    input::placeholder, textarea::placeholder { color: #475569; font-weight: 300; font-style: italic; font-size: 14px; }
-    .btn {
-      margin-top: 14px;
-      padding: 10px 14px;
-      border-radius: 999px;
-      border: none;
-      background: linear-gradient(135deg, #39c6ff 0%, #2c7bff 100%);
-      color: #07101a;
-      font-weight: 800;
-      cursor: pointer;
-    }
-    footer {
-      background: linear-gradient(135deg, #0b1220 0%, #0f172a 60%, #0b1220 100%);
-      color: #e5e7eb;
-      padding: 60px 20px 40px;
-      border-top: 1px solid rgba(148, 163, 184, 0.2);
-    }
-    footer .footerWrap {
+    
+    .contact-content {
+      position: relative;
       max-width: 1200px;
       margin: 0 auto;
+      padding: clamp(60px, 8vw, 100px) clamp(20px, 3.5vw, 56px);
+    }
+    
+    .contact-grid {
       display: grid;
-      grid-template-columns: 1.2fr 1fr 1fr 1fr;
-      gap: 24px;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(32px, 5vw, 56px);
       align-items: start;
     }
-    .footerBrand {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+    
+    @media (max-width: 900px) {
+      .contact-grid {
+        grid-template-columns: 1fr;
+      }
     }
-    .footerBrand img { height: 36px; width: auto; object-fit: contain; }
-    .footerTitle { font-weight: 800; font-size: 16px; }
-    .footerDesc { color: #94a3b8; font-size: 14px; line-height: 1.5; }
-    .footerCol h4 { margin: 0 0 10px; font-size: 14px; }
-    .footerCol a { color: #cbd5e1; text-decoration: none; font-size: 14px; display: block; margin-bottom: 8px; }
-    .footerCol a:hover { color: #ffffff; }
-    .footerPartners {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      align-items: flex-start;
-      min-width: 0;
+    
+    .contact-form {
+      padding: clamp(32px, 4vw, 44px);
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: 
+        linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(8, 12, 18, 0.6)),
+        #0a0e14;
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);
     }
-    .footerPartners img {
+    
+    .contact-form h2 {
+      margin: 0 0 8px;
+      font-size: clamp(24px, 3vw, 32px);
+      font-weight: 600;
+      color: #f7f4ee;
+    }
+    
+    .contact-form__intro {
+      margin: 0 0 28px;
+      font-size: 15px;
+      color: rgba(169, 175, 180, 0.88);
+    }
+    
+    .form-field {
+      margin-bottom: 20px;
+    }
+    
+    .form-field label {
       display: block;
-      width: auto;
-      max-width: 100%;
-      height: auto;
-      max-height: 92px;
-      object-fit: contain;
-      object-position: left center;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: rgba(247, 244, 238, 0.85);
     }
-    .footerCta {
+    
+    .form-field input,
+    .form-field textarea,
+    .form-field select {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(0, 0, 0, 0.3);
+      color: #f7f4ee;
+      font-family: inherit;
+      font-size: 15px;
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+    
+    .form-field select {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%237dd3fc' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+      padding-right: 44px;
+    }
+    
+    .form-field select option {
+      background: #0a0e14;
+      color: #f7f4ee;
+    }
+    
+    .form-field textarea {
+      min-height: 140px;
+      resize: vertical;
+    }
+    
+    .form-field input:focus,
+    .form-field textarea:focus,
+    .form-field select:focus {
+      outline: none;
+      border-color: rgba(125, 211, 252, 0.5);
+      background: rgba(0, 0, 0, 0.45);
+    }
+    
+    .form-field input::placeholder,
+    .form-field textarea::placeholder {
+      color: rgba(169, 175, 180, 0.5);
+    }
+    
+    .honeypot {
+      position: absolute;
+      left: -9999px;
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    .form-submit {
+      width: 100%;
+      margin-top: 24px;
+      padding: 14px 24px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #7dd3fc 0%, #3b82f6 100%);
+      color: #020814;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 4px 16px rgba(125, 211, 252, 0.25);
+    }
+    
+    .form-submit:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(125, 211, 252, 0.35);
+    }
+    
+    .form-submit:active {
+      transform: translateY(0);
+    }
+    
+    .form-submit:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .form-status {
+      margin-top: 16px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 14px;
+      display: none;
+    }
+    
+    .form-status.success {
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: #86efac;
+    }
+    
+    .form-status.error {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+    }
+    
+    .contact-info {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+    
+    .info-card {
+      padding: 28px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.02);
+    }
+    
+    .info-card h3 {
+      margin: 0 0 12px;
+      font-size: 18px;
+      font-weight: 600;
+      color: #f7f4ee;
+    }
+    
+    .info-card p {
+      margin: 0 0 12px;
+      font-size: 15px;
+      color: rgba(169, 175, 180, 0.88);
+    }
+    
+    .info-card p:last-child {
+      margin-bottom: 0;
+    }
+    
+    .info-card strong {
+      color: #f7f4ee;
+    }
+    
+    .info-link {
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      padding: 10px 14px;
-      border-radius: 999px;
-      background: linear-gradient(135deg, #39c6ff 0%, #2c7bff 100%);
-      color: #07101a;
-      font-weight: 800;
+      gap: 8px;
+      margin-top: 16px;
+      padding: 12px 20px;
+      border-radius: 10px;
+      background: rgba(125, 211, 252, 0.12);
+      border: 1px solid rgba(125, 211, 252, 0.25);
+      color: #7dd3fc;
       text-decoration: none;
-      font-size: 14px;
-      margin-top: 8px;
+      font-weight: 600;
+      font-size: 15px;
+      transition: background 0.2s ease, border-color 0.2s ease;
     }
-    .footerBottom {
-      max-width: 1200px;
-      margin: 28px auto 0;
-      padding-top: 18px;
-      border-top: 1px solid rgba(148, 163, 184, 0.2);
-      color: #94a3b8;
-      font-size: 12px;
-      display: flex;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    @media (max-width: 900px) {
-      .grid, footer .footerWrap { grid-template-columns: 1fr; }
+    
+    .info-link:hover {
+      background: rgba(125, 211, 252, 0.18);
+      border-color: rgba(125, 211, 252, 0.4);
     }
   </style>
 </head>
-<body>
+<body class="contact-page">
   <header class="site-header">
     <div class="nav">
       <a class="brand" href="/">
         <img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" />
       </a>
-      <div class="navLinks">
-        <a href="/como-funciona.html">Cómo funciona</a>
-        <a href="/precios">Precios</a>
-        <a href="/faq.html">FAQ</a>
-        <a href="/contacto.html">Contacto</a>
-      </div>
-      <div class="topActions">
-        <a class="btn outline" href="/">Acceso</a>
-      </div>
     </div>
   </header>
 
   <main>
-    <section class="section">
-      <h1>Contacto</h1>
-      <p>Cuéntanos sobre tu flujo y te ayudamos a integrar Ainspecciona.</p>
-      <div class="grid">
-        <div class="card">
-          <h3>Escríbenos</h3>
+    <section class="contact-hero">
+      <p class="contact-hero__eyebrow">Contacto</p>
+      <h1 class="contact-hero__title">Hablemos de tu proyecto</h1>
+      <p class="contact-hero__lead">Agenda una demostración o cuéntanos sobre tu caso de uso. Te respondemos en menos de 24 horas hábiles.</p>
+    </section>
+
+    <section class="contact-content">
+      <div class="contact-grid">
+        <div class="contact-form">
+          <h2>Solicitar demostración</h2>
+          <p class="contact-form__intro">Completa el formulario y te contactaremos con una propuesta personalizada.</p>
           <form id="contactForm">
-            <label for="name">Nombre</label>
-            <input id="name" name="name" type="text" placeholder="Tu nombre" required />
-            <label for="email">Email</label>
-            <input id="email" name="email" type="email" placeholder="tu@empresa.com" required />
-            <label for="company">Empresa</label>
-            <input id="company" name="company" type="text" placeholder="Nombre de tu empresa" />
-            <label for="message">Mensaje</label>
-            <textarea id="message" name="message" placeholder="Describe tu caso de uso" required></textarea>
-            <input type="text" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;opacity:0;" aria-hidden="true" />
-            <button class="btn" id="contactSubmit" type="submit">Enviar</button>
-            <p id="contactStatus" role="status" style="margin:10px 0 0;font-size:14px;display:none;"></p>
+            <div class="form-field">
+              <label for="name">Nombre *</label>
+              <input id="name" name="name" type="text" placeholder="Tu nombre" required />
+            </div>
+            <div class="form-field">
+              <label for="email">Email *</label>
+              <input id="email" name="email" type="email" placeholder="tu@empresa.com" required />
+            </div>
+            <div class="form-field">
+              <label for="company">Empresa</label>
+              <input id="company" name="company" type="text" placeholder="Nombre de tu empresa" />
+            </div>
+            <div class="form-field">
+              <label for="product">Producto de interés</label>
+              <select id="product" name="product">
+                <option value="">Selecciona un producto (opcional)</option>
+                <option value="recepcion-inmobiliaria">Recepción Inmobiliaria</option>
+                <option value="postventa">Postventa</option>
+                <option value="inspeccion-score">Inspección Score</option>
+                <option value="inspeccion-full-check">Inspección Full Check</option>
+                <option value="general">Consulta general</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="message">Mensaje *</label>
+              <textarea id="message" name="message" placeholder="Cuéntanos sobre tu proyecto o caso de uso" required></textarea>
+            </div>
+            <input type="text" name="website" tabindex="-1" autocomplete="off" class="honeypot" aria-hidden="true" />
+            <button class="form-submit" id="contactSubmit" type="submit">Enviar solicitud</button>
+            <div class="form-status" id="contactStatus" role="status"></div>
           </form>
         </div>
-        <div class="card">
-          <h3>Información</h3>
-          <p class="muted">Te respondemos en menos de 24 horas hábiles.</p>
-          <p><strong>Email:</strong> contacto@ainspecciona.com</p>
-          <p><a class="ctaAgendar" href="https://meetings.hubspot.com/saraya-silva" target="_blank" rel="noopener">Agendar reunión <span style="opacity:0.9;">→</span></a></p>
-          <p><strong>Demo:</strong> Solicita un caso real con badges y evidencia.</p>
+
+        <div class="contact-info">
+          <div class="info-card">
+            <h3>Contacto directo</h3>
+            <p><strong>Email:</strong> contacto@ainspecciona.com</p>
+            <p>Te respondemos en menos de 24 horas hábiles.</p>
+            <a class="info-link" href="https://meetings.hubspot.com/saraya-silva" target="_blank" rel="noopener">
+              Agendar reunión
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M4 8h8M9 5l3 3-3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+          </div>
+
+          <div class="info-card">
+            <h3>Solicita una demo</h3>
+            <p>Agenda una videollamada de 20 minutos donde te mostramos:</p>
+            <p>• Cómo funciona la plataforma<br>• Casos de uso específicos para tu empresa<br>• Integración con tus sistemas actuales</p>
+          </div>
+
+          <div class="info-card">
+            <h3>Ubicación</h3>
+            <p><strong>Santiago, Chile</strong></p>
+            <p>Operamos en Chile con alcance regional. Tecnología escalable lista para implementar en cualquier país de Latinoamérica.</p>
+          </div>
         </div>
       </div>
     </section>
   </main>
 
-  <footer>
-    <div class="footerWrap">
-      <div class="footerBrand">
-        <img src="/assets/Logo Ainspecciona.png" alt="Ainspecciona" />
-        <div class="footerTitle">Ainspecciona</div>
-        <div class="footerDesc">Inspección técnica automatizada con evidencia por slot y trazabilidad completa.</div>
-      </div>
-      <div class="footerCol">
-        <h4>Legal</h4>
-        <a href="/terminos">Términos y Condiciones</a>
-        <a href="/privacidad">Política de Privacidad</a>
-      </div>
-      <div class="footerCol">
-        <h4>Contacto</h4>
-        <a href="/contacto.html">Contacto</a>
-        <a href="/precios">Precios</a>
-      </div>
-      <div class="footerCol footerPartners" aria-label="Referencias técnicas">
-        <h4>Referencias técnicas</h4>
-        <img src="/assets/footer-referencias-tecnicas.png" alt="Referencias técnicas (NCH, CDT, CChC, ICC)" loading="lazy" decoding="async" />
-      </div>
-    </div>
-    <div class="footerBottom">
-      <div>© 2026 Ainspecciona. Todos los derechos reservados.</div>
-      <div>Audit-ready · Evidencia por slot · White-label</div>
-    </div>
-  </footer>
   <script src="/assets/site-shell.js" defer></script>
-  <script src="/assets/tracker.js" defer></script>
+  <script src="/assets/site-footer.js" defer></script>
   <script>
     (function () {
       const form = document.getElementById('contactForm');
       const btn = document.getElementById('contactSubmit');
       const status = document.getElementById('contactStatus');
+      const message = document.getElementById('message');
+      const productSelect = document.getElementById('product');
+      const params = new URLSearchParams(location.search);
+      const producto = params.get('producto');
+      const plan = params.get('plan');
+      
+      const labels = {
+        'recepcion': 'Recepción Inmobiliaria',
+        'recepcion-inmobiliaria': 'Recepción Inmobiliaria',
+        'postventa': 'Postventa',
+        'full-check': 'Inspección Full Check',
+        'inspeccion-full-check': 'Inspección Full Check',
+        'in-out': 'In & Out',
+        'property-scan': 'Property Scan',
+        'inspeccion-score': 'Inspección Score'
+      };
+      
+      // Pre-seleccionar producto si viene en la URL
+      if (producto && productSelect) {
+        const normalizedProduct = producto.toLowerCase();
+        if (normalizedProduct === 'full-check') {
+          productSelect.value = 'inspeccion-full-check';
+        } else if (normalizedProduct === 'recepcion') {
+          productSelect.value = 'recepcion-inmobiliaria';
+        } else {
+          productSelect.value = normalizedProduct;
+        }
+      }
+      
+      // Pre-llenar mensaje si viene producto en URL
+      if (message && producto && !message.value) {
+        const name = labels[producto.toLowerCase()] || producto;
+        message.value = plan
+          ? 'Quiero una propuesta de ' + name + ' (plan ' + plan + ').'
+          : 'Quiero información de ' + name + '.';
+      }
 
       function showStatus(text, ok) {
         status.textContent = text;
-        status.style.color = ok ? '#15803d' : '#b91c1c';
+        status.className = 'form-status ' + (ok ? 'success' : 'error');
         status.style.display = 'block';
       }
 
@@ -240,6 +455,7 @@
         btn.disabled = true;
         const originalLabel = btn.textContent;
         btn.textContent = 'Enviando…';
+        
         try {
           const data = Object.fromEntries(new FormData(form).entries());
           const res = await fetch('/api/contacto', {
@@ -248,6 +464,7 @@
             body: JSON.stringify(data)
           });
           const body = await res.json().catch(function () { return {}; });
+          
           if (res.ok && body.ok) {
             form.reset();
             showStatus('¡Mensaje enviado! Te responderemos en menos de 24 horas hábiles.', true);

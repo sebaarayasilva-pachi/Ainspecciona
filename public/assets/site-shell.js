@@ -16,8 +16,10 @@
     try {
       var u = new URL(href, location.origin);
       if (u.origin !== location.origin) return false;
-      var path = u.pathname.replace(/\/$/, "") || "/";
-      var cur = location.pathname.replace(/\/$/, "") || "/";
+      var path = (u.pathname.replace(/\/$/, "") || "/").replace(/\.html$/, "");
+      var cur = (location.pathname.replace(/\/$/, "") || "/").replace(/\.html$/, "");
+      if (path === "/corredores") path = "/productos/inspeccion-score";
+      if (cur === "/corredores") cur = "/productos/inspeccion-score";
       return path === cur;
     } catch (_) {
       return false;
@@ -26,22 +28,14 @@
 
   function isProductActive(product) {
     if (!product || !product.href) return false;
-    if (pathMatches(product.href)) return true;
-    var prefixes = {
-      inspeccion: ["/inspeccionar", "/photoplan", "/demo", "/formulario", "/tenant", "/cases/", "/precios"],
-      postventa: ["/postventa"],
-      entrega: ["/entrega"],
-      propertycheck: []
-    };
-    var list = prefixes[product.id] || [];
-    var cur = location.pathname;
-    return list.some(function (p) {
-      return cur === p || cur.indexOf(p + "/") === 0;
-    });
+    return pathMatches(product.href);
   }
 
   function renderProductsPanel(products) {
     return (products || [])
+      .filter(function (p) {
+        return !p.hidden;
+      })
       .map(function (p) {
         var active = isProductActive(p) ? " is-active" : "";
         var badge = p.badge ? '<span class="navProductBadge">' + escapeHtml(p.badge) + "</span>" : "";
@@ -104,7 +98,7 @@
   function renderHeader(cfg) {
     var brand = cfg.brand || {};
     var nav = cfg.nav || [];
-    var access = cfg.access || { label: "Iniciar sesión", loginHref: "/?login=1" };
+    var access = cfg.access || { label: "Iniciar sesión", loginHref: "/app" };
     var demo = cfg.demoCta || { label: "Solicitar demostración", href: "/contacto.html" };
     var external = demo.external ? ' target="_blank" rel="noopener noreferrer"' : "";
 
@@ -132,9 +126,11 @@
       navHtml +
       "</nav>" +
       '<div class="topActions">' +
-      '<button class="navLoginLink" id="loginBtn" type="button">' +
+      '<a class="navLoginLink" id="loginBtn" href="' +
+      escapeHtml(access.loginHref || "/app") +
+      '">' +
       escapeHtml(access.label) +
-      "</button>" +
+      "</a>" +
       '<a class="navDemoCta" href="' +
       escapeHtml(demo.href) +
       '"' +
@@ -212,10 +208,9 @@
     });
 
     if (loginBtn) {
-      loginBtn.addEventListener("click", function () {
-        if (!openLoginModal()) {
-          var href = (CONFIG && CONFIG.access && CONFIG.access.loginHref) || "/?login=1";
-          location.href = href;
+      loginBtn.addEventListener("click", function (e) {
+        if (new URLSearchParams(location.search).get("login") === "1" && openLoginModal()) {
+          e.preventDefault();
         }
       });
     }

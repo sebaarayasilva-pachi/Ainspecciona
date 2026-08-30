@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Ainspecciona · Inspección técnica para corredores</title>
-  <meta name="description" content="Inspección técnica digital para corredores, oficinas inmobiliarias y administradores. Fotografías guiadas, informe técnico y certificado publicable en 24h." />
-  <link rel="canonical" href="https://ainspecciona.com/" />
+  <title>Ainspecciona · Inspección Score</title>
+  <meta name="description" content="Inspección Score: inspección técnica digital para corredores, oficinas inmobiliarias y administradores. Fotografías guiadas, informe técnico y certificado publicable en 24h." />
+  <link rel="canonical" href="https://ainspecciona.com/productos/inspeccion-score" />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://ainspecciona.com/" />
-  <meta property="og:title" content="Ainspecciona · Inspección técnica para corredores" />
+  <meta property="og:url" content="https://ainspecciona.com/productos/inspeccion-score" />
+  <meta property="og:title" content="Ainspecciona · Inspección Score" />
   <meta property="og:description" content="Inspección técnica digital para corredores, oficinas inmobiliarias y administradores. Fotografías guiadas, informe técnico y certificado publicable en 24h." />
   <meta property="og:image" content="https://ainspecciona.com/assets/certificado-4O7KF9GX.jpg" />
   <meta property="og:locale" content="es_CL" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Ainspecciona · Inspección técnica para corredores" />
+  <meta name="twitter:title" content="Ainspecciona · Inspección Score" />
   <meta name="twitter:description" content="Inspección técnica digital para corredores, oficinas inmobiliarias y administradores. Fotografías guiadas, informe técnico y certificado publicable en 24h." />
   <meta name="twitter:image" content="https://ainspecciona.com/assets/certificado-4O7KF9GX.jpg" />
   <script type="application/ld+json">
@@ -802,6 +802,66 @@
     .demo-foot { font-family: ui-monospace, monospace; font-size: 11px; color: #8EA2BA; margin-top: 24px; }
 
     /* Padding secciones mobile */
+    .scorePrices {
+      background: linear-gradient(180deg, #070B16 0%, #0B1430 100%);
+      color: #e5eef7;
+      padding: 72px 0 80px;
+    }
+    .scorePrices .page-content { max-width: 1200px; }
+    .scorePrices h2 {
+      margin: 0 0 8px;
+      font-size: 32px;
+      letter-spacing: -0.03em;
+    }
+    .scorePrices .scorePricesSub {
+      margin: 0 0 28px;
+      color: #A9B6DD;
+      max-width: 640px;
+    }
+    .scorePriceGrid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      align-items: stretch;
+    }
+    .scorePriceCard {
+      border: 1px solid #1E2A52;
+      border-radius: 16px;
+      padding: 24px;
+      background: #0A1022;
+      display: flex;
+      flex-direction: column;
+    }
+    .scorePriceCard.featured {
+      border-color: rgba(124, 58, 237, 0.6);
+      box-shadow: 0 0 32px rgba(124, 58, 237, 0.18);
+    }
+    .scorePriceCard .plan { margin: 0 0 8px; font-size: 18px; }
+    .scorePriceCard .price { margin: 0; font-size: 28px; font-weight: 800; }
+    .scorePriceCard .muted { color: #9AA7CF; font-size: 13px; margin: 6px 0 16px; }
+    .scorePriceCard .btn {
+      margin-top: auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 10px 16px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 800;
+      font-size: 13px;
+      background: transparent;
+      color: #ECF2FF;
+      border: 1px solid #2B375F;
+    }
+    .scorePriceCard.featured .btn {
+      background: linear-gradient(135deg, #7C3AED 0%, #22D3EE 100%);
+      color: #0A1022;
+      border: none;
+    }
+    @media (max-width: 1000px) {
+      .scorePriceGrid { grid-template-columns: 1fr; }
+    }
     #modelo-analisis .page-content, #flujo .page-content, #cierre .page-content, #demo .page-content { padding-top: 48px; padding-bottom: 48px; }
     @media (max-width: 600px) {
       .section-title { font-size: 20px; }
@@ -818,7 +878,7 @@
       </a>
       <div class="navLinks">
         <a href="/como-funciona.html">Cómo funciona</a>
-        <a href="/precios">Precios</a>
+        <a href="#precios">Precios</a>
         <a href="/faq.html">FAQ</a>
         <a href="/contacto.html">Contacto</a>
       </div>
@@ -1410,6 +1470,39 @@
     </div>
   </section>
 
+  <section id="precios" class="scorePrices">
+    <div class="page-content">
+      <h2>Precios Inspección Score</h2>
+      <p class="scorePricesSub">Inspección individual o packs de créditos. Sin suscripción mensual: pagas solo lo que usas. Precios con IVA incluido.</p>
+      <div class="scorePriceGrid">
+        <article class="scorePriceCard">
+          <h3 class="plan">Inspección individual</h3>
+          <p class="price">$14.990</p>
+          <p class="muted">por inspección · IA, informe y certificado QR</p>
+          <a class="btn" href="/inspeccionar">Comprar</a>
+        </article>
+        <article class="scorePriceCard">
+          <h3 class="plan">10 créditos</h3>
+          <p class="price">$139.990</p>
+          <p class="muted">$13.990 c/u · volumen puntual</p>
+          <a class="btn" href="/">Comprar pack</a>
+        </article>
+        <article class="scorePriceCard featured">
+          <h3 class="plan">50 créditos</h3>
+          <p class="price">$649.500</p>
+          <p class="muted">$12.990 c/u · recomendado</p>
+          <a class="btn" href="/">Comprar pack</a>
+        </article>
+        <article class="scorePriceCard">
+          <h3 class="plan">100 créditos</h3>
+          <p class="price">$1.199.000</p>
+          <p class="muted">$11.990 c/u · oficinas activas</p>
+          <a class="btn" href="/">Comprar pack</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
   <footer>
     <div class="footerWrap">
       <div class="footerBrand">
@@ -1425,7 +1518,7 @@
       <div class="footerCol">
         <h4>Contacto</h4>
         <a href="/contacto.html">Contacto</a>
-        <a href="/precios">Precios</a>
+        <a href="#precios">Precios</a>
       </div>
       <div class="footerCol footerPartners" aria-label="Referencias técnicas">
         <h4>Referencias técnicas</h4>
@@ -1908,7 +2001,7 @@
           const headers = { "Content-Type": "application/json" };
           if (debug) headers["X-Debug"] = "1";
 
-          // Único acceso: login de plataforma → /app
+          // Único acceso: todos aterrizan en /app (productos según reglas de plataforma)
           const res = await fetch("/api/auth/login", {
             method: "POST",
             headers,
@@ -1919,13 +2012,49 @@
             const data = await res.json().catch(() => ({}));
             if (data && data.ok && data.token) {
               try { sessionStorage.setItem("platform_session", data.token); } catch (_) {}
+              // Evitar que una sesión Capture previa (p.ej. Remax) “secuestre” /tenant.
+              try {
+                localStorage.removeItem("tenant_session");
+                localStorage.removeItem("tenant_id");
+                sessionStorage.removeItem("entrega_session");
+                sessionStorage.removeItem("postventa_session");
+                sessionStorage.removeItem("inout_session");
+              } catch (_) {}
               loginModal.classList.remove("open");
-              let nextPath = "/app";
+              let appUrl = "/app";
+              const isAdmin = !!(data.context && data.context.user && data.context.user.isPlatformAdmin);
+              if (isAdmin) appUrl = "/control";
               try {
                 const n = new URLSearchParams(window.location.search).get("next");
-                if (n && n.startsWith("/") && !n.startsWith("//")) nextPath = n;
+                if (n && n.startsWith("/") && !n.startsWith("//")) {
+                  if (n === "/control" || n.startsWith("/control?") || n.startsWith("/control/")) {
+                    appUrl = n;
+                  } else if (n === "/app" || n.startsWith("/app?") || n.startsWith("/app/")) {
+                    appUrl = n;
+                  } else if (n === "/postventa" || n.startsWith("/postventa?") || 
+                             n === "/entrega" || n.startsWith("/entrega?") || 
+                             n === "/inout" || n.startsWith("/inout?") || 
+                             n === "/scan" || n.startsWith("/scan?") || 
+                             n === "/tenant" || n.startsWith("/tenant?")) {
+                    const highlight = n.startsWith("/postventa")
+                      ? "POSTSALE"
+                      : n.startsWith("/entrega")
+                        ? "RECEPTION"
+                        : n.startsWith("/inout")
+                          ? "INOUT"
+                          : n.startsWith("/scan")
+                            ? "SCAN"
+                            : n.startsWith("/tenant")
+                              ? "INSPECTION"
+                              : "";
+                    if (highlight) appUrl = "/app?highlight=" + encodeURIComponent(highlight);
+                  } else {
+                    appUrl = n;
+                    if (isAdmin && (n === "/admin" || n.startsWith("/admin"))) appUrl = "/control";
+                  }
+                }
               } catch (_) {}
-              window.location.replace(nextPath);
+              window.location.replace(appUrl);
               return;
             }
           }
@@ -1998,6 +2127,7 @@
     })();
   </script>
   <script src="/assets/elevenlabs-home.js" defer></script>
+  <script src="/assets/site-shell.js" defer></script>
   <script src="/assets/tracker.js" defer></script>
 </body>
 </html>

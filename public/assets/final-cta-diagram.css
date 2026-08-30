@@ -1,0 +1,268 @@
+/* Tech HUD Diagram - Red Theme */
+
+/* Perimeter and rings */
+.final-cta__diagram-perimeter {
+  fill: none;
+  stroke: rgba(240, 68, 56, 0.08);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+  opacity: 1;
+}
+
+.final-cta__diagram-ring-outer {
+  fill: none;
+  stroke: rgba(240, 68, 56, 0.15);
+  stroke-width: 1.2;
+  stroke-dasharray: 8 16;
+  opacity: 1;
+}
+
+.final-cta__diagram-ring-mid {
+  fill: none;
+  stroke: rgba(240, 68, 56, 0.25);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 12;
+  opacity: 1;
+}
+
+.final-cta__diagram-ring {
+  fill: none;
+  stroke: rgba(240, 68, 56, 0.4);
+  stroke-width: 2;
+  opacity: 1;
+}
+
+/* Particles */
+.final-cta__diagram-particles {
+  opacity: 1;
+}
+
+.final-cta__diagram-particle {
+  fill: #f04438;
+  opacity: 0.9;
+  animation: ctaParticlePulse 2s ease-in-out infinite;
+}
+
+.final-cta__diagram-particle:nth-child(1) { animation-delay: 0s; }
+.final-cta__diagram-particle:nth-child(2) { animation-delay: 0.5s; }
+.final-cta__diagram-particle:nth-child(3) { animation-delay: 1s; }
+.final-cta__diagram-particle:nth-child(4) { animation-delay: 1.5s; }
+
+/* Connection lines */
+.final-cta__diagram-connections {
+  opacity: 1;
+}
+
+.final-cta__diagram-line-glow {
+  stroke: rgba(240, 68, 56, 0.3);
+  stroke-width: 4;
+  opacity: 0.6;
+}
+
+.final-cta__diagram-line {
+  stroke: rgba(240, 68, 56, 0.5);
+  stroke-width: 2;
+  opacity: 1;
+}
+
+/* Data orbit rings */
+.final-cta__diagram-data-orbit {
+  fill: none;
+  stroke: rgba(240, 68, 56, 0.25);
+  stroke-width: 1;
+  stroke-dasharray: 4 8;
+  opacity: 1;
+  animation: ctaRotate 25s linear infinite;
+  transform-origin: center;
+  transform-box: fill-box;
+}
+
+.final-cta__diagram-data-orbit--reverse {
+  animation-duration: 18s;
+  animation-direction: reverse;
+}
+
+/* RAG structure */
+.final-cta__diagram-rag {
+  opacity: 1;
+}
+
+.final-cta__diagram-rag-shield {
+  fill: none;
+  stroke: rgba(240, 68, 56, 0.2);
+  stroke-width: 1;
+  stroke-dasharray: 3 6;
+  opacity: 1;
+}
+
+.final-cta__diagram-rag-layer {
+  fill: none;
+  stroke: rgba(240, 68, 56, 0.35);
+  stroke-width: 1.5;
+  opacity: 1;
+  filter: drop-shadow(0 0 8px rgba(240, 68, 56, 0.4));
+}
+
+.final-cta__diagram-rag-core {
+  stroke: rgba(240, 68, 56, 0.6);
+  stroke-width: 2.5;
+  opacity: 1;
+  filter: drop-shadow(0 0 12px rgba(240, 68, 56, 0.6));
+  animation: ctaCorePulse 3s ease-in-out infinite;
+}
+
+.final-cta__diagram-rag-internals {
+  opacity: 1;
+}
+
+.final-cta__diagram-rag-internals ellipse,
+.final-cta__diagram-rag-internals line {
+  stroke: rgba(255, 255, 255, 0.8);
+}
+
+.final-cta__diagram-rag-internals circle {
+  fill: rgba(255, 255, 255, 0.9);
+}
+
+/* RAG Labels */
+.final-cta__diagram-rag-label {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  fill: #ffffff;
+  opacity: 1;
+  filter: drop-shadow(0 0 8px rgba(240, 68, 56, 0.8));
+}
+
+.final-cta__diagram-rag-sublabel {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  fill: rgba(255, 255, 255, 0.75);
+  opacity: 1;
+}
+
+/* Solution nodes */
+.final-cta__diagram-node-group {
+  opacity: 1;
+  cursor: pointer;
+}
+
+.final-cta__diagram-node-glow {
+  fill: rgba(240, 68, 56, 0.15);
+  stroke: none;
+  opacity: 0.6;
+  filter: blur(4px);
+}
+
+.final-cta__diagram-node-outer {
+  fill: rgba(10, 10, 10, 0.8);
+  stroke: rgba(240, 68, 56, 0.4);
+  stroke-width: 1.5;
+  opacity: 1;
+}
+
+.final-cta__diagram-node {
+  fill: rgba(10, 10, 10, 0.9);
+  stroke: rgba(240, 68, 56, 0.7);
+  stroke-width: 2.5;
+  opacity: 1;
+  transition: all 300ms ease;
+  filter: drop-shadow(0 0 6px rgba(240, 68, 56, 0.5));
+}
+
+.final-cta__diagram-node-inner {
+  fill: rgba(240, 68, 56, 0.1);
+  stroke: none;
+  opacity: 1;
+  transition: all 300ms ease;
+}
+
+/* Node icons */
+.final-cta__diagram-icon {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.8);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 1;
+  transition: all 300ms ease;
+}
+
+.final-cta__diagram-node-group:hover .final-cta__diagram-node {
+  fill: rgba(240, 68, 56, 0.2);
+  stroke: rgba(240, 68, 56, 1);
+  filter: drop-shadow(0 0 12px rgba(240, 68, 56, 0.9));
+}
+
+.final-cta__diagram-node-group:hover .final-cta__diagram-node-inner {
+  fill: rgba(240, 68, 56, 0.3);
+}
+
+.final-cta__diagram-node-group:hover .final-cta__diagram-node-glow {
+  opacity: 1;
+}
+
+.final-cta__diagram-node-group:hover .final-cta__diagram-icon {
+  stroke: #ffffff;
+}
+
+/* Solution labels - Pill style */
+.final-cta__diagram-label-pill {
+  fill: rgba(10, 10, 10, 0.95);
+  stroke: rgba(240, 68, 56, 0.6);
+  stroke-width: 1.5;
+  rx: 15;
+  opacity: 1;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4));
+}
+
+.final-cta__diagram-label-number {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  fill: #f04438;
+  opacity: 1;
+}
+
+.final-cta__diagram-label-name {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  fill: rgba(255, 255, 255, 0.95);
+  opacity: 1;
+}
+
+/* Animations */
+@keyframes ctaCorePulse {
+  0%, 100% { 
+    opacity: 1;
+    stroke-width: 2.5;
+    stroke: rgba(240, 68, 56, 0.6);
+  }
+  50% { 
+    opacity: 1;
+    stroke-width: 3;
+    stroke: rgba(240, 68, 56, 0.9);
+  }
+}
+
+@keyframes ctaParticlePulse {
+  0%, 100% { 
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 1;
+    transform: scale(1.8);
+  }
+}
+
+@keyframes ctaRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

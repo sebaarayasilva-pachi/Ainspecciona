@@ -1,10 +1,10 @@
 /* FinalCtaSection — cierre comercial */
 .final-cta {
-  --cta-bg: #f04438;
+  --cta-bg: #0a0a0a;
   --cta-text: #ffffff;
   --cta-muted: rgba(255, 255, 255, 0.82);
   --cta-micro: rgba(255, 255, 255, 0.72);
-  --cta-dark: #0b0d0f;
+  --cta-accent: #f04438;
   --cta-max: 1280px;
 
   position: relative;
@@ -19,11 +19,12 @@
   inset: 0;
   pointer-events: none;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
-  background-size: 56px 56px;
-  opacity: 0.35;
+    linear-gradient(rgba(240, 68, 56, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(240, 68, 56, 0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  opacity: 0.4;
 }
+
 
 .final-cta__inner {
   position: relative;
@@ -111,14 +112,14 @@
 }
 
 .final-cta__btn--primary {
-  border: 1px solid var(--cta-dark);
-  background: var(--cta-dark);
+  border: 1px solid var(--cta-accent);
+  background: var(--cta-accent);
   color: #fff;
 }
 
 .final-cta__btn--primary:hover {
-  background: #15181c;
-  border-color: #15181c;
+  background: #d63c31;
+  border-color: #d63c31;
   transform: translateY(-1px);
 }
 
@@ -151,6 +152,26 @@
   justify-content: center;
 }
 
+.final-cta__diagram-image {
+  width: min(100%, 520px);
+  max-width: 540px;
+  height: auto;
+  display: block;
+  opacity: 0.95;
+  animation: ctaDiagramFadeIn 800ms ease forwards;
+}
+
+@keyframes ctaDiagramFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 0.95;
+    transform: scale(1);
+  }
+}
+
 .final-cta__diagram {
   width: min(100%, 500px);
   max-width: 520px;
@@ -159,67 +180,7 @@
   display: block;
 }
 
-.final-cta__diagram-ring-outer {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.12);
-  stroke-width: 1;
-  stroke-dasharray: 4 8;
-  opacity: 0;
-}
-
-.final-cta__diagram-ring {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.3);
-  stroke-width: 1.25;
-}
-
-.final-cta__diagram-line {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.18);
-  stroke-width: 1;
-}
-
-.final-cta__diagram-mark {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.18);
-  stroke-width: 1;
-  opacity: 0;
-}
-
-.final-cta__diagram-node {
-  fill: rgba(255, 255, 255, 0.05);
-  stroke: rgba(255, 255, 255, 0.38);
-  stroke-width: 1.25;
-  opacity: 0;
-  transform-origin: center;
-  transform-box: fill-box;
-}
-
-.final-cta__diagram-core {
-  fill: rgba(11, 13, 15, 0.08);
-  stroke: rgba(255, 255, 255, 0.48);
-  stroke-width: 1.25;
-  opacity: 0;
-}
-
-.final-cta__diagram-building {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.32);
-  stroke-width: 1;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  opacity: 0;
-}
-
-.final-cta__diagram-label {
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  fill: rgba(255, 255, 255, 0.5);
-  text-anchor: middle;
-  opacity: 0;
-}
+/* Diagram styles moved to final-cta-diagram.css */
 
 .final-cta__diagram-ring,
 .final-cta__diagram-line {
@@ -228,57 +189,80 @@
 }
 
 /* ——— Diagram animations ——— */
-.final-cta.is-visible .final-cta__diagram-ring-outer {
-  animation: ctaFadeIn 280ms ease forwards;
+.final-cta.is-visible .final-cta__diagram-ring-outer,
+.final-cta.is-visible .final-cta__diagram-ring-mid {
+  animation: ctaFadeIn 350ms ease forwards;
   animation-delay: 0ms;
 }
 
 .final-cta.is-visible .final-cta__diagram-ring {
-  animation: ctaDraw 380ms ease forwards;
-  animation-delay: 120ms;
+  animation: ctaFadeIn 400ms ease forwards;
+  animation-delay: 100ms;
 }
 
 .final-cta.is-visible .final-cta__diagram-line {
-  animation: ctaDraw 320ms ease forwards;
+  animation: ctaFadeIn 320ms ease forwards;
 }
 
-.final-cta.is-visible line.final-cta__diagram-line:nth-child(7) { animation-delay: 320ms; }
-.final-cta.is-visible line.final-cta__diagram-line:nth-child(8) { animation-delay: 360ms; }
-.final-cta.is-visible line.final-cta__diagram-line:nth-child(9) { animation-delay: 400ms; }
-.final-cta.is-visible line.final-cta__diagram-line:nth-child(10) { animation-delay: 440ms; }
+.final-cta.is-visible line.final-cta__diagram-line:nth-of-type(1) { animation-delay: 200ms; }
+.final-cta.is-visible line.final-cta__diagram-line:nth-of-type(2) { animation-delay: 240ms; }
+.final-cta.is-visible line.final-cta__diagram-line:nth-of-type(3) { animation-delay: 280ms; }
+.final-cta.is-visible line.final-cta__diagram-line:nth-of-type(4) { animation-delay: 320ms; }
+.final-cta.is-visible line.final-cta__diagram-line:nth-of-type(5) { animation-delay: 360ms; }
+.final-cta.is-visible line.final-cta__diagram-line:nth-of-type(6) { animation-delay: 400ms; }
 
-.final-cta.is-visible .final-cta__diagram-mark {
-  animation: ctaFadeIn 240ms ease forwards;
-  animation-delay: 460ms;
+.final-cta.is-visible .final-cta__diagram-data-orbit {
+  animation: ctaFadeIn 300ms ease forwards, ctaRotate 20s linear infinite;
+  animation-delay: 300ms, 300ms;
 }
 
-.final-cta.is-visible .final-cta__diagram-node {
-  animation: ctaNodeIn 280ms ease forwards;
+.final-cta.is-visible .final-cta__diagram-data-orbit:nth-of-type(2) {
+  animation: ctaFadeIn 300ms ease forwards, ctaRotate 15s linear infinite reverse;
+  animation-delay: 350ms, 350ms;
 }
 
-.final-cta.is-visible circle.final-cta__diagram-node:nth-child(13) { animation-delay: 520ms; }
-.final-cta.is-visible circle.final-cta__diagram-node:nth-child(14) { animation-delay: 560ms; }
-.final-cta.is-visible circle.final-cta__diagram-node:nth-child(15) { animation-delay: 600ms; }
-.final-cta.is-visible circle.final-cta__diagram-node:nth-child(16) { animation-delay: 640ms; }
+.final-cta.is-visible .final-cta__diagram-rag-layer {
+  animation: ctaFadeIn 350ms ease forwards;
+  animation-delay: 400ms;
+}
+
+.final-cta.is-visible .final-cta__diagram-rag-core {
+  animation: ctaPulse 450ms ease forwards;
+  animation-delay: 480ms;
+}
+
+.final-cta.is-visible .final-cta__diagram-rag-internals {
+  animation: ctaFadeIn 320ms ease forwards;
+  animation-delay: 600ms;
+}
+
+.final-cta.is-visible .final-cta__diagram-rag-label,
+.final-cta.is-visible .final-cta__diagram-rag-sublabel {
+  animation: ctaFadeIn 300ms ease forwards;
+  animation-delay: 650ms;
+}
+
+.final-cta.is-visible .final-cta__diagram-node-group {
+  animation: ctaNodeIn 320ms ease forwards;
+}
+
+.final-cta.is-visible .final-cta__diagram-node-group:nth-of-type(1) { animation-delay: 500ms; }
+.final-cta.is-visible .final-cta__diagram-node-group:nth-of-type(2) { animation-delay: 540ms; }
+.final-cta.is-visible .final-cta__diagram-node-group:nth-of-type(3) { animation-delay: 580ms; }
+.final-cta.is-visible .final-cta__diagram-node-group:nth-of-type(4) { animation-delay: 620ms; }
+.final-cta.is-visible .final-cta__diagram-node-group:nth-of-type(5) { animation-delay: 660ms; }
+.final-cta.is-visible .final-cta__diagram-node-group:nth-of-type(6) { animation-delay: 700ms; }
 
 .final-cta.is-visible .final-cta__diagram-label {
   animation: ctaFadeIn 280ms ease forwards;
 }
 
-.final-cta.is-visible text.final-cta__diagram-label:nth-child(17) { animation-delay: 680ms; }
-.final-cta.is-visible text.final-cta__diagram-label:nth-child(18) { animation-delay: 720ms; }
-.final-cta.is-visible text.final-cta__diagram-label:nth-child(19) { animation-delay: 760ms; }
-.final-cta.is-visible text.final-cta__diagram-label:nth-child(20) { animation-delay: 800ms; }
-
-.final-cta.is-visible .final-cta__diagram-core {
-  animation: ctaFadeIn 280ms ease forwards;
-  animation-delay: 780ms;
-}
-
-.final-cta.is-visible .final-cta__diagram-building {
-  animation: ctaFadeIn 260ms ease forwards;
-  animation-delay: 840ms;
-}
+.final-cta.is-visible text.final-cta__diagram-label:nth-of-type(1) { animation-delay: 740ms; }
+.final-cta.is-visible text.final-cta__diagram-label:nth-of-type(2) { animation-delay: 780ms; }
+.final-cta.is-visible text.final-cta__diagram-label:nth-of-type(3) { animation-delay: 820ms; }
+.final-cta.is-visible text.final-cta__diagram-label:nth-of-type(4) { animation-delay: 860ms; }
+.final-cta.is-visible text.final-cta__diagram-label:nth-of-type(5) { animation-delay: 900ms; }
+.final-cta.is-visible text.final-cta__diagram-label:nth-of-type(6) { animation-delay: 940ms; }
 
 @keyframes ctaNodeIn {
   from { opacity: 0; transform: scale(0.85); }
@@ -338,6 +322,8 @@
   to { stroke-dashoffset: 0; }
 }
 
+/* Diagram animations moved to final-cta-diagram.css */
+
 @media (prefers-reduced-motion: reduce) {
   .final-cta [data-cta-animate] {
     opacity: 1 !important;
@@ -381,6 +367,12 @@
     margin-top: 8px;
   }
 
+  .final-cta__diagram-image {
+    width: min(100%, 420px);
+    max-width: 440px;
+    margin: 0 auto;
+  }
+
   .final-cta__diagram {
     width: min(100%, 400px);
     max-width: 420px;
@@ -413,6 +405,11 @@
 
   .final-cta__visual {
     margin-top: 28px;
+  }
+
+  .final-cta__diagram-image {
+    width: min(100%, 320px);
+    max-width: 340px;
   }
 
   .final-cta__diagram {

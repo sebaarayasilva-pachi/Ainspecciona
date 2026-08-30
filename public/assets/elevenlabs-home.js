@@ -1,6 +1,6 @@
 (function () {
   var p = window.location.pathname.replace(/\/+$/, '') || '/';
-  var isHome = p === '/' || p === '/index.html' || p === '/corredores.html';
+  var isHome = p === '/' || p === '/index.html' || p === '/productos/inspeccion-score.html';
   if (!isHome) return;
 
   fetch('/api/public/elevenlabs-agent')

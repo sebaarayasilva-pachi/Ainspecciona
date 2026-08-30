@@ -1,106 +1,59 @@
 {
-
   "brand": {
-
     "href": "/",
-
     "logo": "/assets/Logo Ainspecciona.png",
-
     "alt": "Ainspecciona"
-
   },
-
   "nav": [
-
-    { "label": "Plataforma", "href": "/#plataforma" },
-
-    { "type": "dropdown", "label": "Soluciones", "key": "soluciones" },
-
-    { "label": "Tecnología", "href": "/#tecnologia" },
-
-    { "label": "Nosotros", "href": "/#equipo" },
-
-    { "label": "Recursos", "href": "/faq.html" }
-
+    { "type": "dropdown", "label": "Soluciones", "key": "soluciones" }
   ],
-
   "products": [
-
     {
-
-      "id": "inspeccion",
-
-      "label": "Inspección STI",
-
-      "description": "Corredores, oficinas y administradores",
-
-      "href": "/como-funciona.html",
-
-      "badge": "Producción"
-
+      "id": "recepcion-inmobiliaria",
+      "label": "Recepción Inmobiliaria",
+      "description": "Hallazgos y recepción de proyectos",
+      "href": "/productos/recepcion-inmobiliaria.html"
     },
-
     {
-
       "id": "postventa",
-
       "label": "Postventa",
-
-      "description": "Garantías y reclamos con agente IA",
-
-      "href": "/postventa",
-
-      "badge": "Piloto"
-
+      "description": "Reclamos con evidencia y tickets",
+      "href": "/productos/postventa.html"
     },
-
     {
-
-      "id": "entrega",
-
-      "label": "Recepción / Entrega",
-
-      "description": "Constructoras e inmobiliarias",
-
-      "href": "/entrega",
-
-      "badge": "Demo"
-
+      "id": "inspeccion-score",
+      "label": "Inspección Score",
+      "description": "Inspección técnica digital para corredores",
+      "href": "/productos/inspeccion-score.html"
     },
-
     {
-
-      "id": "propertycheck",
-
-      "label": "PropertyCheck",
-
-      "description": "Integración API para proptech",
-
-      "href": "/contacto.html?producto=propertycheck",
-
-      "badge": "Partner"
-
+      "id": "inspeccion-full-check",
+      "label": "Inspección Full Check",
+      "description": "Visita presencial Property-CHK",
+      "href": "/productos/inspeccion-full-check.html"
+    },
+    {
+      "id": "in-out",
+      "label": "In & Out",
+      "description": "Entrada y salida de arriendo",
+      "href": "/productos/in-out.html",
+      "hidden": true
+    },
+    {
+      "id": "property-scan",
+      "label": "Property Scan",
+      "description": "Tour 3D y planimetría",
+      "href": "/productos/property-scan.html",
+      "hidden": true
     }
-
   ],
-
   "access": {
-
     "label": "Iniciar sesión",
-
-    "loginHref": "/?login=1"
-
+    "loginHref": "/app"
   },
-
   "demoCta": {
-
     "label": "Solicitar demostración",
-
-    "href": "/?motivo=demo#contacto",
-
+    "href": "/contacto",
     "external": false
-
   }
-
 }
-

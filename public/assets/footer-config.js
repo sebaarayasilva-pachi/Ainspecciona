@@ -19,25 +19,28 @@ window.FOOTER_CONFIG = {
         { label: "Plataforma", href: "/#plataforma", visible: true },
         { label: "Tecnología", href: "/#tecnologia", visible: true },
         { label: "Nosotros", href: "/#equipo", visible: true },
-        { label: "Recursos", href: "/recursos", visible: false }
+        { label: "Recursos", href: "/faq.html", visible: true }
       ]
     },
     {
       title: "Soluciones",
       links: [
-        { label: "Recepción técnica", href: "/entrega", visible: true },
-        { label: "Postventa", href: "/postventa/captura", visible: true },
-        { label: "Inspección pre-arriendo", href: "/#contacto", visible: true },
-        { label: "Inspección pre-venta", href: "/#contacto", visible: true }
+        { label: "Recepción Inmobiliaria", href: "/productos/recepcion-inmobiliaria.html", visible: true },
+        { label: "Postventa", href: "/productos/postventa.html", visible: true },
+        { label: "Inspección Score", href: "/productos/inspeccion-score.html", visible: true },
+        { label: "Inspección Full Check", href: "/productos/inspeccion-full-check.html", visible: true },
+        { label: "In & Out", href: "/productos/in-out.html", visible: false },
+        { label: "Property Scan", href: "/productos/property-scan.html", visible: false }
       ]
     },
     {
       title: "Acceso y contacto",
       links: [
-        { label: "Iniciar sesión", href: "/?login=1", visible: true },
-        { label: "Solicitar demostración", href: "/?motivo=demo#contacto", visible: true, arrow: true },
-        { label: "Contacto", href: "/#contacto", visible: true },
-        { label: "Soporte", href: "mailto:contacto@ainspecciona.com", visible: true }
+        { label: "Precios", href: "/precios", visible: false },
+        { label: "Iniciar sesión", href: "/app", visible: true },
+        { label: "Solicitar demostración", href: "/contacto", visible: true, arrow: true },
+        { label: "Contacto", href: "/contacto", visible: true },
+        { label: "Soporte", href: "/contacto", visible: true }
       ]
     },
     {
