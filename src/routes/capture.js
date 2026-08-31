@@ -318,11 +318,11 @@ export async function registerCaptureRoutes(app, {
         scoreConfigUpdatedAt: runtimeScoreConfig?.updatedAt
       });
 
-      if (summary.ok && summary.scoring) {
+      if (summary.ok && summary.score != null) {
         // Construir kpiScores desde byGroup
         const kpiScores = {};
-        if (summary.scoring.byGroup) {
-          summary.scoring.byGroup.forEach(kpi => {
+        if (summary.byGroup) {
+          summary.byGroup.forEach(kpi => {
             if (kpi.groupKey && kpi.scoreIfOnlyGroup != null) {
               kpiScores[kpi.groupKey] = kpi.scoreIfOnlyGroup;
             }
@@ -330,9 +330,9 @@ export async function registerCaptureRoutes(app, {
         }
 
         scoringData = {
-          finalScore: summary.scoring.score ?? null,
-          finalBadge: summary.scoring.badge ?? null,
-          scoreVersion: summary.scoring.scoreVersion ?? null,
+          finalScore: summary.score ?? null,
+          finalBadge: summary.badge ?? null,
+          scoreVersion: 'SCORING_V2_2_KPI',
           kpiScores: Object.keys(kpiScores).length > 0 ? kpiScores : null,
           scoredAt: new Date()
         };

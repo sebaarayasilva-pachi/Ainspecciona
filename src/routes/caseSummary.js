@@ -234,6 +234,12 @@ export async function getCaseSummary({ prisma, storage, caseId, slotGroupTitleFr
     bedrooms: c.bedrooms,
     bathrooms: c.bathrooms,
     tenantId: c.tenantId || null,
+    // SSOT: Incluir campos de score persistido para que el PDF pueda leerlos
+    kpiScores: c.kpiScores || null,
+    finalScore: c.finalScore ?? null,
+    finalBadge: c.finalBadge || null,
+    scoreVersion: c.scoreVersion || null,
+    scoredAt: c.scoredAt ? new Date(c.scoredAt).toISOString() : null,
     property: {
       id: property.id,
       rol: property.rol,
