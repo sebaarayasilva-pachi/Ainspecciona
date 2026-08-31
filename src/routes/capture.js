@@ -1,5 +1,6 @@
 import sharp from 'sharp';
 import { validatePhotoQuality } from '../photoQuality/validatePhoto.js';
+import { getCaseSummary } from './caseSummary.js';
 
 function now() {
   return new Date();
@@ -12,13 +13,72 @@ function isExpired(tokenRow) {
   return new Date(tokenRow.expiresAt).getTime() <= Date.now();
 }
 
-async function requireCaptureToken(prisma, token) {
+async function requireCaptureToken(prisma, token, { allowPendingApproval = false } = {}) {
   const row = await prisma.captureToken.findUnique({
     where: { token },
-    select: { id: true, token: true, caseId: true, tenantId: true, expiresAt: true, revokedAt: true }
+    select: {
+      id: true,
+      token: true,
+      caseId: true,
+      tenantId: true,
+      expiresAt: true,
+      revokedAt: true,
+      case: { select: { status: true, shortId: true } }
+    }
   });
   if (isExpired(row)) return null;
+  const st = String(row.case?.status || '').toUpperCase();
+  if (st === 'CANCELLED') return null;
+  if (st === 'PENDING_APPROVAL' && !allowPendingApproval) return null;
   return row;
+}
+
+function pendingApprovalCapturePayload(t, slots) {
+  const realTotal = Array.isArray(slots) ? slots.length : 0;
+  const shortId = t.case?.shortId || '';
+  // Apps viejas mapean INVALID_TOKEN → "Enlace vencido". Devolver 200 con slot informativo.
+  // total > 0 evita que la app muestre "Cargando..." indefinidamente.
+  return {
+    ok: true,
+    pendingApproval: true,
+    approved: false,
+    token: t.token,
+    caseId: t.caseId,
+    shortId,
+    expiresAt: t.expiresAt,
+    progress: {
+      uploaded: 0,
+      analyzed: 0,
+      omitted: 0,
+      rejected: 0,
+      pending: Math.max(1, realTotal),
+      closed: 0,
+      total: Math.max(1, realTotal),
+      pct: 0,
+      doneCycle: false
+    },
+    canFinish: false,
+    slot: {
+      id: '__pending_approval__',
+      slotCode: 'PENDING_APPROVAL',
+      title: 'Pendiente de aprobación',
+      instructions:
+        'Esperando al administrador. Cuando apruebe (1 crédito) esta pantalla se actualizará sola y podrás capturar.',
+      orderIndex: 0,
+      status: 'PENDING',
+      photoUrl: null
+    },
+    message:
+      'Pendiente de aprobación del administrador. Cuando aprueben podrás capturar.'
+  };
+}
+
+function pendingApprovalBlockedReply(reply) {
+  return reply.code(403).send({
+    ok: false,
+    error: 'PENDING_APPROVAL',
+    message: 'Esta inspección aún no está aprobada por el administrador. No se pueden capturar fotos hasta entonces.'
+  });
 }
 
 function pickNextSlot(slots) {
@@ -60,7 +120,9 @@ export async function registerCaptureRoutes(app, {
   sendCaseToReview,
   notifyExecutiveReportIfReady,
   queueExecutiveSummaryForCase,
-  recordReportAccuracyOnComplete
+  recordReportAccuracyOnComplete,
+  runtimeScoreConfig,
+  slotGroupTitleFromCode
 }) {
   const mapSlotForResponse = (next) => next
     ? {
@@ -89,7 +151,7 @@ export async function registerCaptureRoutes(app, {
     }
 
     const token = String(req.params.token || '');
-    const t = await requireCaptureToken(prisma, token);
+    const t = await requireCaptureToken(prisma, token, { allowPendingApproval: true });
     if (!t) return reply.code(401).send({ ok: false, error: 'INVALID_TOKEN' });
 
     const slots = await prisma.slot.findMany({
@@ -98,11 +160,17 @@ export async function registerCaptureRoutes(app, {
       include: { photo: true }
     });
 
+    if (String(t.case?.status || '').toUpperCase() === 'PENDING_APPROVAL') {
+      return reply.send(pendingApprovalCapturePayload(t, slots));
+    }
+
     const next = pickNextSlot(slots);
     const progress = computeProgress(slots);
 
     return reply.send({
       ok: true,
+      pendingApproval: false,
+      approved: true,
       token: t.token,
       caseId: t.caseId,
       expiresAt: t.expiresAt,
@@ -119,7 +187,7 @@ export async function registerCaptureRoutes(app, {
     }
 
     const token = String(req.params.token || '');
-    const t = await requireCaptureToken(prisma, token);
+    const t = await requireCaptureToken(prisma, token, { allowPendingApproval: true });
     if (!t) return reply.code(401).send({ ok: false, error: 'INVALID_TOKEN' });
 
     const slots = await prisma.slot.findMany({
@@ -127,6 +195,20 @@ export async function registerCaptureRoutes(app, {
       orderBy: { orderIndex: 'asc' },
       include: { photo: true }
     });
+
+    if (String(t.case?.status || '').toUpperCase() === 'PENDING_APPROVAL') {
+      const payload = pendingApprovalCapturePayload(t, slots);
+      return reply.send({
+        ok: true,
+        pendingApproval: true,
+        caseId: t.caseId,
+        progress: payload.progress,
+        canFinish: false,
+        slots: [],
+        message: payload.message
+      });
+    }
+
     const progress = computeProgress(slots);
 
     return reply.send({
@@ -150,8 +232,14 @@ export async function registerCaptureRoutes(app, {
     if (!prisma) return reply.code(500).send({ ok: false, error: 'DATABASE_NOT_CONFIGURED' });
     const token = String(req.params.token || '');
     const slotId = String(req.params.slotId || '');
-    const t = await requireCaptureToken(prisma, token);
+    const t = await requireCaptureToken(prisma, token, { allowPendingApproval: true });
     if (!t) return reply.code(401).send({ ok: false, error: 'INVALID_TOKEN' });
+    if (String(t.case?.status || '').toUpperCase() === 'PENDING_APPROVAL') {
+      return pendingApprovalBlockedReply(reply);
+    }
+    if (slotId === '__pending_approval__') {
+      return pendingApprovalBlockedReply(reply);
+    }
 
     const slot = await prisma.slot.findUnique({
       where: { id: slotId },
@@ -197,8 +285,11 @@ export async function registerCaptureRoutes(app, {
   app.post('/api/capture/:token/finish', async (req, reply) => {
     if (!prisma) return reply.code(500).send({ ok: false, error: 'DATABASE_NOT_CONFIGURED' });
     const token = String(req.params.token || '');
-    const t = await requireCaptureToken(prisma, token);
+    const t = await requireCaptureToken(prisma, token, { allowPendingApproval: true });
     if (!t) return reply.code(401).send({ ok: false, error: 'INVALID_TOKEN' });
+    if (String(t.case?.status || '').toUpperCase() === 'PENDING_APPROVAL') {
+      return pendingApprovalBlockedReply(reply);
+    }
 
     const slots = await prisma.slot.findMany({ where: { caseId: t.caseId }, orderBy: { orderIndex: 'asc' } });
     const progress = computeProgress(slots);
@@ -215,9 +306,48 @@ export async function registerCaptureRoutes(app, {
       return reply.send({ ok: true, alreadyFinished: true, reviewStatus: c.reviewStatus || 'pending_review', progress });
     }
 
+    // SSOT: Calcular score UNA SOLA VEZ al completar el caso
+    let scoringData = null;
+    try {
+      const summary = await getCaseSummary({
+        prisma,
+        storage,
+        caseId: c.id,
+        slotGroupTitleFromCode: slotGroupTitleFromCode || slotGroupFromSlotCode,
+        scoreConfig: runtimeScoreConfig?.config,
+        scoreConfigUpdatedAt: runtimeScoreConfig?.updatedAt
+      });
+
+      if (summary.ok && summary.scoring) {
+        // Construir kpiScores desde byGroup
+        const kpiScores = {};
+        if (summary.scoring.byGroup) {
+          summary.scoring.byGroup.forEach(kpi => {
+            if (kpi.groupKey && kpi.scoreIfOnlyGroup != null) {
+              kpiScores[kpi.groupKey] = kpi.scoreIfOnlyGroup;
+            }
+          });
+        }
+
+        scoringData = {
+          finalScore: summary.scoring.score ?? null,
+          finalBadge: summary.scoring.badge ?? null,
+          scoreVersion: summary.scoring.scoreVersion ?? null,
+          kpiScores: Object.keys(kpiScores).length > 0 ? kpiScores : null,
+          scoredAt: new Date()
+        };
+      }
+    } catch (err) {
+      app.log.warn({ err, caseId: c.id }, 'Failed to calculate score on case completion');
+    }
+
+    // Persistir score en DB junto con status DONE
     await prisma.case.update({
       where: { id: c.id },
-      data: { status: 'DONE' }
+      data: {
+        status: 'DONE',
+        ...(scoringData || {})
+      }
     });
 
     if (typeof recordReportAccuracyOnComplete === 'function') {
@@ -254,8 +384,11 @@ export async function registerCaptureRoutes(app, {
     const token = String(req.params.token || '');
     const slotId = String(req.params.slotId || '');
 
-    const t = await requireCaptureToken(prisma, token);
+    const t = await requireCaptureToken(prisma, token, { allowPendingApproval: true });
     if (!t) return reply.code(401).send({ ok: false, error: 'INVALID_TOKEN' });
+    if (String(t.case?.status || '').toUpperCase() === 'PENDING_APPROVAL' || slotId === '__pending_approval__') {
+      return pendingApprovalBlockedReply(reply);
+    }
 
     const slot = await prisma.slot.findUnique({
       where: { id: slotId },

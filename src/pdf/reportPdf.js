@@ -112,8 +112,17 @@ function kpiPenaltyForSlot(slot, kpiKey, cfg) {
   return kpiPenaltyFromSeverity(kpiKey, slot.severity, cfg);
 }
 
-/** Misma lógica que computeScoringByKpi: promedio de penalización por slot, no suma total. */
-function scoreKpiFromSlots(items, kpiKey, cfg) {
+/** 
+ * Calcula score del KPI.
+ * SSOT: Usa score persistido si está disponible, solo recalcula como fallback.
+ */
+function scoreKpiFromSlots(items, kpiKey, cfg, persistedKpiScores = null) {
+  // SSOT: Usar score persistido si está disponible
+  if (persistedKpiScores && persistedKpiScores[kpiKey] != null) {
+    return Math.round(Number(persistedKpiScores[kpiKey]));
+  }
+  
+  // Fallback: calcular localmente (casos pre-SSOT o si no hay persistido)
   if (!items.length) return null;
   const impact = items.reduce((acc, s) => acc + kpiPenaltyForSlot(s, kpiKey, cfg), 0);
   const avgPenalty = impact / items.length;
@@ -127,7 +136,7 @@ function slotScoreForPdf(slot, kpiKey, cfg) {
   return Math.max(0, 100 - penalty);
 }
 
-function buildKpiGroups(slots, scoreConfig, byGroupArr = []) {
+function buildKpiGroups(slots, scoreConfig, byGroupArr = [], persistedKpiScores = null) {
   const cfg = scoreConfig || DEFAULT_SCORE_CONFIG;
   const backendMap = new Map(
     (byGroupArr || []).map((g) => [String(g.groupKey || '').toUpperCase(), g])
@@ -145,7 +154,7 @@ function buildKpiGroups(slots, scoreConfig, byGroupArr = []) {
     const backend = backendMap.get(key);
     const score = backend?.scoreIfOnlyGroup != null
       ? Math.round(Number(backend.scoreIfOnlyGroup))
-      : scoreKpiFromSlots(items, key, cfg);
+      : scoreKpiFromSlots(items, key, cfg, persistedKpiScores);
     const badge = badgeFromScore(score, cfg);
     return { key, title: kpiLabel(key), score, badge, items };
   }).filter(Boolean);
@@ -163,7 +172,8 @@ export async function generateReportPdf({ summary, storage, prisma, scoreConfig 
   const score = Math.round(Math.max(0, Math.min(100, summary.score ?? 0)));
   const badge = summary.badge || 'GRAY';
 
-  const kpiGroups = buildKpiGroups(slots, cfg, summary.byGroup || []);
+  // SSOT: Pasar kpiScores persistidos para evitar recalcular
+  const kpiGroups = buildKpiGroups(slots, cfg, summary.byGroup || [], c.kpiScores || null);
 
   // === HEADER (dark premium) ===
   doc.rect(0, 0, doc.page.width, 56).fill('#0B1220');

@@ -2,6 +2,22 @@ import { computeScoringV2_2, badgeFromScore, classifyKpiFromSlot, kpiPenaltyFrom
 import { mapFindingToProblemType } from '../scoring/problemMapV2_2.js';
 import { effectiveSlotAnalysis } from '../analysis/applySlotReviewCorrection.js';
 
+// Helper para obtener título legible del KPI
+function kpiTitleFromKey(key) {
+  const map = {
+    MUROS_PINTURA: 'Muros y pintura',
+    HUMEDAD: 'Humedad visible',
+    PISOS: 'Pisos',
+    SANITARIOS: 'Sanitarios',
+    ELECTRICIDAD: 'Electricidad visible',
+    VENTANAS_CERRAMIENTOS: 'Ventanas y cerramientos',
+    PUERTAS_HERRAJES: 'Puertas y herrajes',
+    MOBILIARIO_FIJO: 'Mobiliario fijo',
+    DOCUMENTOS_CUMPLIMIENTO: 'Documentos y cumplimiento'
+  };
+  return map[key] || (key ? key[0] + key.slice(1).toLowerCase() : key);
+}
+
 /** Códigos de calidad de imagen: las fotos ya pasaron validación en captura; no exponer al usuario */
 const QUALITY_ISSUE_CODES = /image_quality_issue|imagequalityissue|calidad\s*(de\s*)?(imagen|foto)|retomar\s*foto|falta\s*de\s*claridad/i;
 const QUALITY_ISSUE_SIGNALS = [
@@ -178,10 +194,32 @@ export async function getCaseSummary({ prisma, storage, caseId, slotGroupTitleFr
     .filter((f) => !!f.problemType);
 
   let scoring;
-  try {
-    scoring = computeScoringV2_2(findingsNormalized, slots, scoreConfig);
-  } catch (err) {
-    scoring = { score: 0, badge: 'GRAY', byGroup: [] };
+
+  // SSOT: Usar score persistido si existe (calculado al completar caso)
+  if (c.finalScore != null && c.kpiScores != null) {
+    // Reconstruir byGroup desde kpiScores persistido
+    const byGroup = Object.entries(c.kpiScores).map(([key, score]) => ({
+      groupKey: key,
+      scoreIfOnlyGroup: score,
+      title: kpiTitleFromKey(key),
+      slotsCount: 0, // No es crítico para el informe
+      impact: 0 // No es crítico para el informe
+    }));
+    
+    scoring = {
+      scoreVersion: c.scoreVersion || 'SCORING_V2_2_KPI',
+      score: c.finalScore,
+      badge: c.finalBadge || badgeFromScore(c.finalScore, scoreConfig),
+      totalImpact: 0, // No es crítico para el informe
+      byGroup
+    };
+  } else {
+    // Fallback: recalcular para casos antiguos (pre-SSOT) o si falló el cálculo inicial
+    try {
+      scoring = computeScoringV2_2(findingsNormalized, slots, scoreConfig);
+    } catch (err) {
+      scoring = { score: 0, badge: 'GRAY', byGroup: [] };
+    }
   }
 
   const property = c.property || {};

@@ -28,6 +28,8 @@ enum CaseStatus {
   DRAFT
   IN_PROGRESS
   DONE
+  PENDING_APPROVAL
+  CANCELLED
 }
 
 enum SlotStatus {
@@ -76,6 +78,7 @@ model Tenant {
   phone     String?
   /// Logo de la corredora (URL pública GCS/local).
   logoUrl   String?      @db.VarChar(512)
+  logoWhiteUrl String?   @db.VarChar(512)
   facturacionJson Json?  // Razón social, RUT, dirección, comuna, ciudad, giro, email (para boleta/factura)
   status    TenantStatus @default(ACTIVE)
   createdAt DateTime     @default(now())
@@ -255,6 +258,8 @@ model User {
   createdAt DateTime   @default(now())
   /// Tras recuperación por email (clave temporal): la app exige definir clave nueva antes del dashboard.
   mustChangePassword Boolean @default(false)
+  /// Si true, las inspecciones creadas por este usuario desde la app ejecutiva consumen 1 crédito al crear (sin aprobación admin).
+  autoApproveInspections Boolean @default(false)
 
   activationTokens ActivationToken[]
   assignedCases Case[] @relation("AssignedCases")
@@ -302,6 +307,9 @@ model Case {
   hasEntranceGrille Boolean @default(false)
   planVersion  String       @default("v1")
   status       CaseStatus   @default(DRAFT)
+  /// Token para que el admin apruebe/rechace desde el email (sin sesión).
+  approvalToken          String?   @unique @db.VarChar(64)
+  approvalTokenExpiresAt DateTime?
   createdAt    DateTime     @default(now())
   executiveSummary String?  @db.LongText
   reviewStatus    String?  @db.VarChar(32)  // pending_review | approved (Beta: Paulo revisa antes de enviar)
@@ -309,6 +317,13 @@ model Case {
   reviewerEmail   String?  @db.VarChar(255)
   /// Email “informe listo” al ejecutivo (idempotente; solo tenants Business).
   executiveReportNotifiedAt DateTime?
+
+  // SSOT: Score persistido después del análisis (una sola fuente de verdad)
+  finalScore      Int?      // Score 0-100 calculado al completar caso
+  finalBadge      String?   @db.VarChar(16) // GREEN | YELLOW | RED | GRAY
+  scoreVersion    String?   @db.VarChar(32) // SCORING_V2_2_KPI
+  kpiScores       Json?     // Detalle por KPI: {MUROS_PINTURA: 85, SANITARIOS: 50, ...}
+  scoredAt        DateTime? // Timestamp del cálculo
 
   // Starter: contacto y vínculo con pago
   contactEmail         String?  @db.VarChar(255)
@@ -1569,15 +1584,17 @@ enum OrganizationProductStatus {
 }
 
 model Organization {
-  id        String             @id @default(uuid())
-  slug      String             @unique @db.VarChar(64)
-  name      String             @db.VarChar(191)
-  rut       String?            @db.VarChar(32)
-  type      OrganizationType   @default(OTHER)
-  status    OrganizationStatus @default(ACTIVE)
-  logoUrl   String?            @db.VarChar(512)
-  createdAt DateTime           @default(now())
-  updatedAt DateTime           @updatedAt
+  id          String             @id @default(uuid())
+  slug        String             @unique @db.VarChar(64)
+  name        String             @db.VarChar(191)
+  rut         String?            @db.VarChar(32)
+  type        OrganizationType   @default(OTHER)
+  status      OrganizationStatus @default(ACTIVE)
+  logoUrl     String?            @db.VarChar(512)
+  /// Si true, miembros deben aceptar NDA en /app antes de usar productos.
+  requiresNda Boolean            @default(false)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
 
   members  OrganizationMember[]
   products OrganizationProduct[]
@@ -1587,14 +1604,16 @@ model Organization {
 }
 
 model PlatformUser {
-  id           String             @id @default(uuid())
-  email        String             @unique @db.VarChar(191)
-  fullName     String             @db.VarChar(191)
-  passwordHash String             @db.VarChar(255)
-  status       PlatformUserStatus @default(ACTIVE)
-  isPlatformAdmin Boolean         @default(false)
-  createdAt    DateTime           @default(now())
-  updatedAt    DateTime           @updatedAt
+  id              String             @id @default(uuid())
+  email           String             @unique @db.VarChar(191)
+  fullName        String             @db.VarChar(191)
+  passwordHash    String             @db.VarChar(255)
+  status          PlatformUserStatus @default(ACTIVE)
+  isPlatformAdmin Boolean            @default(false)
+  ndaAcceptedAt   DateTime?
+  ndaVersion      String?            @db.VarChar(64)
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
 
   memberships OrganizationMember[]
   links       LegacyIdentityLink[]

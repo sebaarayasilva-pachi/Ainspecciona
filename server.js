@@ -30,6 +30,7 @@ import { registerEntregaRoutes } from './src/entrega/routes.js';
 import { getEntregaSession as getEntregaSessionAuth } from './src/entrega/auth.js';
 import { registerInOutRoutes, getIoSession as getIoSessionAuth } from './src/inout/routes.js';
 import { ensureToctocTenants } from './src/demo/ensureToctocTenants.js';
+import { ensurePlaengeDemo } from './src/demo/ensurePlaengeDemo.js';
 import { registerScanRoutes } from './src/scan/routes.js';
 import { registerPlatformRoutes } from './src/platform/routes.js';
 import { ensurePlatformSchema } from './src/platform/ensurePlatformSchema.js';
@@ -41,6 +42,7 @@ import {
   clampDays,
   queryFunnelBusiness,
   queryInspectionsDaily,
+  queryInspectionsByTenant,
   queryInspectionsHeatmap,
   queryInspectionAddresses,
   aggregateGeo
@@ -66,6 +68,20 @@ import {
   sendSimplefacturaDtePdfEmail,
   sendContactFormEmail
 } from './src/email.js';
+import {
+  approvePendingInspectionCase,
+  rejectPendingInspectionCase,
+  findCaseByApprovalToken,
+  approvalTokenIsExpired,
+  mintApprovalToken,
+  approvalTokenExpiryDate,
+  notifyAdminsInspectionApprovalRequest,
+  consumeOneCreditInTx
+} from './src/inspections/creditApproval.js';
+import {
+  clampTenantDays,
+  buildTenantAnalyticsDashboard
+} from './src/tenant/tenantAnalytics.js';
 import { generateBusinessReceiptPdf } from './src/pdf/receiptPdf.js';
 import { emitBoletaElectronica, fetchDtePdfBuffer, isSimpleFacturaConfigured } from './src/simplefactura.js';
 import { runPropertyCheckPhotoBatchAnalysisV0 } from './src/propertyCheck/propertyCheckAnalyzeV0.js';
@@ -920,6 +936,18 @@ async function ensureReviewColumns() {
   }
 }
 
+/** Amplía ENUM Case.status para flujo de aprobación de créditos (ejecutivo → admin). */
+async function ensureCaseStatusEnum() {
+  try {
+    await prisma.$executeRawUnsafe(
+      "ALTER TABLE `Case` MODIFY COLUMN `status` ENUM('DRAFT', 'IN_PROGRESS', 'DONE', 'PENDING_APPROVAL', 'CANCELLED') NOT NULL DEFAULT 'DRAFT'"
+    );
+    fastify.log.info('Case.status enum includes PENDING_APPROVAL/CANCELLED');
+  } catch (err) {
+    fastify.log.warn(err, 'ensure-case-status-enum');
+  }
+}
+
 /** Columnas de Case añadidas en migraciones recientes; en entornos sin `migrate deploy` pueden faltar. */
 async function ensureCaseExtraColumns() {
   const cols = [
@@ -930,6 +958,14 @@ async function ensureCaseExtraColumns() {
     {
       name: 'hasEntranceGrille',
       sql: 'ALTER TABLE `Case` ADD COLUMN `hasEntranceGrille` BOOLEAN NOT NULL DEFAULT false'
+    },
+    {
+      name: 'approvalToken',
+      sql: 'ALTER TABLE `Case` ADD COLUMN `approvalToken` VARCHAR(64) NULL'
+    },
+    {
+      name: 'approvalTokenExpiresAt',
+      sql: 'ALTER TABLE `Case` ADD COLUMN `approvalTokenExpiresAt` DATETIME(3) NULL'
     }
   ];
   for (const col of cols) {
@@ -940,6 +976,29 @@ async function ensureCaseExtraColumns() {
       if (String(err?.message || '').includes('Duplicate column')) continue;
       fastify.log.warn(err, `ensure-column-case-${col.name}`);
     }
+  }
+  try {
+    await prisma.$executeRawUnsafe(
+      'CREATE UNIQUE INDEX `Case_approvalToken_key` ON `Case`(`approvalToken`)'
+    );
+    fastify.log.info('Added unique index Case_approvalToken_key');
+  } catch (err) {
+    const msg = String(err?.message || '');
+    if (!msg.includes('Duplicate') && !msg.includes('already exists')) {
+      fastify.log.warn(err, 'ensure-index-case-approvalToken');
+    }
+  }
+}
+
+async function ensureUserAutoApproveColumn() {
+  try {
+    await prisma.$executeRawUnsafe(
+      'ALTER TABLE `User` ADD COLUMN `autoApproveInspections` BOOLEAN NOT NULL DEFAULT false'
+    );
+    fastify.log.info('Added column User.autoApproveInspections');
+  } catch (err) {
+    if (String(err?.message || '').includes('Duplicate column')) return;
+    fastify.log.warn(err, 'ensure-column-user-autoApproveInspections');
   }
 }
 
@@ -1635,7 +1694,7 @@ function isCaseReportFullyEmittedFromSlots(slots) {
   });
 }
 
-/** Caso DONE, tenant Business, slots listos. Flujo: (1) si aún no aprobado → pending_review + mail a revisor; (2) si approved → mail al ejecutivo (idempotente). */
+/** Caso DONE, tenant Business, slots listos. Flujo: (1) si aún no aprobado → pending_review + mail a revisor ITO; (2) si approved → mail al ejecutivo (idempotente). */
 async function maybeNotifyExecutiveReportReady(caseId) {
   if (!caseId) return;
   try {
@@ -1656,8 +1715,6 @@ async function maybeNotifyExecutiveReportReady(caseId) {
     });
     if (!c || c.status !== 'DONE') return;
     if (!c.tenant || c.tenant.name === STARTER_TENANT_NAME) return;
-    if (c.executiveReportNotifiedAt) return;
-    if (!c.assignedUserId || !c.assignedUser?.email) return;
     if (!isCaseReportFullyEmittedFromSlots(c.slots)) return;
 
     const shortId = c.shortId || c.id;
@@ -1666,10 +1723,13 @@ async function maybeNotifyExecutiveReportReady(caseId) {
         .trim()
         .replace(/\/$/, '') || 'https://ainspecciona.com';
     const reportUrl = `${base}/cases/${encodeURIComponent(shortId)}/report`;
+    const reviewUrl = `${base}/review?case=${encodeURIComponent(shortId)}`;
 
     const review = String(c.reviewStatus || '').toLowerCase();
 
     if (review === 'approved') {
+      if (c.executiveReportNotifiedAt) return;
+      if (!c.assignedUserId || !c.assignedUser?.email) return;
       const mail = await sendExecutiveReportReadyEmail(c.assignedUser.email, {
         fullName: c.assignedUser.fullName || '',
         shortId,
@@ -1698,9 +1758,10 @@ async function maybeNotifyExecutiveReportReady(caseId) {
     });
     if (!updatedPending.count) return;
 
-    const mailRv = await sendBusinessReportReviewerNotificationEmail(REVIEWER_EMAIL, reportUrl, shortId, {
+    const mailRv = await sendBusinessReportReviewerNotificationEmail(REVIEWER_EMAIL, reviewUrl, shortId, {
       address: c.property?.address || '',
-      executiveName: c.assignedUser.fullName || c.assignedUser.email || ''
+      executiveName: c.assignedUser?.fullName || c.assignedUser?.email || '',
+      reportUrl
     });
     if (!mailRv.ok || mailRv.skipped) {
       if (!mailRv.skipped) {
@@ -1709,6 +1770,9 @@ async function maybeNotifyExecutiveReportReady(caseId) {
           data: { reviewStatus: null }
         });
         fastify.log.warn({ caseId, err: mailRv.error }, 'business-review-request-email-failed');
+      } else {
+        // SMTP off: keep pending_review so the case still appears in /review
+        fastify.log.warn({ caseId, to: REVIEWER_EMAIL }, 'business-review-request-email-skipped-smtp');
       }
     } else {
       fastify.log.info({ caseId: c.id, to: REVIEWER_EMAIL }, 'business-review-request-email-sent');
@@ -2818,9 +2882,11 @@ async function checkAndNotifyReviewer(caseId) {
     const baseUrl = process.env.BASE_URL || 'https://ainspecciona.com';
     const shortId = c.shortId || caseId;
     const reportUrl = `${baseUrl}/cases/${shortId}/report?reviewer=1`;
+    const reviewUrl = `${baseUrl}/review?case=${encodeURIComponent(shortId)}`;
 
-    const emailResult = await sendReviewNotificationEmail(REVIEWER_EMAIL, reportUrl, shortId, c.contactName || '');
-    fastify.log.info({ caseId, shortId, emailResult }, 'review-notification-sent');
+    const emailResult = await sendReviewNotificationEmail(REVIEWER_EMAIL, reviewUrl, shortId, c.contactName || '');
+    // keep reportUrl available in logs for debugging
+    fastify.log.info({ caseId, shortId, reviewUrl, reportUrl, emailResult }, 'review-notification-sent');
     return { ok: true, shortId, emailResult };
   } catch (err) {
     fastify.log.warn(err, 'check-and-notify-reviewer');
@@ -2858,7 +2924,8 @@ fastify.get('/whatsapp-test', (req, reply) => {
 fastify.register(staticPlugin, {
   root: path.join(__dirname, 'public'),
   prefix: '/',
-  index: 'index.html'
+  index: 'index.html',
+  extensions: ['html']
 });
 fastify.register(staticPlugin, {
   root: path.join(process.cwd(), process.env.UPLOAD_DIR || 'uploads'),
@@ -2867,8 +2934,54 @@ fastify.register(staticPlugin, {
 });
 
 fastify.get('/favicon.ico', (req, reply) => reply.redirect(302, '/icons/icon.svg'));
-// Local: no hay public/index.html; en Firebase Hosting `/` → corredores.html
-fastify.get('/', (req, reply) => reply.sendFile('corredores.html'));
+// Local: preview de la nueva home multi-producto (prod Firebase sigue en corredores.html)
+fastify.get('/', (req, reply) => reply.sendFile('home-nueva.html'));
+fastify.get('/home-nueva', (req, reply) => reply.sendFile('home-nueva.html'));
+fastify.get('/corredores', (req, reply) => reply.sendFile('corredores.html'));
+// Marketing only. Tenant door is /app/{producto} (registerPlatformRoutes).
+// Legacy tenant URLs stay live: /postventa, /entrega, /inout, /scan, /tenant.
+const PRODUCT_PAGES = {
+  'recepcion-inmobiliaria': 'productos/recepcion-inmobiliaria.html',
+  postventa: 'productos/postventa.html',
+  'inspeccion-score': 'corredores.html',
+  'inspeccion-full-check': 'productos/inspeccion-full-check.html',
+  'in-out': 'productos/in-out.html',
+  'property-scan': 'productos/property-scan.html'
+};
+fastify.get('/productos/:slug', (req, reply) => {
+  const slug = String(req.params.slug || '').replace(/\.html$/i, '');
+  const file = PRODUCT_PAGES[slug];
+  if (!file) return reply.code(404).type('text/plain').send('Producto no encontrado');
+  return reply.sendFile(file);
+});
+fastify.get('/agendar-inspeccion', (req, reply) => reply.sendFile('productos/agendar-inspeccion.html'));
+fastify.get('/agendar-inspeccion.html', (req, reply) => reply.redirect(302, '/agendar-inspeccion'));
+
+const PROPERTYCHECK_BOOKING_API =
+  process.env.PROPERTYCHECK_BOOKING_API_URL || 'https://property-chk.web.app/api/booking';
+
+fastify.route({
+  method: ['GET', 'POST'],
+  url: '/api/booking',
+  handler: async (req, reply) => {
+    const qs = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
+    const target = `${PROPERTYCHECK_BOOKING_API}${qs}`;
+    const headers = { Accept: 'application/json' };
+    if (req.headers['content-type']) headers['content-type'] = req.headers['content-type'];
+    const init = { method: req.method, headers };
+    if (req.method !== 'GET' && req.body !== undefined) {
+      init.body = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
+      headers['content-type'] = headers['content-type'] || 'application/json';
+    }
+    const res = await fetch(target, init);
+    const buf = Buffer.from(await res.arrayBuffer());
+    reply.code(res.status);
+    const ct = res.headers.get('content-type');
+    if (ct) reply.type(ct);
+    return reply.send(buf);
+  }
+});
+
 fastify.get('/index.html', (req, reply) => reply.redirect(302, '/'));
 
 // Health check ligero para Cloud Run (sin DB) - responde rápido al arranque
@@ -3150,6 +3263,7 @@ fastify.get('/api/public/score-config', async (req, reply) => {
 fastify.get('/install', (req, reply) => reply.redirect('/executive'));
 // /login, /app, /control → registerPlatformRoutes
 fastify.get('/tenant', (req, reply) => reply.sendFile('tenant.html'));
+fastify.get('/approve-inspection', (req, reply) => reply.sendFile('approve-inspection.html'));
 fastify.get('/tenant/comprar-creditos', (req, reply) => reply.header('Cache-Control', 'no-store, no-cache, must-revalidate').sendFile('tenant-comprar-creditos.html'));
 fastify.get('/executive-instalar-ios', (req, reply) =>
   reply.header('Cache-Control', 'no-store, no-cache, must-revalidate').sendFile('executive-instalar-ios.html')
@@ -3233,7 +3347,7 @@ async function entregaPageGuard(req, reply) {
   const session = await getEntregaSessionAuth(prisma, req);
   if (!session) {
     const next = encodeURIComponent(req.url || '/entrega');
-    return reply.redirect(302, `/entrega/login?next=${next}`);
+    return reply.redirect(302, `/?login=1&next=${next}`);
   }
 }
 fastify.get('/entrega/login', (req, reply) => entregaNoStore(reply, 'entrega/login.html'));
@@ -3252,7 +3366,7 @@ async function inoutPageGuard(req, reply) {
   const session = await getIoSessionAuth(prisma, req);
   if (!session) {
     const next = encodeURIComponent(req.url || '/inout/portal');
-    return reply.redirect(302, `/inout/portal/login?next=${next}`);
+    return reply.redirect(302, `/?login=1&next=${next}`);
   }
 }
 fastify.get('/inout', (req, reply) => inoutNoStore(reply, 'inout/index.html'));
@@ -6329,6 +6443,18 @@ fastify.get('/api/admin/analytics/inspections-daily', async (req, reply) => {
   }
 });
 
+fastify.get('/api/admin/analytics/inspections-by-tenant', async (req, reply) => {
+  try {
+    const days = clampDays(req.query?.days);
+    const limit = Math.min(Math.max(parseInt(String(req.query?.limit || '30'), 10) || 30, 1), 100);
+    const rows = await queryInspectionsByTenant(prisma, analyticsSince(days), { limit });
+    return reply.send({ ok: true, days, limit, rows });
+  } catch (err) {
+    req.log.error(err, 'GET /api/admin/analytics/inspections-by-tenant');
+    return reply.code(500).send({ ok: false, error: 'DB_ERROR' });
+  }
+});
+
 fastify.get('/api/admin/analytics/inspections-geo', async (req, reply) => {
   try {
     const days = clampDays(req.query?.days);
@@ -6353,6 +6479,78 @@ fastify.get('/api/admin/analytics/inspections-heatmap', async (req, reply) => {
     return reply.send({ ok: true, days, heatmap });
   } catch (err) {
     req.log.error(err, 'GET /api/admin/analytics/inspections-heatmap');
+    return reply.code(500).send({ ok: false, error: 'DB_ERROR' });
+  }
+});
+
+fastify.get('/api/admin/capture-upload-metrics', async (req, reply) => {
+  try {
+    const days = clampDays(req.query?.days);
+    const limit = Number(req.query?.limit) || 200;
+    const since = analyticsSince(days);
+    
+    const metrics = await prisma.captureUploadMetric.findMany({
+      where: { createdAt: { gte: since } },
+      orderBy: { createdAt: 'desc' },
+      take: limit
+    });
+    
+    if (metrics.length === 0) {
+      return reply.send({ ok: true, summary: { count: 0 }, rows: [] });
+    }
+    
+    // Calcular resumen
+    let totalMs = 0;
+    let maxMs = 0;
+    let passedCount = 0;
+    let failedCount = 0;
+    
+    for (const m of metrics) {
+      totalMs += m.durationMs;
+      if (m.durationMs > maxMs) maxMs = m.durationMs;
+      if (m.passed) passedCount++;
+      else failedCount++;
+    }
+    
+    const summary = {
+      count: metrics.length,
+      avgMs: Math.round(totalMs / metrics.length),
+      maxMs,
+      passedCount,
+      failedCount
+    };
+    
+    // Obtener nombres para enriquecer la tabla
+    const caseIds = [...new Set(metrics.map(m => m.caseId))];
+    const tenantIds = [...new Set(metrics.map(m => m.tenantId).filter(Boolean))];
+    const slotIds = [...new Set(metrics.map(m => m.slotId))];
+    
+    const [cases, tenants, slots] = await Promise.all([
+      prisma.case.findMany({ where: { id: { in: caseIds } }, select: { id: true, shortId: true } }),
+      prisma.tenant.findMany({ where: { id: { in: tenantIds } }, select: { id: true, name: true } }),
+      prisma.slot.findMany({ where: { id: { in: slotIds } }, select: { id: true, slotCode: true, title: true } })
+    ]);
+    
+    const caseMap = new Map(cases.map(c => [c.id, c.shortId]));
+    const tenantMap = new Map(tenants.map(t => [t.id, t.name]));
+    const slotMap = new Map(slots.map(s => [s.id, s.title || s.slotCode]));
+    
+    const rows = metrics.map(m => ({
+      createdAt: m.createdAt,
+      durationMs: m.durationMs,
+      passed: m.passed,
+      imageBytes: m.imageBytes,
+      caseId: m.caseId,
+      tenantId: m.tenantId,
+      slotId: m.slotId,
+      caseLabel: caseMap.get(m.caseId) || m.caseId,
+      tenantName: m.tenantId ? (tenantMap.get(m.tenantId) || m.tenantId) : null,
+      slotLabel: slotMap.get(m.slotId) || m.slotId
+    }));
+    
+    return reply.send({ ok: true, summary, rows });
+  } catch (err) {
+    req.log.error(err, 'GET /api/admin/capture-upload-metrics');
     return reply.code(500).send({ ok: false, error: 'DB_ERROR' });
   }
 });
@@ -6387,20 +6585,31 @@ fastify.get('/api/tenants', async (req, reply) => {
 
 fastify.get('/api/admin/tenants', async (req, reply) => {
   const tenants = await prisma.tenant.findMany({
-    select: tenantSelectBase,
+    select: {
+      ...tenantSelectBase,
+      creditAccount: { select: { balance: true } }
+    },
     orderBy: { createdAt: 'desc' }
   });
-  const rows = tenants.map((t) => ({
-    id: t.id,
-    name: t.name,
-    legalName: t.legalName,
-    rut: t.rut,
-    email: t.email,
-    phone: t.phone,
-    status: t.status,
-    createdAt: t.createdAt,
-    passwordSet: !!t.passwordHash
-  }));
+  const rows = await Promise.all(
+    tenants.map(async (t) => {
+      const logos = await getTenantLogoUrls(t.id);
+      return {
+        id: t.id,
+        name: t.name,
+        legalName: t.legalName,
+        rut: t.rut,
+        email: t.email,
+        phone: t.phone,
+        status: t.status,
+        createdAt: t.createdAt,
+        passwordSet: !!t.passwordHash,
+        creditsBalance: t.creditAccount?.balance ?? 0,
+        logoUrl: logos.logoUrl,
+        logoWhiteUrl: logos.logoWhiteUrl
+      };
+    })
+  );
   return reply.send({ ok: true, tenants: rows });
 });
 
@@ -6812,15 +7021,56 @@ fastify.get('/api/admin/tenants/:tenantId/users', async (req, reply) => {
 
 fastify.post('/api/admin/tenants/:tenantId/credits', async (req, reply) => {
   const tenantId = String(req.params.tenantId || '');
-  const amount = Number(req.body?.amount || 0);
-  if (!amount || amount < 1) {
-    return reply.code(400).send({ ok: false, error: 'AMOUNT_REQUIRED', message: 'amount debe ser >= 1' });
-  }
+  const body = req.body || {};
+  const mode = String(body.mode || 'gift').toLowerCase(); // gift | set
+  const note = String(body.note || '').trim().slice(0, 200);
+
+  const tenant = await prisma.tenant.findUnique({
+    where: { id: tenantId },
+    select: { id: true, name: true }
+  });
+  if (!tenant) return reply.code(404).send({ ok: false, error: 'TENANT_NOT_FOUND' });
+
   try {
     const result = await prisma.$transaction(async (tx) => {
       let account = await tx.tenantCredit.findUnique({ where: { tenantId } });
       if (!account) {
         account = await tx.tenantCredit.create({ data: { tenantId, balance: 0 } });
+      }
+      const prev = Number(account.balance || 0);
+
+      if (mode === 'set') {
+        const balance = Number(body.balance);
+        if (!Number.isFinite(balance) || balance < 0 || !Number.isInteger(balance)) {
+          const err = new Error('INVALID_BALANCE');
+          err.code = 'INVALID_BALANCE';
+          throw err;
+        }
+        const delta = balance - prev;
+        await tx.tenantCredit.update({
+          where: { tenantId },
+          data: { balance }
+        });
+        if (delta !== 0) {
+          await tx.creditTransaction.create({
+            data: {
+              tenantId,
+              amount: delta,
+              type: 'ADJUSTMENT',
+              description:
+                note ||
+                `Admin: ajustar saldo ${prev} → ${balance} (${tenant.name || tenantId})`
+            }
+          });
+        }
+        return { balance, previousBalance: prev, delta, mode: 'set' };
+      }
+
+      const amount = Number(body.amount);
+      if (!Number.isFinite(amount) || !Number.isInteger(amount) || amount < 1) {
+        const err = new Error('AMOUNT_REQUIRED');
+        err.code = 'AMOUNT_REQUIRED';
+        throw err;
       }
       await tx.tenantCredit.update({
         where: { tenantId },
@@ -6831,16 +7081,80 @@ fastify.post('/api/admin/tenants/:tenantId/credits', async (req, reply) => {
           tenantId,
           amount,
           type: 'ADJUSTMENT',
-          description: `Admin: +${amount} créditos`
+          description: note || `Admin: regalar +${amount} créditos (${tenant.name || tenantId})`
         }
       });
-      const updated = await tx.tenantCredit.findUnique({ where: { tenantId } });
-      return { balance: updated?.balance ?? amount };
+      return {
+        balance: prev + amount,
+        previousBalance: prev,
+        delta: amount,
+        mode: 'gift'
+      };
     });
-    return reply.send({ ok: true, balance: result.balance });
+    return reply.send({ ok: true, ...result });
   } catch (err) {
+    if (err?.code === 'INVALID_BALANCE' || err?.message === 'INVALID_BALANCE') {
+      return reply.code(400).send({
+        ok: false,
+        error: 'INVALID_BALANCE',
+        message: 'balance debe ser un entero >= 0'
+      });
+    }
+    if (err?.code === 'AMOUNT_REQUIRED' || err?.message === 'AMOUNT_REQUIRED') {
+      return reply.code(400).send({
+        ok: false,
+        error: 'AMOUNT_REQUIRED',
+        message: 'amount debe ser un entero >= 1'
+      });
+    }
     req.log.error(err, 'admin-add-credits');
     return reply.code(500).send({ ok: false, error: 'DB_ERROR' });
+  }
+});
+
+/** Admin: subir logo color o blanco de una corredora (?type=white). */
+fastify.post('/api/admin/tenants/:tenantId/logo', async (req, reply) => {
+  const tenantId = String(req.params.tenantId || '').trim();
+  if (!tenantId) return reply.code(400).send({ ok: false, error: 'TENANT_ID_REQUIRED' });
+
+  const tenant = await prisma.tenant.findUnique({
+    where: { id: tenantId },
+    select: { id: true, name: true }
+  });
+  if (!tenant) return reply.code(404).send({ ok: false, error: 'TENANT_NOT_FOUND' });
+
+  const isWhite = String(req.query?.type || '') === 'white';
+  try {
+    const part = await req.file({ limits: { fileSize: 2 * 1024 * 1024 } });
+    const result = await saveTenantLogoUpload({
+      tenantId,
+      part,
+      isWhite,
+      log: req.log
+    });
+    return reply.send({ ok: true, tenantId, ...result });
+  } catch (err) {
+    if (err?.code === 'NO_FILE') return reply.code(400).send({ ok: false, error: 'NO_FILE' });
+    if (err?.code === 'UNSUPPORTED_TYPE') {
+      return reply.code(400).send({
+        ok: false,
+        error: 'UNSUPPORTED_TYPE',
+        message: 'Usa JPG, PNG o WebP'
+      });
+    }
+    if (err?.code === 'LOGO_COLUMN_MISSING') {
+      return reply.code(500).send({
+        ok: false,
+        error: 'LOGO_COLUMN_MISSING',
+        message: 'No se pudo guardar el logo en la base de datos.'
+      });
+    }
+    req.log.error(err, 'POST /api/admin/tenants/:tenantId/logo');
+    return reply.code(500).send({
+      ok: false,
+      error: 'UPLOAD_FAILED',
+      message: err?.message || 'Error al subir logo'
+    });
   }
 });
 
@@ -7107,18 +7421,85 @@ fastify.post('/api/tenant/logout', async (req, reply) => {
   return reply.send({ ok: true });
 });
 
-async function getTenantLogoUrl(tenantId) {
-  if (!tenantId) return null;
+async function getTenantLogoUrls(tenantId) {
+  if (!tenantId) return { logoUrl: null, logoWhiteUrl: null };
   try {
     const rows = await prisma.$queryRaw`
-      SELECT logoUrl FROM Tenant WHERE id = ${tenantId} LIMIT 1
+      SELECT logoUrl, logoWhiteUrl FROM Tenant WHERE id = ${tenantId} LIMIT 1
     `;
-    const url = rows?.[0]?.logoUrl;
-    return url ? String(url) : null;
+    const logoUrl = rows?.[0]?.logoUrl ? String(rows[0].logoUrl) : null;
+    const logoWhiteUrl = rows?.[0]?.logoWhiteUrl ? String(rows[0].logoWhiteUrl) : null;
+    return { logoUrl, logoWhiteUrl };
   } catch (err) {
     // Columna ausente u otro error de esquema: no tumbar /me
-    return null;
+    return { logoUrl: null, logoWhiteUrl: null };
   }
+}
+
+/** Guarda logo color o blanco de un tenant (usado por panel tenant y admin). */
+async function saveTenantLogoUpload({ tenantId, part, isWhite, log }) {
+  const colName = isWhite ? 'logoWhiteUrl' : 'logoUrl';
+  if (!part) {
+    const err = new Error('NO_FILE');
+    err.code = 'NO_FILE';
+    throw err;
+  }
+  const mimeType = part.mimetype || '';
+  const ext = safeExtFromMime(mimeType);
+  if (!ext || !['jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
+    const err = new Error('UNSUPPORTED_TYPE');
+    err.code = 'UNSUPPORTED_TYPE';
+    throw err;
+  }
+  const buffer = await part.toBuffer();
+  const saved = await storage.saveImageBuffer({
+    buffer,
+    contentType: mimeType,
+    ext,
+    tenantId
+  });
+  const logoUrl = storage.publicUrl(saved.filePath);
+  try {
+    if (isWhite) {
+      await prisma.$executeRaw`UPDATE Tenant SET logoWhiteUrl = ${logoUrl} WHERE id = ${tenantId}`;
+    } else {
+      await prisma.$executeRaw`UPDATE Tenant SET logoUrl = ${logoUrl} WHERE id = ${tenantId}`;
+    }
+  } catch (dbErr) {
+    const msg = String(dbErr?.message || '');
+    if (msg.includes(colName) || msg.includes('Unknown column') || msg.includes('does not exist')) {
+      log?.warn?.({ err: msg }, `${colName} column missing — creating`);
+      try {
+        await prisma.$executeRawUnsafe(
+          `ALTER TABLE \`Tenant\` ADD COLUMN \`${colName}\` VARCHAR(512) NULL`
+        );
+      } catch (alterErr) {
+        const alterMsg = String(alterErr?.message || '');
+        if (!alterMsg.includes('Duplicate column')) {
+          const err = new Error('LOGO_COLUMN_MISSING');
+          err.code = 'LOGO_COLUMN_MISSING';
+          throw err;
+        }
+      }
+      if (isWhite) {
+        await prisma.$executeRaw`UPDATE Tenant SET logoWhiteUrl = ${logoUrl} WHERE id = ${tenantId}`;
+      } else {
+        await prisma.$executeRaw`UPDATE Tenant SET logoUrl = ${logoUrl} WHERE id = ${tenantId}`;
+      }
+    } else if (msg.includes('Data too long') || msg.includes('too long')) {
+      await prisma.$executeRawUnsafe(
+        `ALTER TABLE \`Tenant\` MODIFY COLUMN \`${colName}\` VARCHAR(512) NULL`
+      );
+      if (isWhite) {
+        await prisma.$executeRaw`UPDATE Tenant SET logoWhiteUrl = ${logoUrl} WHERE id = ${tenantId}`;
+      } else {
+        await prisma.$executeRaw`UPDATE Tenant SET logoUrl = ${logoUrl} WHERE id = ${tenantId}`;
+      }
+    } else {
+      throw dbErr;
+    }
+  }
+  return { logoUrl, type: isWhite ? 'white' : 'color' };
 }
 
 fastify.get('/api/tenant/me', async (req, reply) => {
@@ -7167,7 +7548,7 @@ fastify.get('/api/tenant/me', async (req, reply) => {
     if (!tenant) return reply.code(401).send({ ok: false, error: 'UNAUTHORIZED' });
     const tenantResolved = await refreshTrialStatusIfNeeded(tenant);
     const credits = tenant.creditAccount?.balance ?? 0;
-    const logoUrl = await getTenantLogoUrl(session.tenantId);
+    const { logoUrl, logoWhiteUrl } = await getTenantLogoUrls(session.tenantId);
     const webBase = getPublicWebBase(req);
     const peerCode = tenant.peerReferralCode || peerEnsure.code || null;
     const peerReferralInviteUrl = peerCode ? `${webBase}/?ref=${encodeURIComponent(peerCode)}` : null;
@@ -7178,6 +7559,7 @@ fastify.get('/api/tenant/me', async (req, reply) => {
         name: tenantResolved.name,
         legalName: tenantResolved.legalName,
         logoUrl,
+        logoWhiteUrl,
         rut: tenantResolved.rut,
         email: tenantResolved.email,
         phone: tenantResolved.phone,
@@ -7204,7 +7586,7 @@ fastify.get('/api/tenant/me', async (req, reply) => {
         select: { id: true, name: true, legalName: true, rut: true, email: true, phone: true, status: true, peerReferralCode: true }
       });
       if (!tenant) return reply.code(401).send({ ok: false, error: 'UNAUTHORIZED' });
-      const logoUrl = await getTenantLogoUrl(session.tenantId);
+      const { logoUrl, logoWhiteUrl } = await getTenantLogoUrls(session.tenantId);
       const webBase = getPublicWebBase(req);
       const peerCode = tenant.peerReferralCode || null;
       return reply.send({
@@ -7214,6 +7596,7 @@ fastify.get('/api/tenant/me', async (req, reply) => {
           name: tenant.name,
           legalName: tenant.legalName,
           logoUrl,
+          logoWhiteUrl,
           rut: tenant.rut,
           email: tenant.email,
           phone: tenant.phone,
@@ -7255,59 +7638,39 @@ fastify.put('/api/tenant/me', async (req, reply) => {
 fastify.post('/api/tenant/logo', async (req, reply) => {
   const session = await getTenantSession(req);
   if (!session || !session.tenantId) return reply.code(401).send({ ok: false, error: 'UNAUTHORIZED' });
-  const part = await req.file({ limits: { fileSize: 2 * 1024 * 1024 } });
-  if (!part) return reply.code(400).send({ ok: false, error: 'NO_FILE' });
-  const mimeType = part.mimetype || '';
-  const ext = safeExtFromMime(mimeType);
-  if (!ext || !['jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
-    return reply.code(400).send({ ok: false, error: 'UNSUPPORTED_TYPE', message: 'Usa JPG, PNG o WebP' });
-  }
+
+  const isWhite = req.query.type === 'white';
   try {
-    const buffer = await part.toBuffer();
-    const saved = await storage.saveImageBuffer({
-      buffer,
-      contentType: mimeType,
-      ext,
-      tenantId: session.tenantId
+    const part = await req.file({ limits: { fileSize: 2 * 1024 * 1024 } });
+    const result = await saveTenantLogoUpload({
+      tenantId: session.tenantId,
+      part,
+      isWhite,
+      log: req.log
     });
-    const logoUrl = storage.publicUrl(saved.filePath);
-    try {
-      await prisma.$executeRaw`UPDATE Tenant SET logoUrl = ${logoUrl} WHERE id = ${session.tenantId}`;
-    } catch (dbErr) {
-      const msg = String(dbErr?.message || '');
-      // Columna ausente: crearla y reintentar (prod a veces sin migración).
-      if (msg.includes('logoUrl') || msg.includes('Unknown column') || msg.includes('does not exist')) {
-        req.log.warn({ err: msg }, 'logoUrl column missing — creating');
-        try {
-          await prisma.$executeRawUnsafe(
-            'ALTER TABLE `Tenant` ADD COLUMN `logoUrl` VARCHAR(512) NULL'
-          );
-        } catch (alterErr) {
-          const alterMsg = String(alterErr?.message || '');
-          if (!alterMsg.includes('Duplicate column')) {
-            req.log.error({ err: alterMsg }, 'failed to add logoUrl column');
-            return reply.code(500).send({
-              ok: false,
-              error: 'LOGO_COLUMN_MISSING',
-              message: 'No se pudo guardar el logo en la base de datos. Contacta soporte.'
-            });
-          }
-        }
-        await prisma.$executeRaw`UPDATE Tenant SET logoUrl = ${logoUrl} WHERE id = ${session.tenantId}`;
-      } else if (msg.includes('Data too long') || msg.includes('too long')) {
-        // Ampliar columna y reintentar
-        await prisma.$executeRawUnsafe(
-          'ALTER TABLE `Tenant` MODIFY COLUMN `logoUrl` VARCHAR(512) NULL'
-        );
-        await prisma.$executeRaw`UPDATE Tenant SET logoUrl = ${logoUrl} WHERE id = ${session.tenantId}`;
-      } else {
-        throw dbErr;
-      }
-    }
-    return reply.send({ ok: true, logoUrl });
+    return reply.send({ ok: true, ...result });
   } catch (err) {
+    if (err?.code === 'NO_FILE') return reply.code(400).send({ ok: false, error: 'NO_FILE' });
+    if (err?.code === 'UNSUPPORTED_TYPE') {
+      return reply.code(400).send({
+        ok: false,
+        error: 'UNSUPPORTED_TYPE',
+        message: 'Usa JPG, PNG o WebP'
+      });
+    }
+    if (err?.code === 'LOGO_COLUMN_MISSING') {
+      return reply.code(500).send({
+        ok: false,
+        error: 'LOGO_COLUMN_MISSING',
+        message: 'No se pudo guardar el logo en la base de datos. Contacta soporte.'
+      });
+    }
     req.log.error(err, 'POST /api/tenant/logo');
-    return reply.code(500).send({ ok: false, error: 'UPLOAD_FAILED', message: err?.message || 'Error al subir logo' });
+    return reply.code(500).send({
+      ok: false,
+      error: 'UPLOAD_FAILED',
+      message: err?.message || 'Error al subir logo'
+    });
   }
 });
 
@@ -7348,9 +7711,26 @@ fastify.get('/api/tenant/users', async (req, reply) => {
   if (!session) return reply.code(401).send({ ok: false, error: 'UNAUTHORIZED' });
   const users = await prisma.user.findMany({
     where: { tenantId: session.tenantId },
-    orderBy: { createdAt: 'desc' }
+    orderBy: { createdAt: 'desc' },
+    select: {
+      id: true,
+      email: true,
+      fullName: true,
+      phone: true,
+      role: true,
+      status: true,
+      invitedAt: true,
+      activatedAt: true,
+      createdAt: true,
+      passwordHash: true,
+      autoApproveInspections: true
+    }
   });
-  return reply.send({ ok: true, users });
+  const safeUsers = users.map(u => {
+    const { passwordHash, ...rest } = u;
+    return { ...rest, hasPassword: !!passwordHash };
+  });
+  return reply.send({ ok: true, users: safeUsers });
 });
 
 fastify.get('/api/tenant/inspections', async (req, reply) => {
@@ -7404,8 +7784,10 @@ fastify.get('/api/tenant/inspections', async (req, reply) => {
 
     return {
       id: c.shortId ?? c.id,
+      caseUuid: c.id,
       createdAt: c.createdAt,
       status: c.status,
+      pendingApproval: String(c.status || '').toUpperCase() === 'PENDING_APPROVAL',
       propertyType: c.propertyType,
       bedrooms: c.bedrooms,
       bathrooms: c.bathrooms,
@@ -7413,13 +7795,36 @@ fastify.get('/api/tenant/inspections', async (req, reply) => {
       surface,
       assignedUserName: c.assignedUser?.fullName || null,
       progress,
-      captureUrl,
+      captureUrl: String(c.status || '').toUpperCase() === 'PENDING_APPROVAL' || String(c.status || '').toUpperCase() === 'CANCELLED'
+        ? null
+        : captureUrl,
       badge,
       score
     };
   }));
 
   return reply.send({ ok: true, inspections });
+});
+
+fastify.get('/api/tenant/analytics/dashboard', async (req, reply) => {
+  const session = await getTenantSession(req);
+  if (!session) return reply.code(401).send({ ok: false, error: 'UNAUTHORIZED' });
+  const days = clampTenantDays(req.query?.days, 30, 90);
+  try {
+    const data = await buildTenantAnalyticsDashboard({
+      prisma,
+      storage,
+      tenantId: session.tenantId,
+      days,
+      getCaseSummary,
+      slotGroupTitleFromCode,
+      getRuntimeScoreConfig
+    });
+    return reply.send(data);
+  } catch (err) {
+    req.log.error(err, 'GET /api/tenant/analytics/dashboard');
+    return reply.code(500).send({ ok: false, error: 'DB_ERROR' });
+  }
 });
 
 fastify.post('/api/tenant/users', async (req, reply) => {
@@ -7431,6 +7836,9 @@ fastify.post('/api/tenant/users', async (req, reply) => {
   const phone = payload.phone ? String(payload.phone).trim() : null;
   const role = payload.role ? String(payload.role).toUpperCase() : 'TENANT_USER';
   const action = payload.action ? String(payload.action).toLowerCase() : 'save';
+  const autoApproveInspections = payload.autoApproveInspections !== undefined
+    ? !!payload.autoApproveInspections
+    : undefined;
 
   if (!email || !fullName) {
     return reply.code(400).send({ ok: false, error: 'EMAIL_AND_NAME_REQUIRED' });
@@ -7447,7 +7855,8 @@ fastify.post('/api/tenant/users', async (req, reply) => {
         data: {
           fullName,
           phone,
-          role
+          role,
+          ...(autoApproveInspections !== undefined ? { autoApproveInspections } : {})
         }
       })
     : await prisma.user.create({
@@ -7458,7 +7867,8 @@ fastify.post('/api/tenant/users', async (req, reply) => {
           phone,
           role,
           status: 'PENDING',
-          invitedAt: action === 'invite' ? new Date() : null
+          invitedAt: action === 'invite' ? new Date() : null,
+          ...(autoApproveInspections !== undefined ? { autoApproveInspections } : {})
         }
       });
 
@@ -7529,6 +7939,17 @@ fastify.post('/api/tenant/users/:userId/invite', async (req, reply) => {
   });
 });
 
+fastify.put('/api/tenant/users/auto-approve', async (req, reply) => {
+  const session = await getTenantSession(req);
+  if (!session) return reply.code(401).send({ ok: false, error: 'UNAUTHORIZED' });
+  const enabled = !!(req.body || {}).enabled;
+  const result = await prisma.user.updateMany({
+    where: { tenantId: session.tenantId },
+    data: { autoApproveInspections: enabled }
+  });
+  return reply.send({ ok: true, enabled, updated: result.count });
+});
+
 fastify.put('/api/tenant/users/:userId', async (req, reply) => {
   const session = await getTenantSession(req);
   if (!session) return reply.code(401).send({ ok: false, error: 'UNAUTHORIZED' });
@@ -7543,7 +7964,10 @@ fastify.put('/api/tenant/users/:userId', async (req, reply) => {
     fullName: payload.fullName ? String(payload.fullName).trim() : undefined,
     phone: payload.phone !== undefined ? (payload.phone ? String(payload.phone).trim() : null) : undefined,
     role: payload.role ? String(payload.role).toUpperCase() : undefined,
-    status: payload.status ? String(payload.status).toUpperCase() : undefined
+    status: payload.status ? String(payload.status).toUpperCase() : undefined,
+    autoApproveInspections: payload.autoApproveInspections !== undefined
+      ? !!payload.autoApproveInspections
+      : undefined
   };
 
   const updated = await prisma.user.update({ where: { id: user.id }, data });
@@ -7719,6 +8143,224 @@ fastify.post('/api/tenant/inspections', async (req, reply) => {
     captureUrl,
     reportUrl,
     slots: planSlots
+  });
+});
+
+/** Admin del tenant aprueba inspección del ejecutivo → consume 1 crédito y habilita captura. */
+fastify.post('/api/tenant/inspections/:caseId/approve', async (req, reply) => {
+  const session = await getTenantSession(req);
+  if (!session) return reply.code(401).send({ ok: false, error: 'UNAUTHORIZED' });
+
+  const rawId = String(req.params.caseId || '');
+  const c = await prisma.case.findFirst({
+    where: {
+      tenantId: session.tenantId,
+      OR: [{ id: rawId }, { shortId: rawId }]
+    },
+    select: { id: true, shortId: true, status: true, tenantId: true }
+  });
+  if (!c) return reply.code(404).send({ ok: false, error: 'CASE_NOT_FOUND' });
+  if (String(c.status || '').toUpperCase() !== 'PENDING_APPROVAL') {
+    return reply.code(400).send({
+      ok: false,
+      error: 'NOT_PENDING_APPROVAL',
+      message: 'Esta inspección no está pendiente de aprobación.'
+    });
+  }
+
+  let result;
+  try {
+    result = await approvePendingInspectionCase(prisma, {
+      caseId: c.id,
+      tenantId: session.tenantId,
+      shortId: c.shortId
+    });
+  } catch (err) {
+    if (err?.message === 'INSUFFICIENT_CREDITS') {
+      return reply.code(402).send({
+        ok: false,
+        error: 'INSUFFICIENT_CREDITS',
+        message: 'No tienes créditos suficientes. Compra más en el dashboard.'
+      });
+    }
+    if (err?.message === 'NOT_PENDING_APPROVAL') {
+      return reply.code(400).send({
+        ok: false,
+        error: 'NOT_PENDING_APPROVAL',
+        message: 'Esta inspección no está pendiente de aprobación.'
+      });
+    }
+    throw err;
+  }
+
+  return reply.send({
+    ok: true,
+    approved: true,
+    caseId: c.id,
+    shortId: c.shortId,
+    status: 'IN_PROGRESS',
+    captureUrl: `/capture/${result.captureToken}`,
+    creditsBalance: result.balance
+  });
+});
+
+/** Admin del tenant rechaza inspección del ejecutivo (sin consumir crédito). */
+fastify.post('/api/tenant/inspections/:caseId/reject', async (req, reply) => {
+  const session = await getTenantSession(req);
+  if (!session) return reply.code(401).send({ ok: false, error: 'UNAUTHORIZED' });
+
+  const rawId = String(req.params.caseId || '');
+  const c = await prisma.case.findFirst({
+    where: {
+      tenantId: session.tenantId,
+      OR: [{ id: rawId }, { shortId: rawId }]
+    },
+    select: { id: true, shortId: true, status: true }
+  });
+  if (!c) return reply.code(404).send({ ok: false, error: 'CASE_NOT_FOUND' });
+  if (String(c.status || '').toUpperCase() !== 'PENDING_APPROVAL') {
+    return reply.code(400).send({
+      ok: false,
+      error: 'NOT_PENDING_APPROVAL',
+      message: 'Esta inspección no está pendiente de aprobación.'
+    });
+  }
+
+  try {
+    await rejectPendingInspectionCase(prisma, { caseId: c.id });
+  } catch (err) {
+    if (err?.message === 'NOT_PENDING_APPROVAL') {
+      return reply.code(400).send({
+        ok: false,
+        error: 'NOT_PENDING_APPROVAL',
+        message: 'Esta inspección no está pendiente de aprobación.'
+      });
+    }
+    throw err;
+  }
+
+  return reply.send({
+    ok: true,
+    rejected: true,
+    caseId: c.id,
+    shortId: c.shortId,
+    status: 'CANCELLED'
+  });
+});
+
+/** Info pública para aprobar/rechazar desde el correo (token). */
+fastify.get('/api/public/inspection-approval/:token', async (req, reply) => {
+  const c = await findCaseByApprovalToken(prisma, req.params.token);
+  if (!c) {
+    return reply.code(404).send({ ok: false, error: 'INVALID_TOKEN', message: 'Enlace inválido o ya utilizado.' });
+  }
+  if (approvalTokenIsExpired(c)) {
+    return reply.code(410).send({ ok: false, error: 'TOKEN_EXPIRED', message: 'Este enlace de aprobación expiró.' });
+  }
+  const creditsBalance = c.tenantId ? await getTenantCreditsBalance(c.tenantId) : null;
+  const status = String(c.status || '').toUpperCase();
+  return reply.send({
+    ok: true,
+    shortId: c.shortId,
+    status,
+    pendingApproval: status === 'PENDING_APPROVAL',
+    address: c.property?.address || '',
+    executiveName: c.assignedUser?.fullName || '',
+    tenantName: c.tenant?.name || '',
+    creditsBalance
+  });
+});
+
+fastify.post('/api/public/inspection-approval/:token/approve', async (req, reply) => {
+  const c = await findCaseByApprovalToken(prisma, req.params.token);
+  if (!c) {
+    return reply.code(404).send({ ok: false, error: 'INVALID_TOKEN', message: 'Enlace inválido o ya utilizado.' });
+  }
+  if (approvalTokenIsExpired(c)) {
+    return reply.code(410).send({ ok: false, error: 'TOKEN_EXPIRED', message: 'Este enlace de aprobación expiró.' });
+  }
+  if (String(c.status || '').toUpperCase() !== 'PENDING_APPROVAL') {
+    return reply.code(400).send({
+      ok: false,
+      error: 'NOT_PENDING_APPROVAL',
+      message: 'Esta inspección ya no está pendiente de aprobación.'
+    });
+  }
+  if (!c.tenantId) {
+    return reply.code(400).send({ ok: false, error: 'NO_TENANT', message: 'La inspección no tiene corredora asociada.' });
+  }
+
+  let result;
+  try {
+    result = await approvePendingInspectionCase(prisma, {
+      caseId: c.id,
+      tenantId: c.tenantId,
+      shortId: c.shortId
+    });
+  } catch (err) {
+    if (err?.message === 'INSUFFICIENT_CREDITS') {
+      return reply.code(402).send({
+        ok: false,
+        error: 'INSUFFICIENT_CREDITS',
+        message: 'No hay créditos suficientes. Entra al panel de la corredora y compra créditos.'
+      });
+    }
+    if (err?.message === 'NOT_PENDING_APPROVAL') {
+      return reply.code(400).send({
+        ok: false,
+        error: 'NOT_PENDING_APPROVAL',
+        message: 'Esta inspección ya no está pendiente de aprobación.'
+      });
+    }
+    throw err;
+  }
+
+  return reply.send({
+    ok: true,
+    approved: true,
+    caseId: c.id,
+    shortId: c.shortId,
+    status: 'IN_PROGRESS',
+    captureUrl: `/capture/${result.captureToken}`,
+    creditsBalance: result.balance
+  });
+});
+
+fastify.post('/api/public/inspection-approval/:token/reject', async (req, reply) => {
+  const c = await findCaseByApprovalToken(prisma, req.params.token);
+  if (!c) {
+    return reply.code(404).send({ ok: false, error: 'INVALID_TOKEN', message: 'Enlace inválido o ya utilizado.' });
+  }
+  if (approvalTokenIsExpired(c)) {
+    return reply.code(410).send({ ok: false, error: 'TOKEN_EXPIRED', message: 'Este enlace de aprobación expiró.' });
+  }
+  if (String(c.status || '').toUpperCase() !== 'PENDING_APPROVAL') {
+    return reply.code(400).send({
+      ok: false,
+      error: 'NOT_PENDING_APPROVAL',
+      message: 'Esta inspección ya no está pendiente de aprobación.'
+    });
+  }
+
+  try {
+    await rejectPendingInspectionCase(prisma, { caseId: c.id });
+  } catch (err) {
+    if (err?.message === 'NOT_PENDING_APPROVAL') {
+      return reply.code(400).send({
+        ok: false,
+        error: 'NOT_PENDING_APPROVAL',
+        message: 'Esta inspección ya no está pendiente de aprobación.'
+      });
+    }
+    throw err;
+  }
+
+  return reply.send({
+    ok: true,
+    rejected: true,
+    caseId: c.id,
+    shortId: c.shortId,
+    status: 'CANCELLED'
   });
 });
 
@@ -7915,21 +8557,28 @@ fastify.get('/api/executive/cases', async (req, reply) => {
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     let captureToken = validTokens[0]?.token || null;
-    if (!captureToken && Number(progress?.pct || 0) < 100) {
-      const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7);
-      const created = await prisma.captureToken.create({
-        data: {
-          tenantId: c.tenantId || null,
-          caseId: c.id,
-          token: crypto.randomUUID(),
-          expiresAt
-        },
-        select: { token: true }
-      });
-      captureToken = created.token;
+    const caseStatus = String(c.status || '').toUpperCase();
+    const captureBlocked = caseStatus === 'PENDING_APPROVAL' || caseStatus === 'CANCELLED';
+    // Tras aprobar (DRAFT / IN_PROGRESS / etc.) siempre hay que devolver un link usable.
+    if (!captureToken && !captureBlocked && Number(progress?.pct || 0) < 100) {
+      try {
+        const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7);
+        const created = await prisma.captureToken.create({
+          data: {
+            tenantId: c.tenantId || null,
+            caseId: c.id,
+            token: crypto.randomUUID(),
+            expiresAt
+          },
+          select: { token: true }
+        });
+        captureToken = created.token;
+      } catch (err) {
+        req.log.warn({ err, caseId: c.id }, 'executive-cases-ensure-capture-token-failed');
+      }
     }
 
-    const captureUrl = captureToken ? `/capture/${captureToken}` : null;
+    const captureUrl = captureToken && !captureBlocked ? `/capture/${captureToken}` : null;
     return {
       id: c.shortId ?? c.id,
       createdAt: c.createdAt,
@@ -7940,16 +8589,84 @@ fastify.get('/api/executive/cases', async (req, reply) => {
       address: c.property?.address || null,
       ownerName: c.property?.owner?.fullName || null,
       progress,
-      captureUrl
+      captureToken: captureBlocked ? null : captureToken,
+      captureUrl,
+      pendingApproval: caseStatus === 'PENDING_APPROVAL',
+      cancelled: caseStatus === 'CANCELLED',
+      approved: !captureBlocked && caseStatus !== 'PENDING_APPROVAL'
     };
   }));
 
   return reply.send({ ok: true, cases: rows });
 });
 
+/** Asegura (o renueva) el link de captura de un caso del ejecutivo. */
+fastify.post('/api/executive/cases/:caseId/ensure-capture', async (req, reply) => {
+  const session = await getExecSession(req);
+  if (!session) return reply.code(401).send({ ok: false, error: 'UNAUTHORIZED' });
+
+  const rawId = String(req.params.caseId || '').trim();
+  const c = await prisma.case.findFirst({
+    where: {
+      assignedUserId: session.userId,
+      OR: [{ id: rawId }, { shortId: rawId }]
+    },
+    select: { id: true, shortId: true, status: true, tenantId: true }
+  });
+  if (!c) return reply.code(404).send({ ok: false, error: 'CASE_NOT_FOUND' });
+
+  const caseStatus = String(c.status || '').toUpperCase();
+  if (caseStatus === 'PENDING_APPROVAL') {
+    return reply.code(403).send({
+      ok: false,
+      error: 'PENDING_APPROVAL',
+      pendingApproval: true,
+      message: 'El administrador aún no aprueba esta inspección.'
+    });
+  }
+  if (caseStatus === 'CANCELLED') {
+    return reply.code(403).send({
+      ok: false,
+      error: 'CANCELLED',
+      message: 'Esta inspección fue rechazada.'
+    });
+  }
+
+  const nowTs = Date.now();
+  let existing = await prisma.captureToken.findFirst({
+    where: {
+      caseId: c.id,
+      revokedAt: null,
+      expiresAt: { gt: new Date(nowTs) }
+    },
+    orderBy: { createdAt: 'desc' },
+    select: { token: true }
+  });
+  if (!existing) {
+    const created = await prisma.captureToken.create({
+      data: {
+        tenantId: c.tenantId || null,
+        caseId: c.id,
+        token: crypto.randomUUID(),
+        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7)
+      },
+      select: { token: true }
+    });
+    existing = created;
+  }
+
+  return reply.send({
+    ok: true,
+    caseId: c.shortId || c.id,
+    status: c.status,
+    captureToken: existing.token,
+    captureUrl: `/capture/${existing.token}`
+  });
+});
+
 /**
  * Crear inspección desde app ejecutivo (Ainspecciona Capture).
- * Descuenta 1 crédito del tenant y asigna el caso al ejecutivo autenticado.
+ * Queda PENDING_APPROVAL: el admin del tenant aprueba y ahí se consume 1 crédito.
  */
 fastify.post('/api/executive/inspections', async (req, reply) => {
   const session = await getExecSession(req);
@@ -7957,7 +8674,7 @@ fastify.post('/api/executive/inspections', async (req, reply) => {
 
   const user = await prisma.user.findUnique({
     where: { id: session.userId },
-    select: { id: true, tenantId: true, status: true }
+    select: { id: true, tenantId: true, status: true, fullName: true, autoApproveInspections: true }
   });
   if (!user || user.status !== 'ACTIVE') {
     return reply.code(401).send({ ok: false, error: 'UNAUTHORIZED' });
@@ -7973,6 +8690,20 @@ fastify.post('/api/executive/inspections', async (req, reply) => {
   const bedroomsCount = Number(payload.bedroomsCount || payload.bedrooms || 1);
   const bedrooms = Number(payload.bedrooms || bedroomsCount || 0);
   const bathrooms = Number(payload.bathrooms || bathroomsCount || 1);
+  const captureToken = crypto.randomUUID();
+  const captureExpires = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7);
+
+  let wantAutoApprove = !!user.autoApproveInspections;
+  if (wantAutoApprove) {
+    const credit = await prisma.tenantCredit.findUnique({ where: { tenantId }, select: { balance: true } });
+    if (!credit || credit.balance < 1) {
+      wantAutoApprove = false;
+    }
+  }
+
+  const approvalToken = wantAutoApprove ? null : mintApprovalToken();
+  const approvalTokenExpiresAt = wantAutoApprove ? null : approvalTokenExpiryDate(7);
+  const initialStatus = wantAutoApprove ? 'IN_PROGRESS' : 'PENDING_APPROVAL';
 
   const planSlots = buildPhotoPlanV1({
     ...payload,
@@ -7980,35 +8711,9 @@ fastify.post('/api/executive/inspections', async (req, reply) => {
     bedroomsCount
   });
 
-  const token = crypto.randomUUID();
-  const captureExpires = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7);
-
   let result;
   try {
     result = await prisma.$transaction(async (tx) => {
-      let account = await tx.tenantCredit.findUnique({ where: { tenantId } });
-      if (!account) {
-        account = await tx.tenantCredit.create({ data: { tenantId, balance: 0 } });
-      }
-      if (account.balance < 1) {
-        throw new Error('INSUFFICIENT_CREDITS');
-      }
-      await tx.tenantCredit.update({
-        where: { tenantId },
-        data: { balance: { decrement: 1 } }
-      });
-
-      const tenantTrial = await tx.tenant.findUnique({
-        where: { id: tenantId },
-        select: { trialStatus: true, trialRealInspectionUsedAt: true }
-      });
-      if (tenantTrial?.trialStatus === 'active' && !tenantTrial.trialRealInspectionUsedAt) {
-        await tx.tenant.update({
-          where: { id: tenantId },
-          data: { trialRealInspectionUsedAt: new Date() }
-        });
-      }
-
       let ownerId = null;
       const ownerRutNorm = payload.ownerRut ? normalizeRut(payload.ownerRut) : null;
       if (ownerRutNorm || payload.ownerName) {
@@ -8059,7 +8764,9 @@ fastify.post('/api/executive/inspections', async (req, reply) => {
           hasGreenCertificate: !!payload.hasGreenCertificate,
           hasEntranceGrille: !!payload.hasEntranceGrille,
           planVersion: 'v1',
-          status: 'DRAFT'
+          status: initialStatus,
+          approvalToken,
+          approvalTokenExpiresAt
         }
       });
 
@@ -8076,51 +8783,79 @@ fastify.post('/api/executive/inspections', async (req, reply) => {
         }))
       });
 
+      // Token de captura ya creado: la app instalada exige captureUrl.
+      // Si queda PENDING_APPROVAL, la API bloquea fotos reales hasta aprobar.
       await tx.captureToken.create({
         data: {
           tenantId,
           caseId: c.id,
-          token,
+          token: captureToken,
           expiresAt: captureExpires
         }
       });
 
-      await tx.creditTransaction.create({
-        data: {
+      if (wantAutoApprove) {
+        await consumeOneCreditInTx(tx, {
           tenantId,
-          amount: -1,
-          type: 'CONSUMPTION',
           caseId: c.id,
-          description: `Inspección ${c.shortId || c.id} (app ejecutivo)`
-        }
-      });
+          shortId: c.shortId,
+          description: `Auto-aprobación inspección ${c.shortId || c.id}`
+        });
+      }
 
-      return { caseId: c.id, shortId: c.shortId, slotsCreated: slots.count };
+      return {
+        caseId: c.id,
+        shortId: c.shortId,
+        slotsCreated: slots.count,
+        captureToken,
+        autoApproved: wantAutoApprove,
+        status: initialStatus
+      };
     });
   } catch (err) {
-    if (err?.message === 'INSUFFICIENT_CREDITS') {
-      return reply.code(402).send({
-        ok: false,
-        error: 'INSUFFICIENT_CREDITS',
-        message: 'No tienes créditos suficientes. Solicita recarga al administrador de la corredora.'
-      });
-    }
     req.log.error({ err: err?.message, stack: err?.stack }, 'POST /api/executive/inspections');
     throw err;
   }
 
-  const captureUrl = `/capture/${token}`;
+  if (!result.autoApproved && approvalToken) {
+    const address = String(payload.propertyAddress || '').trim();
+    try {
+      await notifyAdminsInspectionApprovalRequest(prisma, req, getEmailWebBase, {
+        tenantId,
+        approvalToken,
+        shortId: result.shortId,
+        address,
+        executiveName: user.fullName || ''
+      });
+    } catch (err) {
+      req.log.warn({ err }, 'executive-inspection-notify-admins-failed');
+    }
+  }
+
   const caseIdForUrl = result.shortId || result.caseId;
   const reportUrl = `/cases/${encodeURIComponent(caseIdForUrl)}/report`;
+  const captureUrl = `/capture/${result.captureToken}`;
+  const baseUrl = String(getEmailWebBase(req) || 'https://ainspecciona.com').replace(/\/$/, '');
+  const pendingApproval = result.status === 'PENDING_APPROVAL';
 
   return reply.send({
     ok: true,
     caseId: result.caseId,
     shortId: result.shortId,
     tenantId,
+    status: result.status,
+    pendingApproval,
+    autoApproved: !!result.autoApproved,
+    // Apps nuevas: ven pendingApproval y NO abren captura.
+    // Apps viejas: exigen captureUrl; la API bloquea fotos hasta aprobar.
+    captureToken: result.captureToken,
     captureUrl,
+    captureUrlFull: `${baseUrl}${captureUrl}`,
     reportUrl,
-    slots: planSlots
+    slots: planSlots,
+    message: result.autoApproved
+      ? 'Inspección creada. Se consumió 1 crédito (auto-aprobación). Ya puedes capturar.'
+      : 'Solicitud enviada al administrador. Recibirá correo (y WhatsApp si hay teléfono) para aprobar. Se consumirá 1 crédito al aprobarla.'
   });
 });
 
@@ -8232,7 +8967,20 @@ await registerCaptureRoutes(fastify, {
   validateSlotMatchWithOpenAI,
   slotGroupFromSlotCode,
   queueOpenAiSlotAnalysis,
-  sendCaseToReview: checkAndNotifyReviewer
+  sendCaseToReview: checkAndNotifyReviewer,
+  // Business: al terminar captura (o al completar el último análisis) → cola ITO + mail a Paulo
+  notifyExecutiveReportIfReady: maybeNotifyExecutiveReportReady,
+  queueExecutiveSummaryForCase: async (caseId) => {
+    try {
+      const runtimeCfg = await getRuntimeScoreConfig();
+      await ensureExecutiveSummary({ prisma, openai, caseId, scoreConfig: runtimeCfg.config });
+    } catch (err) {
+      fastify.log.warn({ err, caseId }, 'queueExecutiveSummaryForCase failed');
+    }
+  },
+  recordReportAccuracyOnComplete,
+  runtimeScoreConfig: await getRuntimeScoreConfig(),
+  slotGroupTitleFromCode
 });
 
 fastify.post('/api/cases', async (req, reply) => {
@@ -8993,6 +9741,9 @@ fastify.listen({ port: PORT, host: '0.0.0.0' })
     prisma.$connect().then(() => fastify.log.info('DB connected')).catch((err) => fastify.log.warn(err, 'DB connect'));
     backfillCaseShortIds().catch((err) => fastify.log.warn(err, 'Backfill shortId'));
     ensureReviewColumns().catch((err) => fastify.log.warn(err, 'ensure-review-columns'));
+    ensureCaseStatusEnum().catch((err) => fastify.log.warn(err, 'ensure-case-status-enum'));
+    ensureCaseExtraColumns().catch((err) => fastify.log.warn(err, 'ensure-case-extra-columns'));
+    ensureUserAutoApproveColumn().catch((err) => fastify.log.warn(err, 'ensure-user-auto-approve'));
     ensureSubscriptionColumns().catch((err) => fastify.log.warn(err, 'ensure-subscription-columns'));
     ensureTrialColumns().catch((err) => fastify.log.warn(err, 'ensure-trial-columns'));
     ensurePromoTables().catch((err) => fastify.log.warn(err, 'ensure-promo-tables'));
@@ -9005,10 +9756,17 @@ fastify.listen({ port: PORT, host: '0.0.0.0' })
           fastify.log.info({ postventa: r?.postventa?.email }, 'toctoc-tenants-ready');
           return ensurePlatformDemo(prisma, r);
         })
-        .then((p) =>
+        .then((p) => {
           fastify.log.info(
             { hub: p?.hub?.email, control: p?.control?.email },
             'platform-demo-ready'
+          );
+          return ensurePlaengeDemo(prisma);
+        })
+        .then((pl) =>
+          fastify.log.info(
+            { slug: pl?.organization?.slug, projectId: pl?.postsale?.projectId },
+            'plaenge-demo-ready'
           )
         )
         .catch((err) => fastify.log.warn(err, 'ensure-platform-demo'));
