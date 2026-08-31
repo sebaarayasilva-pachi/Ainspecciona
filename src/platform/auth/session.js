@@ -5,6 +5,7 @@
 import crypto from 'node:crypto';
 import { hashPassword, verifyPassword, sessionCookieOpts } from './passwords.js';
 import { PLATFORM_PRODUCTS } from '../products.js';
+import { ndaStatusForSession } from '../nda.js';
 
 export const PLATFORM_SESSION_COOKIE = 'platform_session';
 export const PLATFORM_SESSION_TYPE = 'platform';
@@ -130,13 +131,32 @@ export async function getPlatformSession(prisma, req) {
   return null;
 }
 
+/**
+ * Productos visibles en /app:
+ * OrganizationProduct ENABLED ∩ LegacyIdentityLink del usuario (misma org).
+ */
+export function visibleProductsForSession(session) {
+  if (!session) return [];
+  const org = session.organization;
+  if (!org || org.status !== 'ACTIVE') return [];
+  const orgId = org.id;
+  const linked = new Set(
+    (session.links || [])
+      .filter((l) => !l.organizationId || l.organizationId === orgId)
+      .map((l) => l.product)
+  );
+  return (session.enabledProducts || []).filter((code) => linked.has(code));
+}
+
 export function serializePlatformContext(session) {
   if (!session) return null;
-  const products = (session.enabledProducts || []).map((code) => ({
+  const visibleCodes = visibleProductsForSession(session);
+  const products = visibleCodes.map((code) => ({
     code,
     label: PLATFORM_PRODUCTS[code]?.label || code,
     href: PLATFORM_PRODUCTS[code]?.href || '/app'
   }));
+  const nda = ndaStatusForSession(session);
   return {
     user: {
       id: session.user.id,
@@ -149,14 +169,19 @@ export function serializePlatformContext(session) {
           id: session.organization.id,
           slug: session.organization.slug,
           name: session.organization.name,
-          type: session.organization.type
+          type: session.organization.type,
+          status: session.organization.status,
+          requiresNda: !!session.organization.requiresNda
         }
       : null,
     membership: session.membership
       ? { id: session.membership.id, role: session.membership.role }
       : null,
+    /** Productos ENABLED en la org (sin filtrar por link). */
     enabledProducts: session.enabledProducts || [],
+    /** Productos que el usuario puede abrir en /app (ENABLED ∩ link). */
     products,
+    nda,
     token: session.token
   };
 }

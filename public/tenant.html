@@ -266,7 +266,7 @@
     .note a:hover { text-decoration: underline; }
     .userGrid {
       display: grid;
-      grid-template-columns: 1.2fr 1fr 150px 140px 100px 90px minmax(280px, 1fr);
+      grid-template-columns: 1.2fr 1fr 130px 120px 90px 90px 100px minmax(260px, 1fr);
       gap: 10px;
       align-items: center;
     }
@@ -415,6 +415,77 @@
       margin-top: 4px;
       justify-content: center;
     }
+    .kpiGrid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+    @media (max-width: 900px) {
+      .kpiGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    .kpiCardDash {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(148, 163, 184, 0.15);
+      border-radius: 14px;
+      padding: 14px 16px;
+    }
+    .kpiCardDash .kpiLabel {
+      font-size: 12px;
+      color: #94a3b8;
+      font-weight: 600;
+    }
+    .kpiCardDash .kpiValue {
+      font-size: 28px;
+      font-weight: 800;
+      color: #ECF2FF;
+      margin-top: 4px;
+      letter-spacing: -0.02em;
+    }
+    .kpiCardDash .kpiHint {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+    .dashCharts {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+    @media (max-width: 960px) {
+      .dashCharts { grid-template-columns: 1fr; }
+    }
+    .dashToolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .dashToolbar select {
+      background: #0b1220;
+      border: 1px solid #334155;
+      color: #e2e8f0;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-weight: 600;
+    }
+    .percentileRow {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+    .percentilePill {
+      background: rgba(53, 208, 127, 0.1);
+      border: 1px solid rgba(53, 208, 127, 0.25);
+      color: #a7f3d0;
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 700;
+    }
   </style>
 </head>
 <body>
@@ -463,6 +534,7 @@
     <aside>
       <div class="asideTitle">Panel Tenant</div>
       <nav class="menu">
+        <a class="active" data-section-link="dashboard" href="#dashboard">Dashboard</a>
         <a data-section-link="cuenta" href="#cuenta">Cuenta</a>
         <a data-section-link="users" href="#users">Usuarios</a>
         <a data-section-link="inspections" href="#inspections">Inspecciones</a>
@@ -470,6 +542,53 @@
         <a data-section-link="credits" href="#credits">Cuenta corriente</a>
       </nav>
     </aside>
+
+    <section class="content" id="dashboard" data-section="dashboard">
+      <h1>Dashboard</h1>
+      <div class="muted">KPIs de gestión de inspecciones de tu corredora.</div>
+      <div class="dashToolbar">
+        <label class="muted" for="dashDaysSelect" style="font-weight:700;">Periodo</label>
+        <select id="dashDaysSelect">
+          <option value="7">Últimos 7 días</option>
+          <option value="30" selected>Últimos 30 días</option>
+          <option value="60">Últimos 60 días</option>
+          <option value="90">Últimos 90 días</option>
+        </select>
+        <button type="button" class="btn outline" id="dashRefreshBtn">Actualizar</button>
+        <span class="muted" id="dashStatus" style="font-size:13px;"></span>
+      </div>
+
+      <div class="kpiGrid" id="dashKpis">
+        <div class="kpiCardDash"><div class="kpiLabel">Inspecciones</div><div class="kpiValue" id="kpiTotal">—</div><div class="kpiHint" id="kpiTotalHint">en el periodo</div></div>
+        <div class="kpiCardDash"><div class="kpiLabel">Completadas</div><div class="kpiValue" id="kpiDone">—</div><div class="kpiHint" id="kpiDoneHint">DONE</div></div>
+        <div class="kpiCardDash"><div class="kpiLabel">Pend. aprobación</div><div class="kpiValue" id="kpiPending">—</div><div class="kpiHint">esperando admin</div></div>
+        <div class="kpiCardDash"><div class="kpiLabel">Score promedio</div><div class="kpiValue" id="kpiAvgScore">—</div><div class="kpiHint" id="kpiAvgHint">casos con score</div></div>
+        <div class="kpiCardDash"><div class="kpiLabel">En curso</div><div class="kpiValue" id="kpiInProgress">—</div><div class="kpiHint">captura activa</div></div>
+        <div class="kpiCardDash"><div class="kpiLabel">Badge verde</div><div class="kpiValue" id="kpiGreen">—</div><div class="kpiHint">score alto</div></div>
+        <div class="kpiCardDash"><div class="kpiLabel">Badge amarillo</div><div class="kpiValue" id="kpiYellow">—</div><div class="kpiHint">score medio</div></div>
+        <div class="kpiCardDash"><div class="kpiLabel">Créditos</div><div class="kpiValue" id="kpiCredits">—</div><div class="kpiHint">saldo actual</div></div>
+      </div>
+
+      <div class="dashCharts">
+        <div class="card">
+          <h3 style="margin-top:0;">Inspecciones por agente</h3>
+          <p class="muted" style="font-size:12px; margin:0 0 8px;">Todos los agentes de la corredora (incluye quienes van en cero).</p>
+          <div style="position:relative; height:340px;">
+            <canvas id="dashByAgentChart"></canvas>
+          </div>
+          <p class="muted" id="dashByAgentErr" style="font-size:12px; margin-top:8px; min-height:1em;"></p>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0;">Distribución por estrellas</h3>
+          <p class="muted" style="font-size:12px; margin:0 0 8px;">Percentil por estrella: % de inspecciones con score en 1★, 2★, 3★, 4★ y 5★.</p>
+          <div style="position:relative; height:280px;">
+            <canvas id="dashStarsChart"></canvas>
+          </div>
+          <div class="percentileRow" id="dashPercentiles"></div>
+          <p class="muted" id="dashStarsErr" style="font-size:12px; margin-top:8px; min-height:1em;"></p>
+        </div>
+      </div>
+    </section>
 
     <section class="content hidden" id="cuenta" data-section="cuenta">
       <h1>Cuenta</h1>
@@ -479,7 +598,7 @@
         <form id="accountForm">
           <div style="margin-top:12px; display:flex; align-items:flex-start; gap:24px; flex-wrap:wrap;">
             <div>
-              <label for="accountLogo">Logo</label>
+              <label for="accountLogo">Logo (Color)</label>
               <div class="logoUpload" style="margin-top:6px;">
                 <div class="logoPreview" id="logoPreview">
                   <img id="logoImg" src="" alt="Logo" style="max-width:100px; max-height:80px; object-fit:contain; display:none;" />
@@ -487,6 +606,17 @@
                 </div>
                 <input id="accountLogo" type="file" accept="image/jpeg,image/png,image/webp" style="margin-top:8px;" />
                 <div class="formHint" style="margin-top:4px;">JPG, PNG o WebP. Máx. 2 MB</div>
+              </div>
+            </div>
+            <div>
+              <label for="accountLogoWhite">Logo (Blanco)</label>
+              <div class="logoUpload" style="margin-top:6px;">
+                <div class="logoPreview" id="logoWhitePreview" style="background:#070812;">
+                  <img id="logoWhiteImg" src="" alt="Logo Blanco" style="max-width:100px; max-height:80px; object-fit:contain; display:none;" />
+                  <span id="logoWhitePlaceholder" class="muted" style="font-size:12px;">Sin logo</span>
+                </div>
+                <input id="accountLogoWhite" type="file" accept="image/jpeg,image/png,image/webp" style="margin-top:8px;" />
+                <div class="formHint" style="margin-top:4px;">Para fondos oscuros. Máx. 2 MB</div>
               </div>
             </div>
             <div style="flex:1; min-width:200px;">
@@ -641,7 +771,7 @@
       </div>
     </section>
 
-    <section class="content" id="users" data-section="users">
+    <section class="content hidden" id="users" data-section="users">
       <h1>Usuarios</h1>
       <div class="muted">Crea usuarios y asigna roles.</div>
 
@@ -666,6 +796,14 @@
 
       <div class="card">
         <h3>Listado de usuarios</h3>
+        <p class="muted" style="margin:0 0 10px; font-size:13px;">
+          Si <strong>Auto-aprobar</strong> está activo, las inspecciones de ese agente consumen 1 crédito al crearlas sin pedir aprobación al administrador.
+        </p>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; align-items:center;">
+          <button class="btn outline" id="autoApproveAllOnBtn" type="button">Marcar todos</button>
+          <button class="btn outline" id="autoApproveAllOffBtn" type="button">Desmarcar todos</button>
+          <button class="btn" id="autoApproveSaveBtn" type="button" disabled>Guardar cambios</button>
+        </div>
         <div class="userGrid" id="userHeader">
           <div class="muted">Nombre</div>
           <div class="muted">Email</div>
@@ -673,6 +811,7 @@
           <div class="muted">Rol</div>
           <div class="muted">Invitación</div>
           <div class="muted">Estado</div>
+          <div class="muted">Auto-aprobar</div>
           <div class="muted">Acción</div>
         </div>
         <div class="userGrid" id="userList"></div>
@@ -686,6 +825,15 @@
       <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:12px;">
         <h3 style="margin:0;">Inspecciones</h3>
         <button class="btn outline" id="toggleInspectionFormBtn" type="button">Agregar inspección</button>
+      </div>
+
+      <div class="card" id="pendingApprovalsCard" style="margin-bottom:16px; display:none;">
+        <h3 style="margin-top:0;">Pendientes de aprobación</h3>
+        <p class="muted" style="margin:0 0 12px; font-size:14px;">
+          Solicitudes de ejecutivos. Al aprobar se consume <strong>1 crédito</strong> de la corredora y se habilita la captura.
+          También puedes aprobar desde el correo o WhatsApp.
+        </p>
+        <div id="pendingApprovalsList"></div>
       </div>
 
       <div class="inspectionForm hidden" id="inspectionFormCard">
@@ -803,6 +951,7 @@
     </section>
   </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
   <script>
     (function initSessionFromUrl() {
       const params = new URLSearchParams(window.location.search);
@@ -1043,6 +1192,18 @@
         invited.textContent = formatDateShort(u.invitedAt);
         const status = document.createElement("div");
         status.textContent = u.status || "PENDING";
+
+        const autoApproveCell = document.createElement("div");
+        const autoCb = document.createElement("input");
+        autoCb.type = "checkbox";
+        autoCb.className = "autoApproveCb";
+        autoCb.dataset.userId = u.id;
+        autoCb.dataset.original = u.autoApproveInspections ? "1" : "0";
+        autoCb.checked = !!u.autoApproveInspections;
+        autoCb.title = "Consumir crédito al crear sin pedir aprobación";
+        autoCb.addEventListener("change", updateAutoApproveSaveState);
+        autoApproveCell.appendChild(autoCb);
+
         const action = document.createElement("div");
         action.className = "userActions";
         action.style.cssText = "display:flex;flex-direction:row;flex-wrap:nowrap;gap:6px;align-items:center;";
@@ -1050,7 +1211,14 @@
         const activateBtn = document.createElement("button");
         activateBtn.className = "btn outline";
         activateBtn.textContent = "Activar";
+        if (!u.hasPassword) {
+          activateBtn.disabled = true;
+          activateBtn.title = "El usuario debe configurar su contraseña primero (usa Reinvitar)";
+          activateBtn.style.opacity = "0.5";
+          activateBtn.style.cursor = "not-allowed";
+        }
         activateBtn.addEventListener("click", async () => {
+          if (!u.hasPassword) return;
           const res = await fetch(`/api/tenant/users/${u.id}`, {
             method: "PUT",
             headers: authHeaders({ "Content-Type": "application/json" }),
@@ -1146,6 +1314,7 @@
         list.appendChild(role);
         list.appendChild(invited);
         list.appendChild(status);
+        list.appendChild(autoApproveCell);
         list.appendChild(action);
 
         if (u.role === "TENANT_USER") {
@@ -1155,13 +1324,121 @@
           execSelect.appendChild(opt);
         }
       });
+      updateAutoApproveSaveState();
+    }
+
+    function getAutoApproveCheckboxes() {
+      return Array.from(document.querySelectorAll("#userList input.autoApproveCb"));
+    }
+
+    function updateAutoApproveSaveState() {
+      const btn = document.getElementById("autoApproveSaveBtn");
+      if (!btn) return;
+      const dirty = getAutoApproveCheckboxes().some(
+        (cb) => (cb.checked ? "1" : "0") !== (cb.dataset.original || "0")
+      );
+      btn.disabled = !dirty;
+    }
+
+    function setAutoApproveAllLocal(enabled) {
+      getAutoApproveCheckboxes().forEach((cb) => {
+        cb.checked = !!enabled;
+      });
+      updateAutoApproveSaveState();
+      const note = document.getElementById("userNote");
+      if (note) {
+        note.textContent = enabled
+          ? "Todos marcados. Pulsa Guardar cambios para aplicar."
+          : "Todos desmarcados. Pulsa Guardar cambios para aplicar.";
+      }
+    }
+
+    async function saveAutoApproveChanges() {
+      const note = document.getElementById("userNote");
+      const btn = document.getElementById("autoApproveSaveBtn");
+      const dirty = getAutoApproveCheckboxes().filter(
+        (cb) => (cb.checked ? "1" : "0") !== (cb.dataset.original || "0")
+      );
+      if (!dirty.length) {
+        if (note) note.textContent = "No hay cambios que guardar.";
+        return;
+      }
+      if (btn) btn.disabled = true;
+      let okCount = 0;
+      let failCount = 0;
+      for (const cb of dirty) {
+        const enabled = !!cb.checked;
+        const res = await fetch(`/api/tenant/users/${cb.dataset.userId}`, {
+          method: "PUT",
+          headers: authHeaders({ "Content-Type": "application/json" }),
+          body: JSON.stringify({ autoApproveInspections: enabled }),
+          credentials: "include"
+        });
+        if (handleUnauthorized(res)) {
+          updateAutoApproveSaveState();
+          return;
+        }
+        if (res.ok) {
+          cb.dataset.original = enabled ? "1" : "0";
+          okCount += 1;
+        } else {
+          failCount += 1;
+        }
+      }
+      if (note) {
+        note.textContent = failCount
+          ? `Guardado parcial: ${okCount} ok, ${failCount} con error.`
+          : `Auto-aprobación guardada (${okCount} usuario${okCount === 1 ? "" : "s"}).`;
+      }
+      updateAutoApproveSaveState();
     }
 
     async function renderInspections() {
       const list = document.getElementById("inspectionList");
+      const pendingCard = document.getElementById("pendingApprovalsCard");
+      const pendingList = document.getElementById("pendingApprovalsList");
       list.innerHTML = "";
+      if (pendingList) pendingList.innerHTML = "";
       const inspections = await loadInspections();
-      if (!inspections.length) {
+      const pending = inspections.filter((c) => c.pendingApproval || String(c.status || "").toUpperCase() === "PENDING_APPROVAL");
+      const rest = inspections.filter((c) => !(c.pendingApproval || String(c.status || "").toUpperCase() === "PENDING_APPROVAL"));
+
+      if (pendingCard && pendingList) {
+        if (!pending.length) {
+          pendingCard.style.display = "none";
+        } else {
+          pendingCard.style.display = "block";
+          pending.forEach((c) => {
+            const row = document.createElement("div");
+            row.style.cssText = "display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid rgba(148,163,184,0.15);";
+            const info = document.createElement("div");
+            info.innerHTML = `<div style="font-weight:700;color:#EAF0FF;">${escapeHtml(c.address || "Dirección no informada")}</div>
+              <div class="muted" style="font-size:13px;">${escapeHtml(c.id)} · ${escapeHtml(c.assignedUserName || "Sin asignar")} · ${escapeHtml(formatDateShort(c.createdAt))}</div>`;
+            const actions = document.createElement("div");
+            actions.style.cssText = "display:flex; gap:8px; flex-wrap:wrap;";
+            const approveBtn = document.createElement("button");
+            approveBtn.type = "button";
+            approveBtn.className = "btn";
+            approveBtn.textContent = "Aprobar (1 crédito)";
+            approveBtn.addEventListener("click", () => {
+              if (!confirm("¿Aprobar esta inspección? Se consumirá 1 crédito y el ejecutivo podrá capturar.")) return;
+              tenantApproveInspection(c.id, approveBtn);
+            });
+            const rejectBtn = document.createElement("button");
+            rejectBtn.type = "button";
+            rejectBtn.className = "btn outline";
+            rejectBtn.textContent = "Rechazar";
+            rejectBtn.addEventListener("click", () => tenantRejectInspection(c.id, rejectBtn));
+            actions.appendChild(approveBtn);
+            actions.appendChild(rejectBtn);
+            row.appendChild(info);
+            row.appendChild(actions);
+            pendingList.appendChild(row);
+          });
+        }
+      }
+
+      if (!rest.length && !pending.length) {
         const empty = document.createElement("div");
         empty.className = "note";
         empty.style.gridColumn = "1 / -1";
@@ -1169,7 +1446,7 @@
         list.appendChild(empty);
         return;
       }
-      inspections.forEach((c) => {
+      rest.forEach((c) => {
         const address = document.createElement("div");
         address.textContent = c.address || "Dirección no informada";
         const exec = document.createElement("div");
@@ -1179,7 +1456,12 @@
         const status = document.createElement("div");
         const statusBadge = document.createElement("div");
         statusBadge.className = "badge";
-        statusBadge.textContent = c.status || "DRAFT";
+        const st = String(c.status || "DRAFT").toUpperCase();
+        statusBadge.textContent =
+          st === "CANCELLED" ? "Cancelada" :
+          st === "DONE" ? "Completa" :
+          st === "IN_PROGRESS" ? "En curso" :
+          "Borrador";
         status.appendChild(statusBadge);
 
         const scoreCell = document.createElement("div");
@@ -1225,26 +1507,28 @@
 
         const actions = document.createElement("div");
         actions.className = "inspectionActions";
-        const reportLink = document.createElement("a");
-        reportLink.className = "btn outline";
-        reportLink.textContent = "Ver informe";
-        reportLink.href = `/cases/${encodeURIComponent(c.id)}/report${currentTenantId ? "?tenantId=" + encodeURIComponent(currentTenantId) : ""}`;
-        reportLink.target = "_blank";
-        reportLink.rel = "noreferrer";
-        const certLink = document.createElement("a");
-        certLink.className = "btn";
-        certLink.textContent = "Descargar certificado";
-        certLink.href = `/cases/${encodeURIComponent(c.id)}/certificate${currentTenantId ? "?tenantId=" + encodeURIComponent(currentTenantId) : ""}`;
-        certLink.target = "_blank";
-        certLink.rel = "noreferrer";
-        const emailBtn = document.createElement("button");
-        emailBtn.type = "button";
-        emailBtn.className = "btn outline";
-        emailBtn.textContent = "Enviar email";
-        emailBtn.addEventListener("click", () => tenantSendReportEmail(c.id, emailBtn));
-        actions.appendChild(reportLink);
-        actions.appendChild(certLink);
-        actions.appendChild(emailBtn);
+        if (st !== "CANCELLED") {
+          const reportLink = document.createElement("a");
+          reportLink.className = "btn outline";
+          reportLink.textContent = "Ver informe";
+          reportLink.href = `/cases/${encodeURIComponent(c.id)}/report${currentTenantId ? "?tenantId=" + encodeURIComponent(currentTenantId) : ""}`;
+          reportLink.target = "_blank";
+          reportLink.rel = "noreferrer";
+          const certLink = document.createElement("a");
+          certLink.className = "btn";
+          certLink.textContent = "Descargar certificado";
+          certLink.href = `/cases/${encodeURIComponent(c.id)}/certificate${currentTenantId ? "?tenantId=" + encodeURIComponent(currentTenantId) : ""}`;
+          certLink.target = "_blank";
+          certLink.rel = "noreferrer";
+          const emailBtn = document.createElement("button");
+          emailBtn.type = "button";
+          emailBtn.className = "btn outline";
+          emailBtn.textContent = "Enviar email";
+          emailBtn.addEventListener("click", () => tenantSendReportEmail(c.id, emailBtn));
+          actions.appendChild(reportLink);
+          actions.appendChild(certLink);
+          actions.appendChild(emailBtn);
+        }
 
         list.appendChild(address);
         list.appendChild(exec);
@@ -1255,6 +1539,67 @@
         list.appendChild(created);
         list.appendChild(actions);
       });
+    }
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    async function tenantApproveInspection(caseId, btn) {
+      if (btn) btn.disabled = true;
+      try {
+        const res = await fetch(`/api/tenant/inspections/${encodeURIComponent(caseId)}/approve`, {
+          method: "POST",
+          headers: authHeaders({ "Content-Type": "application/json" }),
+          credentials: "include",
+          body: "{}"
+        });
+        if (handleUnauthorized(res)) return;
+        const data = await res.json().catch(() => ({}));
+        if (res.ok) {
+          alert(`Inspección aprobada.\nSe consumió 1 crédito.\nCréditos restantes: ${data.creditsBalance ?? "—"}`);
+          renderInspections().catch(() => {});
+          loadTenant().catch(() => {});
+          if (typeof renderCredits === "function") renderCredits().catch(() => {});
+          else if (typeof loadCredits === "function") loadCredits().catch(() => {});
+        } else if (res.status === 402) {
+          alert(data.message || "No hay créditos suficientes. Compra más en Créditos.");
+        } else {
+          alert(data.message || "No se pudo aprobar.");
+        }
+      } catch {
+        alert("Error de conexión.");
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    async function tenantRejectInspection(caseId, btn) {
+      if (!confirm("¿Rechazar esta inspección? No se consumirá crédito.")) return;
+      if (btn) btn.disabled = true;
+      try {
+        const res = await fetch(`/api/tenant/inspections/${encodeURIComponent(caseId)}/reject`, {
+          method: "POST",
+          headers: authHeaders({ "Content-Type": "application/json" }),
+          credentials: "include",
+          body: "{}"
+        });
+        if (handleUnauthorized(res)) return;
+        const data = await res.json().catch(() => ({}));
+        if (res.ok) {
+          renderInspections().catch(() => {});
+        } else {
+          alert(data.message || "No se pudo rechazar.");
+        }
+      } catch {
+        alert("Error de conexión.");
+      } finally {
+        if (btn) btn.disabled = false;
+      }
     }
 
     document.getElementById("saveUserBtn").addEventListener("click", async () => {
@@ -1287,6 +1632,12 @@
         const msg = await readErrorMessage(res);
         note.textContent = `No se pudo guardar (${msg}).`;
       }
+    });
+
+    document.getElementById("autoApproveAllOnBtn")?.addEventListener("click", () => setAutoApproveAllLocal(true));
+    document.getElementById("autoApproveAllOffBtn")?.addEventListener("click", () => setAutoApproveAllLocal(false));
+    document.getElementById("autoApproveSaveBtn")?.addEventListener("click", () => {
+      saveAutoApproveChanges().catch(() => {});
     });
 
     document.getElementById("inviteUserBtn").addEventListener("click", async () => {
@@ -1428,7 +1779,7 @@
 
     function setActiveSection() {
       const hash = String(window.location.hash || "").replace("#", "");
-      const section = hash || "cuenta";
+      const section = hash || "dashboard";
       document.querySelectorAll("[data-section]").forEach((el) => {
         const key = el.getAttribute("data-section");
         el.classList.toggle("hidden", key !== section);
@@ -1437,6 +1788,9 @@
         const key = el.getAttribute("data-section-link");
         el.classList.toggle("active", key === section);
       });
+      if (section === "dashboard") {
+        renderDashboard().catch(() => {});
+      }
       if (section === "cuenta") {
         renderAccountForm().catch(() => {});
         renderSubscription().catch(() => {});
@@ -1449,6 +1803,198 @@
       }
     }
 
+    let dashByAgentChart = null;
+    let dashStarsChart = null;
+
+    async function renderDashboard() {
+      const statusEl = document.getElementById("dashStatus");
+      const days = parseInt(document.getElementById("dashDaysSelect")?.value || "30", 10) || 30;
+      if (statusEl) statusEl.textContent = "Cargando…";
+      try {
+        const res = await fetch("/api/tenant/analytics/dashboard?days=" + days, {
+          credentials: "include",
+          headers: authHeaders()
+        });
+        if (handleUnauthorized(res)) return;
+        const d = await res.json().catch(() => ({}));
+        if (!res.ok || !d.ok) {
+          if (statusEl) statusEl.textContent = d.message || d.error || "No se pudo cargar el dashboard.";
+          return;
+        }
+        if (statusEl) statusEl.textContent = "Últimos " + days + " días";
+
+        const k = d.kpis || {};
+        const set = (id, v) => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = v == null || v === "" ? "—" : String(v);
+        };
+        set("kpiTotal", k.total ?? 0);
+        set("kpiDone", k.done ?? 0);
+        set("kpiPending", k.pendingApproval ?? 0);
+        set("kpiInProgress", k.inProgress ?? 0);
+        set("kpiAvgScore", k.avgScore != null ? k.avgScore : "—");
+        set("kpiGreen", k.byBadge?.GREEN ?? 0);
+        set("kpiYellow", k.byBadge?.YELLOW ?? 0);
+        set("kpiCredits", k.creditsBalance ?? 0);
+        const avgHint = document.getElementById("kpiAvgHint");
+        if (avgHint) avgHint.textContent = (k.scoredCount || 0) + " con score";
+
+        const agents = d.byAgent || [];
+        const unassigned = d.unassigned?.total || 0;
+        const agentErr = document.getElementById("dashByAgentErr");
+        const agentCtx = document.getElementById("dashByAgentChart");
+        if (dashByAgentChart) {
+          dashByAgentChart.destroy();
+          dashByAgentChart = null;
+        }
+        if (!agents.length && !unassigned) {
+          if (agentErr) agentErr.textContent = "No hay agentes en la corredora.";
+        } else if (agentCtx && window.Chart) {
+          if (agentErr) agentErr.textContent = "";
+          const labels = agents.map((a) => {
+            const n = String(a.fullName || "—");
+            return n.length > 22 ? n.slice(0, 20) + "…" : n;
+          });
+          const totals = agents.map((a) => a.total || 0);
+          const dones = agents.map((a) => a.byStatus?.DONE || 0);
+          if (unassigned > 0) {
+            labels.push("Sin asignar");
+            totals.push(unassigned);
+            dones.push(d.unassigned?.byStatus?.DONE || 0);
+          }
+          const h = Math.max(240, labels.length * 32);
+          if (agentCtx.parentElement) agentCtx.parentElement.style.height = h + "px";
+          dashByAgentChart = new Chart(agentCtx, {
+            type: "bar",
+            data: {
+              labels,
+              datasets: [
+                {
+                  label: "Total",
+                  data: totals,
+                  backgroundColor: "rgba(53, 208, 127, 0.75)",
+                  borderColor: "#35D07F",
+                  borderWidth: 1,
+                  borderRadius: 4
+                },
+                {
+                  label: "Completadas",
+                  data: dones,
+                  backgroundColor: "rgba(96, 165, 250, 0.65)",
+                  borderColor: "#60a5fa",
+                  borderWidth: 1,
+                  borderRadius: 4
+                }
+              ]
+            },
+            options: {
+              indexAxis: "y",
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { labels: { color: "#94a3b8" } } },
+              scales: {
+                x: { beginAtZero: true, ticks: { color: "#94a3b8", precision: 0 }, grid: { color: "rgba(148,163,184,0.12)" } },
+                y: { ticks: { color: "#cbd5e1" }, grid: { display: false } }
+              }
+            }
+          });
+        }
+
+        const stars = d.scoreDistribution?.stars || d.kpis?.byStars || {};
+        const starsErr = document.getElementById("dashStarsErr");
+        const starsCtx = document.getElementById("dashStarsChart");
+        if (dashStarsChart) {
+          dashStarsChart.destroy();
+          dashStarsChart = null;
+        }
+        const starCounts = [1, 2, 3, 4, 5].map((s) => Number(stars[s] || 0));
+        const starTotal = starCounts.reduce((a, b) => a + b, 0);
+        const starPcts = starCounts.map((c) =>
+          starTotal ? Math.round((c / starTotal) * 1000) / 10 : 0
+        );
+        if (!starTotal) {
+          if (starsErr) starsErr.textContent = "Aún no hay casos con score en este periodo.";
+          const pctElEmpty = document.getElementById("dashPercentiles");
+          if (pctElEmpty) pctElEmpty.innerHTML = "";
+        } else if (starsCtx && window.Chart) {
+          if (starsErr) starsErr.textContent = "";
+          dashStarsChart = new Chart(starsCtx, {
+            type: "bar",
+            data: {
+              labels: ["1 ★", "2 ★", "3 ★", "4 ★", "5 ★"],
+              datasets: [
+                {
+                  label: "% inspecciones",
+                  data: starPcts,
+                  backgroundColor: [
+                    "rgba(239, 68, 68, 0.75)",
+                    "rgba(249, 115, 22, 0.75)",
+                    "rgba(234, 179, 8, 0.75)",
+                    "rgba(132, 204, 22, 0.75)",
+                    "rgba(53, 208, 127, 0.85)"
+                  ],
+                  borderRadius: 6
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { display: false },
+                tooltip: {
+                  callbacks: {
+                    label(ctx) {
+                      const i = ctx.dataIndex;
+                      const pct = starPcts[i] ?? 0;
+                      const n = starCounts[i] ?? 0;
+                      return pct + "% (" + n + " insp.)";
+                    }
+                  }
+                }
+              },
+              scales: {
+                x: { ticks: { color: "#cbd5e1" }, grid: { display: false } },
+                y: {
+                  beginAtZero: true,
+                  max: 100,
+                  ticks: {
+                    color: "#94a3b8",
+                    callback(v) {
+                      return v + "%";
+                    }
+                  },
+                  grid: { color: "rgba(148,163,184,0.12)" }
+                }
+              }
+            }
+          });
+        }
+
+        const pctEl = document.getElementById("dashPercentiles");
+        if (pctEl) {
+          pctEl.innerHTML = starTotal
+            ? [1, 2, 3, 4, 5]
+                .map((s, i) => {
+                  const pct = starPcts[i] ?? 0;
+                  const n = starCounts[i] ?? 0;
+                  return `<span class="percentilePill">${s}★: ${pct}% <span style="opacity:.7;font-weight:600;">(${n})</span></span>`;
+                })
+                .join("")
+            : "";
+        }
+      } catch (err) {
+        if (statusEl) statusEl.textContent = "Error de conexión.";
+      }
+    }
+
+    document.getElementById("dashRefreshBtn")?.addEventListener("click", () => {
+      renderDashboard().catch(() => {});
+    });
+    document.getElementById("dashDaysSelect")?.addEventListener("change", () => {
+      renderDashboard().catch(() => {});
+    });
+
     async function renderAccountForm() {
       const tenant = await loadTenant();
       if (!tenant) return;
@@ -1459,6 +2005,8 @@
       const emailEl = document.getElementById("accountEmail");
       const logoImg = document.getElementById("logoImg");
       const logoPlaceholder = document.getElementById("logoPlaceholder");
+      const logoWhiteImg = document.getElementById("logoWhiteImg");
+      const logoWhitePlaceholder = document.getElementById("logoWhitePlaceholder");
       if (nameEl) nameEl.value = tenant.name || "";
       if (legalEl) legalEl.value = tenant.legalName || "";
       if (rutEl) rutEl.value = tenant.rut || "";
@@ -1475,40 +2023,61 @@
           logoPlaceholder.style.display = "";
         }
       }
+      if (logoWhiteImg && logoWhitePlaceholder) {
+        if (tenant.logoWhiteUrl) {
+          logoWhiteImg.src = tenant.logoWhiteUrl;
+          logoWhiteImg.style.display = "";
+          logoWhitePlaceholder.style.display = "none";
+        } else {
+          logoWhiteImg.src = "";
+          logoWhiteImg.style.display = "none";
+          logoWhitePlaceholder.style.display = "";
+        }
+      }
     }
 
     const accountLogoInput = document.getElementById("accountLogo");
-    if (accountLogoInput) {
-      accountLogoInput.addEventListener("change", async (e) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        const logoImg = document.getElementById("logoImg");
-        const logoPlaceholder = document.getElementById("logoPlaceholder");
-        const note = document.getElementById("accountNote");
-        if (note) note.textContent = "";
-        const fd = new FormData();
-        fd.append("logo", file);
-        try {
-          const res = await fetch("/api/tenant/logo", {
-            method: "POST",
-            headers: authHeaders(),
-            body: fd,
-            credentials: "include"
-          });
-          if (handleUnauthorized(res)) return;
-          const data = await res.json().catch(() => ({}));
-          if (res.ok && data.logoUrl) {
-            if (logoImg) { logoImg.src = data.logoUrl; logoImg.style.display = ""; }
-            if (logoPlaceholder) logoPlaceholder.style.display = "none";
-            if (note) note.textContent = "Logo subido.";
-          } else {
-            if (note) note.textContent = data?.message || "Error al subir logo.";
-          }
-        } catch (err) {
-          if (note) note.textContent = "Error de conexión.";
+    const accountLogoWhiteInput = document.getElementById("accountLogoWhite");
+
+    async function handleLogoUpload(e, isWhite) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const imgId = isWhite ? "logoWhiteImg" : "logoImg";
+      const placeholderId = isWhite ? "logoWhitePlaceholder" : "logoPlaceholder";
+      const imgEl = document.getElementById(imgId);
+      const placeholderEl = document.getElementById(placeholderId);
+      const note = document.getElementById("accountNote");
+      if (note) note.textContent = "";
+      const fd = new FormData();
+      fd.append("logo", file);
+      try {
+        const url = isWhite ? "/api/tenant/logo?type=white" : "/api/tenant/logo";
+        const res = await fetch(url, {
+          method: "POST",
+          headers: authHeaders(),
+          body: fd,
+          credentials: "include"
+        });
+        if (handleUnauthorized(res)) return;
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.logoUrl) {
+          if (imgEl) { imgEl.src = data.logoUrl; imgEl.style.display = ""; }
+          if (placeholderEl) placeholderEl.style.display = "none";
+          if (note) note.textContent = isWhite ? "Logo blanco subido." : "Logo color subido.";
+        } else {
+          if (note) note.textContent = data?.message || "Error al subir logo.";
         }
-        e.target.value = "";
-      });
+      } catch (err) {
+        if (note) note.textContent = "Error de conexión.";
+      }
+      e.target.value = "";
+    }
+
+    if (accountLogoInput) {
+      accountLogoInput.addEventListener("change", (e) => handleLogoUpload(e, false));
+    }
+    if (accountLogoWhiteInput) {
+      accountLogoWhiteInput.addEventListener("change", (e) => handleLogoUpload(e, true));
     }
 
     async function renderSubscription() {

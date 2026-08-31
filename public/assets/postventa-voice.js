@@ -19,13 +19,14 @@
   async function start(opts) {
     opts = opts || {};
     var mod = await loadSdk();
-    var Conversation = mod.Conversation;
-    conversation = await Conversation.startSession({
-      agentId: opts.agentId,
-      connectionType: "webrtc",
-      dynamicVariables: opts.dynamicVariables || {},
-      clientTools: opts.clientTools || {},
-      onConnect: opts.onConnect || function () {},
+      var Conversation = mod.Conversation;
+      conversation = await Conversation.startSession({
+        agentId: opts.agentId,
+        connectionType: "webrtc",
+        dynamicVariables: opts.dynamicVariables || {},
+        clientTools: opts.clientTools || {},
+        overrides: opts.overrides,
+        onConnect: opts.onConnect || function () {},
       onDisconnect: function () {
         conversation = null;
         if (typeof opts.onDisconnect === "function") opts.onDisconnect();

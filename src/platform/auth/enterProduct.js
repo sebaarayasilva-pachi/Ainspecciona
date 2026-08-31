@@ -45,8 +45,12 @@ export async function enterProduct(prisma, platformSession, productCode, req, re
     return { ok: false, error: 'UNKNOWN_PRODUCT', message: 'Producto no reconocido.' };
   }
 
+  const org = platformSession.organization;
+  if (!org || org.status !== 'ACTIVE') {
+    return { ok: false, error: 'ORG_INACTIVE', message: 'Organización inactiva o no asignada.' };
+  }
   const enabled = platformSession.enabledProducts || [];
-  if (!platformSession.isPlatformAdmin && !enabled.includes(product)) {
+  if (!enabled.includes(product)) {
     return { ok: false, error: 'PRODUCT_DISABLED', message: 'Producto no habilitado para esta organización.' };
   }
 

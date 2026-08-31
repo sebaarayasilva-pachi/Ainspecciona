@@ -94,6 +94,23 @@ export async function ensurePlatformSchema(prisma) {
       }
     }
   }
+
+  // Columnas añadidas después del CREATE inicial (prod ya tiene las tablas).
+  const alters = [
+    'ALTER TABLE `platform_organization` ADD COLUMN `requiresNda` TINYINT(1) NOT NULL DEFAULT 0',
+    'ALTER TABLE `platform_user` ADD COLUMN `ndaAcceptedAt` DATETIME(3) NULL',
+    'ALTER TABLE `platform_user` ADD COLUMN `ndaVersion` VARCHAR(64) NULL'
+  ];
+  for (const sql of alters) {
+    try {
+      await prisma.$executeRawUnsafe(sql);
+    } catch (err) {
+      const msg = String(err?.message || '');
+      if (msg.includes('Duplicate column') || msg.includes('already exists')) continue;
+      throw err;
+    }
+  }
+
   ensured = true;
   return { ok: true };
 }

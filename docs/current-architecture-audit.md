@@ -448,21 +448,41 @@ Podemos decir “identidad de plataforma viva” cuando:
 
 ---
 
-## 19. Estado de implementación (Fase 1)
+## 19. Estado de implementación
 
-**Iniciado 2026-08-10 (Opción A — PlatformUser).**
-
+### Fase 1 — Identidad (hecho)
 | Entrega | Path / nota |
 |---------|-------------|
 | Schema + ensure | `prisma/schema.prisma`, `src/platform/ensurePlatformSchema.js` |
-| Auth / login | `POST /api/auth/login`, `GET /login`, sesión `type=platform` |
-| App shell | `GET /app` → `public/app/index.html` |
-| Control MVP | `GET /control` → orgs/products/users |
-| Bridges | Postventa / Entrega / InOut aceptan sesión platform |
+| Auth / login | `POST /api/auth/login`, home modal, sesión `type=platform` |
+| Bridges | Postventa / Entrega / InOut / Capture via enter-product |
 | Seed demo | `plataforma@toctoc.ainspecciona.com`, `control@ainspecciona.com` |
 
-Logins legacy de producto se mantienen.
+### Fase 1.5 — Acceso único a `/app` (hecho)
+| Regla | Comportamiento |
+|-------|----------------|
+| Landing post-login | Siempre `/app` |
+| Productos visibles | Org ACTIVE + producto ENABLED + `LegacyIdentityLink` |
+| 0 productos | Empty state en aside |
+| Deep link `?next=` | `/app?highlight=PRODUCTO` (sin auto-entrar) |
+| Logins producto | Redirect a `/?login=1&next=...` (`?legacy=1` conserva form) |
+| Page guards | Entrega/InOut → login único |
+| Control | Aside (Organizaciones / Usuarios) |
+
+### Control v1.5 (hecho)
+| Entrega | Nota |
+|---------|------|
+| Detalle org | `GET /api/control/organizations/:orgId` — members, links, nombres legacy |
+| Gaps | `GET /api/control/gaps` — ENABLED sin link + Capture huérfanos |
+| PATCH org | status ACTIVE/DISABLED (+ alias SUSPENDED), rename `name` |
+| Toggle producto | Respuesta incluye `hasLink` + `warning` si ENABLED sin link |
+| UI `/control` | Búsqueda, detalle, panel Gaps |
+
+### Siguiente
+- RBAC `requirePermission`
+- Property/Project core
+- Mover intelligence / integrations
 
 ---
 
-*Diagnóstico + Fase 1 identity/control en curso.*
+*Diagnóstico + Fase 1 / 1.5 acceso plataforma + Control v1.5.*

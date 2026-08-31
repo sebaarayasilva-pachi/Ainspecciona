@@ -1,4 +1,21 @@
 User-agent: *
 Allow: /
+Disallow: /app
+Disallow: /app/
+Disallow: /tenant
+Disallow: /admin
+Disallow: /control
+Disallow: /review
+Disallow: /entrega
+Disallow: /inout/portal
+Disallow: /inout/captura
+Disallow: /postventa/login
+Disallow: /postventa/overview
+Disallow: /postventa/proyecto
+Disallow: /postventa/ticket
+Disallow: /postventa/mis-tickets
+Disallow: /postventa/configuracion
+Disallow: /postventa/portal
+Disallow: /postventa/inspector
 
 Sitemap: https://ainspecciona.com/sitemap.xml

@@ -3,7 +3,7 @@
 .site-header {
   position: sticky;
   top: 0;
-  z-index: 20;
+  z-index: 50;
   background: rgba(11, 18, 27, 0.95);
   border-bottom: 1px solid #1E2B45;
   backdrop-filter: blur(8px);
@@ -67,6 +67,7 @@
   display: flex;
   gap: 12px;
   align-items: center;
+  flex-wrap: wrap; /* Permite que los botones bajen si no caben */
 }
 .site-header .topActions .muted {
   color: #94a3b8;
@@ -260,15 +261,15 @@
 
 @media (max-width: 768px) {
   .site-header .nav { padding: 12px 16px; }
-  .site-header .navLinks { gap: 12px; }
-  .site-header .navLinks a { font-size: 13px; }
+  .site-header .navLinks { display: none; } /* Ocultar links en móvil para dar espacio */
   .site-header .brand img { height: 32px; }
 }
 @media (max-width: 480px) {
   .site-header .nav { padding: 10px 12px; gap: 8px; }
-  .site-header .navLinks { gap: 8px; }
-  .site-header .navLinks a { font-size: 12px; }
+  .site-header .navLinks { display: none; }
   .site-header .brand img { height: 28px; }
+  .site-header .topActions { gap: 8px; }
+  .site-header .btn.outline { padding: 6px 10px; font-size: 12px; }
 }
 
 /* ——— Nav v2: Plataforma · Soluciones · demo CTA ——— */
@@ -318,7 +319,7 @@
   top: calc(100% + 12px);
   left: 50%;
   transform: translateX(-50%);
-  min-width: 280px;
+  min-width: 320px;
   background: #0f172a;
   border: 1px solid #1e293b;
   border-radius: 14px;
@@ -389,6 +390,7 @@
   cursor: pointer;
   font-family: inherit;
   padding: 8px 4px;
+  text-decoration: none;
 }
 .site-header-v2 .navLoginLink:hover {
   color: #fff;

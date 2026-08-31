@@ -21,6 +21,7 @@ import {
 
 export const PLATFORM_DEMO_EMAIL = 'plataforma@toctoc.ainspecciona.com';
 export const PLATFORM_CONTROL_EMAIL = 'control@ainspecciona.com';
+export const PLATFORM_CONTROL_PASSWORD = 'control2026!';
 
 const PRODUCTS = ['INSPECTION', 'RECEPTION', 'POSTSALE', 'INOUT', 'SCAN'];
 
@@ -46,7 +47,7 @@ export async function ensurePlatformDemo(prisma, toctocResult = null) {
 
   const password = String(process.env.TOCTOC_DEMO_PASSWORD || TOCTOC_DEMO_PASSWORD);
   const passwordHash = hashPassword(password);
-  const controlPassword = String(process.env.PLATFORM_CONTROL_PASSWORD || password);
+  const controlPassword = String(process.env.PLATFORM_CONTROL_PASSWORD || PLATFORM_CONTROL_PASSWORD);
   const controlHash = hashPassword(controlPassword);
 
   const org = await upsertOrg(prisma, {

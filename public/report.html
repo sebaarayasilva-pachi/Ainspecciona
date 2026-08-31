@@ -811,7 +811,27 @@
             const merged = nonDiagnostic.join(" ").replace(/\s{2,}/g, " ").trim();
             return merged || `Registro visual del área inspeccionada: ${areaLabel || "sector evaluado"}.`;
           };
-          const neutralDescription = isOmitted ? "" : toNeutralVisualDescription(desc, s.title || s.slotCode || "sector evaluado");
+          const isOkStateEarly = isOmitted || String(s.findingCode || "").toUpperCase() === "OK" || !s.severity;
+          const descriptionForOkState = (text, areaLabel) => {
+            // Si el slot es OK, no dejar frases de “falta / no se observa componente” que contradicen Hallazgos.
+            const base = toNeutralVisualDescription(text, areaLabel);
+            const cleaned = base
+              .replace(/[^.!?]*\bno\s+se\s+(observa|aprecia|identifica|detecta|ve)\b[^.!?]*(diferencial|diagrama|interruptor|disyuntor|protecci[oó]n|etiqueta completa|esquema)[^.!?]*[.!?]?/gi, " ")
+              .replace(/[^.!?]*\bno\s+se\s+aprecia\s+un\s+diagrama\b[^.!?]*[.!?]?/gi, " ")
+              .replace(/\s{2,}/g, " ")
+              .replace(/\s+\./g, ".")
+              .trim();
+            if (cleaned) return cleaned;
+            if (String(s?.severitySource || "").includes("human_review") || s?.humanReview?.verdict === "corrected") {
+              return "Evidencia revisada por ITO. Registro visual del elemento solicitado, sin observaciones confirmadas.";
+            }
+            return `Registro visual del área inspeccionada: ${areaLabel || "sector evaluado"}.`;
+          };
+          const neutralDescription = isOmitted
+            ? ""
+            : (isOkStateEarly
+              ? descriptionForOkState(desc, s.title || s.slotCode || "sector evaluado")
+              : toNeutralVisualDescription(desc, s.title || s.slotCode || "sector evaluado"));
           const descLines = wrapLines(neutralDescription, 110, 8);
           const kpiTitle = g.title || kpiLabel(g.key);
           const headerText = `${s.groupTitle || "Área"} · ${s.title || s.slotCode || ""}`;

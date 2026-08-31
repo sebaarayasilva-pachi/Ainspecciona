@@ -4,7 +4,14 @@
   <meta charset="UTF-8" />
   <script>(function(){try{var t=localStorage.getItem("entrega-theme");document.documentElement.setAttribute("data-theme",t==="light"?"light":"dark");}catch(e){document.documentElement.setAttribute("data-theme","dark");}})();</script>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="manifest" href="/manifest-entrega.json" />
+  <link rel="apple-touch-icon" href="/icons/icon.svg" />
   <title>Pisos · Ainspecciona Recepción</title>
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw-executive.js").catch(function() {});
+    }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/entrega/assets/entrega.css" />
@@ -169,19 +176,24 @@
       if (espBox) espBox.style.height = Math.max(180, 28 + espChart.length * 28) + "px";
       E.barChart(document.getElementById("chEsp"), espChart, { horizontal: true, catalog: kpiCatalog });
       const floorTimeline = floorHallazgos.length ? E.hallazgosTimeline(floorHallazgos) : null;
-      E.lineChart(document.getElementById("chLine"), floorTimeline || detail.charts.aperturasVsCierres);
+      const lineSeries =
+        floorTimeline ||
+        (detail.charts && detail.charts.aperturasVsCierres) ||
+        null;
+      E.lineChart(document.getElementById("chLine"), lineSeries);
 
       // Selecciona la unidad más crítica por defecto
-      const initial = detail.units.slice().sort((a, b) => b.criticas - a.criticas)[0];
-      selectUnit(initial.ref);
+      const initial = (detail.units || []).slice().sort((a, b) => (b.criticas || 0) - (a.criticas || 0))[0];
+      if (initial) selectUnit(initial.ref);
 
       function renderPlan(units, floorId) {
         // Plano real de planta con zonas clickeables por depto, coloreadas por estado
         const pp = detail.planoPiso;
-        if (pp && pp.image && Array.isArray(pp.zones) && pp.zones.length) {
+        if (pp && pp.image) {
           const byRef = {};
           units.forEach((u) => (byRef[u.ref] = u));
-          const zonesSvg = pp.zones
+          const zones = Array.isArray(pp.zones) ? pp.zones : [];
+          const zonesSvg = zones
             .map((z) => {
               const u = byRef[z.ref] || { estado: "no_inspeccionado", hallazgos: 0, avance: 0 };
               const estado = E.estadoForUnitDisplay(u);
@@ -190,15 +202,26 @@
               const fillOp = empty ? "0" : "0.20";
               const stroke = empty ? "#CBD5E1" : color;
               const strokeW = empty ? "1.1" : "1.6";
-              return `<g class="plan-zone" data-ref="${z.ref}" onclick="window.__selUnit('${z.ref}')">
-                <path class="apt-fill" d="${z.path}" transform="translate(${z.ox}, ${z.oy})" fill="${color}" fill-opacity="${fillOp}" stroke="${stroke}" stroke-width="${strokeW}" stroke-linejoin="round"/>
-                <text class="plan-label" x="${z.cx}" y="${z.cy - 2}" text-anchor="middle" font-size="15" font-weight="800" fill="var(--plan-ink)" paint-order="stroke" stroke="var(--surface)" stroke-width="2.6">${z.ref}</text>
-                <text x="${z.cx}" y="${z.cy + 11}" text-anchor="middle" font-size="8.5" font-weight="600" fill="var(--plan-muted)" paint-order="stroke" stroke="var(--surface)" stroke-width="2">${u.hallazgos} hallazgos · ${u.avance}% avance</text>
-                <title>Depto ${z.ref} — ${E.STATE_LABELS[estado] || "No inspeccionado"} · ${u.avance}% avance · ${u.hallazgos} hallazgos</title>
+              const shape = z.path
+                ? `<path class="apt-fill" d="${z.path}" transform="translate(${z.ox || 0}, ${z.oy || 0})" fill="${color}" fill-opacity="${fillOp}" stroke="${stroke}" stroke-width="${strokeW}" stroke-linejoin="round"/>`
+                : `<rect class="apt-fill" x="${z.x}" y="${z.y}" width="${z.w}" height="${z.h}" rx="4" fill="${color}" fill-opacity="${fillOp}" stroke="${stroke}" stroke-width="${strokeW}"/>`;
+              const cx = z.cx != null ? z.cx : (z.x != null ? z.x + (z.w || 0) / 2 : (z.ox || 0));
+              const cy = z.cy != null ? z.cy : (z.y != null ? z.y + (z.h || 0) / 2 : (z.oy || 0));
+              const compact = (z.w && z.w < 90) || (z.h && z.h < 90);
+              const fsNum = compact ? 12 : 16;
+              const fsMeta = compact ? 0 : 8;
+              const meta = fsMeta
+                ? `<text x="${cx}" y="${cy + 10}" text-anchor="middle" font-size="${fsMeta}" font-weight="600" fill="var(--plan-muted)" paint-order="stroke" stroke="var(--surface)" stroke-width="2">${u.hallazgos || 0} · ${u.avance || 0}%</text>`
+                : "";
+              return `<g class="plan-zone" data-ref="${z.ref}" onclick="window.__selUnit('${z.ref}')" style="cursor:pointer">
+                ${shape}
+                <text class="plan-label" x="${cx}" y="${cy + (fsMeta ? -2 : 4)}" text-anchor="middle" font-size="${fsNum}" font-weight="800" fill="var(--plan-ink)" paint-order="stroke" stroke="var(--surface)" stroke-width="2.4">${z.ref}</text>
+                ${meta}
+                <title>Depto ${z.ref} — ${E.STATE_LABELS[estado] || "No inspeccionado"} · ${u.avance || 0}% avance · ${u.hallazgos || 0} hallazgos</title>
               </g>`;
             })
             .join("");
-          document.getElementById("planWrap").innerHTML = `<svg viewBox="${pp.viewBox}" preserveAspectRatio="xMidYMid meet">
+          document.getElementById("planWrap").innerHTML = `<svg viewBox="${pp.viewBox}" preserveAspectRatio="xMidYMid meet" style="width:100%;height:auto;display:block;background:#f3f4f6">
             <image href="${pp.image}" x="${pp.imgX || 0}" y="${pp.imgY || 0}" width="${pp.imgW}" height="${pp.imgH}" preserveAspectRatio="none"/>
             ${zonesSvg}
           </svg>`;

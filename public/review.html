@@ -408,6 +408,28 @@
       }
       return res;
     }
+
+    async function readJsonSafe(res) {
+      const text = await res.text();
+      if (!text) return { ok: false, error: 'EMPTY_RESPONSE', status: res.status };
+      try {
+        return JSON.parse(text);
+      } catch {
+        const soft = String(text).replace(/\s+/g, ' ').trim().slice(0, 120);
+        if (res.status === 503 || /service unavailable/i.test(soft)) {
+          return {
+            ok: false,
+            error: 'SERVICE_UNAVAILABLE',
+            hint: 'El servidor se quedó sin memoria o reinició. Reintenta en unos segundos.'
+          };
+        }
+        return {
+          ok: false,
+          error: 'BAD_RESPONSE',
+          hint: 'Respuesta no JSON (HTTP ' + res.status + '): ' + soft
+        };
+      }
+    }
     const $ = (id) => document.getElementById(id);
     function esc(s) { const d = document.createElement('div'); d.textContent = String(s ?? ''); return d.innerHTML; }
 
@@ -650,18 +672,20 @@
       $('finishStatus').textContent = 'Finalizando…';
       try {
         const fin = await adminFetch('/api/admin/review/cases/' + encodeURIComponent(currentCase.id) + '/finish', { method: 'POST' });
-        const finData = await fin.json();
+        const finData = await readJsonSafe(fin);
         if (!finData.ok) { $('finishStatus').textContent = finData.hint || finData.error; $('finishBtn').disabled = false; return; }
         $('finishStatus').textContent = 'Exactitud IA: ' + finData.accuracyPct + '% (' + finData.slotsCorrected + ' corregidos de ' + finData.slotsTotal +
           (finData.autoApproved ? ' · ⚡' + finData.autoApproved + ' auto-validados' : '') + '). Aprobando…';
         const ap = await adminFetch('/api/cases/' + encodeURIComponent(currentCase.id) + '/approve', { method: 'POST' });
-        const apData = await ap.json();
+        const apData = await readJsonSafe(ap);
         if (apData.ok) {
           const to = (apData.sent || []).map((s) => s.email).filter(Boolean).join(', ');
           $('finishStatus').textContent = '✓ Informe aprobado' +
             (apData.emailSent ? (to ? ' · email a ' + to : ' · email enviado') : ' · sin email (revisa SMTP / destinatario)');
         } else {
-          $('finishStatus').textContent = 'Revisión finalizada, pero falló la aprobación: ' + (apData.error || '');
+          $('finishStatus').textContent = 'Revisión finalizada, pero falló la aprobación: ' + (apData.hint || apData.error || '');
+          $('finishBtn').disabled = false;
+          return;
         }
         setTimeout(() => { backToQueue(); loadQueue(); }, 2200);
       } catch (err) {
@@ -674,8 +698,8 @@
       $('finishStatus').textContent = 'Regenerando resumen ejecutivo…';
       try {
         const res = await adminFetch('/api/cases/' + encodeURIComponent(currentCase.id) + '/executive-summary?force=1', { method: 'POST' });
-        const data = await res.json();
-        $('finishStatus').textContent = data.ok !== false ? '✓ Resumen regenerado.' : 'Error al regenerar: ' + (data.error || '');
+        const data = await readJsonSafe(res);
+        $('finishStatus').textContent = data.ok !== false ? '✓ Resumen regenerado.' : 'Error al regenerar: ' + (data.hint || data.error || '');
       } catch (err) {
         $('finishStatus').textContent = 'Error: ' + err.message;
       }

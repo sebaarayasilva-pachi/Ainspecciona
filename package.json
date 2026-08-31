@@ -19,6 +19,7 @@
     "kickoff:cleanup:prod": "powershell -NoProfile -ExecutionPolicy Bypass -File ./kickoff-cleanup-prod.ps1",
     "ensure:starter-tenant": "node scripts/ensure-starter-tenant.mjs",
     "seed:postventa-demo": "node scripts/seed-postventa-demo.mjs",
+    "seed:pv-premium-portfolio": "node scripts/seed-pv-premium-portfolio.mjs",
     "seed:pv-portal-user": "node scripts/seed-pv-portal-user.mjs",
     "sync:elevenlabs-postventa": "node scripts/sync-elevenlabs-postventa-agent.mjs",
     "sync:elevenlabs-entrega": "node scripts/sync-elevenlabs-entrega-agent.mjs",

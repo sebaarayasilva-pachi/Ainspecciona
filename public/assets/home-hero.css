@@ -55,9 +55,15 @@ html {
 
 .platform-page .site-header,
 .platform-page .site-header-v2 {
+  z-index: 50;
   background: transparent !important;
   border-bottom: none !important;
   backdrop-filter: none !important;
+}
+
+.platform-page .site-header-v2 .navDropdownPanel {
+  background: #111418;
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .platform-page .site-header-v2 .nav {
@@ -95,10 +101,11 @@ html {
 
 /* ——— Hero ——— */
 .home-hero {
-  min-height: calc(100vh - var(--header-h));
+  min-height: 0;
   display: flex;
   align-items: flex-start;
   padding-top: 8px;
+  padding-bottom: 8px;
   box-sizing: border-box;
 }
 
@@ -106,7 +113,7 @@ html {
   width: 100%;
   max-width: var(--home-max);
   margin: 0 auto;
-  padding: 6px 20px 56px 80px;
+  padding: 6px 20px 24px 80px;
   display: grid;
   grid-template-columns: minmax(0, 40fr) minmax(0, 60fr);
   gap: 32px;
@@ -237,9 +244,10 @@ html {
 }
 
 .home-hero__visual::after {
-  inset: -4% -8% -4% -8%;
-  background: linear-gradient(180deg, var(--home-bg) 0%, transparent 10%, transparent 90%, var(--home-bg) 100%);
-  opacity: 0.85;
+  inset: -4% -8% auto -8%;
+  height: 12%;
+  background: linear-gradient(180deg, var(--home-bg) 0%, transparent 100%);
+  opacity: 0.55;
 }
 
 .home-hero__visual img {
@@ -354,7 +362,7 @@ html {
 
   .home-hero__grid {
     grid-template-columns: 1fr;
-    padding: 40px 40px 56px;
+    padding: 40px 40px 24px;
     gap: 40px;
   }
 
@@ -379,7 +387,7 @@ html {
 
   .home-hero {
     min-height: auto;
-    padding: 96px 0 56px;
+    padding: 72px 0 24px;
   }
 
   .home-hero__grid {

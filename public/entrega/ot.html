@@ -4,7 +4,14 @@
   <meta charset="UTF-8" />
   <script>(function(){try{var t=localStorage.getItem("entrega-theme");document.documentElement.setAttribute("data-theme",t==="light"?"light":"dark");}catch(e){document.documentElement.setAttribute("data-theme","dark");}})();</script>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="manifest" href="/manifest-entrega.json" />
+  <link rel="apple-touch-icon" href="/icons/icon.svg" />
   <title>Órdenes de Trabajo · Ainspecciona Recepción</title>
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw-executive.js").catch(function() {});
+    }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/entrega/assets/entrega.css" />

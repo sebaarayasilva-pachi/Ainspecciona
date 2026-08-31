@@ -540,8 +540,8 @@ export async function sendReviewNotificationEmail(to, reportUrl, caseShortId, co
   <h1 style="margin:0 0 16px;font-size:22px">Nueva inspección para revisión</h1>
   <p style="margin:0 0 8px">Caso: <strong>${escapeHtml(caseShortId)}</strong></p>
   ${contactName ? `<p style="margin:0 0 8px">Cliente: <strong>${escapeHtml(contactName)}</strong></p>` : ''}
-  <p style="margin:16px 0">La IA ha completado el análisis. Revisa el informe en el enlace. Para <strong>aprobar y enviarlo al cliente</strong>, entra al panel de administración (Inspecciones) y pulsa «Aprobar».</p>
-  <p style="margin:16px 0"><a href="${escapeHtml(reportUrl)}" class="btn">Abrir informe</a></p>
+  <p style="margin:16px 0">La IA ha completado el análisis. Ábrelo en el <strong>centro ITO</strong>, revisa y aprueba para enviarlo al cliente.</p>
+  <p style="margin:16px 0"><a href="${escapeHtml(reportUrl)}" class="btn">Abrir centro ITO</a></p>
   <p style="margin:16px 0;font-size:14px;color:#94a3b8">O copia este enlace: ${escapeHtml(reportUrl)}</p>
   <p style="margin:16px 0 0;font-size:13px;color:#64748b">— Ainspecciona</p>
 </div>
@@ -573,13 +573,16 @@ export async function sendReviewNotificationEmail(to, reportUrl, caseShortId, co
  */
 export async function sendBusinessReportReviewerNotificationEmail(
   to,
-  reportUrl,
+  reviewUrl,
   caseShortId,
-  { address = '', executiveName = '' } = {}
+  { address = '', executiveName = '', reportUrl = '' } = {}
 ) {
-  if (!to || !reportUrl) return { ok: false, error: 'Missing to or reportUrl' };
+  if (!to || !reviewUrl) return { ok: false, error: 'Missing to or reviewUrl' };
   const addr = address ? `<p style="margin:0 0 8px;font-size:14px;color:#94a3b8">${escapeHtml(address)}</p>` : '';
   const exec = executiveName ? `<p style="margin:0 0 8px">Ejecutivo asignado: <strong>${escapeHtml(executiveName)}</strong></p>` : '';
+  const reportLink = reportUrl
+    ? `<p style="margin:12px 0 0;font-size:14px"><a href="${escapeHtml(reportUrl)}">Ver informe PDF</a></p>`
+    : '';
 
   const html = `
 <!DOCTYPE html>
@@ -591,9 +594,10 @@ export async function sendBusinessReportReviewerNotificationEmail(
   <p style="margin:0 0 8px">Caso: <strong>${escapeHtml(caseShortId)}</strong></p>
   ${exec}
   ${addr}
-  <p style="margin:16px 0">La IA terminó de emitir el informe. Revísalo en el enlace. Para <strong>aprobar</strong> y que se envíe el aviso al ejecutivo asignado, entra al panel de administración (Inspecciones) y pulsa «Aprobar».</p>
-  <p style="margin:16px 0"><a href="${escapeHtml(reportUrl)}" class="btn">Abrir informe</a></p>
-  <p style="margin:16px 0;font-size:14px;color:#94a3b8">O copia este enlace: ${escapeHtml(reportUrl)}</p>
+  <p style="margin:16px 0">La IA terminó de emitir el informe. Ábrelo en el <strong>centro ITO</strong>, revisa los slots y aprueba para notificar al ejecutivo.</p>
+  <p style="margin:16px 0"><a href="${escapeHtml(reviewUrl)}" class="btn">Abrir centro ITO</a></p>
+  <p style="margin:16px 0;font-size:14px;color:#94a3b8">O copia este enlace: ${escapeHtml(reviewUrl)}</p>
+  ${reportLink}
   <p style="margin:16px 0 0;font-size:13px;color:#64748b">— Ainspecciona</p>
 </div>
 </body>
@@ -615,6 +619,73 @@ export async function sendBusinessReportReviewerNotificationEmail(
     return { ok: true, id: info.messageId };
   } catch (err) {
     console.error('[email] Error enviando business review request:', err);
+    return { ok: false, error: err?.message || String(err) };
+  }
+}
+
+/**
+ * Solicitud de aprobación de inspección (ejecutivo → admin del tenant).
+ * Incluye botones para aprobar/rechazar desde el correo.
+ */
+export async function sendInspectionApprovalRequestEmail(
+  to,
+  {
+    approveUrl,
+    rejectUrl,
+    panelUrl,
+    caseShortId,
+    address = '',
+    executiveName = '',
+    tenantName = ''
+  } = {}
+) {
+  if (!to || !approveUrl) return { ok: false, error: 'Missing to or approveUrl' };
+  const addr = address ? `<p style="margin:0 0 8px;font-size:14px;color:#94a3b8">${escapeHtml(address)}</p>` : '';
+  const exec = executiveName
+    ? `<p style="margin:0 0 8px">Solicitada por: <strong>${escapeHtml(executiveName)}</strong></p>`
+    : '';
+  const tenant = tenantName
+    ? `<p style="margin:0 0 8px;font-size:13px;color:#94a3b8">${escapeHtml(tenantName)}</p>`
+    : '';
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><style>body{font-family:system-ui,sans-serif;background:#0f172a;color:#e2e8f0;margin:0;padding:24px;line-height:1.6}a{color:#7c3aed;font-weight:600;text-decoration:none}.btn{display:inline-block;padding:14px 28px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff!important;border-radius:12px;margin:8px 8px 8px 0}.btn-outline{display:inline-block;padding:14px 28px;background:transparent;color:#e2e8f0!important;border:1px solid #475569;border-radius:12px;margin:8px 8px 8px 0}.card{max-width:520px;margin:0 auto;background:#1e293b;border-radius:16px;padding:32px;border:1px solid #334155}</style></head>
+<body>
+<div class="card">
+  <h1 style="margin:0 0 16px;font-size:22px">Solicitud de inspección</h1>
+  ${tenant}
+  <p style="margin:0 0 8px">Caso: <strong>${escapeHtml(caseShortId || '')}</strong></p>
+  ${exec}
+  ${addr}
+  <p style="margin:16px 0">Un ejecutivo pidió crear esta inspección. Al <strong>aprobar</strong> se consume <strong>1 crédito</strong> y se habilita la captura.</p>
+  <p style="margin:16px 0">
+    <a href="${escapeHtml(approveUrl)}" class="btn">Aprobar (1 crédito)</a>
+    ${rejectUrl ? `<a href="${escapeHtml(rejectUrl)}" class="btn-outline">Rechazar</a>` : ''}
+  </p>
+  ${panelUrl ? `<p style="margin:16px 0;font-size:14px;color:#94a3b8">También puedes gestionarla en el <a href="${escapeHtml(panelUrl)}">panel de la corredora</a>.</p>` : ''}
+  <p style="margin:16px 0 0;font-size:13px;color:#64748b">— Ainspecciona</p>
+</div>
+</body>
+</html>`;
+
+  const transporter = getTransporter();
+  if (!transporter) {
+    console.warn('[email] SMTP no configurado. Approval request no enviado a', to);
+    return { ok: false, skipped: true };
+  }
+
+  try {
+    const info = await transporter.sendMail({
+      from: getFromEmail(),
+      to: to.trim().toLowerCase(),
+      subject: `Aprobar inspección ${caseShortId || ''} · 1 crédito · Ainspecciona`,
+      html
+    });
+    return { ok: true, id: info.messageId };
+  } catch (err) {
+    console.error('[email] Error enviando approval request:', err);
     return { ok: false, error: err?.message || String(err) };
   }
 }

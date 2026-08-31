@@ -17,6 +17,7 @@
       --accent-soft: rgba(43, 182, 115, 0.14);
       --line: rgba(255, 255, 255, 0.08);
       --aside-w: 260px;
+      --warn: #f0b429;
     }
     * { box-sizing: border-box; }
     html, body { height: 100%; }
@@ -28,7 +29,6 @@
       display: flex;
       min-height: 100vh;
     }
-
     .aside {
       width: var(--aside-w);
       flex-shrink: 0;
@@ -36,7 +36,6 @@
       border-right: 1px solid var(--line);
       display: flex;
       flex-direction: column;
-      min-height: 100vh;
       position: sticky;
       top: 0;
       height: 100vh;
@@ -57,7 +56,6 @@
       color: var(--muted);
       line-height: 1.35;
     }
-
     .nav-label {
       margin: 18px 20px 8px;
       font-size: 0.68rem;
@@ -94,10 +92,9 @@
     }
     .nav-item:hover { background: rgba(255,255,255,0.05); }
     .nav-item.active,
-    .nav-item:focus-visible {
+    .nav-item.highlight {
       background: var(--accent-soft);
       color: var(--accent);
-      outline: none;
     }
     .nav-item .dot {
       width: 7px;
@@ -107,8 +104,8 @@
       flex-shrink: 0;
     }
     .nav-item.active .dot,
+    .nav-item.highlight .dot,
     .nav-item:hover .dot { background: var(--accent); }
-
     .aside-foot {
       border-top: 1px solid var(--line);
       padding: 14px 12px 16px;
@@ -129,7 +126,6 @@
       font-size: 0.86rem;
       margin-bottom: 2px;
     }
-
     .shell {
       flex: 1;
       min-width: 0;
@@ -163,7 +159,6 @@
       font-size: 1.25rem;
       margin: 0;
     }
-
     .content {
       flex: 1;
       padding: 36px 40px 56px;
@@ -190,27 +185,38 @@
       padding: 24px 26px;
       max-width: 560px;
     }
-    .hero-panel h2 {
-      margin: 0 0 8px;
-      font-size: 1.05rem;
-    }
+    .hero-panel h2 { margin: 0 0 8px; font-size: 1.05rem; }
     .hero-panel p {
       margin: 0;
       color: var(--muted);
       font-size: 0.9rem;
       line-height: 1.45;
     }
-    .err {
+    .cta-highlight {
+      display: none;
       margin-top: 16px;
-      color: #f07178;
-      font-size: 0.9rem;
     }
+    .cta-highlight.show { display: block; }
+    .cta-highlight button {
+      border: none;
+      background: var(--accent);
+      color: #062415;
+      font: inherit;
+      font-weight: 700;
+      padding: 12px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .err { margin-top: 16px; color: #f07178; font-size: 0.9rem; }
     .empty {
       color: var(--muted);
-      font-size: 0.9rem;
-      padding: 8px 12px;
+      font-size: 0.85rem;
+      padding: 12px;
+      line-height: 1.45;
+      border: 1px dashed var(--line);
+      border-radius: 10px;
+      margin: 4px 2px;
     }
-
     .backdrop {
       display: none;
       position: fixed;
@@ -218,7 +224,88 @@
       background: rgba(0,0,0,0.45);
       z-index: 30;
     }
-
+    .nda-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(6, 10, 14, 0.92);
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+    .nda-overlay.show { display: flex; }
+    .nda-card {
+      width: min(720px, 100%);
+      max-height: min(92vh, 880px);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.45);
+    }
+    .nda-card header {
+      padding: 18px 22px 12px;
+      border-bottom: 1px solid var(--line);
+    }
+    .nda-card header h2 {
+      margin: 0;
+      font-family: "Instrument Serif", Georgia, serif;
+      font-size: 1.55rem;
+      font-weight: 400;
+    }
+    .nda-card header p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+    .nda-body {
+      padding: 8px 22px;
+      overflow-y: auto;
+      flex: 1;
+      font-size: 0.92rem;
+      line-height: 1.55;
+      color: #d5dde6;
+    }
+    .nda-body h1 { font-size: 1.2rem; margin: 12px 0 8px; }
+    .nda-body h2 { font-size: 1rem; margin: 18px 0 8px; color: var(--ink); }
+    .nda-body .nda-meta { color: var(--muted); font-size: 0.8rem; }
+    .nda-body ul { padding-left: 1.2rem; }
+    .nda-foot {
+      padding: 14px 22px 18px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .nda-foot label {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    .nda-foot input { margin-top: 3px; accent-color: var(--accent); }
+    .nda-foot .btn-row { display: flex; gap: 10px; justify-content: flex-end; }
+    .nda-foot button {
+      border: none;
+      border-radius: 10px;
+      padding: 11px 18px;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--accent);
+      color: #04140c;
+    }
+    .nda-foot button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .nda-foot .nda-err { color: #f07178; font-size: 0.85rem; margin: 0; display: none; }
+    body.nda-locked .aside,
+    body.nda-locked .shell { pointer-events: none; filter: blur(1px); }
     @media (max-width: 860px) {
       body { display: block; }
       .aside {
@@ -238,6 +325,25 @@
   </style>
 </head>
 <body>
+  <div class="nda-overlay" id="ndaOverlay" aria-modal="true" role="dialog" aria-labelledby="ndaTitle">
+    <div class="nda-card">
+      <header>
+        <h2 id="ndaTitle">Acuerdo de Confidencialidad</h2>
+        <p>Debes aceptar el NDA para continuar en este ambiente demo.</p>
+      </header>
+      <div class="nda-body" id="ndaBody">Cargando…</div>
+      <div class="nda-foot">
+        <label>
+          <input type="checkbox" id="ndaCheck" />
+          <span>He leído y acepto el Acuerdo de Confidencialidad.</span>
+        </label>
+        <p class="nda-err" id="ndaErr"></p>
+        <div class="btn-row">
+          <button type="button" id="ndaAccept" disabled>Aceptar y continuar</button>
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="backdrop" id="backdrop" hidden></div>
 
   <aside class="aside" id="aside">
@@ -272,8 +378,11 @@
       <h1>Inicio</h1>
       <p class="lead" id="lead">Elige un producto en el menú para continuar.</p>
       <div class="hero-panel">
-        <h2>Plataforma</h2>
-        <p>Un acceso, una organización y los módulos que tienes contratados. Los logins por producto quedan como compatibilidad.</p>
+        <h2>Tus módulos</h2>
+        <p id="heroText">Solo aparecen los productos contratados por tu organización a los que tienes acceso.</p>
+        <div class="cta-highlight" id="ctaHighlight">
+          <button type="button" id="ctaBtn">Continuar</button>
+        </div>
       </div>
       <p class="err" id="err" style="display:none"></p>
     </main>
@@ -287,6 +396,10 @@
         if (t) headers["x-platform-session"] = t;
       } catch (_) {}
 
+      const params = new URLSearchParams(location.search);
+      const highlight = String(params.get("highlight") || "").toUpperCase();
+      const enterCode = String(params.get("enter") || "").toUpperCase();
+
       const menuBtn = document.getElementById("menuBtn");
       const backdrop = document.getElementById("backdrop");
       function closeNav() { document.body.classList.remove("nav-open"); backdrop.hidden = true; }
@@ -297,16 +410,69 @@
       });
       backdrop.addEventListener("click", closeNav);
 
-      async function load() {
-        const res = await fetch("/api/auth/me", { credentials: "include", headers });
-        if (res.status === 401) {
-          location.href = "/login?next=/app";
-          return;
-        }
-        const data = await res.json();
-        if (!data.ok) throw new Error("No se pudo cargar la sesión");
-        const ctx = data.context;
+      function escapeHtml(s) {
+        return String(s || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
 
+      let appContext = null;
+      let ndaGateOpen = false;
+
+      async function showNdaGate() {
+        ndaGateOpen = true;
+        document.body.classList.add("nda-locked");
+        const overlay = document.getElementById("ndaOverlay");
+        overlay.classList.add("show");
+        const body = document.getElementById("ndaBody");
+        try {
+          const res = await fetch("/app/nda-content.html", { credentials: "same-origin", cache: "no-store" });
+          body.innerHTML = await res.text();
+        } catch (_) {
+          body.innerHTML = "<p>No se pudo cargar el texto del NDA. Recarga la página o contacta a soporte.</p>";
+        }
+        const check = document.getElementById("ndaCheck");
+        const btn = document.getElementById("ndaAccept");
+        check.checked = false;
+        btn.disabled = true;
+        check.onchange = () => { btn.disabled = !check.checked; };
+        btn.onclick = acceptNda;
+      }
+
+      function hideNdaGate() {
+        ndaGateOpen = false;
+        document.body.classList.remove("nda-locked");
+        document.getElementById("ndaOverlay").classList.remove("show");
+      }
+
+      async function acceptNda() {
+        const errEl = document.getElementById("ndaErr");
+        errEl.style.display = "none";
+        const btn = document.getElementById("ndaAccept");
+        btn.disabled = true;
+        try {
+          const res = await fetch("/api/auth/accept-nda", {
+            method: "POST",
+            credentials: "include",
+            headers: { ...headers, "Content-Type": "application/json" },
+            body: "{}"
+          });
+          const data = await res.json();
+          if (!res.ok || !data.ok) throw new Error(data.message || "No se pudo registrar la aceptación");
+          if (data.context) appContext = data.context;
+          hideNdaGate();
+          renderHub(appContext);
+          autoEnter(appContext);
+        } catch (ex) {
+          errEl.textContent = ex.message;
+          errEl.style.display = "block";
+          btn.disabled = !document.getElementById("ndaCheck").checked;
+        }
+      }
+
+      function renderHub(ctx) {
         document.getElementById("orgLine").textContent = ctx.organization
           ? ctx.organization.name
           : "Sin organización";
@@ -314,27 +480,39 @@
         const who = document.getElementById("who");
         who.innerHTML = "<strong>" + escapeHtml(ctx.user.fullName) + "</strong><span>" + escapeHtml(ctx.user.email) + "</span>";
 
-        document.getElementById("lead").textContent = ctx.organization
-          ? ("Organización " + ctx.organization.name + ". Abre un módulo desde el menú lateral.")
-          : "Abre un módulo desde el menú lateral.";
-
         if (ctx.user.isPlatformAdmin) {
           document.getElementById("controlLink").style.display = "flex";
         }
 
+        const products = ctx.products || [];
         const nav = document.getElementById("nav");
         nav.innerHTML = "";
-        const products = ctx.products || [];
+
         if (!products.length) {
-          nav.innerHTML = '<p class="empty">No hay productos habilitados.</p>';
+          nav.innerHTML = '<p class="empty">Tu organización no tiene productos habilitados para tu usuario. Contacta a Ainspecciona.</p>';
+          document.getElementById("lead").textContent = "No hay módulos disponibles con tu cuenta actual.";
+          document.getElementById("heroText").textContent =
+            "Si acabas de contratar un producto, pide a soporte que habilite el acceso en Control.";
           return;
         }
+
+        document.getElementById("lead").textContent = ctx.organization
+          ? ("Organización " + ctx.organization.name + ". Abre un módulo desde el menú.")
+          : "Abre un módulo desde el menú.";
+
+        let highlighted = null;
         for (const p of products) {
           const btn = document.createElement("button");
           btn.type = "button";
           btn.className = "nav-item";
+          btn.dataset.code = p.code;
+          if (highlight && p.code === highlight) {
+            btn.classList.add("highlight");
+            highlighted = p;
+          }
           btn.innerHTML = '<span class="dot"></span>' + escapeHtml(p.label);
           btn.addEventListener("click", () => {
+            if (ndaGateOpen) return;
             nav.querySelectorAll(".nav-item").forEach((el) => el.classList.remove("active"));
             btn.classList.add("active");
             closeNav();
@@ -342,14 +520,57 @@
           });
           nav.appendChild(btn);
         }
+
+        if (highlighted) {
+          const cta = document.getElementById("ctaHighlight");
+          const ctaBtn = document.getElementById("ctaBtn");
+          cta.classList.add("show");
+          ctaBtn.textContent = "Continuar a " + highlighted.label;
+          ctaBtn.onclick = () => {
+            if (ndaGateOpen) return;
+            enter(highlighted.code, highlighted.label);
+          };
+          document.getElementById("heroText").textContent =
+            "Venías hacia " + highlighted.label + ". Puedes continuar o elegir otro módulo en el menú.";
+        }
       }
 
-      function escapeHtml(s) {
-        return String(s || "")
-          .replace(/&/g, "&amp;")
-          .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;")
-          .replace(/"/g, "&quot;");
+      async function load() {
+        const res = await fetch("/api/auth/me", { credentials: "include", headers });
+        if (res.status === 401) {
+          location.href = "/?login=1&next=" + encodeURIComponent(location.pathname + location.search);
+          return;
+        }
+        const data = await res.json();
+        if (!data.ok) throw new Error("No se pudo cargar la sesión");
+        const ctx = data.context;
+        appContext = ctx;
+        if (ctx && ctx.token) {
+          try { sessionStorage.setItem("platform_session", ctx.token); } catch (_) {}
+          headers["x-platform-session"] = ctx.token;
+        }
+
+        if (ctx.nda && ctx.nda.required && !ctx.nda.accepted) {
+          document.getElementById("orgLine").textContent = ctx.organization
+            ? ctx.organization.name
+            : "Sin organización";
+          const who = document.getElementById("who");
+          who.innerHTML = "<strong>" + escapeHtml(ctx.user.fullName) + "</strong><span>" + escapeHtml(ctx.user.email) + "</span>";
+          await showNdaGate();
+          return;
+        }
+
+        renderHub(ctx);
+        autoEnter(ctx);
+      }
+
+      function autoEnter(ctx) {
+        const code = enterCode || "";
+        if (!code) return;
+        const products = (ctx && ctx.products) || [];
+        const match = products.find(function (p) { return p.code === code; });
+        if (!match) return;
+        enter(match.code, match.label);
       }
 
       async function enter(product, label) {
@@ -371,7 +592,12 @@
               else sessionStorage.setItem(data.storageKey, data.token);
             } catch (_) {}
           }
-          location.href = data.href || "/app";
+          let href = data.href || "/app";
+          // Capture: pasar token en URL para no reutilizar un tenant_session viejo (p.ej. Remax).
+          if (product === "INSPECTION" && data.token) {
+            href = "/tenant?t=" + encodeURIComponent(data.token);
+          }
+          location.href = href;
         } catch (ex) {
           err.textContent = ex.message;
           err.style.display = "block";
@@ -381,7 +607,14 @@
 
       document.getElementById("logout").addEventListener("click", async () => {
         await fetch("/api/auth/logout", { method: "POST", credentials: "include", headers });
-        try { sessionStorage.removeItem("platform_session"); } catch (_) {}
+        try {
+          sessionStorage.removeItem("platform_session");
+          sessionStorage.removeItem("entrega_session");
+          sessionStorage.removeItem("postventa_session");
+          sessionStorage.removeItem("inout_session");
+          localStorage.removeItem("tenant_session");
+          localStorage.removeItem("tenant_id");
+        } catch (_) {}
         location.href = "/?login=1";
       });
 

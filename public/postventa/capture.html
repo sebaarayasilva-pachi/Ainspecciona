@@ -289,9 +289,21 @@
     } else {
       els.cameraHint.innerHTML = 'Toca <strong>Tomar foto</strong>, revisa y pulsa <strong>Subir foto</strong>.';
       show(els.cameraHint);
-      show(els.takePhotoBtn);
-      show(els.galleryBtn);
-      if (!isMobileCapture() && !isEmbed) show(els.liveCameraBtn);
+      
+      // Si estamos en modo embebido (con el asistente de voz activo), preferimos la cámara en vivo
+      // para evitar que el navegador pause la pestaña al abrir la app de cámara nativa.
+      if (isEmbed) {
+        show(els.liveCameraBtn);
+        els.liveCameraBtn.textContent = 'Tomar foto (cámara web)';
+        els.liveCameraBtn.classList.remove('btn-outline');
+        els.liveCameraBtn.classList.add('btn-primary');
+        show(els.galleryBtn);
+      } else {
+        show(els.takePhotoBtn);
+        show(els.galleryBtn);
+        if (!isMobileCapture()) show(els.liveCameraBtn);
+      }
+      
       els.uploadBtn.textContent = 'Subir foto';
     }
     if (currentSlot.optional) {

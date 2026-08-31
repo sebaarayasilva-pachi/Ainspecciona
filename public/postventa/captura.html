@@ -5,6 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Postventa · Ainspecciona</title>
   <meta name="description" content="Asistente de postventa inmobiliaria. Indica la dirección de tu departamento, valida garantía y sube fotos guiadas de tu solicitud." />
+  <link rel="manifest" href="/manifest-postventa.json" />
+  <link rel="apple-touch-icon" href="/icons/icon.svg" />
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw-executive.js").catch(function() {});
+    }
+  </script>
   <link rel="canonical" href="https://ainspecciona.com/postventa/captura" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://ainspecciona.com/postventa/captura" />
@@ -274,13 +281,17 @@
     body.pv-capture-mode {
       overflow: hidden;
     }
-    body.pv-capture-mode .site-header,
     body.pv-capture-mode .page {
-      display: none !important;
+      position: absolute !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+      height: 0 !important;
+      overflow: hidden !important;
     }
     body.pv-capture-mode #pv-voice-shell {
       display: block !important;
-      top: 0;
+      top: 70px; /* Debajo del header */
       bottom: auto;
       height: min(32dvh, 240px);
       min-height: 180px;
@@ -296,7 +307,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      top: min(32dvh, 240px);
+      top: calc(70px + min(32dvh, 240px));
       z-index: 2147483000;
       background: #f6f7f9;
       overflow: hidden;
@@ -409,7 +420,7 @@
         <a href="/contacto.html">Contacto</a>
       </div>
       <div class="topActions">
-        <a class="btn outline" href="/">Inicio</a>
+        <button type="button" id="pwa-install-btn" class="btn outline pwa-install-btn" style="border-color: #35D07F; color: #35D07F;">📱 Instalar App</button>
       </div>
     </div>
   </header>
@@ -477,14 +488,23 @@
     <div class="pv-voice-bar">
       <span class="pv-voice-dot" id="pv-voice-dot" aria-hidden="true"></span>
       <span id="pv-voice-status">Asistente de postventa</span>
+      <button type="button" class="pwa-install-btn" id="pwa-install-btn-voice" style="background: rgba(53, 208, 127, 0.2); border: 1px solid #35D07F; color: #35D07F; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; margin-left: auto; margin-right: 8px;">📱 Instalar</button>
       <button type="button" id="pv-voice-end">Finalizar</button>
     </div>
   </div>
+  <script>
+    // Fallback por si el JS externo está en caché
+    document.getElementById('pwa-install-btn-voice').addEventListener('click', function() {
+      var mainBtn = document.getElementById('pwa-install-btn');
+      if (mainBtn) mainBtn.click();
+    });
+  </script>
 
   <div id="pv-capture-shell" aria-hidden="true">
     <div id="pv-capture-panel"></div>
   </div>
 
+  <script src="/assets/pwa-install.js?v=6" defer></script>
   <script src="/assets/postventa-capture-embed.js?v=voice2"></script>
   <script src="/assets/postventa-voice.js?v=voice2"></script>
   <script src="/assets/elevenlabs-postventa.js?v=captura1" defer></script>

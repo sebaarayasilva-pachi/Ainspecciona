@@ -130,7 +130,7 @@
     " Ainspecciona SpA. Todos los derechos reservados.</p>" +
     '<div class="site-footer__bottom-meta">' +
     renderSocial(cfg.socialLinks) +
-    '<p class="site-footer__bottom-right">Desarrollado en Chile.</p>' +
+    '<p class="site-footer__bottom-right">Desarrollado en Chile por The Magnet Co.</p>' +
     "</div>" +
     "</div>" +
     "</div>";

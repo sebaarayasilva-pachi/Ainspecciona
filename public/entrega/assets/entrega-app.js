@@ -103,7 +103,7 @@
     { key: "usuarios", label: "Usuarios", icon: "usuarios", href: "/entrega/usuarios", adminOnly: true },
   ];
 
-  const ENTREGA_PROJECT_ID = "cuvee-2";
+  let ENTREGA_PROJECT_ID = "cuvee-2";
 
   let SEED = null;
   let KPI_CATALOG = null;
@@ -208,13 +208,20 @@
   async function loadSeed() {
     if (SEED) return SEED;
     await ensureAuth();
-    const res = await fetch("/entrega/data/seed.json", { credentials: "same-origin", cache: "no-store" });
+    const tenantSlug = (ME && ME.tenant && ME.tenant.slug) || "";
+    const seedUrl =
+      tenantSlug === "plaenge-demo"
+        ? "/entrega/data/plaenge-ii.json"
+        : "/entrega/data/seed.json";
+    const res = await fetch(seedUrl, { credentials: "same-origin", cache: "no-store" });
     SEED = await res.json();
     if (ME && ME.tenant && ME.tenant.name) {
       SEED.tenant = SEED.tenant || {};
       SEED.tenant.name = ME.tenant.name;
       SEED.tenant.slug = ME.tenant.slug || SEED.tenant.slug;
     }
+    const firstId = SEED.projects && SEED.projects[0] && SEED.projects[0].id;
+    if (firstId) ENTREGA_PROJECT_ID = firstId;
     return SEED;
   }
 
@@ -463,14 +470,18 @@
   }
 
   function lineChart(canvas, series) {
+    if (!canvas) return null;
+    const labels = series && Array.isArray(series.labels) ? series.labels : [];
+    const aperturas = series && Array.isArray(series.aperturas) ? series.aperturas : [];
+    const cierres = series && Array.isArray(series.cierres) ? series.cierres : [];
     const pal = chartPalette();
     return new Chart(canvas, {
       type: "line",
       data: {
-        labels: series.labels,
+        labels,
         datasets: [
-          { label: "Aperturas", data: series.aperturas, borderColor: "#EF4444", backgroundColor: "rgba(239,68,68,.08)", tension: 0.35, fill: true, pointRadius: 2 },
-          { label: "Cierres", data: series.cierres, borderColor: "#22C55E", backgroundColor: "rgba(34,197,94,.08)", tension: 0.35, fill: true, pointRadius: 2 },
+          { label: "Aperturas", data: aperturas, borderColor: "#EF4444", backgroundColor: "rgba(239,68,68,.08)", tension: 0.35, fill: true, pointRadius: 2 },
+          { label: "Cierres", data: cierres, borderColor: "#22C55E", backgroundColor: "rgba(34,197,94,.08)", tension: 0.35, fill: true, pointRadius: 2 },
         ],
       },
       options: {
@@ -2058,8 +2069,17 @@
     const liveFloor = liveHallazgosOnly(floorHallazgos);
     const metricsHallazgos = liveMode ? floorHallazgos : liveFloor.length ? liveFloor : floorHallazgos;
     const chartBase = liveMode
-      ? { hallazgosPorKpi: [], observacionesPorEspecialidad: [], aperturasVsCierres: null }
-      : base.charts;
+      ? {
+          hallazgosPorKpi: [],
+          observacionesPorEspecialidad: [],
+          // Si no hay serie live, conservar seed para no romper el gráfico de línea.
+          aperturasVsCierres: (base.charts && base.charts.aperturasVsCierres) || null
+        }
+      : base.charts || {
+          hallazgosPorKpi: [],
+          observacionesPorEspecialidad: [],
+          aperturasVsCierres: null
+        };
     detail.metrics = computeFloorMetrics(
       detail.units,
       metricsHallazgos,

@@ -57,63 +57,48 @@
 
 
   function waitUntilSafeToOpenCapture() {
-
     // Espera a que el agente termine de hablar (intro / "voy a abrir la cámara")
     // antes de montar la captura. Evita abrir la cámara a mitad de la prevalidación.
     return new Promise(function (resolve) {
-
       var started = Date.now();
-
-      var heardSpeaking = voiceMode === 'speaking';
-
-      var graceMs = 2800;
-
-      var maxMs = 22000;
-
-      function finish() {
-
-        setTimeout(resolve, 400);
-
-      }
+      var heardSpeaking = false;
+      var silenceStart = 0;
 
       function check() {
-
         var t = Date.now() - started;
+        var isSpeaking = (voiceMode === 'speaking');
 
-        if (voiceMode === 'speaking') heardSpeaking = true;
-
-        if (heardSpeaking && voiceMode !== 'speaking') {
-
-          finish();
-
-          return;
-
+        if (isSpeaking) {
+          heardSpeaking = true;
+          silenceStart = 0;
+        } else {
+          if (heardSpeaking) {
+            if (!silenceStart) silenceStart = Date.now();
+            // Debe estar en silencio por 2 segundos seguidos para considerar que terminó
+            if (Date.now() - silenceStart > 2000) {
+              resolve();
+              return;
+            }
+          } else {
+            // Si nunca habló en los primeros 5 segundos, resolvemos
+            if (t > 5000) {
+              resolve();
+              return;
+            }
+          }
         }
 
-        if (!heardSpeaking && t >= graceMs) {
-
-          finish();
-
-          return;
-
-        }
-
-        if (t >= maxMs) {
-
+        // Timeout máximo de seguridad: 60 segundos
+        if (t >= 60000) {
           resolve();
-
           return;
-
         }
 
-        setTimeout(check, 80);
-
+        setTimeout(check, 100);
       }
 
       check();
-
     });
-
   }
 
 
@@ -476,13 +461,13 @@
 
           var inCapture = document.body.classList.contains('pv-capture-mode');
 
-          setVoiceState(false, inCapture ? 'Voz pausada — reconectando…' : 'Sesión finalizada');
+          setVoiceState(false, inCapture ? 'Voz pausada por la cámara' : 'Sesión finalizada');
 
           if (ctaStatus) {
 
             ctaStatus.textContent = inCapture
 
-              ? 'La cámara puede pausar la voz. Reconectando el asistente…'
+              ? 'La cámara pausó la voz. Reconectando el asistente…'
 
               : 'Sesión pausada. Toca Iniciar asistente para continuar.';
 
@@ -854,12 +839,17 @@
 
 
 
-    var sent = sendToAgent(msg, { forceTurn: true });
+    // Solo enviamos el mensaje al agente si la conexión está activa
+    if (window.PostventaVoice && window.PostventaVoice.isActive()) {
+      // Usamos sendContextualUpdate en lugar de forzar el turno para evitar
+      // que el agente se interrumpa a sí mismo si todavía está hablando.
+      var sent = sendToAgent(msg, { forceTurn: false });
 
-    if (window.console && typeof console.debug === 'function') {
+      if (window.console && typeof console.debug === 'function') {
 
-      console.debug('[pv-capture] notify ' + kind + ' sent=' + sent, msg);
+        console.debug('[pv-capture] notify ' + kind + ' sent=' + sent, msg);
 
+      }
     }
 
     document.dispatchEvent(
@@ -898,9 +888,19 @@
 
     if (!voiceDesiredInCapture) return;
 
-    if (!document.body.classList.contains('pv-capture-mode')) return;
+    // if (!document.body.classList.contains('pv-capture-mode')) return;
 
     if (document.visibilityState && document.visibilityState !== 'visible') return;
+
+    // Si la reconexión viene de un cambio de visibilidad (ej. volver de la cámara nativa),
+    // NO reconectamos automáticamente para evitar que el agente reinicie su saludo desde cero.
+    if (reason === 'visibility_visible') {
+      if (ctaStatus) {
+        ctaStatus.textContent = 'Voz pausada por la cámara. Toca Iniciar asistente arriba si quieres seguir con audio.';
+        ctaStatus.classList.remove('is-error');
+      }
+      return;
+    }
 
     if (window.PostventaVoice && window.PostventaVoice.isActive()) {
 
@@ -910,7 +910,7 @@
 
     }
 
-    if (reconnectingVoice || sessionStarting) return;
+    // if (reconnectingVoice || sessionStarting) return;
 
     if (!agentConfig || !agentConfig.agentId || !window.PostventaVoice) return;
 
@@ -928,21 +928,27 @@
 
     }
 
-    try {
+      try {
 
-      await warmAudioForConversation();
+        await warmAudioForConversation();
 
-      await ensureMicForVoice();
+        await ensureMicForVoice();
 
-      var conv = await window.PostventaVoice.start({
+        var conv = await window.PostventaVoice.start({
 
-        agentId: agentConfig.agentId,
+          agentId: agentConfig.agentId,
 
-        dynamicVariables: buildDynamicVariables(),
+          dynamicVariables: buildDynamicVariables(),
 
-        clientTools: buildClientTools(),
+          clientTools: buildClientTools(),
 
-        onConnect: function (conversation) {
+          overrides: {
+            agent: {
+              first_message: "Ya, sigamos con la foto."
+            }
+          },
+
+          onConnect: function (conversation) {
 
           sessionStarting = false;
 
@@ -1084,13 +1090,12 @@
 
     if (banner) banner.style.display = 'none';
 
-    setTimeout(function () {
-
-      softenAssistantForCapture();
-
-      ensureVoiceDuringCapture('enter_capture');
-
-    }, 500);
+    // Desactivamos la llamada a ensureVoiceDuringCapture aquí porque el agente
+    // ya está conectado y hablando, y llamar a start() de nuevo lo reinicia.
+    // setTimeout(function () {
+    //   softenAssistantForCapture();
+    //   ensureVoiceDuringCapture('enter_capture');
+    // }, 500);
 
   }
 
@@ -1320,75 +1325,59 @@
 
 
 
-    if (ctaStatus) {
+    // Ejecutar la apertura de UI de forma asíncrona para no bloquear al agente
 
-      ctaStatus.textContent = 'El asistente explica la captura… la cámara abrirá al terminar.';
+    setTimeout(async function () {
 
-      ctaStatus.classList.remove('is-error');
+      if (ctaStatus) {
 
-    }
+        ctaStatus.textContent = 'El asistente explica la captura… la cámara abrirá al terminar.';
 
-    setVoiceState(true, 'Esperando fin de la explicación…');
+        ctaStatus.classList.remove('is-error');
 
-    await waitUntilSafeToOpenCapture();
+      }
 
+      setVoiceState(true, 'Esperando fin de la explicación…');
 
+      // Esperamos a que el agente termine de decir "Voy a abrir la cámara"
+      // antes de mostrar la interfaz visual, para que calce perfecto.
+      await waitUntilSafeToOpenCapture();
 
-    if (openEmbeddedCapture(target, ticketShortId)) {
+      if (openEmbeddedCapture(target, ticketShortId)) {
 
-      return {
+        // OK
 
-        success: true,
+      } else {
 
-        message: 'embedded_capture_opened',
+        showCaptureBanner(target, ticketShortId);
 
-        embedded: true,
+      }
 
-        url: target,
-
-        session_must_continue: true,
-
-        end_call: false,
-
-        agent_instruction:
-
-          'NO cuelgues ni te despidas. La llamada sigue activa. Espera [CAPTURA INICIO] y guía cada foto hasta [CAPTURA FIN].',
-
-        hint: 'Cámara embebida abajo; el asistente guía cada foto por voz.'
-
-      };
-
-    }
+    }, 50);
 
 
 
-    showCaptureBanner(target, ticketShortId);
+    return {
 
-    if (window.PostventaVoice && window.PostventaVoice.isActive()) {
+      success: true,
 
-      return {
+      message: 'capture_opening_async',
 
-        success: true,
+      embedded: true,
 
-        message: 'capture_banner_shown',
+      url: target,
 
-        embedded: false,
+      session_must_continue: true,
 
-        url: target,
+      end_call: false,
 
-        session_must_continue: true,
+      agent_instruction:
 
-        end_call: false,
+        'NO cuelgues ni te despidas. La cámara se está abriendo en la pantalla del usuario. Termina de dar tus instrucciones y espera a que el usuario suba la foto ([CAPTURA INICIO] o [CAPTURA SUBIDA]).',
 
-        agent_instruction: 'NO cuelgues. Indica que toque Tomar fotos ahora en pantalla.'
+      hint: 'Cámara embebida abriéndose; el asistente guía cada foto por voz.'
 
-      };
-
-    }
-
-    window.location.assign(target);
-
-    return { success: true, message: 'opening_capture_fullpage', url: target, embedded: false };
+    };
 
   }
 

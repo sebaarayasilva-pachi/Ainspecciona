@@ -2,6 +2,16 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
+  <script>
+    (function () {
+      try {
+        var q = new URLSearchParams(location.search);
+        if (q.get("legacy") === "1") return;
+        var next = q.get("next") || "/postventa/inspector";
+        location.replace("/?login=1&next=" + encodeURIComponent(next));
+      } catch (e) {}
+    })();
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#070b10" />
   <title>Inspector · Ingresar</title>

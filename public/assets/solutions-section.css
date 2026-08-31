@@ -18,8 +18,10 @@
 
 .solutions-section[data-sol-active="0"] { --sol-stage-accent: #f04438; }
 .solutions-section[data-sol-active="1"] { --sol-stage-accent: #f97316; }
-.solutions-section[data-sol-active="2"] { --sol-stage-accent: #22c55e; }
+.solutions-section[data-sol-active="2"] { --sol-stage-accent: #14b8a6; }
 .solutions-section[data-sol-active="3"] { --sol-stage-accent: #3b82f6; }
+.solutions-section[data-sol-active="4"] { --sol-stage-accent: #22c55e; }
+.solutions-section[data-sol-active="5"] { --sol-stage-accent: #06b6d4; }
 
 .solutions-section::before {
   content: "";

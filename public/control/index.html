@@ -5,17 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Control · Ainspecciona</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #11161c;
-      --panel: #1a212b;
+      --bg: #0e1318;
+      --aside: #141b22;
+      --panel: #1a222c;
       --ink: #eef2f6;
       --muted: #8b9aab;
-      --line: rgba(255,255,255,0.1);
-      --ok: #3ecf8e;
-      --off: #6b7280;
       --accent: #5b9fd4;
+      --ok: #3ecf8e;
+      --warn: #e6b84d;
+      --off: #6b7280;
+      --line: rgba(255,255,255,0.08);
+      --aside-w: 240px;
     }
     * { box-sizing: border-box; }
     body {
@@ -23,41 +26,170 @@
       font-family: "DM Sans", system-ui, sans-serif;
       background: var(--bg);
       color: var(--ink);
+      display: flex;
       min-height: 100vh;
     }
-    header {
+    .aside {
+      width: var(--aside-w);
+      background: var(--aside);
+      border-right: 1px solid var(--line);
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 18px 24px;
-      border-bottom: 1px solid var(--line);
-      background: var(--panel);
+      flex-direction: column;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      flex-shrink: 0;
     }
-    h1 { margin: 0; font-size: 1.15rem; letter-spacing: 0.02em; }
-    .nav a { color: var(--muted); margin-left: 14px; text-decoration: none; font-size: 0.9rem; }
-    .nav a:hover { color: var(--ink); }
-    main { max-width: 1100px; margin: 0 auto; padding: 28px 20px 64px; }
-    h2 { margin: 0 0 16px; font-size: 1.1rem; }
+    .aside-brand {
+      padding: 20px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+    .aside-brand .name {
+      font-family: "Instrument Serif", Georgia, serif;
+      font-size: 1.35rem;
+      margin: 0;
+    }
+    .aside-brand .sub {
+      margin: 4px 0 0;
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .nav { padding: 12px 10px; flex: 1; display: flex; flex-direction: column; gap: 2px; }
+    .nav-item {
+      display: block;
+      border: none;
+      background: transparent;
+      color: var(--ink);
+      text-align: left;
+      font: inherit;
+      font-size: 0.9rem;
+      padding: 10px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.05); }
+    .nav-item.active { background: rgba(91, 159, 212, 0.16); color: var(--accent); }
+    .nav-item .badge {
+      display: inline-block;
+      margin-left: 6px;
+      min-width: 1.4em;
+      padding: 0 6px;
+      border-radius: 999px;
+      background: rgba(230, 184, 77, 0.2);
+      color: var(--warn);
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-align: center;
+    }
+    .aside-foot {
+      border-top: 1px solid var(--line);
+      padding: 12px 10px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .shell { flex: 1; min-width: 0; }
+    .topbar {
+      display: none;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+      background: var(--aside);
+      align-items: center;
+      gap: 12px;
+    }
+    .menu-btn {
+      border: 1px solid var(--line);
+      background: transparent;
+      color: var(--ink);
+      border-radius: 10px;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+    }
+    main { padding: 28px 28px 64px; max-width: 1100px; }
+    h1 { margin: 0 0 6px; font-size: 1.4rem; }
+    h2 { margin: 28px 0 10px; font-size: 1.05rem; }
+    .lead { margin: 0 0 16px; color: var(--muted); font-size: 0.9rem; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+      align-items: center;
+    }
+    .search {
+      flex: 1;
+      min-width: 200px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      color: var(--ink);
+      font: inherit;
+      padding: 10px 12px;
+    }
+    .search::placeholder { color: var(--muted); }
+    .btn {
+      border: 1px solid var(--line);
+      background: transparent;
+      color: var(--ink);
+      border-radius: 10px;
+      font: inherit;
+      font-size: 0.85rem;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn.primary {
+      background: rgba(91, 159, 212, 0.16);
+      border-color: rgba(91, 159, 212, 0.45);
+      color: var(--accent);
+    }
+    .btn.warn {
+      border-color: rgba(230, 184, 77, 0.45);
+      color: var(--warn);
+    }
     .org {
       border: 1px solid var(--line);
       border-radius: 14px;
-      padding: 18px;
-      margin-bottom: 14px;
+      padding: 16px 18px;
+      margin-bottom: 10px;
       background: var(--panel);
+      cursor: pointer;
+      transition: border-color .15s ease;
     }
+    .org:hover { border-color: rgba(91, 159, 212, 0.45); }
     .org-head {
       display: flex;
       justify-content: space-between;
       gap: 12px;
       flex-wrap: wrap;
-      margin-bottom: 12px;
     }
     .slug {
       font-family: "IBM Plex Mono", monospace;
       font-size: 0.75rem;
       color: var(--muted);
     }
-    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .pill {
+      font-size: 0.72rem;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      color: var(--muted);
+    }
+    .pill.on { border-color: rgba(62, 207, 142, 0.45); color: var(--ok); }
+    .pill.gap { border-color: rgba(230, 184, 77, 0.45); color: var(--warn); }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
     .chip {
       border: 1px solid var(--line);
       border-radius: 999px;
@@ -69,6 +201,7 @@
       background: rgba(0,0,0,0.2);
     }
     .chip.enabled { border-color: rgba(62, 207, 142, 0.45); }
+    .chip.gap { border-color: rgba(230, 184, 77, 0.45); }
     .chip button {
       border: none;
       background: transparent;
@@ -78,49 +211,314 @@
       font-size: 0.75rem;
       padding: 0;
     }
-    .dot {
-      width: 7px; height: 7px; border-radius: 50%;
-      background: var(--off);
-    }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--off); flex-shrink: 0; }
     .chip.enabled .dot { background: var(--ok); }
-    .err { color: #f07178; }
-    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin-top: 28px; }
-    th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); }
-    th { color: var(--muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    .chip.gap .dot { background: var(--warn); }
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th {
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .err { color: #f07178; margin-top: 12px; }
+    .warn-box {
+      border: 1px solid rgba(230, 184, 77, 0.35);
+      background: rgba(230, 184, 77, 0.08);
+      color: var(--warn);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 0.85rem;
+      margin: 12px 0;
+      display: none;
+    }
+    .warn-box.show { display: block; }
+    .gap-item {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      background: var(--panel);
+    }
+    .gap-item button.linkish {
+      border: none;
+      background: none;
+      color: var(--accent);
+      cursor: pointer;
+      font: inherit;
+      padding: 0;
+      text-decoration: underline;
+    }
+    .empty { color: var(--muted); font-size: 0.9rem; padding: 12px 0; }
+    .create-box {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px 18px;
+      margin-bottom: 16px;
+      background: var(--panel);
+      display: none;
+    }
+    .create-box.open { display: block; }
+    .create-box h2 { margin: 0 0 12px; font-size: 1.05rem; }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 12px;
+    }
+    @media (max-width: 720px) {
+      .form-grid { grid-template-columns: 1fr; }
+    }
+    .form-grid label {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+    .form-grid label.full { grid-column: 1 / -1; }
+    .form-grid input,
+    .form-grid select {
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      color: var(--ink);
+      font: inherit;
+      padding: 9px 11px;
+    }
+    .product-checks {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 14px;
+      margin-top: 4px;
+    }
+    .product-checks label {
+      flex-direction: row;
+      align-items: center;
+      gap: 6px;
+      color: var(--ink);
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .form-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+    .form-note { color: var(--muted); font-size: 0.8rem; margin: 8px 0 0; }
+    .backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 30;
+    }
+    @media (max-width: 860px) {
+      body { display: block; }
+      .aside {
+        position: fixed;
+        z-index: 40;
+        transform: translateX(-105%);
+        transition: transform .2s ease;
+      }
+      body.nav-open .aside { transform: translateX(0); }
+      body.nav-open .backdrop { display: block; }
+      .topbar { display: flex; }
+      main { padding: 20px 16px 48px; }
+    }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Ainspecciona Control</h1>
+  <div class="backdrop" id="backdrop" hidden></div>
+  <aside class="aside">
+    <div class="aside-brand">
+      <p class="name">Ainspecciona</p>
+      <p class="sub">Control</p>
+    </div>
     <nav class="nav">
-      <a href="/app">App</a>
-      <a href="/admin">Admin legacy</a>
-      <a href="#" id="logout">Salir</a>
+      <button type="button" class="nav-item active" data-panel="orgs">Organizaciones</button>
+      <button type="button" class="nav-item" data-panel="users">Usuarios</button>
+      <button type="button" class="nav-item" data-panel="gaps">Gaps <span class="badge" id="gapsBadge" hidden>0</span></button>
     </nav>
-  </header>
-  <main>
-    <h2>Organizaciones</h2>
-    <div id="orgs"></div>
-    <h2 style="margin-top:36px">Usuarios plataforma</h2>
-    <div id="usersWrap"></div>
-    <p class="err" id="err" style="display:none"></p>
-  </main>
+    <div class="aside-foot">
+      <a class="nav-item" href="/app">Volver a App</a>
+      <button type="button" class="nav-item" id="logout">Salir</button>
+    </div>
+  </aside>
+
+  <div class="shell">
+    <div class="topbar">
+      <button class="menu-btn" type="button" id="menuBtn" aria-label="Menú">☰</button>
+      <strong>Control</strong>
+    </div>
+    <main>
+      <section class="panel active" id="panel-orgs">
+        <div id="orgsListView">
+          <h1>Organizaciones</h1>
+          <p class="lead">Busca un cliente y abre el detalle para productos y tenants legacy.</p>
+          <div class="toolbar">
+            <input class="search" id="orgSearch" type="search" placeholder="Buscar por nombre o slug…" />
+            <button type="button" class="btn primary" id="btnNewOrg">Nueva organización</button>
+          </div>
+          <div class="create-box" id="createOrgBox">
+            <h2>Crear organización</h2>
+            <form id="createOrgForm">
+              <div class="form-grid">
+                <label class="full">Nombre *
+                  <input name="name" required maxlength="191" placeholder="Ej. Corredora Andes" />
+                </label>
+                <label>Slug (opcional)
+                  <input name="slug" maxlength="64" placeholder="se genera del nombre" />
+                </label>
+                <label>Tipo
+                  <select name="type">
+                    <option value="BROKER" selected>Corredora (BROKER)</option>
+                    <option value="DEVELOPER">Inmobiliaria (DEVELOPER)</option>
+                    <option value="PROPERTY_MANAGER">Administradora</option>
+                    <option value="INTERNAL">Interna</option>
+                    <option value="OTHER">Otra</option>
+                  </select>
+                </label>
+                <label>RUT (opcional)
+                  <input name="rut" maxlength="32" placeholder="76.XXX.XXX-X" />
+                </label>
+                <label>Admin email
+                  <input name="adminEmail" type="email" placeholder="admin@cliente.cl" />
+                </label>
+                <label>Admin nombre
+                  <input name="adminName" maxlength="191" placeholder="Nombre contacto" />
+                </label>
+                <label class="full">Admin contraseña
+                  <input name="adminPassword" type="password" minlength="8" autocomplete="new-password" placeholder="Mín. 8 caracteres" />
+                </label>
+                <label class="full">Productos a habilitar
+                  <div class="product-checks" id="createProductChecks"></div>
+                </label>
+              </div>
+              <p class="form-note">Si agregas admin + productos, se crean los tenants legacy y los vínculos automáticamente.</p>
+              <div class="form-actions">
+                <button type="submit" class="btn primary" id="createOrgSubmit">Crear</button>
+                <button type="button" class="btn" id="createOrgCancel">Cancelar</button>
+              </div>
+              <p class="err" id="createOrgErr" style="display:none;margin-top:10px"></p>
+            </form>
+          </div>
+          <div id="orgs"></div>
+        </div>
+        <div id="orgDetailView" hidden>
+          <div class="toolbar">
+            <button type="button" class="btn" id="backToOrgs">← Organizaciones</button>
+            <button type="button" class="btn warn" id="toggleOrgStatus">Suspender</button>
+          </div>
+          <h1 id="detailTitle">—</h1>
+          <p class="lead" id="detailMeta"></p>
+          <div class="warn-box" id="detailWarn"></div>
+          <h2>Productos</h2>
+          <div class="chips" id="detailProducts"></div>
+          <h2>Tenants legacy</h2>
+          <div id="detailLinks"></div>
+          <h2>Miembros</h2>
+          <div id="detailMembers"></div>
+          <form id="addMemberForm" class="create-box open" style="margin-top:14px">
+            <h2 style="margin:0 0 10px;font-size:0.95rem">Agregar admin</h2>
+            <p class="form-note" style="margin-top:0">Necesario para vincular productos legacy. Al guardar se reintentan productos activos sin link.</p>
+            <div class="form-grid">
+              <label>Nombre
+                <input id="addMemberName" type="text" autocomplete="off" placeholder="Nombre completo" />
+              </label>
+              <label>Email *
+                <input id="addMemberEmail" type="email" required autocomplete="off" placeholder="admin@cliente.com" />
+              </label>
+              <label class="full">Contraseña * (mín. 8)
+                <input id="addMemberPassword" type="text" required minlength="8" autocomplete="off" placeholder="••••••••" />
+              </label>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn primary" id="addMemberSubmit">Agregar y vincular</button>
+            </div>
+            <p class="err" id="addMemberErr" style="display:none;margin-top:10px"></p>
+          </form>
+        </div>
+      </section>
+
+      <section class="panel" id="panel-users">
+        <h1>Usuarios plataforma</h1>
+        <p class="lead">Identidades de login único y vínculos a productos.</p>
+        <div class="toolbar">
+          <input class="search" id="userSearch" type="search" placeholder="Buscar por email o nombre…" />
+        </div>
+        <div id="usersWrap"></div>
+      </section>
+
+      <section class="panel" id="panel-gaps">
+        <h1>Gaps</h1>
+        <p class="lead">Productos activos sin vínculo y corredoras Capture sin link de plataforma.</p>
+        <div id="gapsWrap"></div>
+      </section>
+
+      <p class="err" id="err" style="display:none"></p>
+    </main>
+  </div>
+
   <script>
     (function () {
       const headers = {};
-      try {
-        const t = sessionStorage.getItem("platform_session");
-        if (t) headers["x-platform-session"] = t;
-      } catch (_) {}
+      function syncAuthHeader() {
+        try {
+          const t = sessionStorage.getItem("platform_session");
+          if (t) headers["x-platform-session"] = t;
+          else delete headers["x-platform-session"];
+        } catch (_) {}
+      }
+      syncAuthHeader();
+
+      let catalog = {};
+      let organizations = [];
+      let users = [];
+      let selectedOrgId = null;
+      let detailOrg = null;
+
+      const backdrop = document.getElementById("backdrop");
+      const menuBtn = document.getElementById("menuBtn");
+      function closeNav() { document.body.classList.remove("nav-open"); backdrop.hidden = true; }
+      function openNav() { document.body.classList.add("nav-open"); backdrop.hidden = false; }
+      menuBtn.addEventListener("click", () => {
+        if (document.body.classList.contains("nav-open")) closeNav();
+        else openNav();
+      });
+      backdrop.addEventListener("click", closeNav);
+
+      function showPanel(name) {
+        document.querySelectorAll(".nav-item[data-panel]").forEach((b) => {
+          b.classList.toggle("active", b.dataset.panel === name);
+        });
+        document.querySelectorAll(".panel").forEach((p) => p.classList.remove("active"));
+        document.getElementById("panel-" + name).classList.add("active");
+        closeNav();
+      }
+
+      document.querySelectorAll(".nav-item[data-panel]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          if (btn.dataset.panel === "orgs") showOrgsList();
+          showPanel(btn.dataset.panel);
+        });
+      });
 
       async function api(path, opts) {
+        syncAuthHeader();
         const res = await fetch(path, {
           credentials: "include",
-          headers: { ...headers, ...(opts && opts.body ? { "Content-Type": "application/json" } : {}), ...(opts && opts.headers || {}) },
+          headers: {
+            ...headers,
+            ...(opts && opts.body ? { "Content-Type": "application/json" } : {}),
+            ...((opts && opts.headers) || {})
+          },
           ...opts
         });
         if (res.status === 401) {
-          location.href = "/login?next=/control";
+          location.href = "/?login=1&next=/control";
           return null;
         }
         if (res.status === 403) {
@@ -130,77 +528,453 @@
         return res.json();
       }
 
-      async function toggle(orgId, product, status) {
+      async function bootstrap() {
+        syncAuthHeader();
+        const res = await fetch("/api/auth/me", { credentials: "include", headers });
+        if (res.status === 401) {
+          location.href = "/?login=1&next=/control";
+          return false;
+        }
+        const data = await res.json().catch(() => ({}));
+        if (!data.ok || !data.context || !data.context.user) {
+          location.href = "/?login=1&next=/control";
+          return false;
+        }
+        if (data.context.token) {
+          try { sessionStorage.setItem("platform_session", data.context.token); } catch (_) {}
+          headers["x-platform-session"] = data.context.token;
+        }
+        if (!data.context.user.isPlatformAdmin) {
+          location.href = "/app";
+          return false;
+        }
+        return true;
+      }
+
+      function esc(s) {
+        return String(s == null ? "" : s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function showOrgsList() {
+        selectedOrgId = null;
+        detailOrg = null;
+        document.getElementById("orgsListView").hidden = false;
+        document.getElementById("orgDetailView").hidden = true;
+        renderOrgs();
+      }
+
+      function renderOrgs() {
+        const q = (document.getElementById("orgSearch").value || "").trim().toLowerCase();
+        const box = document.getElementById("orgs");
+        box.innerHTML = "";
+        const list = organizations.filter((o) => {
+          if (!q) return true;
+          return (
+            String(o.name || "").toLowerCase().includes(q) ||
+            String(o.slug || "").toLowerCase().includes(q)
+          );
+        });
+        if (!list.length) {
+          box.innerHTML = '<p class="empty">Sin resultados.</p>';
+          return;
+        }
+        for (const o of list) {
+          const enabled = (o.products || []).filter((p) => p.status === "ENABLED");
+          const el = document.createElement("article");
+          el.className = "org";
+          el.innerHTML =
+            '<div class="org-head"><div><strong>' + esc(o.name) + "</strong>" +
+            '<div class="slug">' + esc(o.slug) + " · " + esc(o.type) + " · " +
+            o.memberCount + " miembros · " + o.linkCount + " links</div></div>" +
+            '<div class="slug">' + esc(o.status) + "</div></div>" +
+            '<div class="meta-row">' +
+            enabled.map((p) =>
+              '<span class="pill on">' + esc((catalog[p.product] && catalog[p.product].label) || p.product) + "</span>"
+            ).join("") +
+            (enabled.length ? "" : '<span class="pill">Sin productos</span>') +
+            "</div>";
+          el.addEventListener("click", () => openOrgDetail(o.id));
+          box.appendChild(el);
+        }
+      }
+
+      async function openOrgDetail(orgId) {
+        selectedOrgId = orgId;
+        const data = await api("/api/control/organizations/" + orgId);
+        if (!data || !data.ok) {
+          document.getElementById("err").textContent = "No se pudo cargar la organización";
+          document.getElementById("err").style.display = "block";
+          return;
+        }
+        if (data.catalog) catalog = data.catalog;
+        detailOrg = data.organization;
+        document.getElementById("orgsListView").hidden = true;
+        document.getElementById("orgDetailView").hidden = false;
+        showPanel("orgs");
+        renderDetail();
+      }
+
+      function renderDetail() {
+        const o = detailOrg;
+        if (!o) return;
+        document.getElementById("detailTitle").textContent = o.name;
+        document.getElementById("detailMeta").textContent =
+          o.slug + " · " + o.type + " · " + o.status;
+
+        const statusBtn = document.getElementById("toggleOrgStatus");
+        statusBtn.textContent = o.status === "ACTIVE" ? "Suspender" : "Reactivar";
+        statusBtn.className = o.status === "ACTIVE" ? "btn warn" : "btn primary";
+
+        const warn = document.getElementById("detailWarn");
+        const noMembers = !(o.members && o.members.length);
+        if (o.productsWithoutLink && o.productsWithoutLink.length) {
+          const names = o.productsWithoutLink
+            .map((c) => (catalog[c] && catalog[c].label) || c)
+            .join(", ");
+          warn.textContent = noMembers
+            ? "Producto(s) activo(s) sin vínculo: " + names +
+              ". Agrega un admin abajo y se vincularán automáticamente."
+            : "Producto(s) activo(s) sin vínculo legacy — el cliente no lo verá en /app hasta vincular: " +
+              names + ". Usa «Vincular» en cada producto.";
+          warn.classList.add("show");
+        } else {
+          warn.classList.remove("show");
+          warn.textContent = "";
+        }
+
+        const byCode = {};
+        for (const p of o.products || []) byCode[p.product] = p;
+        const prodBox = document.getElementById("detailProducts");
+        prodBox.innerHTML = Object.keys(catalog).map((code) => {
+          const row = byCode[code];
+          const enabled = row && row.status === "ENABLED";
+          const hasLink = row ? !!row.hasLink : false;
+          const gap = enabled && !hasLink;
+          return (
+            '<span class="chip ' + (enabled ? "enabled" : "") + (gap ? " gap" : "") + '">' +
+            '<span class="dot"></span>' +
+            esc(catalog[code].label || code) +
+            (gap ? ' <span title="Sin link">!</span>' : "") +
+            (gap
+              ? '<button type="button" class="link-repair" data-provision="' + code + '">Vincular</button>'
+              : "") +
+            '<button type="button" data-product="' + code + '" data-status="' +
+            (enabled ? "ENABLED" : "DISABLED") + '">' +
+            (enabled ? "Desactivar" : "Activar") +
+            "</button></span>"
+          );
+        }).join("");
+        prodBox.querySelectorAll("button[data-product]").forEach((btn) => {
+          btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            toggleProduct(btn.dataset.product, btn.dataset.status);
+          });
+        });
+        prodBox.querySelectorAll("button[data-provision]").forEach((btn) => {
+          btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            repairProduct(btn.dataset.provision);
+          });
+        });
+
+        const links = o.links || [];
+        const linksBox = document.getElementById("detailLinks");
+        if (!links.length) {
+          linksBox.innerHTML = '<p class="empty">Sin LegacyIdentityLink.</p>';
+        } else {
+          linksBox.innerHTML =
+            "<table><thead><tr><th>Producto</th><th>Tenant legacy</th><th>Usuario plataforma</th><th>IDs</th></tr></thead><tbody>" +
+            links.map((l) =>
+              "<tr><td>" + esc(l.productLabel || l.product) + "</td><td>" +
+              esc(l.legacyTenantName || "—") +
+              '<div class="slug">' + esc(l.legacyTenantId) + "</div></td><td>" +
+              esc(l.platformUserEmail) + "</td><td class=\"slug\">user " +
+              esc(l.legacyUserId) + "</td></tr>"
+            ).join("") +
+            "</tbody></table>";
+        }
+
+        const members = o.members || [];
+        const memBox = document.getElementById("detailMembers");
+        if (!members.length) {
+          memBox.innerHTML =
+            '<p class="empty">Sin miembros. Sin un admin no se pueden crear vínculos legacy.</p>';
+        } else {
+          memBox.innerHTML =
+            "<table><thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Estado</th></tr></thead><tbody>" +
+            members.map((m) =>
+              "<tr><td>" + esc(m.user.fullName) + "</td><td>" + esc(m.user.email) +
+              "</td><td>" + esc(m.role) + "</td><td>" + esc(m.status) + "</td></tr>"
+            ).join("") +
+            "</tbody></table>";
+        }
+        document.getElementById("addMemberErr").style.display = "none";
+      }
+
+      async function repairProduct(product) {
+        const res = await api(
+          "/api/control/organizations/" + selectedOrgId + "/products/" + product + "/provision",
+          { method: "POST", body: "{}" }
+        );
+        const warn = document.getElementById("detailWarn");
+        if (!res) return;
+        if (res.warning || !res.ok) {
+          warn.textContent = res.warning || res.message || res.error || "No se pudo vincular.";
+          warn.classList.add("show");
+        } else {
+          warn.textContent = res.message || "Producto vinculado.";
+          warn.classList.add("show");
+        }
+        await openOrgDetail(selectedOrgId);
+        await refreshLists(false);
+      }
+
+      async function toggleProduct(product, status) {
         const next = status === "ENABLED" ? "DISABLED" : "ENABLED";
-        await api("/api/control/organizations/" + orgId + "/products/" + product, {
+        const res = await api(
+          "/api/control/organizations/" + selectedOrgId + "/products/" + product,
+          { method: "PATCH", body: JSON.stringify({ status: next }) }
+        );
+        if (!res || !res.ok) return;
+        const warn = document.getElementById("detailWarn");
+        if (res.warning) {
+          warn.textContent = res.warning;
+          warn.classList.add("show");
+        } else if (res.message || (res.provision && res.provision.ok)) {
+          warn.textContent = res.message || res.provision.message || "Producto vinculado.";
+          warn.classList.add("show");
+        }
+        await openOrgDetail(selectedOrgId);
+        await refreshLists(false);
+      }
+
+      async function toggleOrgStatus() {
+        if (!detailOrg) return;
+        const next = detailOrg.status === "ACTIVE" ? "DISABLED" : "ACTIVE";
+        const res = await api("/api/control/organizations/" + detailOrg.id, {
           method: "PATCH",
           body: JSON.stringify({ status: next })
         });
-        load();
+        if (!res || !res.ok) return;
+        await openOrgDetail(detailOrg.id);
+        await refreshLists(false);
       }
 
-      async function load() {
-        const [orgData, userData] = await Promise.all([
+      function renderUsers() {
+        const q = (document.getElementById("userSearch").value || "").trim().toLowerCase();
+        const list = users.filter((u) => {
+          if (!q) return true;
+          return (
+            String(u.email || "").toLowerCase().includes(q) ||
+            String(u.fullName || "").toLowerCase().includes(q)
+          );
+        });
+        if (!list.length) {
+          document.getElementById("usersWrap").innerHTML = '<p class="empty">Sin resultados.</p>';
+          return;
+        }
+        const rows = list.map((u) =>
+          "<tr><td>" + esc(u.fullName) + "</td><td>" + esc(u.email) + "</td><td>" +
+          esc((u.organizations || []).map((o) => o.name).join(", ") || "—") +
+          "</td><td>" + esc((u.products || []).join(", ") || "—") +
+          "</td><td>" + (u.isPlatformAdmin ? "Control" : "—") + "</td></tr>"
+        ).join("");
+        document.getElementById("usersWrap").innerHTML =
+          "<table><thead><tr><th>Nombre</th><th>Email</th><th>Orgs</th><th>Links</th><th>Rol</th></tr></thead><tbody>" +
+          rows + "</tbody></table>";
+      }
+
+      function renderGaps(gaps) {
+        const badge = document.getElementById("gapsBadge");
+        const total = (gaps && gaps.counts && gaps.counts.total) || 0;
+        if (total > 0) {
+          badge.hidden = false;
+          badge.textContent = String(total);
+        } else {
+          badge.hidden = true;
+        }
+
+        const box = document.getElementById("gapsWrap");
+        if (!gaps || !total) {
+          box.innerHTML = '<p class="empty">Sin gaps. Todo enlazado.</p>';
+          return;
+        }
+
+        let html = "";
+        const noLink = gaps.productsWithoutLink || [];
+        if (noLink.length) {
+          html += "<h2>Productos ENABLED sin link (" + noLink.length + ")</h2>";
+          html += noLink.map((g) =>
+            '<div class="gap-item"><strong>' + esc(g.organizationName) + "</strong>" +
+            '<div class="slug">' + esc(g.organizationSlug) + "</div>" +
+            "<p>" + esc(g.productLabel) + " activo sin LegacyIdentityLink.</p>" +
+            '<button type="button" class="linkish" data-org="' + esc(g.organizationId) +
+            '">Abrir organización</button></div>'
+          ).join("");
+        }
+        const orphans = gaps.captureOrphans || [];
+        if (orphans.length) {
+          html += "<h2>Capture ACTIVE sin link (" + orphans.length + ")</h2>";
+          html += orphans.map((g) =>
+            '<div class="gap-item"><strong>' + esc(g.tenantName) + "</strong>" +
+            '<div class="slug">' + esc(g.tenantEmail || g.tenantId) + "</div>" +
+            "<p>Tenant Capture sin vínculo INSPECTION en plataforma.</p></div>"
+          ).join("");
+        }
+        box.innerHTML = html;
+        box.querySelectorAll("button[data-org]").forEach((btn) => {
+          btn.addEventListener("click", () => openOrgDetail(btn.dataset.org));
+        });
+      }
+
+      async function refreshLists(includeGaps) {
+        const tasks = [
           api("/api/control/organizations"),
           api("/api/control/users")
-        ]);
+        ];
+        if (includeGaps !== false) tasks.push(api("/api/control/gaps"));
+        const [orgData, userData, gapsData] = await Promise.all(tasks);
         if (!orgData || !orgData.ok) {
           document.getElementById("err").textContent = "No se pudo cargar Control";
           document.getElementById("err").style.display = "block";
           return;
         }
-        const catalog = orgData.catalog || {};
-        const box = document.getElementById("orgs");
-        box.innerHTML = "";
-        for (const o of orgData.organizations || []) {
-          const byCode = {};
-          for (const p of o.products || []) byCode[p.product] = p;
-          const el = document.createElement("article");
-          el.className = "org";
-          const chips = Object.keys(catalog).map((code) => {
-            const row = byCode[code];
-            const enabled = row && row.status === "ENABLED";
-            return (
-              '<span class="chip ' + (enabled ? "enabled" : "") + '">' +
-              '<span class="dot"></span>' +
-              (catalog[code].label || code) +
-              '<button type="button" data-org="' + o.id + '" data-product="' + code + '" data-status="' + (enabled ? "ENABLED" : "DISABLED") + '">' +
-              (enabled ? "Desactivar" : "Activar") +
-              "</button></span>"
-            );
-          }).join("");
-          el.innerHTML =
-            '<div class="org-head"><div><strong>' + o.name + '</strong>' +
-            '<div class="slug">' + o.slug + ' · ' + o.type + ' · ' + o.memberCount + ' miembros</div></div>' +
-            '<div class="slug">' + o.status + '</div></div>' +
-            '<div class="chips">' + chips + '</div>';
-          box.appendChild(el);
-        }
-        box.querySelectorAll("button[data-org]").forEach((btn) => {
-          btn.addEventListener("click", () => toggle(btn.dataset.org, btn.dataset.product, btn.dataset.status));
-        });
-
+        catalog = orgData.catalog || catalog;
+        organizations = orgData.organizations || [];
+        fillCreateProductChecks();
+        if (!selectedOrgId) renderOrgs();
         if (userData && userData.ok) {
-          const rows = (userData.users || []).map((u) =>
-            "<tr><td>" + u.fullName + "</td><td>" + u.email + "</td><td>" +
-            (u.organizations.map((o) => o.name).join(", ") || "—") +
-            "</td><td>" + (u.products || []).join(", ") +
-            "</td><td>" + (u.isPlatformAdmin ? "Control" : "—") + "</td></tr>"
-          ).join("");
-          document.getElementById("usersWrap").innerHTML =
-            "<table><thead><tr><th>Nombre</th><th>Email</th><th>Orgs</th><th>Links</th><th>Rol</th></tr></thead><tbody>" +
-            rows + "</tbody></table>";
+          users = userData.users || [];
+          renderUsers();
         }
+        if (gapsData && gapsData.ok) renderGaps(gapsData);
       }
 
-      document.getElementById("logout").addEventListener("click", async (e) => {
-        e.preventDefault();
-        await api("/api/auth/logout", { method: "POST" });
-        try { sessionStorage.removeItem("platform_session"); } catch (_) {}
-        location.href = "/login";
+      document.getElementById("orgSearch").addEventListener("input", renderOrgs);
+      document.getElementById("userSearch").addEventListener("input", renderUsers);
+      document.getElementById("backToOrgs").addEventListener("click", showOrgsList);
+      document.getElementById("toggleOrgStatus").addEventListener("click", toggleOrgStatus);
+
+      function fillCreateProductChecks() {
+        const box = document.getElementById("createProductChecks");
+        if (!box || box.dataset.ready === "1") return;
+        box.innerHTML = Object.keys(catalog).map((code) =>
+          '<label><input type="checkbox" name="products" value="' + code + '"' +
+          (code === "INSPECTION" ? " checked" : "") + " /> " +
+          esc((catalog[code] && catalog[code].label) || code) + "</label>"
+        ).join("");
+        box.dataset.ready = "1";
+      }
+
+      const createBox = document.getElementById("createOrgBox");
+      document.getElementById("btnNewOrg").addEventListener("click", () => {
+        fillCreateProductChecks();
+        createBox.classList.add("open");
+        document.getElementById("createOrgErr").style.display = "none";
+        createBox.querySelector('[name="name"]')?.focus();
+      });
+      document.getElementById("createOrgCancel").addEventListener("click", () => {
+        createBox.classList.remove("open");
+        document.getElementById("createOrgForm").reset();
+        document.getElementById("createOrgErr").style.display = "none";
       });
 
-      load();
+      document.getElementById("createOrgForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const errEl = document.getElementById("createOrgErr");
+        errEl.style.display = "none";
+        const fd = new FormData(e.target);
+        const products = [...e.target.querySelectorAll('input[name="products"]:checked')].map((el) => el.value);
+        const payload = {
+          name: String(fd.get("name") || "").trim(),
+          slug: String(fd.get("slug") || "").trim() || undefined,
+          type: String(fd.get("type") || "BROKER"),
+          rut: String(fd.get("rut") || "").trim() || undefined,
+          adminEmail: String(fd.get("adminEmail") || "").trim() || undefined,
+          adminName: String(fd.get("adminName") || "").trim() || undefined,
+          adminPassword: String(fd.get("adminPassword") || "") || undefined,
+          products
+        };
+        const btn = document.getElementById("createOrgSubmit");
+        btn.disabled = true;
+        try {
+          const res = await api("/api/control/organizations", {
+            method: "POST",
+            body: JSON.stringify(payload)
+          });
+          if (!res || !res.ok) {
+            errEl.textContent = (res && (res.message || res.error)) || "No se pudo crear";
+            errEl.style.display = "block";
+            return;
+          }
+          createBox.classList.remove("open");
+          e.target.reset();
+          await refreshLists(true);
+          if (res.organization && res.organization.id) {
+            await openOrgDetail(res.organization.id);
+          }
+        } finally {
+          btn.disabled = false;
+        }
+      });
+
+      document.getElementById("addMemberForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (!selectedOrgId) return;
+        const errEl = document.getElementById("addMemberErr");
+        errEl.style.display = "none";
+        const payload = {
+          fullName: String(document.getElementById("addMemberName").value || "").trim() || undefined,
+          email: String(document.getElementById("addMemberEmail").value || "").trim(),
+          password: String(document.getElementById("addMemberPassword").value || ""),
+          role: "ORGANIZATION_ADMIN"
+        };
+        const btn = document.getElementById("addMemberSubmit");
+        btn.disabled = true;
+        try {
+          const res = await api("/api/control/organizations/" + selectedOrgId + "/members", {
+            method: "POST",
+            body: JSON.stringify(payload)
+          });
+          if (!res || !res.ok) {
+            errEl.textContent = (res && (res.message || res.error)) || "No se pudo agregar";
+            errEl.style.display = "block";
+            return;
+          }
+          e.target.reset();
+          const warn = document.getElementById("detailWarn");
+          warn.textContent = res.message || "Miembro agregado.";
+          warn.classList.add("show");
+          await openOrgDetail(selectedOrgId);
+          await refreshLists(false);
+        } finally {
+          btn.disabled = false;
+        }
+      });
+
+      document.getElementById("logout").addEventListener("click", async () => {
+        await api("/api/auth/logout", { method: "POST" });
+        try {
+          sessionStorage.removeItem("platform_session");
+          sessionStorage.removeItem("entrega_session");
+          sessionStorage.removeItem("postventa_session");
+          sessionStorage.removeItem("inout_session");
+          localStorage.removeItem("tenant_session");
+          localStorage.removeItem("tenant_id");
+        } catch (_) {}
+        location.href = "/?login=1";
+      });
+
+      bootstrap().then((ok) => {
+        if (ok) return refreshLists(true);
+      }).catch(() => {
+        document.getElementById("err").textContent = "No se pudo iniciar Control";
+        document.getElementById("err").style.display = "block";
+      });
     })();
   </script>
 </body>

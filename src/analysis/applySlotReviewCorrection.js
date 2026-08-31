@@ -44,9 +44,12 @@ export function buildSlotPatchFromReview(slot, review) {
     score_penalty_applied: 0
   };
   if (humanCode === 'OK') {
+    // No conservar la descripción IA: suele dejar frases de “no se observa X” que contradicen OK.
     nextParsed.description =
-      String(prevParsed.description || '').trim() ||
-      'Evidencia revisada por ITO; no se confirman hallazgos relevantes.';
+      'Evidencia revisada por ITO. Registro visual del elemento solicitado, sin observaciones confirmadas.';
+  } else if (humanMessage) {
+    // Hallazgo corregido: descripción e informe deben reflejar el criterio humano.
+    nextParsed.description = humanMessage;
   }
 
   return {

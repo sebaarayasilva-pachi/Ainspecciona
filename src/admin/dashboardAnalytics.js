@@ -304,6 +304,39 @@ export async function queryInspectionsDaily(prisma, since) {
 }
 
 /**
+ * Cantidad de inspecciones (casos) por corredora en el periodo.
+ * @param {import('@prisma/client').PrismaClient} prisma
+ * @param {Date} since
+ * @param {{ limit?: number }} [opts]
+ */
+export async function queryInspectionsByTenant(prisma, since, opts = {}) {
+  const limit = Math.min(Math.max(Number(opts.limit) || 30, 1), 100);
+  const rows = await prisma.$queryRawUnsafe(
+    `SELECT
+       c.tenantId AS tenantId,
+       COALESCE(NULLIF(TRIM(t.name), ''), '(Sin nombre)') AS tenantName,
+       COUNT(*) AS total,
+       SUM(c.status = 'DONE') AS doneN,
+       SUM(c.status = 'PENDING_APPROVAL') AS pendingN
+     FROM \`Case\` c
+     LEFT JOIN Tenant t ON t.id = c.tenantId
+     WHERE c.createdAt >= ?
+       AND c.tenantId IS NOT NULL
+     GROUP BY c.tenantId, t.name
+     ORDER BY total DESC
+     LIMIT ${limit}`,
+    since
+  );
+  return (rows || []).map((r) => ({
+    tenantId: r.tenantId ? String(r.tenantId) : null,
+    tenantName: String(r.tenantName || '(Sin nombre)'),
+    total: Number(r.total || 0),
+    done: Number(r.doneN || 0),
+    pendingApproval: Number(r.pendingN || 0)
+  }));
+}
+
+/**
  * Heatmap: día de semana (0=lun ... 6=dom) x hora Chile aprox. (UTC-4 fijo en SQL).
  * @param {import('@prisma/client').PrismaClient} prisma
  * @param {Date} since

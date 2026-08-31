@@ -193,16 +193,19 @@
         show($('pvCapVidGallery'));
         $('pvCapUpload').textContent = 'Subir video';
       } else {
-        show($('pvCapTake'));
-        show($('pvCapGallery'));
         // Con voz activa: priorizar vista en vivo (la cámara nativa pausa el WebRTC)
         show($('pvCapLive'));
+        show($('pvCapGallery'));
         $('pvCapUpload').textContent = 'Subir foto';
         if (voiceSessionActive()) {
-          $('pvCapTake').textContent = 'Capturar (mantener voz)';
+          $('pvCapLive').textContent = 'Tomar foto (cámara web)';
+          $('pvCapLive').classList.remove('outline');
+          $('pvCapLive').classList.add('primary');
+          hide($('pvCapTake'));
           $('pvCapStatus').textContent =
-            'Usa Capturar para la cámara en pantalla (así no se corta la voz). Galería también sirve.';
+            'Usa Tomar foto (cámara web) para no cortar la voz del asistente.';
         } else {
+          show($('pvCapTake'));
           $('pvCapTake').textContent = 'Abrir cámara';
         }
       }
@@ -261,7 +264,7 @@
         hidePhotoControls();
         show($('pvCapCapture'));
         $('pvCapStatus').textContent = 'Encuadra y toca Capturar. La voz del asistente sigue activa.';
-        requestVoiceReconnect('camara_en_vivo');
+        // requestVoiceReconnect('camara_en_vivo'); // Desactivado para evitar reinicios
       } catch (e) {
         liveMode = false;
         $('pvCapStatus').textContent =

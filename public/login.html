@@ -150,7 +150,17 @@
           if (data.token) {
             try { sessionStorage.setItem("platform_session", data.token); } catch (_) {}
           }
-          location.href = next.startsWith("/") ? next : "/app";
+          try {
+            localStorage.removeItem("tenant_session");
+            localStorage.removeItem("tenant_id");
+            sessionStorage.removeItem("entrega_session");
+            sessionStorage.removeItem("postventa_session");
+            sessionStorage.removeItem("inout_session");
+          } catch (_) {}
+          const isAdmin = !!(data.context && data.context.user && data.context.user.isPlatformAdmin);
+          let dest = next.startsWith("/") ? next : "/app";
+          if (isAdmin && (dest === "/app" || dest === "/")) dest = "/control";
+          location.href = dest;
         } catch (ex) {
           err.textContent = ex.message || "Error";
           err.classList.add("show");

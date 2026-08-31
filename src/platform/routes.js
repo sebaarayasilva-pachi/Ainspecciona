@@ -14,7 +14,13 @@ import {
 } from './auth/session.js';
 import { tryProvisionFromLegacy, tryProvisionTenantByRut } from './auth/legacyBridge.js';
 import { enterProduct } from './auth/enterProduct.js';
-import { PLATFORM_PRODUCTS } from './products.js';
+import { APP_TENANT_PRODUCTS, PLATFORM_PRODUCTS } from './products.js';
+import { resolveLegacyTenantNames, productLabel } from './control/legacyLookup.js';
+import { collectControlGaps } from './control/gaps.js';
+import { provisionProductAccess } from './control/provisionProduct.js';
+import { createOrganizationFromControl } from './control/createOrganization.js';
+import { addOrganizationMember } from './control/addOrganizationMember.js';
+import { PLATFORM_NDA_VERSION, ndaStatusForSession } from './nda.js';
 
 function noStore(reply) {
   reply.header('Cache-Control', 'no-store, no-cache, must-revalidate');
@@ -40,6 +46,17 @@ export async function registerPlatformRoutes(fastify, { prisma }) {
     if (!session) return reply.redirect(302, '/login?next=/app');
     return noStore(reply).sendFile('app/index.html');
   });
+
+  // Tenant door: /app/{producto} → login o entra al módulo. URLs legacy no se tocan.
+  for (const product of APP_TENANT_PRODUCTS) {
+    fastify.get(product.app, async (req, reply) => {
+      const session = prisma ? await getPlatformSession(prisma, req) : null;
+      if (!session) {
+        return reply.redirect(302, `/login?next=${encodeURIComponent(product.app)}`);
+      }
+      return reply.redirect(302, `/app?enter=${encodeURIComponent(product.code)}`);
+    });
+  }
 
   fastify.get('/control', async (req, reply) => {
     const session = prisma ? await getPlatformSession(prisma, req) : null;
@@ -123,12 +140,53 @@ export async function registerPlatformRoutes(fastify, { prisma }) {
     if (!prisma) return reply.code(503).send({ ok: false, error: 'DB_UNAVAILABLE' });
     const session = await getPlatformSession(prisma, req);
     if (!session) return reply.code(401).send({ ok: false, error: 'UNAUTHORIZED' });
+    // Reafirmar __session como token de plataforma (Firebase Hosting solo reenvía esa cookie).
+    // Evita que un login de producto previo deje /app o /control sin sesión.
+    setPlatformSessionCookies(req, reply, session.token);
     return reply.send({ ok: true, context: serializePlatformContext(session) });
+  });
+
+  fastify.post('/api/auth/accept-nda', {
+    preHandler: requirePlatformAuth(prisma)
+  }, async (req, reply) => {
+    const session = req.platformSession;
+    const status = ndaStatusForSession(session);
+    if (!status.required) {
+      return reply.send({
+        ok: true,
+        nda: status,
+        context: serializePlatformContext(session),
+        message: 'NDA no requerido para esta organización.'
+      });
+    }
+    const updated = await prisma.platformUser.update({
+      where: { id: session.user.id },
+      data: {
+        ndaAcceptedAt: new Date(),
+        ndaVersion: PLATFORM_NDA_VERSION
+      }
+    });
+    session.user.ndaAcceptedAt = updated.ndaAcceptedAt;
+    session.user.ndaVersion = updated.ndaVersion;
+    return reply.send({
+      ok: true,
+      nda: ndaStatusForSession(session),
+      context: serializePlatformContext(session)
+    });
   });
 
   fastify.post('/api/auth/enter-product', {
     preHandler: requirePlatformAuth(prisma)
   }, async (req, reply) => {
+    const nda = ndaStatusForSession(req.platformSession);
+    if (nda.required && !nda.accepted) {
+      return reply.code(403).send({
+        ok: false,
+        error: 'NDA_REQUIRED',
+        message: 'Debes aceptar el Acuerdo de Confidencialidad antes de continuar.',
+        nda
+      });
+    }
     const product = req.body?.product || req.query?.product;
     const result = await enterProduct(prisma, req.platformSession, product, req, reply);
     if (!result.ok) return reply.code(400).send(result);
@@ -166,6 +224,134 @@ export async function registerPlatformRoutes(fastify, { prisma }) {
     });
   });
 
+  fastify.post('/api/control/organizations', {
+    preHandler: requirePlatformAdmin(prisma)
+  }, async (req, reply) => {
+    const result = await createOrganizationFromControl(prisma, req.body || {});
+    if (!result.ok) {
+      return reply.code(400).send(result);
+    }
+    return reply.code(201).send(result);
+  });
+
+  fastify.get('/api/control/organizations/:orgId', {
+    preHandler: requirePlatformAdmin(prisma)
+  }, async (req, reply) => {
+    const orgId = String(req.params.orgId || '');
+    const org = await prisma.organization.findUnique({
+      where: { id: orgId },
+      include: {
+        products: true,
+        members: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                email: true,
+                fullName: true,
+                status: true,
+                isPlatformAdmin: true
+              }
+            }
+          }
+        },
+        links: {
+          include: {
+            platformUser: {
+              select: { id: true, email: true, fullName: true, status: true }
+            }
+          }
+        }
+      }
+    });
+    if (!org) return reply.code(404).send({ ok: false, error: 'NOT_FOUND' });
+
+    const nameByKey = await resolveLegacyTenantNames(prisma, org.links);
+    const linkedProducts = new Set(org.links.map((l) => l.product));
+    const products = org.products.map((p) => ({
+      product: p.product,
+      label: productLabel(p.product),
+      status: p.status,
+      plan: p.plan,
+      hasLink: linkedProducts.has(p.product)
+    }));
+    const productsWithoutLink = products
+      .filter((p) => p.status === 'ENABLED' && !p.hasLink)
+      .map((p) => p.product);
+
+    return reply.send({
+      ok: true,
+      catalog: PLATFORM_PRODUCTS,
+      organization: {
+        id: org.id,
+        slug: org.slug,
+        name: org.name,
+        type: org.type,
+        status: org.status,
+        products,
+        productsWithoutLink,
+        members: org.members.map((m) => ({
+          id: m.id,
+          role: m.role,
+          status: m.status,
+          user: m.user
+        })),
+        links: org.links.map((l) => ({
+          id: l.id,
+          product: l.product,
+          productLabel: productLabel(l.product),
+          legacyTenantId: l.legacyTenantId,
+          legacyUserId: l.legacyUserId,
+          legacyTenantName: nameByKey.get(`${l.product}:${l.legacyTenantId}`) || null,
+          platformUserEmail: l.platformUser.email,
+          platformUserId: l.platformUser.id,
+          platformUserStatus: l.platformUser.status
+        }))
+      }
+    });
+  });
+
+  fastify.patch('/api/control/organizations/:orgId', {
+    preHandler: requirePlatformAdmin(prisma)
+  }, async (req, reply) => {
+    const orgId = String(req.params.orgId || '');
+    const org = await prisma.organization.findUnique({ where: { id: orgId } });
+    if (!org) return reply.code(404).send({ ok: false, error: 'NOT_FOUND' });
+
+    const data = {};
+    if (req.body?.name != null) {
+      const name = String(req.body.name).trim();
+      if (!name) return reply.code(400).send({ ok: false, error: 'INVALID_NAME' });
+      data.name = name;
+    }
+    if (req.body?.status != null) {
+      let status = String(req.body.status).toUpperCase();
+      if (status === 'SUSPENDED') status = 'DISABLED';
+      if (!['ACTIVE', 'DISABLED'].includes(status)) {
+        return reply.code(400).send({ ok: false, error: 'INVALID_STATUS' });
+      }
+      data.status = status;
+    }
+    if (!Object.keys(data).length) {
+      return reply.code(400).send({ ok: false, error: 'NO_CHANGES' });
+    }
+
+    const updated = await prisma.organization.update({
+      where: { id: orgId },
+      data
+    });
+    return reply.send({
+      ok: true,
+      organization: {
+        id: updated.id,
+        slug: updated.slug,
+        name: updated.name,
+        type: updated.type,
+        status: updated.status
+      }
+    });
+  });
+
   fastify.patch('/api/control/organizations/:orgId/products/:product', {
     preHandler: requirePlatformAdmin(prisma)
   }, async (req, reply) => {
@@ -196,7 +382,97 @@ export async function registerPlatformRoutes(fastify, { prisma }) {
       }
     });
 
-    return reply.send({ ok: true, product: row });
+    let provision = null;
+    if (status === 'ENABLED') {
+      const existingLinks = await prisma.legacyIdentityLink.count({
+        where: { organizationId: orgId, product }
+      });
+      if (existingLinks === 0) {
+        provision = await provisionProductAccess(prisma, org, product);
+      }
+    }
+
+    const linkCount = await prisma.legacyIdentityLink.count({
+      where: { organizationId: orgId, product }
+    });
+    const hasLink = linkCount > 0;
+    const warning =
+      status === 'ENABLED' && !hasLink
+        ? provision?.message ||
+          'Producto activo sin vínculo legacy — el cliente no lo verá en /app hasta crear link'
+        : null;
+
+    return reply.send({
+      ok: true,
+      product: {
+        product: row.product,
+        status: row.status,
+        plan: row.plan,
+        hasLink
+      },
+      provision,
+      warning,
+      message: hasLink && provision?.ok ? provision.message : undefined
+    });
+  });
+
+  fastify.post('/api/control/organizations/:orgId/products/:product/provision', {
+    preHandler: requirePlatformAdmin(prisma)
+  }, async (req, reply) => {
+    const orgId = String(req.params.orgId || '');
+    const product = String(req.params.product || '').toUpperCase();
+    if (!PLATFORM_PRODUCTS[product]) {
+      return reply.code(400).send({ ok: false, error: 'UNKNOWN_PRODUCT' });
+    }
+    const org = await prisma.organization.findUnique({ where: { id: orgId } });
+    if (!org) return reply.code(404).send({ ok: false, error: 'NOT_FOUND' });
+
+    const op = await prisma.organizationProduct.findUnique({
+      where: { organizationId_product: { organizationId: orgId, product } }
+    });
+    if (!op || op.status !== 'ENABLED') {
+      return reply.code(400).send({
+        ok: false,
+        error: 'PRODUCT_NOT_ENABLED',
+        message: 'Activa el producto antes de vincular.'
+      });
+    }
+
+    const provision = await provisionProductAccess(prisma, org, product);
+    const linkCount = await prisma.legacyIdentityLink.count({
+      where: { organizationId: orgId, product }
+    });
+    return reply.send({
+      ok: !!provision.ok && linkCount > 0,
+      provision,
+      hasLink: linkCount > 0,
+      warning: linkCount === 0 ? provision.message : null,
+      message: provision.message
+    });
+  });
+
+  fastify.post('/api/control/organizations/:orgId/members', {
+    preHandler: requirePlatformAdmin(prisma)
+  }, async (req, reply) => {
+    const orgId = String(req.params.orgId || '');
+    const result = await addOrganizationMember(prisma, orgId, {
+      email: req.body?.email,
+      password: req.body?.password,
+      fullName: req.body?.fullName,
+      role: req.body?.role || 'ORGANIZATION_ADMIN'
+    });
+    if (!result.ok) {
+      const code = result.error === 'NOT_FOUND' ? 404 : 400;
+      return reply.code(code).send(result);
+    }
+    return reply.send(result);
+  });
+
+  fastify.get('/api/control/gaps', {
+    preHandler: requirePlatformAdmin(prisma)
+  }, async (req, reply) => {
+    const gaps = await collectControlGaps(prisma);
+    return reply.send({ ok: true, ...gaps });
   });
 
   fastify.get('/api/control/users', {

@@ -781,7 +781,7 @@
           <option value="60">Últimos 60 días</option>
           <option value="90">Últimos 90 días</option>
         </select>
-        <span class="muted" id="analyticsPeriodHint">Funnel, inspecciones diarias, mapa regional y heatmap.</span>
+        <span class="muted" id="analyticsPeriodHint">Funnel, inspecciones diarias, por corredora, mapa regional y heatmap.</span>
       </div>
 
       <div class="analyticsGrid">
@@ -799,6 +799,15 @@
           </div>
           <p class="muted" id="inspectionsDailyErr" style="font-size:12px; margin-top:8px; min-height:1em;"></p>
         </div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px;">
+        <h3>Inspecciones por corredora</h3>
+        <p class="muted" style="font-size:12px; margin:0 0 8px;">Casos creados en el periodo seleccionado (top 30).</p>
+        <div style="position:relative; height:420px;">
+          <canvas id="inspectionsByTenantChart"></canvas>
+        </div>
+        <p class="muted" id="inspectionsByTenantErr" style="font-size:12px; margin-top:8px; min-height:1em;"></p>
       </div>
 
       <div class="analyticsGrid">
@@ -2969,24 +2978,33 @@
         card.className = "tenantCard";
         const statusLabel = String(t.status || "ACTIVE") === "ACTIVE" ? "Activa" : "Inactiva";
         const metaParts = [t.email || "", t.rut || "", t.legalName || ""].filter(Boolean).join(" · ") || "—";
+        const creditsBal = Number(t.creditsBalance ?? 0);
         card.innerHTML = `
           <div class="tenantCardHeader">
             <span class="tenantCardTitle">${escapeHtml(t.name || "—")}</span>
             <span class="badge" title="${escapeHtml(t.id)}">ID: ${escapeHtml(t.id.slice(0, 8))}…</span>
             <span class="tenantCardMeta">Creada: ${formatDateShort(t.createdAt)}</span>
             <span class="pill ${statusLabel === "Activa" ? "ok" : ""}">${statusLabel}</span>
+            <span class="pill ok" data-credits-pill title="Créditos disponibles">Créditos: ${creditsBal}</span>
             <span class="tenantCardMeta" style="width:100%;">${escapeHtml(metaParts)}</span>
           </div>
           <div class="tenantCardActions">
             <button type="button" class="btn outline" data-toggle="edit">Editar</button>
+            <button type="button" class="btn outline" data-toggle="logos">Logos</button>
+            <button type="button" class="btn outline" data-toggle="credits">Créditos</button>
             <button type="button" class="btn outline" data-toggle="users">Usuarios (<span data-user-count>0</span>)</button>
           </div>
           <div class="tenantCardBody" data-body="edit"></div>
+          <div class="tenantCardBody" data-body="logos"></div>
+          <div class="tenantCardBody" data-body="credits"></div>
           <div class="tenantCardBody" data-body="users"></div>
         `;
         const editBody = card.querySelector('[data-body="edit"]');
+        const logosBody = card.querySelector('[data-body="logos"]');
+        const creditsBody = card.querySelector('[data-body="credits"]');
         const usersBody = card.querySelector('[data-body="users"]');
         const userCountSpan = card.querySelector("[data-user-count]");
+        const creditsPill = card.querySelector("[data-credits-pill]");
 
         const editForm = document.createElement("div");
         editForm.className = "grid";
@@ -3073,6 +3091,193 @@
         editForm.appendChild(actionsDiv);
         editBody.appendChild(editForm);
 
+        const logosPanel = document.createElement("div");
+        logosPanel.style.display = "flex";
+        logosPanel.style.flexWrap = "wrap";
+        logosPanel.style.gap = "24px";
+        logosPanel.style.alignItems = "flex-start";
+        const colorLogoUrl = t.logoUrl || "";
+        const whiteLogoUrl = t.logoWhiteUrl || "";
+        logosPanel.innerHTML = `
+          <div>
+            <label>Logo (Color)</label>
+            <div style="margin-top:6px;">
+              <div style="width:120px;height:90px;border:1px solid #1E2B45;border-radius:8px;display:flex;align-items:center;justify-content:center;background:#0f172a;">
+                <img data-admin-logo-color alt="Logo color" style="max-width:100px;max-height:80px;object-fit:contain;${colorLogoUrl ? "" : "display:none;"}" ${colorLogoUrl ? `src="${escapeHtml(colorLogoUrl)}"` : ""} />
+                <span data-admin-logo-color-ph class="muted" style="font-size:12px;${colorLogoUrl ? "display:none;" : ""}">Sin logo</span>
+              </div>
+              <input data-admin-logo-color-file type="file" accept="image/jpeg,image/png,image/webp" style="margin-top:8px;max-width:220px;" />
+              <div class="formHint" style="margin-top:4px;font-size:12px;color:#94a3b8;">JPG, PNG o WebP. Máx. 2 MB</div>
+            </div>
+          </div>
+          <div>
+            <label>Logo (Negro / blanco sobre oscuro)</label>
+            <div style="margin-top:6px;">
+              <div style="width:120px;height:90px;border:1px solid #1E2B45;border-radius:8px;display:flex;align-items:center;justify-content:center;background:#070812;">
+                <img data-admin-logo-white alt="Logo blanco" style="max-width:100px;max-height:80px;object-fit:contain;${whiteLogoUrl ? "" : "display:none;"}" ${whiteLogoUrl ? `src="${escapeHtml(whiteLogoUrl)}"` : ""} />
+                <span data-admin-logo-white-ph class="muted" style="font-size:12px;${whiteLogoUrl ? "display:none;" : ""}">Sin logo</span>
+              </div>
+              <input data-admin-logo-white-file type="file" accept="image/jpeg,image/png,image/webp" style="margin-top:8px;max-width:220px;" />
+              <div class="formHint" style="margin-top:4px;font-size:12px;color:#94a3b8;">Para fondos oscuros. Máx. 2 MB</div>
+            </div>
+          </div>
+          <div class="note" data-admin-logo-note style="width:100%;"></div>
+        `;
+        const logoNote = logosPanel.querySelector("[data-admin-logo-note]");
+        const setLogoPreview = (isWhite, url) => {
+          const img = logosPanel.querySelector(isWhite ? "[data-admin-logo-white]" : "[data-admin-logo-color]");
+          const ph = logosPanel.querySelector(isWhite ? "[data-admin-logo-white-ph]" : "[data-admin-logo-color-ph]");
+          if (url) {
+            if (img) {
+              img.src = url;
+              img.style.display = "";
+            }
+            if (ph) ph.style.display = "none";
+            if (isWhite) t.logoWhiteUrl = url;
+            else t.logoUrl = url;
+          }
+        };
+        const uploadAdminLogo = async (file, isWhite) => {
+          if (!file) return;
+          logoNote.textContent = "Subiendo…";
+          const fd = new FormData();
+          fd.append("logo", file);
+          const qs = isWhite ? "?type=white" : "";
+          try {
+            const res = await adminFetch(`/api/admin/tenants/${t.id}/logo${qs}`, {
+              method: "POST",
+              body: fd
+            });
+            const data = await res.json().catch(() => ({}));
+            if (res.ok && data.logoUrl) {
+              setLogoPreview(isWhite, data.logoUrl);
+              logoNote.textContent = isWhite ? "Logo blanco/negro subido." : "Logo color subido.";
+              const note = document.getElementById("tenantNote");
+              if (note) {
+                note.textContent = `${t.name || "Corredora"}: ${isWhite ? "logo blanco" : "logo color"} actualizado.`;
+              }
+            } else {
+              logoNote.textContent = data.message || data.error || "No se pudo subir el logo.";
+            }
+          } catch (err) {
+            logoNote.textContent = "Error de conexión al subir el logo.";
+          }
+        };
+        logosPanel.querySelector("[data-admin-logo-color-file]").addEventListener("change", async (e) => {
+          const file = e.target.files?.[0];
+          await uploadAdminLogo(file, false);
+          e.target.value = "";
+        });
+        logosPanel.querySelector("[data-admin-logo-white-file]").addEventListener("change", async (e) => {
+          const file = e.target.files?.[0];
+          await uploadAdminLogo(file, true);
+          e.target.value = "";
+        });
+        logosBody.appendChild(logosPanel);
+
+        const creditsPanel = document.createElement("div");
+        creditsPanel.className = "grid";
+        creditsPanel.innerHTML = `
+          <div class="row" style="grid-column:1/-1;">
+            <label>Saldo actual</label>
+            <div><strong data-credits-current>${creditsBal}</strong> créditos</div>
+          </div>
+          <div class="row">
+            <label for="giftAmount-${escapeHtml(t.id)}">Regalar créditos</label>
+            <input id="giftAmount-${escapeHtml(t.id)}" type="number" min="1" step="1" class="smallInput" placeholder="Ej. 5" />
+          </div>
+          <div class="row">
+            <label for="giftNote-${escapeHtml(t.id)}">Nota (opcional)</label>
+            <input id="giftNote-${escapeHtml(t.id)}" type="text" class="smallInput" placeholder="Motivo del regalo" />
+          </div>
+          <div class="actions" style="grid-column:1/-1;">
+            <button type="button" class="btn" data-credits-gift>Regalar</button>
+          </div>
+          <div class="row" style="grid-column:1/-1; margin-top:8px;">
+            <label for="setBalance-${escapeHtml(t.id)}">Ajustar saldo a</label>
+            <input id="setBalance-${escapeHtml(t.id)}" type="number" min="0" step="1" class="smallInput" placeholder="Ej. 12" value="${creditsBal}" />
+          </div>
+          <div class="row">
+            <label for="setNote-${escapeHtml(t.id)}">Nota (opcional)</label>
+            <input id="setNote-${escapeHtml(t.id)}" type="text" class="smallInput" placeholder="Motivo del ajuste" />
+          </div>
+          <div class="actions" style="grid-column:1/-1;">
+            <button type="button" class="btn outline" data-credits-set>Ajustar saldo</button>
+          </div>
+          <div class="note" data-credits-note style="grid-column:1/-1;"></div>
+        `;
+        const creditsNote = creditsPanel.querySelector("[data-credits-note]");
+        const creditsCurrent = creditsPanel.querySelector("[data-credits-current]");
+        const giftAmountInput = creditsPanel.querySelector(`#giftAmount-${CSS.escape(t.id)}`);
+        const giftNoteInput = creditsPanel.querySelector(`#giftNote-${CSS.escape(t.id)}`);
+        const setBalanceInput = creditsPanel.querySelector(`#setBalance-${CSS.escape(t.id)}`);
+        const setNoteInput = creditsPanel.querySelector(`#setNote-${CSS.escape(t.id)}`);
+
+        const applyCreditsUi = (balance) => {
+          const n = Number(balance || 0);
+          if (creditsCurrent) creditsCurrent.textContent = String(n);
+          if (creditsPill) creditsPill.textContent = `Créditos: ${n}`;
+          if (setBalanceInput) setBalanceInput.value = String(n);
+          t.creditsBalance = n;
+        };
+
+        creditsPanel.querySelector("[data-credits-gift]").addEventListener("click", async () => {
+          const amount = Number(giftAmountInput?.value);
+          if (!Number.isInteger(amount) || amount < 1) {
+            creditsNote.textContent = "Indica cuántos créditos regalar (entero ≥ 1).";
+            return;
+          }
+          if (!confirm(`¿Regalar ${amount} crédito(s) a ${t.name || "esta corredora"}?`)) return;
+          const res = await adminFetch(`/api/admin/tenants/${t.id}/credits`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              mode: "gift",
+              amount,
+              note: giftNoteInput?.value?.trim() || undefined
+            })
+          });
+          const data = await res.json().catch(() => ({}));
+          const note = document.getElementById("tenantNote");
+          if (res.ok) {
+            applyCreditsUi(data.balance);
+            if (giftAmountInput) giftAmountInput.value = "";
+            creditsNote.textContent = `Regalados +${amount}. Nuevo saldo: ${data.balance}.`;
+            if (note) note.textContent = `${t.name || "Corredora"}: +${amount} créditos (saldo ${data.balance}).`;
+          } else {
+            creditsNote.textContent = data.message || data.error || "No se pudieron regalar créditos.";
+          }
+        });
+
+        creditsPanel.querySelector("[data-credits-set]").addEventListener("click", async () => {
+          const balance = Number(setBalanceInput?.value);
+          if (!Number.isInteger(balance) || balance < 0) {
+            creditsNote.textContent = "El saldo debe ser un entero ≥ 0.";
+            return;
+          }
+          if (!confirm(`¿Dejar el saldo de ${t.name || "esta corredora"} en ${balance} créditos?`)) return;
+          const res = await adminFetch(`/api/admin/tenants/${t.id}/credits`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              mode: "set",
+              balance,
+              note: setNoteInput?.value?.trim() || undefined
+            })
+          });
+          const data = await res.json().catch(() => ({}));
+          const note = document.getElementById("tenantNote");
+          if (res.ok) {
+            applyCreditsUi(data.balance);
+            creditsNote.textContent = `Saldo ajustado a ${data.balance} (antes ${data.previousBalance}).`;
+            if (note) note.textContent = `${t.name || "Corredora"}: saldo ajustado a ${data.balance}.`;
+          } else {
+            creditsNote.textContent = data.message || data.error || "No se pudo ajustar el saldo.";
+          }
+        });
+
+        creditsBody.appendChild(creditsPanel);
+
         const userCard = document.createElement("div");
         userCard.className = "userCard";
         userCard.innerHTML = `
@@ -3107,13 +3312,26 @@
         `;
         usersBody.appendChild(userCard);
 
+        const closeOtherBodies = (keep) => {
+          [editBody, logosBody, creditsBody, usersBody].forEach((el) => {
+            if (el !== keep) el.classList.remove("open");
+          });
+        };
         card.querySelector('[data-toggle="edit"]').addEventListener("click", () => {
           editBody.classList.toggle("open");
-          if (usersBody.classList.contains("open")) usersBody.classList.remove("open");
+          closeOtherBodies(editBody);
+        });
+        card.querySelector('[data-toggle="logos"]').addEventListener("click", () => {
+          logosBody.classList.toggle("open");
+          closeOtherBodies(logosBody);
+        });
+        card.querySelector('[data-toggle="credits"]').addEventListener("click", () => {
+          creditsBody.classList.toggle("open");
+          closeOtherBodies(creditsBody);
         });
         card.querySelector('[data-toggle="users"]').addEventListener("click", () => {
           usersBody.classList.toggle("open");
-          if (editBody.classList.contains("open")) editBody.classList.remove("open");
+          closeOtherBodies(usersBody);
         });
 
         const body = userCard.querySelector("[data-users-body]");
@@ -5089,6 +5307,7 @@
 
     // --- Dashboard analytics (funnel, daily, geo, heatmap) ---
     let inspectionsDailyChart = null;
+    let inspectionsByTenantChart = null;
     const DOW_LABELS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
     function hmCell(matrix, d, h) {
@@ -5386,9 +5605,103 @@
       const n = parseInt(days, 10) || 30;
       loadFunnelAnalytics(n);
       loadInspectionsDailyChart(n);
+      loadInspectionsByTenantChart(n);
       loadAnalysisAccuracyChart(n);
       loadGeoAnalytics(n);
       loadHeatmapAnalytics(n);
+    }
+
+    async function loadInspectionsByTenantChart(days) {
+      const ctx = document.getElementById("inspectionsByTenantChart");
+      const errEl = document.getElementById("inspectionsByTenantErr");
+      if (!ctx) return;
+      if (errEl) errEl.innerHTML = "";
+      try {
+        const res = await adminFetch("/api/admin/analytics/inspections-by-tenant?days=" + days + "&limit=30");
+        const d = await res.json().catch(() => ({}));
+        if (res.status !== 200 || !d.ok) {
+          if (inspectionsByTenantChart) {
+            inspectionsByTenantChart.destroy();
+            inspectionsByTenantChart = null;
+          }
+          if (errEl) errEl.innerHTML = analyticsProblemHtml(res, d);
+          return;
+        }
+        const rows = d.rows || [];
+        if (!rows.length) {
+          if (inspectionsByTenantChart) {
+            inspectionsByTenantChart.destroy();
+            inspectionsByTenantChart = null;
+          }
+          if (errEl) errEl.textContent = "Sin inspecciones en este periodo.";
+          return;
+        }
+        const labels = rows.map((r) => {
+          const name = String(r.tenantName || "—");
+          return name.length > 28 ? name.slice(0, 26) + "…" : name;
+        });
+        const totals = rows.map((r) => Number(r.total || 0));
+        const dones = rows.map((r) => Number(r.done || 0));
+        const chartHeight = Math.max(280, rows.length * 28);
+        const wrap = ctx.parentElement;
+        if (wrap) wrap.style.height = chartHeight + "px";
+        if (inspectionsByTenantChart) inspectionsByTenantChart.destroy();
+        inspectionsByTenantChart = new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels,
+            datasets: [
+              {
+                label: "Total creadas",
+                data: totals,
+                backgroundColor: "rgba(53, 208, 127, 0.75)",
+                borderColor: "#35D07F",
+                borderWidth: 1,
+                borderRadius: 4
+              },
+              {
+                label: "Completadas",
+                data: dones,
+                backgroundColor: "rgba(96, 165, 250, 0.65)",
+                borderColor: "#60a5fa",
+                borderWidth: 1,
+                borderRadius: 4
+              }
+            ]
+          },
+          options: {
+            indexAxis: "y",
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                labels: { color: "#94a3b8" }
+              },
+              tooltip: {
+                callbacks: {
+                  title(items) {
+                    const i = items?.[0]?.dataIndex;
+                    return rows[i]?.tenantName || "";
+                  }
+                }
+              }
+            },
+            scales: {
+              x: {
+                beginAtZero: true,
+                ticks: { color: "#94a3b8", precision: 0 },
+                grid: { color: "rgba(148,163,184,0.12)" }
+              },
+              y: {
+                ticks: { color: "#cbd5e1" },
+                grid: { display: false }
+              }
+            }
+          }
+        });
+      } catch (e) {
+        if (errEl) errEl.textContent = "Error al cargar inspecciones por corredora.";
+      }
     }
 
     let analysisAccuracyChart = null;

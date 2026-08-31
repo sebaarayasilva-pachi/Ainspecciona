@@ -8,15 +8,15 @@ export const SEVERITY_FACTOR_V22 = {
 
 export const DEFAULT_SCORE_CONFIG = {
   kpis: {
-    MUROS_PINTURA: { low: 5, medium: 15, high: 30 },
-    HUMEDAD: { low: 5, medium: 15, high: 30 },
-    PISOS: { low: 5, medium: 15, high: 30 },
-    SANITARIOS: { low: 5, medium: 15, high: 30 },
-    ELECTRICIDAD: { low: 5, medium: 15, high: 30 },
-    VENTANAS_CERRAMIENTOS: { low: 5, medium: 15, high: 30 },
-    PUERTAS_HERRAJES: { low: 5, medium: 15, high: 30 },
-    MOBILIARIO_FIJO: { low: 5, medium: 15, high: 30 },
-    DOCUMENTOS_CUMPLIMIENTO: { low: 5, medium: 15, high: 30 }
+    MUROS_PINTURA: { low: 30, medium: 50, high: 80 },
+    HUMEDAD: { low: 30, medium: 50, high: 80 },
+    PISOS: { low: 30, medium: 50, high: 80 },
+    SANITARIOS: { low: 30, medium: 50, high: 80 },
+    ELECTRICIDAD: { low: 30, medium: 50, high: 80 },
+    VENTANAS_CERRAMIENTOS: { low: 30, medium: 50, high: 80 },
+    PUERTAS_HERRAJES: { low: 30, medium: 50, high: 80 },
+    MOBILIARIO_FIJO: { low: 30, medium: 50, high: 80 },
+    DOCUMENTOS_CUMPLIMIENTO: { low: 30, medium: 50, high: 80 }
   },
   slotKpiMap: {
     BATHROOM_1_SHOWER: "SANITARIOS",
@@ -648,8 +648,9 @@ function computeScoringByKpi(slots, scoreConfig) {
       byGroup.set(key, { groupKey: key, title: kpiTitleFromKey(key), impact: 0, slotsCount: 0 });
     }
     const group = byGroup.get(key);
-    group.slotsCount += 1;
+    // Solo contar slots con severity (no omitidos ni OK)
     if (!s.severity) return;
+    group.slotsCount += 1;
     const penalty = kpiPenaltyFromSeverity(key, s.severity, cfg);
     totalPenalty += penalty;
     group.impact += penalty;
