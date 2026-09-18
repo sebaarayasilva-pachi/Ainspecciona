@@ -99,21 +99,30 @@ def main():
     ], cwd=str(mvs_dir))
 
     status(40, "densifying_point_cloud")
-    # Los frames de ARCore son de 0.3 MP: a resolución nativa la consistencia fotométrica
-    # rechaza casi todo, y submuestreando de más la nube se llena de ruido. El nivel 1 es
-    # el punto medio; se deja ajustable para poder calibrar sin redeployar.
+    # Los frames de ARCore son de 480x640, y --min-resolution ya vale 640, así que pedir
+    # nivel 1 no submuestreaba nada: el clamp lo anulaba. Se pide nivel 0 para que la
+    # intención quede explícita. Los valores van por env para calibrar sin redeployar.
     run_cmd([
         "DensifyPointCloud",
         "scene.mvs",
-        "--resolution-level", env("MVS_RESOLUTION_LEVEL") or "1",
+        "--resolution-level", env("MVS_RESOLUTION_LEVEL") or "0",
         "--number-views-fuse", env("MVS_VIEWS_FUSE") or "2"
     ], cwd=str(mvs_dir))
 
     status(60, "reconstructing_mesh")
+    # La malla salía en islas flotantes por los defaults del paso de limpieza:
+    # --max-edge-scale 2 borraba ~30k caras de arista larga, justo las que puentean las
+    # zonas con pocos puntos, y --min-point-distance 1.5 descartaba puntos densos antes de
+    # triangular. --free-space-support usa la visibilidad de las cámaras para vaciar el
+    # interior, que es lo que cierra superficies poco representadas en escenas indoor.
     run_cmd([
         "ReconstructMesh",
         "scene_dense.mvs",
-        "--thickness-factor", "2" # Helps with thin structures
+        "--free-space-support", env("MVS_FREE_SPACE") or "1",
+        "--min-point-distance", env("MVS_MIN_POINT_DIST") or "0",
+        "--max-edge-scale", env("MVS_MAX_EDGE_SCALE") or "6",
+        "--close-holes", env("MVS_CLOSE_HOLES") or "100",
+        "--thickness-factor", "2"
     ], cwd=str(mvs_dir))
 
     status(80, "texturing_mesh")
