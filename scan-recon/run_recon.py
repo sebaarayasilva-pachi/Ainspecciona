@@ -22,6 +22,9 @@ from ply_to_glb import ply_to_glb_bytes
 WORK = Path(os.environ.get("WORK_DIR", "/tmp/scan-recon"))
 COLMAP = os.environ.get("COLMAP_BIN", "colmap")
 MAX_FRAMES = int(os.environ.get("MAX_FRAMES", "160"))
+# Progreso que reporta la web cuando COLMAP termina. El tramo que queda hasta 100 es el
+# mallado de OpenMVS, que es quien publica el READY.
+COLMAP_DONE_PROGRESS = 60
 
 
 def log(msg):
@@ -311,9 +314,12 @@ def main():
     frames_meta = []
 
     def status(progress, step, **extra):
-        payload = {"status": "PROCESSING", "progress": progress, "step": step, **extra}
+        # Los pasos de aca reportan 0..100 de COLMAP, pero en la barra de la web COLMAP
+        # es solo el primer tramo: el resto lo ocupa el mallado.
+        scaled = round(progress * COLMAP_DONE_PROGRESS / 100)
+        payload = {"status": "PROCESSING", "progress": scaled, "step": step, **extra}
         gcs.upload_json(status_key, payload)
-        log(f"status {progress} {step}")
+        log(f"status {scaled} {step}")
 
     try:
         WORK.mkdir(parents=True, exist_ok=True)
@@ -579,9 +585,13 @@ def main():
             "planes": detected_planes
         }
 
+        # COLMAP no declara READY: la malla de OpenMVS llega despues y sobrescribe este
+        # mismo result.json. Si marcaramos listo aca, la web finaliza el scan y nunca
+        # vuelve a leerlo, asi que el visor se queda para siempre en la nube de puntos.
+        # El READY lo publica run_meshing.py, o modal_app.py si el mallado falla.
         result = {
-            "status": "READY",
-            "progress": 100,
+            "status": "PROCESSING",
+            "progress": COLMAP_DONE_PROGRESS,
             "modelType": "GLB",
             "modelKey": model_key,
             "kind": meta["kind"],
@@ -592,8 +602,13 @@ def main():
             "diagnostic": diagnostic,
         }
         gcs.upload_json(result_key, result)
-        gcs.upload_json(status_key, {"status": "READY", "progress": 100, "step": "done", "pointCount": point_count})
-        log(f"READY points={point_count} kind={meta['kind']}")
+        gcs.upload_json(status_key, {
+            "status": "PROCESSING",
+            "progress": COLMAP_DONE_PROGRESS,
+            "step": "colmap_done",
+            "pointCount": point_count,
+        })
+        log(f"COLMAP OK points={point_count} kind={meta['kind']}; falta el mallado")
     except Exception as exc:
         err = str(exc)[:400]
         log("FAILED " + err)

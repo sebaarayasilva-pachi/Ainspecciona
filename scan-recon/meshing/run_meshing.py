@@ -7,6 +7,11 @@ from pathlib import Path
 from google.cloud import storage
 import trimesh
 
+# Debe coincidir con COLMAP_DONE_PROGRESS de run_recon.py: es el punto de la barra donde
+# COLMAP termina y arranca este mallado.
+COLMAP_DONE_PROGRESS = 60
+
+
 def env(key):
     return os.environ.get(key)
 
@@ -57,13 +62,17 @@ def main():
 
     prefix = f"scans/{org_id}/{scan_id}"
     colmap_prefix = f"{prefix}/recon/colmap"
-    status_key = f"{prefix}/meshing_status.json"
+    # El mismo status.json que consulta la web. run_recon.py lo dejo en PROCESSING al
+    # terminar COLMAP, y el tramo que queda hasta 100 es este mallado.
+    status_key = f"{prefix}/recon/status.json"
+    result_key = f"{prefix}/recon/result.json"
 
     gcs = Gcs(bucket_name)
-    
+
     def status(progress, step):
-        gcs.upload_json(status_key, {"status": "TRAINING", "progress": progress, "step": step})
-        log(f"status {progress} {step}")
+        scaled = COLMAP_DONE_PROGRESS + round(progress * (99 - COLMAP_DONE_PROGRESS) / 100)
+        gcs.upload_json(status_key, {"status": "PROCESSING", "progress": scaled, "step": step})
+        log(f"status {scaled} {step}")
 
     WORK = Path("/tmp/work")
     if WORK.exists():
@@ -145,20 +154,32 @@ def main():
     log("Exporting to GLB...")
     scene.export(str(glb_file))
 
+    # trimesh.load devuelve una Scene o una Trimesh segun el OBJ, asi que hay que cubrir
+    # los dos casos para reportar el conteo real en result.json.
+    if isinstance(scene, trimesh.Scene):
+        mesh_faces = sum(len(g.faces) for g in scene.geometry.values())
+    else:
+        mesh_faces = len(scene.faces)
+    log(f"malla exportada: {mesh_faces} caras")
+
     status(95, "uploading_model")
     gcs.upload_file(glb_file, f"{prefix}/model.glb")
-    
-    # Actualizar el resultado principal
-    result_key = f"{prefix}/recon/result.json"
+
+    # El READY lo publica este paso, no COLMAP: hasta aca el model.glb era la nube de
+    # puntos dispersa y recien ahora quedo sobrescrito por la malla texturizada.
     blob = gcs.bucket.blob(result_key)
-    if blob.exists():
-        result_data = json.loads(blob.download_as_string())
-        result_data["modelType"] = "GLB"
-        result_data["modelKey"] = f"{prefix}/model.glb"
-        gcs.upload_json(result_key, result_data)
-    
-    status(100, "done")
-    log("Meshing completado exitosamente")
+    result_data = json.loads(blob.download_as_string()) if blob.exists() else {}
+    result_data.update({
+        "status": "READY",
+        "progress": 100,
+        "modelType": "GLB",
+        "modelKey": f"{prefix}/model.glb",
+        "kind": "openmvs_mesh",
+        "faceCount": int(mesh_faces),
+    })
+    gcs.upload_json(result_key, result_data)
+    gcs.upload_json(status_key, {"status": "READY", "progress": 100, "step": "done"})
+    log(f"READY faces={mesh_faces}")
 
 if __name__ == "__main__":
     main()

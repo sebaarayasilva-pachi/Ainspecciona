@@ -78,11 +78,37 @@ def process_scan_bg(scan_id: str, org_id: str, pkg_path: str, bucket_name: str):
     print(f"--- Iniciando Meshing (OpenMVS) para {scan_id} ---")
     mesh_res = subprocess.run([sys.executable, "/app/scan-recon/meshing/run_meshing.py"])
     if mesh_res.returncode != 0:
-        print("Error en Meshing!")
+        # run_recon.py deja el scan en PROCESSING porque el READY lo publica el mallado.
+        # Si el mallado se cae, sin esto el scan queda colgado para siempre; preferimos
+        # publicar la nube de puntos dispersa, que es lo que habia antes de este cambio.
+        print("Error en Meshing! Publicando la nube de puntos de COLMAP como resultado.")
+        publish_sparse_fallback(bucket_name, org_id, scan_id)
         return {"ok": False, "error": "MESHING_FAILED"}
-        
+
     print("--- Pipeline completado exitosamente ---")
     return {"ok": True}
+
+
+def publish_sparse_fallback(bucket_name: str, org_id: str, scan_id: str):
+    """Marca READY el result.json que dejo COLMAP, sin malla."""
+    import json
+
+    from google.cloud import storage
+
+    prefix = f"scans/{org_id}/{scan_id}"
+    bucket = storage.Client().bucket(bucket_name)
+    try:
+        blob = bucket.blob(f"{prefix}/recon/result.json")
+        result = json.loads(blob.download_as_string()) if blob.exists() else {}
+        result.update({"status": "READY", "progress": 100})
+        blob.upload_from_string(json.dumps(result), content_type="application/json")
+        bucket.blob(f"{prefix}/recon/status.json").upload_from_string(
+            json.dumps({"status": "READY", "progress": 100, "step": "done_without_mesh"}),
+            content_type="application/json",
+        )
+        print("Fallback publicado: el scan queda como nube de puntos.")
+    except Exception as exc:
+        print(f"No se pudo publicar el fallback: {exc}")
 
 @app.function(
     image=modal.Image.debian_slim().pip_install("fastapi[standard]"), # Webhook ligero
