@@ -1,0 +1,7 @@
+FROM yeicor/colmap-openmvs:cuda-latest
+
+ENV PATH="/usr/local/bin/OpenMVS:${PATH}"
+
+# Clear any entrypoint that might be interfering with Modal
+ENTRYPOINT []
+CMD ["/bin/bash"]

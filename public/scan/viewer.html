@@ -36,12 +36,73 @@
       border: 1px solid #2a3542; overflow: hidden; position: relative;
     }
     #stage canvas { width: 100% !important; height: 100% !important; display: block; }
+    #stage.walk, #walkStage.walk { aspect-ratio: 3/4; max-height: min(72vh, 720px); background: #07090c; }
+    #walkStage {
+      width: 100%; aspect-ratio: 16/10; background: #000; border-radius: 14px;
+      border: 1px solid #2a3542; overflow: hidden; position: relative;
+    }
+    @media (min-width: 720px) {
+      #stage.walk, #walkStage.walk { aspect-ratio: 16/10; }
+    }
+    .walk-photo {
+      position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    }
+    .walk-photo img {
+      max-width: 100%; max-height: 100%; object-fit: contain;
+      transition: opacity .28s ease;
+    }
+    .walk-photo img.rot90 { transform: rotate(90deg) scale(1.35); }
+    .walk-photo img.rot-90 { transform: rotate(-90deg) scale(1.35); }
+    .walk-photo img.rot180 { transform: rotate(180deg); }
+    .walk-nav {
+      position: absolute; inset: 0; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 8px; pointer-events: none;
+    }
+    .walk-nav button {
+      pointer-events: auto; width: 44px; height: 44px; border: 0; border-radius: 50%;
+      background: rgba(15,20,25,.72); color: #e8eef4; font-size: 26px; font-weight: 700;
+      cursor: pointer; font-family: inherit; line-height: 1;
+    }
+    .walk-hud {
+      position: absolute; left: 12px; right: 12px; bottom: 12px;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      pointer-events: none;
+    }
+    .walk-hud span, .walk-hud button {
+      pointer-events: auto; background: rgba(15,20,25,.72); color: #e8eef4;
+      border-radius: 999px; padding: 6px 12px; font-size: 13px; font-weight: 700;
+    }
+    .walk-hud button {
+      border: 1px solid #2a3542; cursor: pointer; font-family: inherit;
+    }
+    .walk-hud button.active { background: #2bb673; color: #062415; border-color: #2bb673; }
     #planWrap {
       display: none; width: 100%; aspect-ratio: 16/10; background: #1a222c;
       border-radius: 14px; border: 1px solid #2a3542; padding: 16px; overflow: auto;
     }
     #planWrap.show { display: block; }
     #stage.hide { display: none; }
+    #minimap {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 200px;
+      height: 150px;
+      background: rgba(15,20,25,.85);
+      border: 1px solid #2a3542;
+      border-radius: 10px;
+      z-index: 20;
+      pointer-events: none;
+      backdrop-filter: blur(4px);
+    }
+    @media (max-width: 720px) {
+      #minimap {
+        width: 120px;
+        height: 90px;
+        top: 12px;
+        right: 12px;
+      }
+    }
     .meta { margin-top: 14px; color: #8b9aab; font-size: 14px; line-height: 1.4; }
     .meta h1 { margin: 0 0 6px; font-size: 22px; color: #e8eef4; }
     .note {
@@ -49,6 +110,17 @@
       background: rgba(43,182,115,.1); border: 1px solid rgba(43,182,115,.35);
       font-size: 13px; color: #b8c5d4;
     }
+    .film {
+      display: flex; gap: 8px; overflow-x: auto; margin-top: 10px; padding-bottom: 6px;
+    }
+    .film img {
+      height: 64px; width: auto; border-radius: 8px; border: 2px solid transparent; cursor: pointer;
+      background: #111;
+    }
+    .film img.active { border-color: #2bb673; }
+    .film img.rot90, .film img.rot-90 { height: 48px; transform: rotate(90deg); }
+    .film img.rot-90 { transform: rotate(-90deg); }
+    .film img.rot180 { transform: rotate(180deg); }
     .err { color: #e85d5d; margin-top: 16px; }
     .loading { padding: 48px 16px; text-align: center; color: #8b9aab; }
   </style>
@@ -66,6 +138,7 @@
     <div class="brand">Ainspecciona <span>Scan</span></div>
     <div class="tabs">
       <button type="button" id="tabTour" class="active">Tour 3D</button>
+      <button type="button" id="tabFotos" hidden>Fotos</button>
       <button type="button" id="tabPlan">Plano</button>
     </div>
     <button type="button" class="btn secondary" id="shareBtn">Compartir</button>
@@ -75,20 +148,25 @@
     <div id="err" class="err" hidden></div>
     <div id="content" hidden>
       <div id="stage"></div>
+      <div id="minimap" hidden>
+        <svg id="minimapSvg" width="100%" height="100%" viewBox="0 0 200 150"></svg>
+      </div>
+      <div id="walkStage" hidden></div>
       <div id="planWrap"><svg id="planSvg" width="100%" height="100%" viewBox="0 0 900 560"></svg></div>
+      <div class="film" id="film" hidden></div>
       <div class="meta">
         <h1 id="title">—</h1>
         <div id="address"></div>
       </div>
-      <div class="note">
-        Recorrido y planimetría de marketing (MVP). Las verticales/horizontales se alinean al eje mundo.
-        El modelo fotoreal llegará cuando conectemos el motor de reconstrucción.
+      <div class="note" id="note">
+        Recorrido y planimetría de marketing.
       </div>
     </div>
   </main>
   <script type="module">
     import * as THREE from "three";
     import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+    import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
     const parts = location.pathname.split("/").filter(Boolean);
     // /scan/s/:publicId
@@ -98,7 +176,9 @@
     const errEl = document.getElementById("err");
     const content = document.getElementById("content");
     const stage = document.getElementById("stage");
+    const walkStage = document.getElementById("walkStage");
     const planWrap = document.getElementById("planWrap");
+    const tabFotos = document.getElementById("tabFotos");
 
     function showErr(msg) {
       loading.hidden = true;
@@ -128,8 +208,69 @@
       document.getElementById("title").textContent = scan.property?.name || "Propiedad";
       document.getElementById("address").textContent = scan.property?.address || "";
       document.title = (scan.property?.name || "Scan") + " · Ainspecciona Scan";
+      const tour = scan.tour;
+      const hasPhotos = Array.isArray(tour?.frames) && tour.frames.length > 0;
+      
+          // Manejar tanto GLB (nube de puntos) como GAUSSIAN_SPLAT (Gaussian Splatting)
+          const isSplat = scan.modelType === "SPLAT_PLY" || scan.modelType === "SPLAT" || scan.modelType === "GAUSSIAN_SPLAT";
+          const modelUrl = (scan.modelType === "GLB" || isSplat) && scan.modelUrl
+        ? scan.modelUrl + (scan.modelUrl.includes("?") ? "&" : "?") + "v=" + encodeURIComponent(scan.readyAt || Date.now())
+        : null;
+        
+        document.getElementById("note").textContent = modelUrl
+          ? (isSplat ? "Modelo 3D fotorealista (Gaussian Splatting)." : (scan.modelType === "GLB" ? "Modelo 3D estructural (OpenMVS)." : "Nube de puntos 3D (COLMAP). Marketing, no es un scan certificado."))
+        : hasPhotos
+          ? "Recorrido con las fotos de la captura. El modelo 3D unido no se pudo armar con este scan."
+          : "Tour de muestra. El zip con fotos reales se usa cuando el Scan viene de la app.";
       renderPlan(scan.planJson);
-      initTour(scan.planJson);
+      
+      if (modelUrl) {
+        if (isSplat) {
+          // Si es Gaussian Splatting, cargamos el visor en un iframe
+          viewMode = "model";
+          document.getElementById("tabTour").textContent = "Tour 3D (Splat)";
+          
+          const iframe = document.createElement('iframe');
+          iframe.src = `/scan/splat/viewer.html?url=${encodeURIComponent(modelUrl)}`;
+          iframe.style.width = '100%';
+          iframe.style.height = '100%';
+          iframe.style.border = 'none';
+          iframe.allowFullscreen = true;
+          
+          stage.innerHTML = '';
+          stage.appendChild(iframe);
+          
+          renderMinimap(scan.planJson);
+          
+          if (hasPhotos) {
+            tabFotos.hidden = false;
+            initPhotoTour(tour.frames, walkStage);
+            document.getElementById("film").hidden = true;
+          }
+        } else {
+          // Si es GLB (nube de puntos), usamos el visor original de Three.js
+          const loaded = await initModelTour(modelUrl);
+          if (loaded) {
+            viewMode = "model";
+            document.getElementById("tabTour").textContent = "Tour 3D";
+            if (hasPhotos) {
+              tabFotos.hidden = false;
+              initPhotoTour(tour.frames, walkStage);
+              document.getElementById("film").hidden = true;
+            }
+          } else if (hasPhotos) {
+            document.getElementById("tabTour").textContent = "Recorrido";
+            initPhotoTour(tour.frames, stage);
+          } else {
+            initTour(scan.planJson);
+          }
+        }
+      } else if (hasPhotos) {
+        document.getElementById("tabTour").textContent = "Recorrido";
+        initPhotoTour(tour.frames, stage);
+      } else {
+        initTour(scan.planJson);
+      }
       document.getElementById("shareBtn").onclick = async () => {
         const url = location.href;
         try {
@@ -147,6 +288,37 @@
     function renderPlan(planJson) {
       const svg = document.getElementById("planSvg");
       svg.innerHTML = "";
+      const path = planJson?.path || [];
+      if (path.length > 1) {
+        let maxX = 1, maxY = 1;
+        path.forEach((p) => {
+          maxX = Math.max(maxX, p.x);
+          maxY = Math.max(maxY, p.y);
+        });
+        const pad = 40;
+        const scale = Math.min((900 - pad * 2) / maxX, (560 - pad * 2) / maxY);
+        const d = path.map((p, i) => {
+          const x = pad + p.x * scale;
+          const y = pad + p.y * scale;
+          return (i ? "L" : "M") + x + " " + y;
+        }).join(" ");
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        line.setAttribute("d", d);
+        line.setAttribute("fill", "none");
+        line.setAttribute("stroke", "#2bb673");
+        line.setAttribute("stroke-width", "4");
+        line.setAttribute("stroke-linejoin", "round");
+        svg.appendChild(line);
+        path.forEach((p, i) => {
+          const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          c.setAttribute("cx", pad + p.x * scale);
+          c.setAttribute("cy", pad + p.y * scale);
+          c.setAttribute("r", i === 0 || i === path.length - 1 ? 6 : 3);
+          c.setAttribute("fill", i === 0 ? "#2bb673" : "#e8eef4");
+          svg.appendChild(c);
+        });
+        return;
+      }
       const rooms = planJson?.rooms || [];
       if (!rooms.length) {
         svg.innerHTML = '<text x="40" y="60" fill="#8b9aab" font-size="18">Sin planimetría</text>';
@@ -183,6 +355,82 @@
         svg.appendChild(label);
       });
     }
+
+    let minimapScale = 1;
+    let minimapPad = 10;
+    let minimapCamera = null;
+
+    function renderMinimap(planJson) {
+      const svg = document.getElementById("minimapSvg");
+      if (!svg) return;
+      svg.innerHTML = "";
+      
+      const rooms = planJson?.rooms || [];
+      if (!rooms.length) return;
+      
+      let maxX = 0, maxY = 0;
+      rooms.forEach((r) => {
+        maxX = Math.max(maxX, r.x + r.w);
+        maxY = Math.max(maxY, r.y + r.h);
+      });
+      
+      const width = document.getElementById("minimap").clientWidth || 200;
+      const height = document.getElementById("minimap").clientHeight || 150;
+      minimapPad = 10;
+      minimapScale = Math.min((width - minimapPad * 2) / maxX, (height - minimapPad * 2) / maxY);
+      
+      rooms.forEach((r, i) => {
+        const x = minimapPad + r.x * minimapScale;
+        const y = minimapPad + r.y * minimapScale;
+        const w = r.w * minimapScale;
+        const h = r.h * minimapScale;
+        const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        rect.setAttribute("x", x);
+        rect.setAttribute("y", y);
+        rect.setAttribute("width", w);
+        rect.setAttribute("height", h);
+        rect.setAttribute("fill", i % 2 ? "#243041" : "#1e2834");
+        rect.setAttribute("stroke", "#2bb673");
+        rect.setAttribute("stroke-width", "1");
+        svg.appendChild(rect);
+      });
+      
+      minimapCamera = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      
+      const fov = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      // FOV apuntando hacia arriba (-Y en SVG)
+      fov.setAttribute("d", "M 0 0 L -12 -20 A 20 20 0 0 1 12 -20 Z");
+      fov.setAttribute("fill", "rgba(43, 182, 115, 0.4)");
+      
+      const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      circle.setAttribute("r", "4");
+      circle.setAttribute("fill", "#2bb673");
+      circle.setAttribute("stroke", "#0f1419");
+      circle.setAttribute("stroke-width", "1.5");
+      
+      minimapCamera.appendChild(fov);
+      minimapCamera.appendChild(circle);
+      
+      svg.appendChild(minimapCamera);
+      document.getElementById("minimap").hidden = false;
+    }
+
+    window.addEventListener('message', (e) => {
+      if (e.data && e.data.type === 'camera_update' && minimapCamera) {
+        const pos = e.data.position;
+        const rotY = e.data.rotation.y;
+        
+        const mx = minimapPad + pos.x * minimapScale;
+        const my = minimapPad + pos.z * minimapScale;
+        
+        // En Three.js, rotY=0 mira hacia -Z. En SVG, -Y es arriba.
+        // Convertimos a grados y ajustamos si es necesario.
+        // La cámara de Three.js rota en sentido antihorario, SVG rotate() es horario.
+        const angleDeg = -rotY * (180 / Math.PI);
+        
+        minimapCamera.setAttribute("transform", `translate(${mx}, ${my}) rotate(${angleDeg})`);
+      }
+    });
 
     function initTour(planJson) {
       const rooms = planJson?.rooms || [];
@@ -264,18 +512,381 @@
       tick();
     }
 
-    document.getElementById("tabTour").onclick = () => {
-      document.getElementById("tabTour").classList.add("active");
-      document.getElementById("tabPlan").classList.remove("active");
-      stage.classList.remove("hide");
-      planWrap.classList.remove("show");
-    };
-    document.getElementById("tabPlan").onclick = () => {
-      document.getElementById("tabPlan").classList.add("active");
-      document.getElementById("tabTour").classList.remove("active");
-      stage.classList.add("hide");
-      planWrap.classList.add("show");
-    };
+    function imageRotationDeg(frame) {
+      if (frame?.upright) return 0;
+      const explicit = Number(frame?.rotationDeg);
+      if (Number.isFinite(explicit) && explicit !== 0) return explicit;
+      // JPEG del sensor ARCore (640x480) con el teléfono en vertical.
+      return 90;
+    }
+
+    function rotClass(deg) {
+      if (deg === 90) return "rot90";
+      if (deg === -90) return "rot-90";
+      if (deg === 180) return "rot180";
+      return "";
+    }
+
+    function initPhotoTour(frames, host) {
+      host.classList.add("walk");
+      host.innerHTML = "";
+      const wrap = document.createElement("div");
+      wrap.className = "walk-photo";
+      const img = document.createElement("img");
+      img.alt = "Foto del recorrido";
+      wrap.appendChild(img);
+      const nav = document.createElement("div");
+      nav.className = "walk-nav";
+      const prev = document.createElement("button");
+      prev.type = "button";
+      prev.setAttribute("aria-label", "Anterior");
+      prev.textContent = "‹";
+      const next = document.createElement("button");
+      next.type = "button";
+      next.setAttribute("aria-label", "Siguiente");
+      next.textContent = "›";
+      nav.append(prev, next);
+      const hud = document.createElement("div");
+      hud.className = "walk-hud";
+      const counter = document.createElement("span");
+      const play = document.createElement("button");
+      play.type = "button";
+      play.textContent = "Reproducir";
+      hud.append(counter, play);
+      host.append(wrap, nav, hud);
+
+      const film = document.getElementById("film");
+      film.hidden = false;
+      film.innerHTML = "";
+      const thumbs = [];
+      frames.forEach((f, i) => {
+        const t = document.createElement("img");
+        t.src = f.imageUrl;
+        t.alt = "Foto " + (i + 1);
+        const deg = imageRotationDeg(f);
+        const cls = rotClass(deg);
+        if (cls) t.classList.add(cls);
+        t.onclick = () => goTo(i, true);
+        film.appendChild(t);
+        thumbs.push(t);
+      });
+
+      let current = 0;
+      let playing = false;
+      let timer = 0;
+      function applyPhoto(i) {
+        const f = frames[i];
+        const deg = imageRotationDeg(f);
+        img.className = rotClass(deg);
+        img.src = f.imageUrl;
+        counter.textContent = (i + 1) + " / " + frames.length;
+        thumbs.forEach((el, idx) => el.classList.toggle("active", idx === i));
+        const active = thumbs[i];
+        if (active) active.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+      }
+      function goTo(i, stopPlay) {
+        current = (i + frames.length) % frames.length;
+        applyPhoto(current);
+        if (stopPlay && playing) togglePlay();
+      }
+      function togglePlay() {
+        playing = !playing;
+        play.classList.toggle("active", playing);
+        play.textContent = playing ? "Pausar" : "Reproducir";
+        if (playing) {
+          timer = setInterval(() => goTo(current + 1), 1100);
+        } else {
+          clearInterval(timer);
+        }
+      }
+      prev.onclick = () => goTo(current - 1, true);
+      next.onclick = () => goTo(current + 1, true);
+      play.onclick = togglePlay;
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight") goTo(current + 1, true);
+        if (e.key === "ArrowLeft") goTo(current - 1, true);
+        if (e.key === " ") {
+          e.preventDefault();
+          togglePlay();
+        }
+      });
+      let touchX = 0;
+      host.addEventListener("touchstart", (e) => {
+        touchX = e.changedTouches[0].clientX;
+      }, { passive: true });
+      host.addEventListener("touchend", (e) => {
+        const dx = e.changedTouches[0].clientX - touchX;
+        if (Math.abs(dx) > 40) goTo(current + (dx < 0 ? 1 : -1), true);
+      }, { passive: true });
+      goTo(0);
+    }
+
+    async function initModelTour(url) {
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x0e141c);
+      const camera = new THREE.PerspectiveCamera(65, 1, 0.05, 120);
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      stage.appendChild(renderer.domElement);
+      scene.add(new THREE.HemisphereLight(0xffffff, 0x223344, 1.15));
+      const dir = new THREE.DirectionalLight(0xffffff, 0.55);
+      dir.position.set(4, 8, 3);
+      scene.add(dir);
+
+      try {
+        const gltf = await new GLTFLoader().loadAsync(url);
+        gltf.scene.traverse((o) => {
+          if (o.isPoints && o.material) {
+            o.material.size = 0.06;
+            o.material.sizeAttenuation = true;
+            o.material.vertexColors = true;
+          }
+          if (o.isMesh && o.material) {
+            // La textura de OpenMVS ya trae horneada la luz de las fotos. Sombrearla otra vez
+            // con las luces de la escena la deja casi negra, y la malla llega sin normales,
+            // asi que el sombreado plano ni siquiera seria correcto.
+            const src = o.material;
+            o.material = new THREE.MeshBasicMaterial({
+              map: src.map || null,
+              color: src.map ? new THREE.Color(1.45, 1.45, 1.45) : (src.color || new THREE.Color(0xffffff)),
+              side: THREE.DoubleSide,
+              toneMapped: false,
+              vertexColors: !!o.geometry?.attributes?.color
+            });
+            src.dispose();
+          }
+        });
+        scene.add(gltf.scene);
+      } catch {
+        renderer.dispose();
+        stage.innerHTML = "";
+        return false;
+      }
+
+      const box = new THREE.Box3().setFromObject(scene);
+      const size = new THREE.Vector3();
+      const center = new THREE.Vector3();
+      box.getSize(size);
+      box.getCenter(center);
+      if (!Number.isFinite(center.x) || size.length() < 0.05) {
+        center.set(0, 1, 0);
+        size.set(2, 2, 2);
+      }
+      const span = Math.max(size.x, size.y, size.z, 1.2);
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      camera.position.set(center.x + span * 0.7, center.y + span * 0.45, center.z + span * 0.7);
+      controls.target.copy(center);
+      camera.lookAt(controls.target);
+
+      function resize() {
+        const w = stage.clientWidth;
+        const h = stage.clientHeight;
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(w, h, false);
+      }
+      resize();
+      window.addEventListener("resize", resize);
+      function tick() {
+        controls.update();
+        renderer.render(scene, camera);
+        requestAnimationFrame(tick);
+      }
+      tick();
+      return true;
+    }
+
+    function nearCameras(x, y, z, cams, maxD) {
+      if (!cams.length) return true;
+      for (const c of cams) {
+        const dx = x - c.tx, dy = y - c.ty, dz = z - c.tz;
+        if (dx * dx + dy * dy + dz * dz <= maxD * maxD) return true;
+      }
+      return false;
+    }
+
+    function boostColor(r, g, b) {
+      return [
+        Math.min(1, r / 255 * 1.45 + 0.1),
+        Math.min(1, g / 255 * 1.45 + 0.1),
+        Math.min(1, b / 255 * 1.45 + 0.1)
+      ];
+    }
+
+    async function initWeldTour(url, frames) {
+      const res = await fetch(url);
+      const weld = await res.json().catch(() => null);
+      const hasRoom = Array.isArray(weld?.room?.groups) && weld.room.groups.length > 0;
+      if (!weld || (!hasRoom && !weld.points?.length && !weld.voxels?.length)) {
+        if (frames.length) initPhotoTour(frames, stage);
+        return false;
+      }
+      const cams = (frames || []).map((f) => f.pose).filter((p) => p && Number.isFinite(p.tx));
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x0e141c);
+      const camera = new THREE.PerspectiveCamera(65, 1, 0.08, 80);
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      stage.appendChild(renderer.domElement);
+      scene.add(new THREE.AmbientLight(0xffffff, 1));
+
+      let roomMeshes = 0;
+      if (hasRoom) {
+        const loader = new THREE.TextureLoader();
+        const byIndex = new Map((frames || []).map((f) => [Number(f.index), f]));
+        for (const g of weld.room.groups) {
+          if (!g.positions?.length) continue;
+          const geo = new THREE.BufferGeometry();
+          geo.setAttribute("position", new THREE.Float32BufferAttribute(g.positions, 3));
+          if (g.color && !g.frameIndex) {
+            scene.add(new THREE.Mesh(
+              geo,
+              new THREE.MeshBasicMaterial({ color: g.color, side: THREE.DoubleSide })
+            ));
+            roomMeshes += 1;
+            continue;
+          }
+          const src = byIndex.get(Number(g.frameIndex));
+          if (!src?.imageUrl) continue;
+          const tex = await new Promise((resolve) => {
+            loader.load(src.imageUrl, resolve, undefined, () => resolve(null));
+          });
+          if (!tex) continue;
+          tex.colorSpace = THREE.SRGBColorSpace;
+          tex.flipY = false;
+          if (g.uvs?.length) geo.setAttribute("uv", new THREE.Float32BufferAttribute(g.uvs, 2));
+          scene.add(new THREE.Mesh(
+            geo,
+            new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide, toneMapped: false })
+          ));
+          roomMeshes += 1;
+        }
+      }
+
+      let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity, minZ = Infinity, maxZ = -Infinity;
+      function acc(x, y, z) {
+        minX = Math.min(minX, x); maxX = Math.max(maxX, x);
+        minY = Math.min(minY, y); maxY = Math.max(maxY, y);
+        minZ = Math.min(minZ, z); maxZ = Math.max(maxZ, z);
+      }
+      if (roomMeshes) {
+        for (const g of weld.room.groups) {
+          for (let i = 0; i + 2 < (g.positions || []).length; i += 3) acc(g.positions[i], g.positions[i + 1], g.positions[i + 2]);
+        }
+      } else if (!frames.length) {
+        const pts = weld.points || [];
+        const vox = weld.voxels || [];
+        const size = Math.max(Number(weld.voxelSize) || 0.07, 0.06);
+        if (pts.length >= 6) {
+          const n = Math.floor(pts.length / 6);
+          const keptPos = [];
+          const keptCol = [];
+          for (let i = 0; i < n; i++) {
+            const x = pts[i * 6], y = pts[i * 6 + 1], z = pts[i * 6 + 2];
+            if (!nearCameras(x, y, z, cams, 2.6)) continue;
+            keptPos.push(x, y, z);
+            keptCol.push(...boostColor(pts[i * 6 + 3], pts[i * 6 + 4], pts[i * 6 + 5]));
+            acc(x, y, z);
+          }
+          if (keptPos.length >= 3) {
+            const geo = new THREE.BufferGeometry();
+            geo.setAttribute("position", new THREE.Float32BufferAttribute(keptPos, 3));
+            geo.setAttribute("color", new THREE.Float32BufferAttribute(keptCol, 3));
+            scene.add(new THREE.Points(geo, new THREE.PointsMaterial({
+              size: 0.07, vertexColors: true, sizeAttenuation: true
+            })));
+          }
+        }
+        if (vox.length >= 6) {
+          const n = Math.floor(vox.length / 6);
+          const keptVox = [];
+          for (let i = 0; i < n; i++) {
+            const x = vox[i * 6], y = vox[i * 6 + 1], z = vox[i * 6 + 2];
+            if (!nearCameras(x, y, z, cams, 2.6)) continue;
+            keptVox.push(i);
+            acc(x, y, z);
+          }
+          if (keptVox.length) {
+            const box = new THREE.BoxGeometry(size * 1.15, size * 1.15, size * 1.15);
+            const mat = new THREE.MeshBasicMaterial({ vertexColors: true });
+            const mesh = new THREE.InstancedMesh(box, mat, keptVox.length);
+            const dummy = new THREE.Object3D();
+            const color = new THREE.Color();
+            keptVox.forEach((src, i) => {
+              dummy.position.set(vox[src * 6], vox[src * 6 + 1], vox[src * 6 + 2]);
+              dummy.updateMatrix();
+              mesh.setMatrixAt(i, dummy.matrix);
+              const [r, g, b] = boostColor(vox[src * 6 + 3], vox[src * 6 + 4], vox[src * 6 + 5]);
+              color.setRGB(r, g, b);
+              mesh.setColorAt(i, color);
+            });
+            mesh.instanceMatrix.needsUpdate = true;
+            if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+            scene.add(mesh);
+          }
+        }
+      }
+      if (!roomMeshes && frames.length) {
+        renderer.dispose();
+        stage.innerHTML = "";
+        initPhotoTour(frames, stage);
+        return true;
+      }
+      if (!Number.isFinite(minX)) { minX = -1; maxX = 1; minY = 0; maxY = 2; minZ = -1; maxZ = 1; }
+      const cx = (minX + maxX) / 2;
+      const cy = (minY + maxY) / 2;
+      const cz = (minZ + maxZ) / 2;
+      const span = Math.max(maxX - minX, maxY - minY, maxZ - minZ, 1.2);
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      camera.position.set(maxX + Math.max(1.2, span * 0.45), cy + Math.max(1.1, span * 0.35), maxZ + Math.max(1.2, span * 0.45));
+      controls.target.set(cx, cy, cz);
+      camera.lookAt(controls.target);
+
+      function resize() {
+        const w = stage.clientWidth;
+        const h = stage.clientHeight;
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(w, h, false);
+      }
+      resize();
+      window.addEventListener("resize", resize);
+      function tick() {
+        controls.update();
+        renderer.render(scene, camera);
+        requestAnimationFrame(tick);
+      }
+      tick();
+      return true;
+    }
+
+    let viewMode = "photos";
+    function showTab(name) {
+      document.getElementById("tabTour").classList.toggle("active", name === "tour");
+      tabFotos.classList.toggle("active", name === "fotos");
+      document.getElementById("tabPlan").classList.toggle("active", name === "plan");
+      planWrap.classList.toggle("show", name === "plan");
+      if (viewMode === "weld" || viewMode === "model") {
+        stage.classList.toggle("hide", name !== "tour");
+        const minimap = document.getElementById("minimap");
+        if (minimapCamera) minimap.hidden = name !== "tour";
+        walkStage.hidden = name !== "fotos";
+        document.getElementById("film").hidden = name !== "fotos";
+      } else {
+        stage.classList.toggle("hide", name !== "tour");
+        const minimap = document.getElementById("minimap");
+        if (minimapCamera) minimap.hidden = name !== "tour";
+        walkStage.hidden = true;
+        document.getElementById("film").hidden = name !== "tour";
+      }
+    }
+    document.getElementById("tabTour").onclick = () => showTab("tour");
+    tabFotos.onclick = () => showTab("fotos");
+    document.getElementById("tabPlan").onclick = () => showTab("plan");
 
     load();
   </script>

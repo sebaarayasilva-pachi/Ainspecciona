@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Ainspecciona Scan - Diagnóstico</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: "Segoe UI", sans-serif;
+      background: #0f1419; color: #e8eef4; min-height: 100vh;
+      overflow: hidden;
+    }
+    #stage { width: 100vw; height: 100vh; background: #000; }
+    #stage canvas { display: block; }
+    .hud {
+      position: absolute; top: 16px; left: 16px; z-index: 10;
+      background: rgba(15,20,25,0.85); backdrop-filter: blur(8px);
+      border: 1px solid #2a3542; border-radius: 12px; padding: 16px;
+      min-width: 300px;
+    }
+    .hud h1 { margin: 0 0 12px; font-size: 18px; color: #2bb673; }
+    .hud p { margin: 4px 0; font-size: 14px; display: flex; justify-content: space-between; }
+    .hud p span { font-weight: bold; }
+    .legend { margin-top: 16px; font-size: 12px; border-top: 1px solid #2a3542; padding-top: 12px; }
+    .legend div { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dot.green { background: #00ff00; }
+    .dot.red { background: #ff0000; }
+  </style>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.169.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.169.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div class="hud">
+    <h1>Diagnóstico de Registro</h1>
+    <div id="stats">Cargando...</div>
+    <div class="legend">
+      <div><div class="dot green"></div> Cámaras Registradas</div>
+      <div><div class="dot red"></div> Cámaras No Registradas</div>
+    </div>
+  </div>
+  <div id="stage"></div>
+  
+  <script type="module">
+    import * as THREE from "three";
+    import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+    import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+
+    const parts = location.pathname.split("/").filter(Boolean);
+    const urlParams = new URLSearchParams(window.location.search);
+    const publicId = urlParams.get('publicId') || decodeURIComponent(parts[parts.length - 1] || "");
+    const forceSync = urlParams.get('forceSync') === 'true';
+
+    async function load() {
+      const url = "/api/scan/public/" + encodeURIComponent(publicId) + (forceSync ? '?forceSync=true' : '');
+      const res = await fetch(url);
+      const data = await res.json().catch(() => ({}));
+      if (!data.ok || !data.scan || !data.scan.tour) {
+        document.getElementById("stats").textContent = "Error al cargar datos.";
+        return;
+      }
+      
+      const tour = data.scan.tour;
+      const diag = tour.diagnostic || {};
+      
+      document.getElementById("stats").innerHTML = `
+        <p>Total Frames: <span>${diag.totalFrames || 0}</span></p>
+        <p>Accepted Frames: <span>${diag.acceptedFrames || 0}</span></p>
+        <p>Registered Frames: <span>${diag.registeredFrames || 0}</span></p>
+        <p>Registration: <span>${((diag.registrationRatio || 0) * 100).toFixed(1)}%</span></p>
+        <p>Mean Error: <span>${(diag.meanReprojectionError || 0).toFixed(3)} px</span></p>
+        <p>Sparse Points: <span>${diag.sparsePoints || 0}</span></p>
+        ${diag.planes && diag.planes.length > 0 ? (() => {
+          let floorArea = 0, ceilingArea = 0, wallArea = 0;
+          diag.planes.forEach(p => {
+            const area = p.area || 0;
+            if (p.classification === 'FLOOR') floorArea += area;
+            else if (p.classification === 'CEILING') ceilingArea += area;
+            else if (p.classification === 'WALL') wallArea += area;
+          });
+          
+          return `
+          <div style="margin-top: 15px; border-top: 1px solid #333; padding-top: 10px;">
+            <p style="color:#2196F3; font-weight:bold; margin-bottom:5px;">Cobertura de Planos</p>
+            <p style="font-size: 11px; margin-bottom: 2px;">
+              <span style="color: #4CAF50">■ Piso:</span> ${floorArea.toFixed(1)} m²
+            </p>
+            <p style="font-size: 11px; margin-bottom: 2px;">
+              <span style="color: #2196F3">■ Cielo:</span> ${ceilingArea.toFixed(1)} m²
+            </p>
+            <p style="font-size: 11px; margin-bottom: 2px;">
+              <span style="color: #FF9800">■ Paredes:</span> ${wallArea.toFixed(1)} m²
+            </p>
+            <div style="margin-top: 10px;">
+              <p style="font-size: 10px; color: #888; margin-bottom: 2px;">Detalle (${diag.planes.length} planos):</p>
+              ${diag.planes.map(p => `
+                <p style="font-size: 10px; margin: 1px 0; color: #aaa;">
+                  ${p.classification.substring(0,1)}: ${(p.area || 0).toFixed(1)}m² (${p.inlierCount}pts)
+                </p>
+              `).join('')}
+            </div>
+          </div>
+          `;
+        })() : ''}
+      `;
+
+      let modelUrlToLoad = data.scan.modelUrl;
+      initTour(tour, diag, modelUrlToLoad);
+    }
+
+    function createCameraFrustum(colorHex) {
+      const material = new THREE.LineBasicMaterial({ color: colorHex });
+      const points = [];
+      const w = 0.1, h = 0.075, d = 0.15;
+      points.push(0,0,0,  w,h,-d);
+      points.push(0,0,0, -w,h,-d);
+      points.push(0,0,0,  w,-h,-d);
+      points.push(0,0,0, -w,-h,-d);
+      points.push(w,h,-d, -w,h,-d);
+      points.push(-w,h,-d, -w,-h,-d);
+      points.push(-w,-h,-d, w,-h,-d);
+      points.push(w,-h,-d, w,h,-d);
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute('position', new THREE.Float32BufferAttribute(points, 3));
+      return new THREE.LineSegments(geometry, material);
+    }
+
+    async function initTour(tour, diag, modelUrl) {
+      const stage = document.getElementById("stage");
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x0e141c);
+      const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.05, 120);
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      stage.appendChild(renderer.domElement);
+      
+      scene.add(new THREE.HemisphereLight(0xffffff, 0x223344, 1.15));
+      const dir = new THREE.DirectionalLight(0xffffff, 0.55);
+      dir.position.set(4, 8, 3);
+      scene.add(dir);
+
+      if (modelUrl) {
+        try {
+          const gltf = await new GLTFLoader().loadAsync(modelUrl);
+          gltf.scene.traverse((o) => {
+            if (o.isPoints && o.material) {
+              o.material.size = 0.04;
+              o.material.sizeAttenuation = true;
+              o.material.vertexColors = true;
+            }
+          });
+          scene.add(gltf.scene);
+        } catch (e) {
+          console.error("Error loading model", e);
+        }
+      }
+
+      // Add cameras
+      if (tour.frames) {
+        tour.frames.forEach(f => {
+          if (!f.pose || typeof f.pose.tx !== 'number') return;
+          const color = f.registered ? 0x00ff00 : 0xff0000;
+          const frustum = createCameraFrustum(color);
+          frustum.position.set(f.pose.tx, f.pose.ty, f.pose.tz);
+          frustum.quaternion.set(f.pose.qx, f.pose.qy, f.pose.qz, f.pose.qw);
+          scene.add(frustum);
+        });
+      }
+
+      // Add detected planes
+      if (diag.planes && diag.planes.length > 0) {
+        diag.planes.forEach(plane => {
+          const [A, B, C, D] = plane.equation;
+          const normal = new THREE.Vector3(A, B, C);
+          
+          // Calculate center from bounds
+          const min = new THREE.Vector3().fromArray(plane.minBounds);
+          const max = new THREE.Vector3().fromArray(plane.maxBounds);
+          const center = new THREE.Vector3().addVectors(min, max).multiplyScalar(0.5);
+          
+          // Project center onto the plane to ensure it lies exactly on it
+          // Distance from point to plane = A*x + B*y + C*z + D
+          const dist = normal.dot(center) + D;
+          center.sub(normal.clone().multiplyScalar(dist));
+          
+          // Size based on bounds
+          const sizeX = Math.max(0.5, max.x - min.x);
+          const sizeY = Math.max(0.5, max.y - min.y);
+          const sizeZ = Math.max(0.5, max.z - min.z);
+          
+          // The plane geometry is flat on XY, we need to orient it to the normal
+          // We'll just use a large enough square for now based on the bounds span
+          const span = Math.max(sizeX, sizeY, sizeZ);
+          const geometry = new THREE.PlaneGeometry(span, span);
+          
+          let color = 0x888888;
+          if (plane.classification === 'FLOOR') color = 0x4CAF50; // Green
+          else if (plane.classification === 'CEILING') color = 0x2196F3; // Blue
+          else if (plane.classification === 'WALL') color = 0xFF9800; // Orange
+          
+          const material = new THREE.MeshBasicMaterial({ 
+            color: color, 
+            transparent: true, 
+            opacity: 0.4, 
+            side: THREE.DoubleSide,
+            depthWrite: false
+          });
+          
+          const mesh = new THREE.Mesh(geometry, material);
+          mesh.position.copy(center);
+          
+          // Orient the plane to match the normal
+          // Default plane normal is +Z (0,0,1)
+          const targetNormal = normal.clone().normalize();
+          const defaultNormal = new THREE.Vector3(0, 0, 1);
+          const quaternion = new THREE.Quaternion().setFromUnitVectors(defaultNormal, targetNormal);
+          mesh.quaternion.copy(quaternion);
+          
+          // Add edges for better visibility
+          const edges = new THREE.EdgesGeometry(geometry);
+          const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: color, linewidth: 2 }));
+          mesh.add(line);
+          
+          scene.add(mesh);
+        });
+      }
+
+      const box = new THREE.Box3().setFromObject(scene);
+      const size = new THREE.Vector3();
+      const center = new THREE.Vector3();
+      box.getSize(size);
+      box.getCenter(center);
+      if (!Number.isFinite(center.x) || size.length() < 0.05) {
+        center.set(0, 1, 0);
+        size.set(2, 2, 2);
+      }
+      const span = Math.max(size.x, size.y, size.z, 1.2);
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      camera.position.set(center.x + span * 0.7, center.y + span * 0.45, center.z + span * 0.7);
+      controls.target.copy(center);
+      camera.lookAt(controls.target);
+
+      window.addEventListener("resize", () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+
+      function tick() {
+        controls.update();
+        renderer.render(scene, camera);
+        requestAnimationFrame(tick);
+      }
+      tick();
+    }
+
+    load();
+  </script>
+</body>
+</html>

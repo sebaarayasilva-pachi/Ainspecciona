@@ -47,3 +47,13 @@ deploy-tag.txt
 deploy-last.log*
 agent-backup-before-workflow.json
 tmp-nda-xml/
+
+# Llave privada de la service account que usa el pipeline de scan. "gcp.env" no cae
+# bajo las reglas .env* de arriba, y deploy_secret.py lleva el JSON embebido.
+scan-recon/gcp.env
+scan-recon/deploy_secret.py
+scan-recon/logs.txt
+
+# Bytecode de Python del pipeline de scan
+__pycache__/
+*.pyc

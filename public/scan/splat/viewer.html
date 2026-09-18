@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Ainspecciona - Visor Gaussian Splatting</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #000;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    #canvas-container {
+      width: 100vw;
+      height: 100vh;
+      display: block;
+    }
+    #loading-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      z-index: 100;
+      transition: opacity 0.5s ease;
+    }
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #2bb673;
+      animation: spin 1s ease-in-out infinite;
+      margin-bottom: 20px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    #progress-text {
+      font-size: 18px;
+      font-weight: 500;
+    }
+    .hud {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(15, 20, 25, 0.7);
+      backdrop-filter: blur(10px);
+      padding: 15px;
+      border-radius: 10px;
+      color: white;
+      pointer-events: none;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .hud h3 {
+      margin: 0 0 5px 0;
+      font-size: 16px;
+      color: #2bb673;
+    }
+    .hud p {
+      margin: 0;
+      font-size: 12px;
+      color: #ccc;
+    }
+  </style>
+  <!-- Import map para Three.js y Gaussian Splats 3D -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.169.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.169.0/examples/jsm/",
+        "@mkkellogg/gaussian-splats-3d": "https://unpkg.com/@mkkellogg/gaussian-splats-3d@0.4.4/build/gaussian-splats-3d.module.js"
+      }
+    }
+  </script>
+</head>
+<body>
+
+  <div id="loading-overlay">
+    <div class="spinner"></div>
+    <div id="progress-text">Cargando modelo 3D...</div>
+  </div>
+
+  <div id="canvas-container"></div>
+
+  <div class="hud">
+    <h3>Vista 3D Fotorrealista</h3>
+    <p>Usa el mouse o gestos para navegar.</p>
+    <p>Scroll/Pellizcar para zoom.</p>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { Viewer } from '@mkkellogg/gaussian-splats-3d';
+
+    // URL del modelo. Si no se pasa, usamos el de prueba.
+    // Ahora soportamos .ply (formato 1) que es lo que generamos
+    const urlParams = new URLSearchParams(window.location.search);
+    let modelUrl = urlParams.get('url') || 'https://huggingface.co/cakewalk/splat-data/resolve/main/train.splat';
+    
+    // Limpiar la URL de parámetros extra como v=12345 que pueden confundir al parser
+    const cleanUrl = modelUrl.split('?')[0];
+    const isPly = cleanUrl.toLowerCase().endsWith('.ply');
+    
+    console.log("Cargando modelo:", modelUrl, "Es PLY:", isPly);
+    
+    const loadingOverlay = document.getElementById('loading-overlay');
+    const progressText = document.getElementById('progress-text');
+
+    // Forzar el uso de la URL directa a GCS si es la de nuestra API
+    if (modelUrl.includes('/api/scan/public/')) {
+      // Extraemos el publicId de la URL, manejando posibles parámetros extra
+      // La URL puede venir como /api/scan/public/avyayui82t/model o /api/scan/public/avyayui82t/model?v=...
+      const urlObj = new URL(modelUrl, window.location.origin);
+      const pathParts = urlObj.pathname.split('/');
+      const publicIdIndex = pathParts.indexOf('public') + 1;
+      const publicId = pathParts[publicIdIndex];
+
+      if (publicId) {
+        fetch(`/api/scan/public/${publicId}`)
+          .then(r => r.json())
+          .then(data => {
+            if (data && data.scan && data.scan.modelUrl) {
+              let gcsPath = data.scan.modelUrl;
+              // Si la API devuelve la ruta de la API en lugar de GCS, la ignoramos y usamos la original
+              if (gcsPath.includes('/api/scan/public/')) {
+                 console.warn("La API devolvió una URL de API, no de GCS. Usando original.");
+                 init(modelUrl, isPly ? 2 : 0);
+                 return;
+              }
+              // Asegurarnos de que no empiece con slash si ya lo vamos a poner
+              if (gcsPath.startsWith('/')) gcsPath = gcsPath.substring(1);
+              
+              const gcsUrl = `https://storage.googleapis.com/ainspecciona-photos-852721861524/${gcsPath}`;
+              console.log("URL de GCS resuelta vía API (seguro):", gcsUrl);
+              const isPlyFormat = gcsUrl.toLowerCase().split('?')[0].endsWith('.ply');
+              init(gcsUrl, isPlyFormat ? 2 : 0); // 0 = .splat, 2 = .ply (según la lib)
+            } else {
+              init(modelUrl, isPly ? 2 : 0);
+            }
+          })
+          .catch(err => {
+            console.error("Error consultando API:", err);
+            init(modelUrl, isPly ? 2 : 0);
+          });
+      } else {
+        init(modelUrl, isPly ? 2 : 0);
+      }
+    } else if (modelUrl.startsWith('scans/')) {
+      // Si la URL viene directamente como ruta relativa de GCS (ej. scans/...)
+      const gcsUrl = `https://storage.googleapis.com/ainspecciona-photos-852721861524/${modelUrl}`;
+      console.log("URL de GCS resuelta directamente:", gcsUrl);
+      const isPlyFormat = gcsUrl.toLowerCase().split('?')[0].endsWith('.ply');
+      init(gcsUrl, isPlyFormat ? 2 : 0);
+    } else {
+      init(modelUrl, isPly ? 2 : 0);
+    }
+
+    async function init(urlToLoad, formatCode) {
+      try {
+        // Inicializar el visor de Gaussian Splatting
+        const viewer = new Viewer({
+          'cameraUp': [0, -1, 0], // Ajustar según la orientación de COLMAP/ARCore
+          'initialCameraPosition': [0, 1, 4], // Un poco más lejos y arriba
+          'initialCameraLookAt': [0, 0, 0],
+          'rootElement': document.getElementById('canvas-container'),
+          'useBuiltInControls': true,
+          'gpuArchitecture': 'default', // Intenta usar la mejor GPU disponible
+          'webXRMode': 0, // Sin VR por ahora
+          'sharedMemoryForWorkers': false, // Desactivar SharedArrayBuffer para evitar errores de crossOriginIsolated
+          'halfPrecisionCovariancesOnGPU': true // Optimización de memoria
+        });
+
+        // Configurar actualización de progreso
+        viewer.addSplatScene(urlToLoad, {
+          'splatAlphaCrop': 0.15, // Ocultar puntos muy transparentes (ruido)
+          'showLoadingUI': false, // Usamos nuestra propia UI
+          'format': formatCode, // 0 = .splat, 2 = .ply
+          'onProgress': (progress) => {
+            // progress is a number between 0 and 100
+            console.log("Progreso de carga:", progress);
+            if (progress >= 99) {
+              progressText.innerText = 'Renderizando... (Puede tardar unos segundos)';
+            } else {
+              progressText.innerText = `Descargando modelo: ${progress.toFixed(0)}%`;
+            }
+          }
+        }).then(() => {
+          // Ocultar overlay cuando termina
+          loadingOverlay.style.opacity = '0';
+          setTimeout(() => {
+            loadingOverlay.style.display = 'none';
+          }, 500);
+          
+          viewer.start();
+
+          // Enviar posición de la cámara al padre para el minimapa
+          function sendCameraPosition() {
+            if (viewer.camera) {
+              const pos = viewer.camera.position;
+              // Extraer el ángulo de rotación Y (yaw)
+              const euler = new THREE.Euler().setFromQuaternion(viewer.camera.quaternion, 'YXZ');
+              window.parent.postMessage({
+                type: 'camera_update',
+                position: { x: pos.x, y: pos.y, z: pos.z },
+                rotation: { y: euler.y }
+              }, '*');
+            }
+            requestAnimationFrame(sendCameraPosition);
+          }
+          sendCameraPosition();
+
+        }).catch((error) => {
+          console.error("Error al cargar la escena splat:", error);
+          progressText.innerText = "Error al cargar el modelo. Revisa la consola.";
+          progressText.style.color = "#ff4444";
+          document.querySelector('.spinner').style.display = 'none';
+        });
+
+      } catch (error) {
+        console.error("Error al cargar el visor:", error);
+        progressText.innerText = "Error al cargar el modelo.";
+        progressText.style.color = "#ff4444";
+        document.querySelector('.spinner').style.display = 'none';
+      }
+    }
+
+    // init() se llama ahora arriba después de resolver la URL
+  </script>
+</body>
+</html>

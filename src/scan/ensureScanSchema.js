@@ -47,7 +47,7 @@ export async function ensureScanSchema(prisma) {
       status ENUM('DRAFT','CAPTURING','CAPTURED','UPLOADING','UPLOADED','QUEUED','PROCESSING','READY','FAILED') NOT NULL DEFAULT 'DRAFT',
       captureMode ENUM('MOCK','ARCORE_DEPTH','ARCORE_STANDARD') NOT NULL DEFAULT 'MOCK',
       processingProgress INT NOT NULL DEFAULT 0,
-      modelType ENUM('GLB','GAUSSIAN_SPLAT','MOCK_SCENE') NULL,
+      modelType ENUM('GLB','GAUSSIAN_SPLAT','MOCK_SCENE','PHOTO_MESH') NULL,
       modelUrl VARCHAR(1024) NULL,
       planUrl VARCHAR(1024) NULL,
       planJson JSON NULL,
@@ -69,5 +69,8 @@ export async function ensureScanSchema(prisma) {
   for (const sql of stmts) {
     await prisma.$executeRawUnsafe(sql);
   }
+  await prisma.$executeRawUnsafe(
+    `ALTER TABLE scan_job MODIFY modelType ENUM('GLB','GAUSSIAN_SPLAT','MOCK_SCENE','PHOTO_MESH') NULL`
+  ).catch(() => {});
   return { ok: true };
 }

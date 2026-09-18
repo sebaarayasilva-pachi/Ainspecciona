@@ -3,8 +3,8 @@
  */
 
 export class MockReconstructionProvider {
-  async submit(scanId) {
-    return `mock-job-${scanId}`;
+  async submit() {
+    return null;
   }
 
   async getStatus(jobId) {
@@ -45,7 +45,7 @@ export class MockReconstructionProvider {
   }
 }
 
-/** @type {import('./provider.js').MockReconstructionProvider} */
+/** @type {MockReconstructionProvider | import('./colmapProvider.js').ColmapReconstructionProvider} */
 let activeProvider = new MockReconstructionProvider();
 
 export function getReconstructionProvider() {
