@@ -453,6 +453,67 @@
       font-size: 13px;
     }
     .table th { color: #94a3b8; font-weight: 900; }
+    .consensusList { display: flex; flex-direction: column; gap: 16px; margin-top: 16px; }
+    .consensusSlot {
+      background: #0B1220;
+      border: 1px solid #1E2B45;
+      border-radius: 14px;
+      padding: 16px;
+    }
+    .consensusSlotHead {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+      align-items: baseline;
+      margin-bottom: 12px;
+    }
+    .consensusSlotHead strong { color: #EAF0FF; font-size: 15px; }
+    .consensusGrid {
+      display: grid;
+      grid-template-columns: 200px 1fr 1fr;
+      gap: 12px;
+      align-items: start;
+    }
+    @media (max-width: 980px) {
+      .consensusGrid { grid-template-columns: 1fr; }
+    }
+    .consensusPhotoWrap { margin: 0; }
+    .consensusPhoto {
+      display: block;
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      border-radius: 10px;
+      background: #070b12;
+      border: 1px solid #1E2B45;
+    }
+    .consensusCol {
+      background: #0F1A2E;
+      border: 1px solid #1E2B45;
+      border-radius: 10px;
+      padding: 12px;
+      min-height: 140px;
+    }
+    .consensusCol h4 {
+      margin: 0 0 8px;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #94a3b8;
+    }
+    .consensusText { white-space: pre-wrap; font-size: 13px; line-height: 1.45; color: #d5e2f5; }
+    .consensusObs { margin-top: 8px; white-space: pre-wrap; font-size: 12px; color: #94a3b8; }
+    .consensusJudge {
+      margin-top: 12px;
+      background: rgba(53, 208, 127, 0.06);
+      border: 1px solid rgba(53, 208, 127, 0.25);
+      border-radius: 10px;
+      padding: 12px;
+    }
+    .consensusJudge.skip {
+      background: #0F1A2E;
+      border-color: #1E2B45;
+    }
     .pill {
       display: inline-flex; align-items: center; gap: 6px;
       padding: 6px 10px; border-radius: 999px;
@@ -669,6 +730,7 @@
         <a class="active" data-section-link="dashboard" href="#dashboard">Dashboard</a>
         <a href="/review">Review</a>
         <a data-section-link="score" href="#score">Score</a>
+        <a data-section-link="consensus" href="#consensus">Consenso</a>
         <a data-section-link="intelligence" href="#intelligence">Aintelligence</a>
         <a data-section-link="taxonomia" href="#taxonomia">Taxonomía</a>
         <a data-section-link="tenants" href="#tenants">Corredoras</a>
@@ -1058,8 +1120,115 @@
       </div>
 
       <div class="card">
+        <h3>STI v4 — motor y puntajes</h3>
+        <div class="kpiSubtle">Política editable. El código solo aplica estas reglas. Casos ya cerrados en v3 no se recalculan solos.</div>
+        <div class="row">
+          <label for="engineVersion">Motor</label>
+          <select id="engineVersion">
+            <option value="4.0">STI v4.0</option>
+            <option value="3.0">STI v3 (legado)</option>
+          </select>
+        </div>
+        <div class="kpiRows" style="margin-top:12px;">
+          <div class="kpiHeader">Severidad</div>
+          <div class="kpiHeader">Puntaje del slot</div>
+          <div class="kpiHeader"></div>
+          <div class="kpiRow">
+            <label>OK</label>
+            <input id="sevScoreOk" type="number" step="1" min="0" max="100" />
+            <span class="kpiSubtle">Sin hallazgo</span>
+          </div>
+          <div class="kpiRow">
+            <label>Baja</label>
+            <input id="sevScoreLow" type="number" step="1" min="0" max="100" />
+            <span class="kpiSubtle">Cosmético / menor</span>
+          </div>
+          <div class="kpiRow">
+            <label>Media</label>
+            <input id="sevScoreMed" type="number" step="1" min="0" max="100" />
+            <span class="kpiSubtle">Reparación / funcional parcial</span>
+          </div>
+          <div class="kpiRow">
+            <label>Alta</label>
+            <input id="sevScoreHigh" type="number" step="1" min="0" max="100" />
+            <span class="kpiSubtle">Grave / seguridad</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Pesos KPI (STI)</h3>
+        <div class="kpiSubtle">Multiplicador en el promedio del inmueble. 1 = peso normal.</div>
+        <div class="row"><label for="wMuros">Muros y pintura</label><input id="wMuros" type="number" step="0.1" min="0.1" /></div>
+        <div class="row"><label for="wHumedad">Humedad</label><input id="wHumedad" type="number" step="0.1" min="0.1" /></div>
+        <div class="row"><label for="wPisos">Pisos</label><input id="wPisos" type="number" step="0.1" min="0.1" /></div>
+        <div class="row"><label for="wSanitarios">Sanitarios</label><input id="wSanitarios" type="number" step="0.1" min="0.1" /></div>
+        <div class="row"><label for="wElectricidad">Electricidad</label><input id="wElectricidad" type="number" step="0.1" min="0.1" /></div>
+        <div class="row"><label for="wVentanas">Ventanas</label><input id="wVentanas" type="number" step="0.1" min="0.1" /></div>
+        <div class="row"><label for="wPuertas">Puertas</label><input id="wPuertas" type="number" step="0.1" min="0.1" /></div>
+        <div class="row"><label for="wMobiliario">Mobiliario</label><input id="wMobiliario" type="number" step="0.1" min="0.1" /></div>
+      </div>
+
+      <div class="card">
+        <h3>Estrellas (STI v4)</h3>
+        <div class="kpiSubtle">Umbral mínimo de STI para cada estrella. Un HIGH de seguridad limita el máximo.</div>
+        <div class="row"><label for="starFrom2">2★ desde</label><input id="starFrom2" type="number" step="1" min="0" max="100" /></div>
+        <div class="row"><label for="starFrom3">3★ desde</label><input id="starFrom3" type="number" step="1" min="0" max="100" /></div>
+        <div class="row"><label for="starFrom4">4★ desde</label><input id="starFrom4" type="number" step="1" min="0" max="100" /></div>
+        <div class="row"><label for="starFrom5">5★ desde</label><input id="starFrom5" type="number" step="1" min="0" max="100" /></div>
+        <div class="row"><label for="starSafetyCap">Tope si HIGH + seguridad</label><input id="starSafetyCap" type="number" step="1" min="1" max="5" /></div>
+      </div>
+
+      <div class="card">
+        <h3>Caps HIGH</h3>
+        <div class="kpiSubtle">Techo del KPI si hay al menos un HIGH.</div>
+        <div class="row"><label for="capFunctional">HIGH funcional (máx. KPI)</label><input id="capFunctional" type="number" step="1" min="0" max="100" /></div>
+        <div class="row"><label for="capSafety">HIGH seguridad (máx. KPI)</label><input id="capSafety" type="number" step="1" min="0" max="100" /></div>
+      </div>
+
+      <div class="card">
+        <h3>Confianza IA</h3>
+        <div class="row"><label for="confAccept">Aceptar automático (≥)</label><input id="confAccept" type="number" step="0.01" min="0" max="1" /></div>
+        <div class="row"><label for="confReview">Segunda revisión (≥)</label><input id="confReview" type="number" step="0.01" min="0" max="1" /></div>
+        <div class="row"><label for="confHighMin">Mínimo para HIGH</label><input id="confHighMin" type="number" step="0.01" min="0" max="1" /></div>
+      </div>
+
+      <div class="card">
+        <h3>Consenso shadow</h3>
+        <div class="kpiSubtle">No cambia el informe ni el STI. También se activa con CONSENSUS_SHADOW=1 en el servidor.</div>
+        <div class="row">
+          <label for="consensusShadowEnabled">Shadow habilitado</label>
+          <input id="consensusShadowEnabled" type="checkbox" />
+        </div>
+        <div class="row"><label for="consensusJudgeAccept">Judge acepta (≥)</label><input id="consensusJudgeAccept" type="number" step="0.01" min="0" max="1" /></div>
+        <div class="row"><label for="consensusJudgeReview">Judge revisión (≥)</label><input id="consensusJudgeReview" type="number" step="0.01" min="0" max="1" /></div>
+        <div class="row"><label for="consensusJudgeHighSafety">Judge HIGH safety (≥)</label><input id="consensusJudgeHighSafety" type="number" step="0.01" min="0" max="1" /></div>
+        <div class="kpiSubtle" style="margin-top:8px;">Códigos de seguridad (uno por línea). HIGH en estos códigos exige el umbral alto.</div>
+        <textarea id="consensusSafetyCodes" rows="4" placeholder="RCD_MISSING"></textarea>
+      </div>
+
+      <div class="card">
+        <h3>Frases de coherencia</h3>
+        <div class="kpiSubtle">Una por línea. Si el texto las contiene, el slot queda OK / 100 (salvo contradicción).</div>
+        <textarea id="coherencePhrases" rows="8"></textarea>
+      </div>
+
+      <div class="card">
+        <h3>Mapa finding → KPI</h3>
+        <div class="kpiSubtle">Una línea: tipo=KPI. Ej: faucetCorrosion=SANITARIOS</div>
+        <textarea id="findingKpiMap" rows="10"></textarea>
+      </div>
+
+      <div class="card">
+        <h3>Pesos y slots críticos</h3>
+        <div class="kpiSubtle">Pesos: SLOT_CODE=3. Críticos: un código por línea (tablero, etc.).</div>
+        <textarea id="slotWeights" rows="4" placeholder="ELECTRICAL_PANEL=3"></textarea>
+        <textarea id="criticalSlotCodes" rows="3" style="margin-top:8px;" placeholder="ELECTRICAL_PANEL"></textarea>
+      </div>
+
+      <div class="card">
         <h3>Rangos de badge</h3>
-        <div class="kpiSubtle">Define color del badge y estrellas (1–5). Rojo: bajo amarillo · Amarillo: entre ambos · Verde: desde verde. Estrellas: 1 en rojo, 2–3 en amarillo, 4–5 en verde.</div>
+        <div class="kpiSubtle">Color del badge (rojo / amarillo / verde). En v4 las estrellas usan la tabla de arriba, no estos umbrales.</div>
         <div class="row">
           <label for="badgeYellow">Amarillo desde</label>
           <input id="badgeYellow" type="number" step="1" min="0" max="100" />
@@ -1096,6 +1265,40 @@
         <button class="btn outline" id="resetBtn" type="button">Restaurar valores</button>
       </div>
       <div class="note">Los cambios se guardan directamente en el servidor y aplican para las nuevas inspecciones.</div>
+    </section>
+
+    <section class="content" id="consensus" data-section="consensus" style="display: none;">
+      <h1>Consenso shadow</h1>
+      <div class="muted">Solo lectura frente a producción. Relanzar sombra no pisa el informe ni el STI.</div>
+      <div class="card">
+        <div class="row">
+          <label for="consensusCaseId">Caso (shortId o UUID)</label>
+          <input id="consensusCaseId" type="text" placeholder="WVUXLLWN" />
+        </div>
+        <div class="actions" style="margin-top:12px;">
+          <button class="btn" type="button" id="consensusLoadBtn">Cargar</button>
+          <button class="btn outline" type="button" id="consensusRerunBtn">Relanzar consenso (escribe informe)</button>
+        </div>
+        <div class="note" id="consensusMeta" style="margin-top:10px;"></div>
+      </div>
+      <div class="card">
+        <table class="table" id="consensusTable" style="width:100%; font-size:13px;">
+          <thead>
+            <tr>
+              <th>Slot</th>
+              <th>KPI</th>
+              <th>Prod</th>
+              <th>Sombra</th>
+              <th>Acuerdo</th>
+              <th>Judge</th>
+            </tr>
+          </thead>
+          <tbody id="consensusTableBody">
+            <tr><td colspan="6" class="muted">Carga un caso para comparar sombra vs producción.</td></tr>
+          </tbody>
+        </table>
+        <div class="consensusList" id="consensusCompareList"></div>
+      </div>
     </section>
 
     <section class="content" id="intelligence" data-section="intelligence" style="display: none;">
@@ -1237,6 +1440,18 @@
           <div>
             <div class="kpiSubtle">Mobiliario fijo</div>
             <textarea id="promptMobiliario"></textarea>
+          </div>
+          <div>
+            <div class="kpiSubtle">Schema SlotAnalysis v4</div>
+            <textarea id="promptSlotAnalysisV4"></textarea>
+          </div>
+          <div>
+            <div class="kpiSubtle">Validación secundaria HIGH</div>
+            <textarea id="promptHighValidation"></textarea>
+          </div>
+          <div>
+            <div class="kpiSubtle">Inventario tablero eléctrico</div>
+            <textarea id="promptElectricalInventory"></textarea>
           </div>
         </div>
       </div>
@@ -2369,11 +2584,70 @@
       },
       badge: { yellowFrom: 60, greenFrom: 85 },
       kpiWeights: {
+        MUROS_PINTURA: 1,
         HUMEDAD: 2,
+        PISOS: 1,
         SANITARIOS: 2,
-        ELECTRICIDAD: 2
+        ELECTRICIDAD: 2,
+        VENTANAS_CERRAMIENTOS: 1,
+        PUERTAS_HERRAJES: 1,
+        MOBILIARIO_FIJO: 1
       },
-      aiFindingExamples: []
+      engineVersion: "4.0",
+      severityScores: { ok: 100, low: 85, medium: 60, high: 25 },
+      stars: {
+        bands: [
+          { from: 0, stars: 1, label: "Condición deficiente" },
+          { from: 50, stars: 2, label: "Requiere intervención" },
+          { from: 65, stars: 3, label: "Condición intermedia" },
+          { from: 80, stars: 4, label: "Buen estado" },
+          { from: 90, stars: 5, label: "Muy buen estado" }
+        ],
+        highSafetyMaxStars: 3
+      },
+      caps: { highFunctional: 60, highSafety: 45 },
+      confidence: { accept: 0.85, review: 0.65, highMin: 0.9 },
+      coherencePhrases: [
+        "no se detecta",
+        "no se detectan",
+        "sin evidencia",
+        "no se observan hallazgos",
+        "no se observan hallazgos relevantes",
+        "sin hallazgos relevantes",
+        "sin señales visibles de humedad",
+        "no se detectan señales visibles de humedad"
+      ],
+      findingKpiMap: {
+        paintToneVariation: "MUROS_PINTURA",
+        wallCrack: "MUROS_PINTURA",
+        visibleMoisture: "HUMEDAD",
+        moldLikeStaining: "HUMEDAD",
+        floorGap: "PISOS",
+        floorLift: "PISOS",
+        faucetCorrosion: "SANITARIOS",
+        pipeCorrosion: "SANITARIOS",
+        activeLeak: "SANITARIOS",
+        missingDifferential: "ELECTRICIDAD",
+        exposedWire: "ELECTRICIDAD",
+        brokenWindowSeal: "VENTANAS_CERRAMIENTOS",
+        doorHardwareDamage: "PUERTAS_HERRAJES",
+        furnitureScratch: "MOBILIARIO_FIJO"
+      },
+      slotWeights: { ELECTRICAL_PANEL: 3 },
+      criticalSlotCodes: ["ELECTRICAL_PANEL"],
+      aiPromptsV4: {
+        SLOT_ANALYSIS_SCHEMA: "",
+        HIGH_VALIDATION: "",
+        ELECTRICAL_INVENTORY: ""
+      },
+      aiFindingExamples: [],
+      consensus: {
+        shadowEnabled: false,
+        judgeAccept: 0.85,
+        judgeReview: 0.65,
+        judgeHighSafety: 0.95,
+        safetyCodes: ["RCD_MISSING", "EXPOSED_WIRE", "ACTIVE_LEAK", "FLOOR_LIFT"]
+      }
     };
 
     const fields = [
@@ -2438,7 +2712,32 @@
       { id: "promptMobiliario", path: "aiPrompts.MOBILIARIO_FIJO", type: "text" },
       { id: "recGreen", path: "recommendations.GREEN", type: "text" },
       { id: "recYellow", path: "recommendations.YELLOW", type: "text" },
-      { id: "recRed", path: "recommendations.RED", type: "text" }
+      { id: "recRed", path: "recommendations.RED", type: "text" },
+      { id: "engineVersion", path: "engineVersion", type: "text" },
+      { id: "sevScoreOk", path: "severityScores.ok", type: "number" },
+      { id: "sevScoreLow", path: "severityScores.low", type: "number" },
+      { id: "sevScoreMed", path: "severityScores.medium", type: "number" },
+      { id: "sevScoreHigh", path: "severityScores.high", type: "number" },
+      { id: "wMuros", path: "kpiWeights.MUROS_PINTURA", type: "number" },
+      { id: "wHumedad", path: "kpiWeights.HUMEDAD", type: "number" },
+      { id: "wPisos", path: "kpiWeights.PISOS", type: "number" },
+      { id: "wSanitarios", path: "kpiWeights.SANITARIOS", type: "number" },
+      { id: "wElectricidad", path: "kpiWeights.ELECTRICIDAD", type: "number" },
+      { id: "wVentanas", path: "kpiWeights.VENTANAS_CERRAMIENTOS", type: "number" },
+      { id: "wPuertas", path: "kpiWeights.PUERTAS_HERRAJES", type: "number" },
+      { id: "wMobiliario", path: "kpiWeights.MOBILIARIO_FIJO", type: "number" },
+      { id: "starSafetyCap", path: "stars.highSafetyMaxStars", type: "number" },
+      { id: "capFunctional", path: "caps.highFunctional", type: "number" },
+      { id: "capSafety", path: "caps.highSafety", type: "number" },
+      { id: "confAccept", path: "confidence.accept", type: "number" },
+      { id: "confReview", path: "confidence.review", type: "number" },
+      { id: "confHighMin", path: "confidence.highMin", type: "number" },
+      { id: "consensusJudgeAccept", path: "consensus.judgeAccept", type: "number" },
+      { id: "consensusJudgeReview", path: "consensus.judgeReview", type: "number" },
+      { id: "consensusJudgeHighSafety", path: "consensus.judgeHighSafety", type: "number" },
+      { id: "promptSlotAnalysisV4", path: "aiPromptsV4.SLOT_ANALYSIS_SCHEMA", type: "text" },
+      { id: "promptHighValidation", path: "aiPromptsV4.HIGH_VALIDATION", type: "text" },
+      { id: "promptElectricalInventory", path: "aiPromptsV4.ELECTRICAL_INVENTORY", type: "text" }
     ];
 
     const KPI_OPTIONS = [
@@ -2553,6 +2852,58 @@
           ...Object.fromEntries(
             Object.entries(input.kpiWeights).map(([k, v]) => [String(k).toUpperCase(), Number(v)]).filter(([, v]) => Number.isFinite(v) && v > 0)
           )
+        };
+      }
+      if (input.engineVersion) next.engineVersion = String(input.engineVersion);
+      if (input.severityScores && typeof input.severityScores === "object") {
+        next.severityScores = {
+          ok: Number.isFinite(Number(input.severityScores.ok)) ? Number(input.severityScores.ok) : next.severityScores.ok,
+          low: Number.isFinite(Number(input.severityScores.low)) ? Number(input.severityScores.low) : next.severityScores.low,
+          medium: Number.isFinite(Number(input.severityScores.medium)) ? Number(input.severityScores.medium) : next.severityScores.medium,
+          high: Number.isFinite(Number(input.severityScores.high)) ? Number(input.severityScores.high) : next.severityScores.high
+        };
+      }
+      if (input.stars && typeof input.stars === "object") {
+        next.stars = {
+          ...next.stars,
+          ...input.stars,
+          highSafetyMaxStars: Number.isFinite(Number(input.stars.highSafetyMaxStars))
+            ? Number(input.stars.highSafetyMaxStars)
+            : next.stars.highSafetyMaxStars
+        };
+      }
+      if (input.caps && typeof input.caps === "object") {
+        next.caps = {
+          highFunctional: Number(input.caps.highFunctional ?? next.caps.highFunctional),
+          highSafety: Number(input.caps.highSafety ?? next.caps.highSafety)
+        };
+      }
+      if (input.confidence && typeof input.confidence === "object") {
+        next.confidence = {
+          accept: Number(input.confidence.accept ?? next.confidence.accept),
+          review: Number(input.confidence.review ?? next.confidence.review),
+          highMin: Number(input.confidence.highMin ?? next.confidence.highMin)
+        };
+      }
+      if (Array.isArray(input.coherencePhrases)) next.coherencePhrases = input.coherencePhrases.map(String);
+      if (input.findingKpiMap && typeof input.findingKpiMap === "object") {
+        next.findingKpiMap = { ...next.findingKpiMap, ...input.findingKpiMap };
+      }
+      if (input.slotWeights && typeof input.slotWeights === "object") next.slotWeights = { ...next.slotWeights, ...input.slotWeights };
+      if (Array.isArray(input.criticalSlotCodes)) next.criticalSlotCodes = input.criticalSlotCodes.map(String);
+      if (input.aiPromptsV4 && typeof input.aiPromptsV4 === "object") {
+        next.aiPromptsV4 = { ...next.aiPromptsV4, ...input.aiPromptsV4 };
+      }
+      if (input.consensus && typeof input.consensus === "object") {
+        next.consensus = {
+          ...next.consensus,
+          shadowEnabled: !!input.consensus.shadowEnabled,
+          judgeAccept: Number.isFinite(Number(input.consensus.judgeAccept)) ? Number(input.consensus.judgeAccept) : next.consensus.judgeAccept,
+          judgeReview: Number.isFinite(Number(input.consensus.judgeReview)) ? Number(input.consensus.judgeReview) : next.consensus.judgeReview,
+          judgeHighSafety: Number.isFinite(Number(input.consensus.judgeHighSafety)) ? Number(input.consensus.judgeHighSafety) : next.consensus.judgeHighSafety,
+          safetyCodes: Array.isArray(input.consensus.safetyCodes)
+            ? input.consensus.safetyCodes.map(String)
+            : next.consensus.safetyCodes
         };
       }
       if (Array.isArray(input.aiFindingExamples)) {
@@ -2770,6 +3121,73 @@
       addSlotRowWithData("", "");
     }
 
+    function linesToMap(text, upperValue) {
+      const out = {};
+      String(text || "").split("\n").forEach((line) => {
+        const t = line.trim();
+        if (!t || t.startsWith("#")) return;
+        const idx = t.indexOf("=");
+        if (idx < 1) return;
+        const k = t.slice(0, idx).trim();
+        let v = t.slice(idx + 1).trim();
+        if (!k || !v) return;
+        out[k] = upperValue ? v.toUpperCase() : v;
+      });
+      return out;
+    }
+    function mapToLines(obj) {
+      return Object.entries(obj || {}).map(([k, v]) => `${k}=${v}`).join("\n");
+    }
+    function fillV4ExtraFields(cfg) {
+      const bands = cfg.stars?.bands || [];
+      const fromOf = (n) => (bands.find((b) => Number(b.stars) === n) || {}).from;
+      const setVal = (id, val) => { const el = document.getElementById(id); if (el && val != null) el.value = val; };
+      setVal("starFrom2", fromOf(2) ?? 50);
+      setVal("starFrom3", fromOf(3) ?? 65);
+      setVal("starFrom4", fromOf(4) ?? 80);
+      setVal("starFrom5", fromOf(5) ?? 90);
+      setVal("coherencePhrases", (cfg.coherencePhrases || []).join("\n"));
+      setVal("findingKpiMap", mapToLines(cfg.findingKpiMap));
+      setVal("slotWeights", mapToLines(cfg.slotWeights));
+      setVal("criticalSlotCodes", (cfg.criticalSlotCodes || []).join("\n"));
+      setVal("consensusSafetyCodes", (cfg.consensus?.safetyCodes || []).join("\n"));
+      const shadowEl = document.getElementById("consensusShadowEnabled");
+      if (shadowEl) shadowEl.checked = !!cfg.consensus?.shadowEnabled;
+    }
+    function readV4ExtraFields(cfg) {
+      const bandFrom = (id, fallback) => {
+        const n = Number(document.getElementById(id)?.value);
+        return Number.isFinite(n) ? n : fallback;
+      };
+      cfg.stars = cfg.stars || {};
+      cfg.stars.bands = [
+        { from: 0, stars: 1, label: "Condición deficiente" },
+        { from: bandFrom("starFrom2", 50), stars: 2, label: "Requiere intervención" },
+        { from: bandFrom("starFrom3", 65), stars: 3, label: "Condición intermedia" },
+        { from: bandFrom("starFrom4", 80), stars: 4, label: "Buen estado" },
+        { from: bandFrom("starFrom5", 90), stars: 5, label: "Muy buen estado" }
+      ];
+      const phrases = String(document.getElementById("coherencePhrases")?.value || "")
+        .split("\n").map((s) => s.trim()).filter(Boolean);
+      if (phrases.length) cfg.coherencePhrases = phrases;
+      const fmap = linesToMap(document.getElementById("findingKpiMap")?.value, true);
+      if (Object.keys(fmap).length) cfg.findingKpiMap = fmap;
+      const weights = {};
+      Object.entries(linesToMap(document.getElementById("slotWeights")?.value, false)).forEach(([k, v]) => {
+        const n = Number(v);
+        if (Number.isFinite(n) && n > 0) weights[String(k).toUpperCase()] = n;
+      });
+      if (Object.keys(weights).length) cfg.slotWeights = weights;
+      const crit = String(document.getElementById("criticalSlotCodes")?.value || "")
+        .split("\n").map((s) => s.trim().toUpperCase()).filter(Boolean);
+      if (crit.length) cfg.criticalSlotCodes = crit;
+      cfg.consensus = cfg.consensus || {};
+      cfg.consensus.shadowEnabled = !!document.getElementById("consensusShadowEnabled")?.checked;
+      const safetyCodes = String(document.getElementById("consensusSafetyCodes")?.value || "")
+        .split("\n").map((s) => s.trim()).filter(Boolean);
+      if (safetyCodes.length) cfg.consensus.safetyCodes = safetyCodes;
+    }
+
     async function loadForm() {
       const cfg = await fetchConfig();
       fields.forEach(({ id, path }) => {
@@ -2777,6 +3195,7 @@
         if (!el) return;
         el.value = getByPath(cfg, path);
       });
+      fillV4ExtraFields(cfg);
       renderSlotMap(cfg);
       aiFindingExamples = Array.isArray(cfg.aiFindingExamples) ? cfg.aiFindingExamples.slice() : [];
       renderFindingExamples();
@@ -2807,6 +3226,7 @@
       });
       cfg.slotKpiMap = slotMap;
       cfg.aiFindingExamples = aiFindingExamples.slice();
+      readV4ExtraFields(cfg);
       setLocalConfig(cfg);
       try {
         const res = await adminFetch("/api/admin/score-config", {
@@ -2838,6 +3258,150 @@
     document.getElementById("saveBtn").addEventListener("click", () => saveForm());
     document.getElementById("saveIntelligenceBtn").addEventListener("click", () => saveForm());
     document.getElementById("resetBtn").addEventListener("click", () => resetForm());
+
+    function consensusEsc(s) {
+      return String(s ?? "—").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    }
+    function consensusAnalysisHtml(label, a) {
+      if (!a) {
+        return '<div class="consensusCol"><h4>' + consensusEsc(label) + '</h4><div class="muted">Sin análisis</div></div>';
+      }
+      if (a.error) {
+        return '<div class="consensusCol"><h4>' + consensusEsc(label) + '</h4><div class="muted">' + consensusEsc(a.error) + '</div></div>';
+      }
+      const bits = [a.evaluability, a.severity, (a.codes || []).join(", ")].filter(Boolean);
+      const text = [a.observation, a.interpretation, a.cause].filter(Boolean).join("\n\n");
+      const obsLines = (a.observations || []).map((o) => {
+        return (o.code || "—") + " · " + (o.detected ? "detectado" : "no") +
+          (o.severity ? " · " + o.severity : "") +
+          (o.confidence != null ? " · " + o.confidence : "");
+      }).join("\n");
+      const title = a.model ? (label + " · " + a.model) : label;
+      return '<div class="consensusCol"><h4>' + consensusEsc(title) + '</h4>' +
+        (bits.length ? '<div class="muted" style="margin-bottom:8px">' + consensusEsc(bits.join(" · ")) + '</div>' : '') +
+        '<div class="consensusText">' + consensusEsc(text || "—") + '</div>' +
+        (obsLines ? '<div class="consensusObs">' + consensusEsc(obsLines) + '</div>' : '') +
+        '</div>';
+    }
+    function consensusJudgeHtml(r, roles) {
+      const c = r.judge || r.gemini || r.claude;
+      const judgeName = roles?.judge?.name || "Juez";
+      const aName = roles?.a?.name || "OpenAI";
+      const bName = roles?.b?.name || "Claude";
+      if (!r.judgeTriggered) {
+        return '<div class="consensusJudge skip"><h4 style="margin:0 0 6px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#94a3b8">' +
+          consensusEsc(judgeName) + '</h4><div class="muted">No intervino: ' + consensusEsc(aName) + ' y ' + consensusEsc(bName) + ' coincidieron.</div></div>';
+      }
+      if (!c) {
+        return '<div class="consensusJudge skip"><h4 style="margin:0 0 6px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#94a3b8">' +
+          consensusEsc(judgeName) + '</h4><div class="muted">Sin respuesta.</div></div>';
+      }
+      if (c.error) {
+        return '<div class="consensusJudge skip"><h4 style="margin:0 0 6px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#94a3b8">' +
+          consensusEsc(judgeName) + '</h4><div class="muted">' + consensusEsc(c.error) + '</div></div>';
+      }
+      const side = c.chosenSide === "A" ? ("eligió " + aName) : (c.chosenSide === "B" ? ("eligió " + bName) : (c.chosenSide === "NEITHER" ? "ninguno" : c.chosenSide));
+      const bits = [side, c.confidence != null ? ("conf " + c.confidence) : null, c.finalFindingCode, c.severity].filter(Boolean);
+      const title = c.model ? (judgeName + " · " + c.model) : judgeName;
+      const obsLines = (c.observations || []).map((o) => {
+        return (o.code || "—") + " · " + (o.detected ? "detectado" : "no") +
+          (o.severity ? " · " + o.severity : "") +
+          (o.confidence != null ? " · " + o.confidence : "");
+      }).join("\n");
+      return '<div class="consensusJudge"><h4 style="margin:0 0 6px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#94a3b8">' +
+        consensusEsc(title) + '</h4><div class="muted" style="margin-bottom:8px">' + consensusEsc(bits.join(" · ")) +
+        '</div><div class="consensusText">' + consensusEsc(c.rationale || "—") + '</div>' +
+        (obsLines ? '<div class="consensusObs">' + consensusEsc(obsLines) + '</div>' : '') +
+        '</div>';
+    }
+    function consensusPhotoHtml(r) {
+      if (!r.photoUrl) {
+        return '<div class="muted" style="padding:24px 0;text-align:center">Sin foto</div>';
+      }
+      return '<a class="consensusPhotoWrap" href="' + consensusEsc(r.photoUrl) + '" target="_blank" rel="noopener">' +
+        '<img class="consensusPhoto" src="' + consensusEsc(r.photoUrl) + '" alt="' + consensusEsc(r.title || r.slotCode || "foto") + '" />' +
+        '</a>';
+    }
+    async function loadConsensusShadow() {
+      const caseId = String(document.getElementById("consensusCaseId")?.value || "").trim();
+      const meta = document.getElementById("consensusMeta");
+      const tbody = document.getElementById("consensusTableBody");
+      const list = document.getElementById("consensusCompareList");
+      if (!caseId) {
+        if (meta) meta.textContent = "Indica un caso.";
+        return;
+      }
+      if (meta) meta.textContent = "Cargando…";
+      const res = await adminFetch("/api/admin/consensus/shadow/" + encodeURIComponent(caseId));
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        if (meta) meta.textContent = data?.error || "No se pudo cargar.";
+        if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="muted">Sin datos.</td></tr>';
+        if (list) list.innerHTML = "";
+        return;
+      }
+      const keys = (data.missingKeys || []).join(", ");
+      const roles = data.roles || { a: { name: "OpenAI" }, b: { name: "Claude" }, judge: { name: "Gemini" } };
+      if (meta) {
+        meta.textContent = "Caso " + (data.case?.shortId || data.case?.id) +
+          " · shadow " + (data.shadowEnabled ? "ON" : "OFF") +
+          " · A " + (roles.a?.model || roles.a?.name) +
+          " · B " + (roles.b?.model || roles.b?.name) +
+          " · juez " + (roles.judge?.model || roles.judge?.name) +
+          (roles.judge?.thinking ? " thinking " + roles.judge.thinking : "") +
+          (keys ? " · faltan keys: " + keys : "") +
+          " · " + (data.rows || []).length + " filas. No modifica el informe.";
+      }
+      if (!tbody) return;
+      if (!(data.rows || []).length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="muted">Sin filas de sombra. Relanza el caso si hay keys y shadow ON.</td></tr>';
+        if (list) list.innerHTML = "";
+        return;
+      }
+      tbody.innerHTML = data.rows.map((r) => {
+        const prod = [r.prodSeverity || "OK", r.prodFinding || ""].filter(Boolean).join(" / ");
+        const shadow = [r.finalStatus || "", r.finalFindingCode || "", r.finalSeverity || ""].filter(Boolean).join(" · ");
+        const agree = r.consensusStatus || "";
+        const judge = r.judgeTriggered ? ("sí " + ((r.judge || r.gemini || r.claude)?.confidence != null ? (r.judge || r.gemini || r.claude).confidence : "")) : "no";
+        return "<tr><td>" + consensusEsc(r.slotCode || r.slotId) + "</td><td>" + consensusEsc(r.kpi) +
+          "</td><td>" + consensusEsc(prod) + "</td><td>" + consensusEsc(shadow) +
+          "</td><td>" + consensusEsc(agree) + "</td><td>" + consensusEsc(judge) + "</td></tr>";
+      }).join("");
+      if (list) {
+        list.innerHTML = data.rows.map((r) => {
+          const head = consensusEsc(r.title || r.slotCode || r.slotId) +
+            (r.kpi ? " · " + consensusEsc(r.kpi) : "") +
+            " · " + consensusEsc(r.finalStatus || "") +
+            " · " + consensusEsc(r.consensusStatus || "");
+          return '<article class="consensusSlot"><div class="consensusSlotHead"><strong>' + head +
+            '</strong></div><div class="consensusGrid">' + consensusPhotoHtml(r) +
+            consensusAnalysisHtml(roles.a?.name || "OpenAI", r.analystA || r.openai) +
+            consensusAnalysisHtml(roles.b?.name || "Claude", r.analystB || r.claude) +
+            '</div>' + consensusJudgeHtml(r, roles) + '</article>';
+        }).join("");
+      }
+    }
+    async function rerunConsensusShadow() {
+      const caseId = String(document.getElementById("consensusCaseId")?.value || "").trim();
+      const meta = document.getElementById("consensusMeta");
+      if (!caseId) return;
+      if (!window.confirm("Esto reescribe el informe oficial (slots resueltos) y el STI. ¿Continuar?")) return;
+      if (meta) meta.textContent = "Relanzando consenso (producción)…";
+      const res = await adminFetch("/api/admin/consensus/shadow/" + encodeURIComponent(caseId), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: "{}"
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        if (meta) meta.textContent = data?.error || "No se pudo relanzar.";
+        return;
+      }
+      if (meta) meta.textContent = "Sombra relanzada: " + (data.count || 0) + " slots. Recargando…";
+      await loadConsensusShadow();
+    }
+    document.getElementById("consensusLoadBtn")?.addEventListener("click", () => loadConsensusShadow().catch(() => {}));
+    document.getElementById("consensusRerunBtn")?.addEventListener("click", () => rerunConsensusShadow().catch(() => {}));
     const addSlotBtn = document.getElementById("addSlotBtn");
     if (addSlotBtn) addSlotBtn.addEventListener("click", addSlotRow);
     
@@ -2867,6 +3431,10 @@
         }
         if (sectionId === 'taxonomia') {
           loadTaxonomyAdmin().catch(() => {});
+        }
+        if (sectionId === 'consensus') {
+          const el = document.getElementById('consensusCaseId');
+          if (el && !el.value) el.value = 'WVUXLLWN';
         }
       });
     });

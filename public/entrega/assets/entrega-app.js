@@ -2,6 +2,15 @@
 (function () {
   "use strict";
 
+  function isEmbedMode() {
+    try {
+      return new URLSearchParams(location.search).get("embed") === "1";
+    } catch {
+      return false;
+    }
+  }
+  if (isEmbedMode()) document.documentElement.classList.add("ainspecta-embed");
+
   const THEME_KEY = "entrega-theme";
   const NF = new Intl.NumberFormat("es-CL");
   const STATE_COLORS = {
@@ -89,9 +98,18 @@
   function appHref(path) {
     let p = String(path || "");
     if (!p || p.startsWith("#") || p.startsWith("/api/") || p.startsWith("http")) return p;
-    if (p.startsWith("/entrega")) return p;
-    if (p.startsWith("/")) return ENTREGA_BASE + p;
-    return ENTREGA_BASE + "/" + p;
+    let resolved = p;
+    if (p.startsWith("/entrega")) resolved = p;
+    else if (p.startsWith("/")) resolved = ENTREGA_BASE + p;
+    else resolved = ENTREGA_BASE + "/" + p;
+    if (!isEmbedMode()) return resolved;
+    try {
+      const u = new URL(resolved, location.origin);
+      u.searchParams.set("embed", "1");
+      return u.pathname + u.search + u.hash;
+    } catch {
+      return resolved;
+    }
   }
 
   const NAV = [
@@ -274,7 +292,7 @@
   function renderSidebar(activeKey, project, seed) {
     const comp = project.composition || {};
     const isAdmin = ME && ME.user && ME.user.role === "ADMIN";
-    const navHtml = NAV.filter((n) => !n.adminOnly || isAdmin)
+    const navHtml = NAV.filter((n) => (!n.adminOnly || isAdmin) && !(isEmbedMode() && n.key === "usuarios"))
       .map(
         (n) =>
           `<a href="${withProject(n.href, project.id)}" class="${n.key === activeKey ? "active" : ""}">${svgIcon(n.icon)}<span>${n.label}</span></a>`
@@ -340,11 +358,14 @@
 
   function withProject(href, pid) {
     const resolved = appHref(href);
-    if (resolved.startsWith("#") || resolved.includes("#")) {
-      const [base, hash] = resolved.split("#");
-      return `${base}?p=${pid}${hash ? "#" + hash : ""}`;
+    try {
+      const u = new URL(resolved, location.origin);
+      if (pid) u.searchParams.set("p", pid);
+      if (isEmbedMode()) u.searchParams.set("embed", "1");
+      return u.pathname + u.search + u.hash;
+    } catch {
+      return resolved;
     }
-    return `${resolved}?p=${pid}`;
   }
 
   function projectSelector(seed, project) {

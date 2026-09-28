@@ -1,0 +1,113 @@
+<svg width="1440" height="620" viewBox="0 0 1440 620" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1440" height="620" fill="#F6F4F1"/>
+
+  <!-- Header -->
+  <text x="120" y="188"
+    fill="#0B0B0B"
+    font-family="Inter, Arial, sans-serif"
+    font-size="52"
+    font-weight="700">
+    <tspan x="120" dy="0">Hay momentos donde una</tspan>
+    <tspan x="120" dy="62">inspecci�n cambia la decisi�n.</tspan>
+  </text>
+
+  <text x="120" y="290"
+    fill="#4B5563"
+    font-family="Inter, Arial, sans-serif"
+    font-size="24"
+    font-weight="400">
+    <tspan x="120" dy="0">�salo cuando todav�a est�s a tiempo de evaluar, negociar</tspan>
+    <tspan x="120" dy="34">o proteger el valor real de una propiedad.</tspan>
+  </text>
+
+  <!-- Cards row -->
+  <!-- Card 1 -->
+  <g>
+    <rect x="120" y="352" width="372" height="196" rx="24" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="1.5"/>
+    
+    <!-- Icon -->
+    <rect x="152" y="384" width="56" height="56" rx="16" fill="#EEF4FF"/>
+    <path d="M170 419H190" stroke="#5B8DEF" stroke-width="3.2" stroke-linecap="round"/>
+    <path d="M180 409V429" stroke="#5B8DEF" stroke-width="3.2" stroke-linecap="round"/>
+    <rect x="164" y="395" width="32" height="38" rx="6" stroke="#5B8DEF" stroke-width="2.6"/>
+    
+    <!-- Title -->
+    <text x="152" y="474"
+      fill="#0B0B0B"
+      font-family="Inter, Arial, sans-serif"
+      font-size="28"
+      font-weight="700">
+      Antes de comprar
+    </text>
+
+    <!-- Body -->
+    <text x="152" y="512"
+      fill="#4B5563"
+      font-family="Inter, Arial, sans-serif"
+      font-size="20"
+      font-weight="400">
+      <tspan x="152" dy="0">Detecta problemas visibles antes</tspan>
+      <tspan x="152" dy="30">de comprometer una inversi�n.</tspan>
+    </text>
+  </g>
+
+  <!-- Card 2 -->
+  <g>
+    <rect x="534" y="352" width="372" height="196" rx="24" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="1.5"/>
+    
+    <!-- Icon -->
+    <rect x="566" y="384" width="56" height="56" rx="16" fill="#EEF4FF"/>
+    <path d="M581 425L594 412L602 420L614 406" stroke="#5B8DEF" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M579 398H613" stroke="#5B8DEF" stroke-width="2.4" stroke-linecap="round" opacity="0.7"/>
+    
+    <!-- Title -->
+    <text x="566" y="474"
+      fill="#0B0B0B"
+      font-family="Inter, Arial, sans-serif"
+      font-size="28"
+      font-weight="700">
+      Antes de negociar
+    </text>
+
+    <!-- Body -->
+    <text x="566" y="512"
+      fill="#4B5563"
+      font-family="Inter, Arial, sans-serif"
+      font-size="20"
+      font-weight="400">
+      <tspan x="566" dy="0">Identifica hallazgos que pueden</tspan>
+      <tspan x="566" dy="30">influir en el precio final.</tspan>
+    </text>
+  </g>
+
+  <!-- Card 3 -->
+  <g>
+    <rect x="948" y="352" width="372" height="196" rx="24" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="1.5"/>
+    
+    <!-- Icon -->
+    <rect x="980" y="384" width="56" height="56" rx="16" fill="#EEF4FF"/>
+    <path d="M994 426V406C994 401.582 997.582 398 1002 398H1014C1018.42 398 1022 401.582 1022 406V426" stroke="#5B8DEF" stroke-width="2.8" stroke-linecap="round"/>
+    <path d="M990 426H1026" stroke="#5B8DEF" stroke-width="2.8" stroke-linecap="round"/>
+    <circle cx="1008" cy="412" r="3.2" fill="#5B8DEF"/>
+    
+    <!-- Title -->
+    <text x="980" y="474"
+      fill="#0B0B0B"
+      font-family="Inter, Arial, sans-serif"
+      font-size="28"
+      font-weight="700">
+      Protege tu Inversi�n
+    </text>
+
+    <!-- Body -->
+    <text x="980" y="512"
+      fill="#4B5563"
+      font-family="Inter, Arial, sans-serif"
+      font-size="20"
+      font-weight="400">
+      <tspan x="980" dy="0">Anticipa riesgos visibles y negocia con</tspan>
+      <tspan x="980" dy="30">respaldo t�cnico: menos sorpresas de costo</tspan>
+      <tspan x="980" dy="30">y m�s claridad al comprar o arrendar.</tspan>
+    </text>
+  </g>
+</svg>

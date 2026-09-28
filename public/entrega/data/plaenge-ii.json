@@ -1,0 +1,1167 @@
+{
+  "tenant": {
+    "slug": "plaenge-demo",
+    "name": "Plaenge DEMO"
+  },
+  "kpis": [
+    "Terminaciones",
+    "Instalaciones Sanitarias",
+    "Instalaciones Eléctricas",
+    "Instalaciones de Gas",
+    "Fachadas y Terminaciones Exteriores",
+    "Estructura Visible",
+    "Climatización",
+    "Ventanas y Cerramientos",
+    "Áreas Verdes y Exteriores"
+  ],
+  "catalogoEspecialidades": {
+    "Terminaciones": [
+      "Pintor",
+      "Yesero",
+      "Instalador de cerámica",
+      "Instalador de porcelanato",
+      "Instalador de piso flotante",
+      "Instalador de piso SPC/Vinílico",
+      "Instalador de alfombra",
+      "Carpintero terminaciones",
+      "Instalador de guardapolvos",
+      "Instalador de papel mural",
+      "Instalador de cubiertas",
+      "Mueblista",
+      "Vidriero",
+      "Instalador de quincallería",
+      "Sellador de juntas y silicona"
+    ],
+    "Instalaciones Sanitarias": [
+      "Gasfiter",
+      "Destapador sanitario",
+      "Técnico de bombas",
+      "Técnico de presurización",
+      "Técnico de aguas lluvias"
+    ],
+    "Instalaciones Eléctricas": [
+      "Electricista",
+      "Técnico corrientes débiles",
+      "Técnico iluminación",
+      "Técnico citofonía/intercom"
+    ],
+    "Instalaciones de Gas": [
+      "Instalador autorizado SEC gas",
+      "Técnico calefont",
+      "Técnico caldera",
+      "Técnico cocina y horno"
+    ],
+    "Fachadas y Terminaciones Exteriores": [
+      "Fachadista",
+      "Pintor exterior",
+      "Impermeabilizador",
+      "Instalador EIFS",
+      "Instalador siding",
+      "Hojalatero",
+      "Techumbre"
+    ],
+    "Estructura Visible": [
+      "Constructor",
+      "ITO",
+      "Ingeniero estructural",
+      "Especialista en reparación de hormigón"
+    ],
+    "Climatización": [
+      "Técnico aire acondicionado",
+      "Técnico ventilación",
+      "Técnico extracción"
+    ],
+    "Ventanas y Cerramientos": [
+      "Aluminiero",
+      "Instalador PVC",
+      "Vidriero",
+      "Técnico de cierres y herrajes"
+    ],
+    "Áreas Verdes y Exteriores": [
+      "Jardinero",
+      "Técnico riego",
+      "Paisajista"
+    ]
+  },
+  "especialidades": [
+    "Pintor",
+    "Yesero",
+    "Instalador de cerámica",
+    "Instalador de porcelanato",
+    "Instalador de piso flotante",
+    "Instalador de piso SPC/Vinílico",
+    "Instalador de alfombra",
+    "Carpintero terminaciones",
+    "Instalador de guardapolvos",
+    "Instalador de papel mural",
+    "Instalador de cubiertas",
+    "Mueblista",
+    "Vidriero",
+    "Instalador de quincallería",
+    "Sellador de juntas y silicona",
+    "Gasfiter",
+    "Destapador sanitario",
+    "Técnico de bombas",
+    "Técnico de presurización",
+    "Técnico de aguas lluvias",
+    "Electricista",
+    "Técnico corrientes débiles",
+    "Técnico iluminación",
+    "Técnico citofonía/intercom",
+    "Instalador autorizado SEC gas",
+    "Técnico calefont",
+    "Técnico caldera",
+    "Técnico cocina y horno",
+    "Fachadista",
+    "Pintor exterior",
+    "Impermeabilizador",
+    "Instalador EIFS",
+    "Instalador siding",
+    "Hojalatero",
+    "Techumbre",
+    "Constructor",
+    "ITO",
+    "Ingeniero estructural",
+    "Especialista en reparación de hormigón",
+    "Técnico aire acondicionado",
+    "Técnico ventilación",
+    "Técnico extracción",
+    "Aluminiero",
+    "Instalador PVC",
+    "Técnico de cierres y herrajes",
+    "Jardinero",
+    "Técnico riego",
+    "Paisajista"
+  ],
+  "estados": {
+    "lista": {
+      "label": "Lista",
+      "color": "#22C55E"
+    },
+    "pendiente_menor": {
+      "label": "Pendiente menor",
+      "color": "#FACC15"
+    },
+    "pendiente_intermedio": {
+      "label": "Pendiente intermedio",
+      "color": "#F97316"
+    },
+    "critico": {
+      "label": "Crítico",
+      "color": "#EF4444"
+    },
+    "no_inspeccionado": {
+      "label": "No inspeccionado",
+      "color": "#D1D5DB"
+    }
+  },
+  "severidades": {
+    "critica": {
+      "label": "Crítica",
+      "color": "#EF4444"
+    },
+    "intermedia": {
+      "label": "Intermedia",
+      "color": "#F97316"
+    },
+    "menor": {
+      "label": "Menor",
+      "color": "#FACC15"
+    }
+  },
+  "projects": [
+    {
+      "id": "plaenge-ii",
+      "name": "Plaenge II",
+      "familia": "Plaenge",
+      "building": "Edificio Plaenge II",
+      "address": "Av. Apoquindo 4500, Las Condes",
+      "comuna": "Las Condes",
+      "ciudad": "Santiago",
+      "status": "en_curso",
+      "statusLabel": "En curso",
+      "inspectionDate": "2024-05-23",
+      "lastUpdate": "2024-05-23T10:30:00",
+      "riesgoEntrega": "Atención",
+      "fechaComprometidaEntrega": "2027-09-30",
+      "fechaProyectadaEntrega": "2027-09-30",
+      "fechaInicioRecepcion": "2026-07-01",
+      "composition": {
+        "locales": 5,
+        "oficinas": 18,
+        "departamentos": 131,
+        "estacionamientos": 100,
+        "bodegas": 117
+      },
+      "metrics": {
+        "avanceRecepcion": 74,
+        "unidadesRecibidas": 97,
+        "unidadesTotales": 131,
+        "avanceCierre": 58,
+        "unidadesCierre": 89,
+        "observacionesTotales": 6160,
+        "criticasAbiertas": 128,
+        "criticasPctTotal": 2.1,
+        "otActivas": 64,
+        "otAbiertas": 24,
+        "otAtrasadas": 12,
+        "unidadesListas": 96,
+        "unidadesListasPct": 62,
+        "unidadesBloqueadas": 32
+      },
+      "panelGerencial": {
+        "kpiDominante": {
+          "nombre": "Terminaciones",
+          "pct": 35
+        },
+        "especialidadMayorAtraso": {
+          "nombre": "Pintor",
+          "pct": 28
+        },
+        "pisoCritico": {
+          "nombre": "Piso 2",
+          "criticas": 24
+        },
+        "unidadesBloqueadas": 32,
+        "otAtrasadas": 12
+      },
+      "accionesRecomendadas": [
+        "Priorizar cierre de críticas en Piso 2 y Piso 1",
+        "Asignar más recursos a Terminaciones",
+        "Revisar y reprogramar OT atrasadas",
+        "Implementar plan de cierre acelerado",
+        "Revisar críticas abiertas"
+      ],
+      "resumenEjecutivo": "Obra demo Plaenge II. Ambiente aislado del tenant plaenge-demo para demostración de Recepción Técnica.",
+      "charts": {
+        "hallazgosPorKpi": [
+          {
+            "label": "Terminaciones",
+            "value": 2154,
+            "color": "#6366F1"
+          },
+          {
+            "label": "Instalaciones Eléctricas",
+            "value": 1180,
+            "color": "#22C55E"
+          },
+          {
+            "label": "Instalaciones Sanitarias",
+            "value": 940,
+            "color": "#F97316"
+          },
+          {
+            "label": "Ventanas y Cerramientos",
+            "value": 620,
+            "color": "#EAB308"
+          },
+          {
+            "label": "Climatización",
+            "value": 410,
+            "color": "#14B8A6"
+          },
+          {
+            "label": "Fachadas y Terminaciones Exteriores",
+            "value": 380,
+            "color": "#EC4899"
+          },
+          {
+            "label": "Instalaciones de Gas",
+            "value": 260,
+            "color": "#0EA5E9"
+          },
+          {
+            "label": "Estructura Visible",
+            "value": 140,
+            "color": "#8B5CF6"
+          },
+          {
+            "label": "Áreas Verdes y Exteriores",
+            "value": 76,
+            "color": "#84CC16"
+          }
+        ],
+        "observacionesPorEspecialidad": [
+          {
+            "label": "Pintor",
+            "value": 1240
+          },
+          {
+            "label": "Electricista",
+            "value": 980
+          },
+          {
+            "label": "Yesero",
+            "value": 720
+          },
+          {
+            "label": "Instalador de cerámica",
+            "value": 610
+          },
+          {
+            "label": "Gasfiter",
+            "value": 540
+          },
+          {
+            "label": "Mueblista",
+            "value": 430
+          },
+          {
+            "label": "Sellador de juntas y silicona",
+            "value": 360
+          }
+        ],
+        "aperturasVsCierres": {
+          "labels": [
+            "12 May",
+            "14 May",
+            "16 May",
+            "18 May",
+            "20 May",
+            "22 May",
+            "24 May"
+          ],
+          "aperturas": [
+            120,
+            180,
+            260,
+            240,
+            300,
+            280,
+            250
+          ],
+          "cierres": [
+            40,
+            90,
+            150,
+            180,
+            210,
+            240,
+            260
+          ]
+        },
+        "avancePorPiso": [
+          {
+            "label": "Piso 2",
+            "value": 42
+          },
+          {
+            "label": "Piso 3",
+            "value": 58
+          },
+          {
+            "label": "Piso 4",
+            "value": 74
+          },
+          {
+            "label": "Piso 5",
+            "value": 86
+          },
+          {
+            "label": "Piso 6",
+            "value": 88
+          },
+          {
+            "label": "Piso 7",
+            "value": 92
+          }
+        ],
+        "topUnidadesCriticas": [
+          {
+            "unidad": "204",
+            "piso": 2,
+            "criticas": 18,
+            "estado": "critico"
+          },
+          {
+            "unidad": "203",
+            "piso": 2,
+            "criticas": 15,
+            "estado": "critico"
+          },
+          {
+            "unidad": "205",
+            "piso": 2,
+            "criticas": 14,
+            "estado": "critico"
+          },
+          {
+            "unidad": "103",
+            "piso": 1,
+            "criticas": 13,
+            "estado": "critico"
+          },
+          {
+            "unidad": "307",
+            "piso": 3,
+            "criticas": 9,
+            "estado": "critico"
+          }
+        ],
+        "estadoOtPorEspecialidad": [
+          {
+            "label": "Pintor",
+            "value": 18,
+            "pct": 28,
+            "color": "#6366F1"
+          },
+          {
+            "label": "Electricista",
+            "value": 12,
+            "pct": 19,
+            "color": "#22C55E"
+          },
+          {
+            "label": "Gasfiter",
+            "value": 10,
+            "pct": 16,
+            "color": "#F97316"
+          },
+          {
+            "label": "Instalador de cerámica",
+            "value": 9,
+            "pct": 14,
+            "color": "#EAB308"
+          },
+          {
+            "label": "Mueblista",
+            "value": 8,
+            "pct": 12,
+            "color": "#14B8A6"
+          },
+          {
+            "label": "Sellador de juntas y silicona",
+            "value": 7,
+            "pct": 11,
+            "color": "#94A3B8"
+          }
+        ]
+      },
+      "floors": [
+        {
+          "id": "piso-7",
+          "name": "Piso 7",
+          "estado": "lista",
+          "avanceRecepcion": 92,
+          "criticas": 1,
+          "cells": [
+            "lista",
+            "lista",
+            "lista",
+            "pendiente_menor",
+            "lista",
+            "lista",
+            "lista",
+            "lista"
+          ]
+        },
+        {
+          "id": "piso-6",
+          "name": "Piso 6",
+          "estado": "pendiente_menor",
+          "avanceRecepcion": 88,
+          "criticas": 2,
+          "cells": [
+            "lista",
+            "lista",
+            "pendiente_menor",
+            "lista",
+            "lista",
+            "pendiente_menor",
+            "lista",
+            "lista"
+          ]
+        },
+        {
+          "id": "piso-5",
+          "name": "Piso 5",
+          "estado": "lista",
+          "avanceRecepcion": 86,
+          "criticas": 3,
+          "cells": [
+            "lista",
+            "lista",
+            "lista",
+            "lista",
+            "pendiente_menor",
+            "lista",
+            "lista",
+            "lista"
+          ]
+        },
+        {
+          "id": "piso-4",
+          "name": "Piso 4",
+          "estado": "pendiente_menor",
+          "avanceRecepcion": 74,
+          "criticas": 6,
+          "cells": [
+            "lista",
+            "pendiente_menor",
+            "lista",
+            "pendiente_menor",
+            "lista",
+            "pendiente_menor",
+            "lista",
+            "lista"
+          ]
+        },
+        {
+          "id": "piso-3",
+          "name": "Piso 3",
+          "estado": "pendiente_intermedio",
+          "avanceRecepcion": 58,
+          "criticas": 12,
+          "cells": [
+            "pendiente_intermedio",
+            "pendiente_menor",
+            "critico",
+            "lista",
+            "pendiente_intermedio",
+            "pendiente_menor",
+            "critico",
+            "lista"
+          ]
+        },
+        {
+          "id": "piso-2",
+          "name": "Piso 2",
+          "estado": "critico",
+          "avanceRecepcion": 42,
+          "criticas": 24,
+          "cells": [
+            "critico",
+            "pendiente_intermedio",
+            "critico",
+            "critico",
+            "critico",
+            "pendiente_intermedio",
+            "pendiente_intermedio",
+            "critico"
+          ]
+        },
+        {
+          "id": "piso-1",
+          "name": "Piso 1",
+          "estado": "critico",
+          "avanceRecepcion": 46,
+          "criticas": 16,
+          "cells": [
+            "critico",
+            "critico",
+            "pendiente_intermedio",
+            "critico",
+            "critico",
+            "pendiente_intermedio",
+            "critico",
+            "pendiente_intermedio"
+          ]
+        }
+      ],
+      "floorDetail": {
+        "piso-3": {
+          "name": "Piso 3",
+          "planoPiso": {
+            "image": "/entrega/assets/plano-piso3.png",
+            "viewBox": "0 0 709 252",
+            "imgX": 0,
+            "imgY": 0,
+            "imgW": 709,
+            "imgH": 252,
+            "zones": [
+              {
+                "ref": "305",
+                "ox": 37,
+                "oy": 37,
+                "cx": 119,
+                "cy": 83,
+                "path": "M148 92.5V81.8H163.5V0.5H101V6.3H34V50.9H0.5V92.5H148Z"
+              },
+              {
+                "ref": "306",
+                "ox": 201,
+                "oy": 36,
+                "cx": 258,
+                "cy": 82,
+                "path": "M68.5 0.5V6.5H113.5V92.5H0.5V0.5H68.5Z"
+              },
+              {
+                "ref": "307",
+                "ox": 358,
+                "oy": 37,
+                "cx": 435,
+                "cy": 83,
+                "path": "M151.511 0.5L153.489 92.5H0.5V22H45V5.5H89.5V0.5H151.511Z"
+              },
+              {
+                "ref": "308",
+                "ox": 512,
+                "oy": 35,
+                "cx": 595,
+                "cy": 86,
+                "path": "M67.5 5.5H135V55H166V102.5H22.5V93.5H0.5V1.49219L67.5 0.506836V5.5Z"
+              },
+              {
+                "ref": "301",
+                "ox": 37,
+                "oy": 138,
+                "cx": 119,
+                "cy": 190,
+                "path": "M148 0.5V12.5H163.5V103.5H101V97H34V47H0.5V0.5H148Z"
+              },
+              {
+                "ref": "302",
+                "ox": 204,
+                "oy": 147,
+                "cx": 282,
+                "cy": 194,
+                "path": "M155.5 0.5V71.5H110.5V88H66V95H0.5V0.5H155.5Z"
+              },
+              {
+                "ref": "303",
+                "ox": 360,
+                "oy": 147,
+                "cx": 436,
+                "cy": 194,
+                "path": "M152 0.5V93.5H85.5V90H41.5V71.5H0.5V0.5H152Z"
+              },
+              {
+                "ref": "304",
+                "ox": 512,
+                "oy": 138,
+                "cx": 595,
+                "cy": 190,
+                "path": "M165.5 0.5V49H134.5V98.5H68V103H0.5V10H21.5V0.5H165.5Z"
+              }
+            ]
+          },
+          "metrics": {
+            "avanceRecepcion": 58,
+            "unidadesRecibidas": 86,
+            "unidadesTotales": 148,
+            "avanceCierre": 49,
+            "unidadesCierre": 72,
+            "observacionesAbiertas": 74,
+            "criticas": 12,
+            "criticasPct": 8,
+            "otActivas": 14,
+            "otAtrasadas": 4,
+            "unidadesInspeccionadas": 58
+          },
+          "units": [
+            {
+              "ref": "301",
+              "tipo": "Departamento",
+              "estado": "critico",
+              "avance": 20,
+              "hallazgos": 5,
+              "criticas": 1
+            },
+            {
+              "ref": "302",
+              "tipo": "Departamento",
+              "estado": "pendiente_menor",
+              "avance": 74,
+              "hallazgos": 6,
+              "criticas": 0
+            },
+            {
+              "ref": "303",
+              "tipo": "Departamento",
+              "estado": "critico",
+              "avance": 40,
+              "hallazgos": 13,
+              "criticas": 3
+            },
+            {
+              "ref": "304",
+              "tipo": "Departamento",
+              "estado": "lista",
+              "avance": 96,
+              "hallazgos": 2,
+              "criticas": 0
+            },
+            {
+              "ref": "305",
+              "tipo": "Departamento",
+              "estado": "pendiente_intermedio",
+              "avance": 62,
+              "hallazgos": 9,
+              "criticas": 1
+            },
+            {
+              "ref": "306",
+              "tipo": "Departamento",
+              "estado": "pendiente_menor",
+              "avance": 70,
+              "hallazgos": 5,
+              "criticas": 0
+            },
+            {
+              "ref": "307",
+              "tipo": "Departamento",
+              "estado": "critico",
+              "avance": 44,
+              "hallazgos": 11,
+              "criticas": 3
+            },
+            {
+              "ref": "308",
+              "tipo": "Departamento",
+              "estado": "lista",
+              "avance": 92,
+              "hallazgos": 3,
+              "criticas": 0
+            }
+          ],
+          "charts": {
+            "hallazgosPorKpi": [
+              {
+                "label": "Terminaciones",
+                "value": 30,
+                "color": "#6366F1"
+              },
+              {
+                "label": "Instalaciones Eléctricas",
+                "value": 18,
+                "color": "#22C55E"
+              },
+              {
+                "label": "Instalaciones Sanitarias",
+                "value": 16,
+                "color": "#F97316"
+              },
+              {
+                "label": "Ventanas y Cerramientos",
+                "value": 12,
+                "color": "#EAB308"
+              },
+              {
+                "label": "Climatización",
+                "value": 14,
+                "color": "#14B8A6"
+              }
+            ],
+            "observacionesPorEspecialidad": [
+              {
+                "label": "Pintor",
+                "value": 30
+              },
+              {
+                "label": "Electricista",
+                "value": 18
+              },
+              {
+                "label": "Mueblista",
+                "value": 12
+              },
+              {
+                "label": "Gasfiter",
+                "value": 10
+              },
+              {
+                "label": "Técnico aire acondicionado",
+                "value": 6
+              },
+              {
+                "label": "Sellador de juntas y silicona",
+                "value": 4
+              }
+            ],
+            "aperturasVsCierres": {
+              "labels": [
+                "10 May",
+                "14 May",
+                "18 May",
+                "22 May"
+              ],
+              "aperturas": [
+                16,
+                24,
+                22,
+                18
+              ],
+              "cierres": [
+                6,
+                12,
+                18,
+                22
+              ]
+            }
+          }
+        },
+        "piso-2": {
+          "name": "Piso 2",
+          "metrics": {
+            "avanceRecepcion": 67,
+            "unidadesRecibidas": 96,
+            "unidadesTotales": 144,
+            "avanceCierre": 54,
+            "unidadesCierre": 77,
+            "observacionesAbiertas": 124,
+            "criticas": 18,
+            "criticasPct": 14.5,
+            "otActivas": 22,
+            "otAtrasadas": 8,
+            "unidadesInspeccionadas": 64
+          },
+          "units": [
+            {
+              "ref": "201",
+              "tipo": "Departamento",
+              "estado": "pendiente_intermedio",
+              "avance": 64,
+              "hallazgos": 8,
+              "criticas": 1
+            },
+            {
+              "ref": "202",
+              "tipo": "Departamento",
+              "estado": "pendiente_menor",
+              "avance": 78,
+              "hallazgos": 5,
+              "criticas": 0
+            },
+            {
+              "ref": "203",
+              "tipo": "Departamento",
+              "estado": "critico",
+              "avance": 38,
+              "hallazgos": 15,
+              "criticas": 4
+            },
+            {
+              "ref": "204",
+              "tipo": "Departamento",
+              "estado": "critico",
+              "avance": 32,
+              "hallazgos": 17,
+              "criticas": 5
+            },
+            {
+              "ref": "205",
+              "tipo": "Departamento",
+              "estado": "critico",
+              "avance": 41,
+              "hallazgos": 14,
+              "criticas": 4
+            },
+            {
+              "ref": "206",
+              "tipo": "Departamento",
+              "estado": "pendiente_intermedio",
+              "avance": 60,
+              "hallazgos": 9,
+              "criticas": 1
+            },
+            {
+              "ref": "207",
+              "tipo": "Departamento",
+              "estado": "pendiente_intermedio",
+              "avance": 62,
+              "hallazgos": 8,
+              "criticas": 1
+            },
+            {
+              "ref": "208",
+              "tipo": "Departamento",
+              "estado": "critico",
+              "avance": 45,
+              "hallazgos": 12,
+              "criticas": 3
+            }
+          ],
+          "charts": {
+            "hallazgosPorKpi": [
+              {
+                "label": "Terminaciones",
+                "value": 38,
+                "color": "#6366F1"
+              },
+              {
+                "label": "Instalaciones Eléctricas",
+                "value": 26,
+                "color": "#22C55E"
+              },
+              {
+                "label": "Instalaciones Sanitarias",
+                "value": 24,
+                "color": "#F97316"
+              },
+              {
+                "label": "Ventanas y Cerramientos",
+                "value": 16,
+                "color": "#EAB308"
+              },
+              {
+                "label": "Climatización",
+                "value": 20,
+                "color": "#14B8A6"
+              }
+            ],
+            "observacionesPorEspecialidad": [
+              {
+                "label": "Pintor",
+                "value": 48
+              },
+              {
+                "label": "Electricista",
+                "value": 32
+              },
+              {
+                "label": "Mueblista",
+                "value": 16
+              },
+              {
+                "label": "Gasfiter",
+                "value": 14
+              },
+              {
+                "label": "Técnico aire acondicionado",
+                "value": 8
+              },
+              {
+                "label": "Sellador de juntas y silicona",
+                "value": 6
+              }
+            ],
+            "aperturasVsCierres": {
+              "labels": [
+                "10 May",
+                "14 May",
+                "18 May",
+                "22 May"
+              ],
+              "aperturas": [
+                20,
+                32,
+                28,
+                24
+              ],
+              "cierres": [
+                8,
+                16,
+                22,
+                26
+              ]
+            }
+          },
+          "planoPiso": {
+            "image": "/entrega/assets/plaenge-planta-piso-2.png",
+            "viewBox": "0 0 620 405",
+            "imgX": 0,
+            "imgY": 0,
+            "imgW": 620,
+            "imgH": 405,
+            "zones": [
+              {
+                "ref": "201",
+                "x": 82,
+                "y": 88,
+                "w": 92,
+                "h": 228,
+                "cx": 128,
+                "cy": 202
+              },
+              {
+                "ref": "205",
+                "x": 182,
+                "y": 88,
+                "w": 100,
+                "h": 70,
+                "cx": 232,
+                "cy": 123
+              },
+              {
+                "ref": "206",
+                "x": 290,
+                "y": 88,
+                "w": 100,
+                "h": 70,
+                "cx": 340,
+                "cy": 123
+              },
+              {
+                "ref": "207",
+                "x": 182,
+                "y": 165,
+                "w": 208,
+                "h": 48,
+                "cx": 286,
+                "cy": 189
+              },
+              {
+                "ref": "202",
+                "x": 182,
+                "y": 222,
+                "w": 66,
+                "h": 94,
+                "cx": 215,
+                "cy": 269
+              },
+              {
+                "ref": "203",
+                "x": 254,
+                "y": 222,
+                "w": 66,
+                "h": 94,
+                "cx": 287,
+                "cy": 269
+              },
+              {
+                "ref": "208",
+                "x": 326,
+                "y": 222,
+                "w": 64,
+                "h": 94,
+                "cx": 358,
+                "cy": 269
+              },
+              {
+                "ref": "204",
+                "x": 400,
+                "y": 88,
+                "w": 112,
+                "h": 228,
+                "cx": 456,
+                "cy": 202
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "units": {
+    "plaenge-ii:201": {
+      "ref": "201",
+      "projectId": "plaenge-ii",
+      "tipo": "Departamento",
+      "tipoUnidad": "201",
+      "piso": 2,
+      "floorId": "piso-2",
+      "estado": "pendiente_intermedio",
+      "estadoLabel": "Pendiente intermedio",
+      "inspector": "O. Chamorro",
+      "fechaInspeccion": "2026-08-11",
+      "tiempoEnObra": "1 día",
+      "lastUpdate": "2026-08-11T21:51:17.111Z",
+      "dormitorios": 2,
+      "plano": {
+        "image": "/entrega/assets/plaenge-planta-depto-201.png",
+        "viewBox": "0 0 1132 619",
+        "imgX": 0,
+        "imgY": 0,
+        "imgW": 1132,
+        "imgH": 619,
+        "zones": [
+          {
+            "recinto": "Living Comedor",
+            "x": 695,
+            "y": 234,
+            "w": 372,
+            "h": 340,
+            "cx": 881,
+            "cy": 404
+          },
+          {
+            "recinto": "Terraza",
+            "x": 695,
+            "y": 54,
+            "w": 372,
+            "h": 180,
+            "cx": 881,
+            "cy": 144
+          },
+          {
+            "recinto": "Estar",
+            "x": 414,
+            "y": 127,
+            "w": 281,
+            "h": 217,
+            "cx": 554,
+            "cy": 235
+          },
+          {
+            "recinto": "Pasillo",
+            "x": 320,
+            "y": 344,
+            "w": 375,
+            "h": 136,
+            "cx": 507,
+            "cy": 412
+          },
+          {
+            "recinto": "Dormitorio 2",
+            "x": 236,
+            "y": 127,
+            "w": 178,
+            "h": 217,
+            "cx": 325,
+            "cy": 235
+          },
+          {
+            "recinto": "Dormitorio Principal",
+            "x": 43,
+            "y": 128,
+            "w": 279,
+            "h": 356,
+            "cx": 182,
+            "cy": 306
+          },
+          {
+            "recinto": "Baño Principal",
+            "x": 43,
+            "y": 397,
+            "w": 143,
+            "h": 87,
+            "cx": 114,
+            "cy": 440
+          },
+          {
+            "recinto": "Baño 3",
+            "x": 320,
+            "y": 397,
+            "w": 133,
+            "h": 87,
+            "cx": 386,
+            "cy": 440
+          },
+          {
+            "recinto": "Baño 2",
+            "x": 483,
+            "y": 397,
+            "w": 102,
+            "h": 87,
+            "cx": 534,
+            "cy": 440
+          }
+        ]
+      },
+      "metrics": {
+        "avance": 64,
+        "verificados": 0,
+        "totalVerificables": 0,
+        "hallazgosTotales": 0,
+        "abiertos": 0,
+        "cerrados": 0,
+        "criticos": 0,
+        "otActivas": 0
+      },
+      "recintos": [
+        "Living Comedor",
+        "Terraza",
+        "Estar",
+        "Pasillo",
+        "Dormitorio 2",
+        "Dormitorio Principal",
+        "Baño Principal",
+        "Baño 3",
+        "Baño 2"
+      ],
+      "hallazgos": [],
+      "resumenTecnico": "Unidad 201 · Plaenge II. Planta cargada para captura de recepción.",
+      "accionesRecomendadas": []
+    }
+  }
+}

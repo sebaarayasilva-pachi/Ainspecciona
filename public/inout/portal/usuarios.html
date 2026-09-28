@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Usuarios · In &amp; Out</title>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/inout/assets/inout.css" />
+  <style>
+    .users-grid { display: grid; grid-template-columns: minmax(280px, 360px) 1fr; gap: 16px; align-items: start; }
+    @media (max-width: 960px) { .users-grid { grid-template-columns: 1fr; } }
+    .new-form { display: grid; gap: 10px; }
+    .new-form input, .new-form select {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      background: rgba(0,0,0,0.25);
+      color: var(--text);
+      font: inherit;
+    }
+    table.users { width: 100%; border-collapse: collapse; font-size: 13px; }
+    table.users th { text-align: left; font-size: 11px; text-transform: uppercase; color: var(--muted); padding: 8px 6px; border-bottom: 1px solid var(--border); }
+    table.users td { padding: 10px 6px; border-bottom: 1px solid var(--border); }
+  </style>
+</head>
+<body class="io-shell">
+  <div class="io-layout">
+    <div id="shell"></div>
+    <main class="io-main">
+      <h1>Usuarios</h1>
+      <p class="sub">Administradores del tenant: crean accesos para operadores e inspectores.</p>
+      <div id="content"></div>
+    </main>
+  </div>
+  <script src="/inout/portal/assets/inout-app.js"></script>
+  <script>
+    const Io = window.IoPortal;
+    const ROLE_LABELS = { ADMIN: "Administrador", OPERATOR: "Operador", INSPECTOR: "Inspector" };
+
+    function showMsg(el, text, ok) {
+      el.textContent = text;
+      el.className = ok ? "okmsg" : "err";
+      el.hidden = !text;
+    }
+
+    async function loadUsers() {
+      const res = await Io.ioFetch("/api/inout/users");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) throw new Error(data.error || "No se pudo listar");
+      const wrap = document.getElementById("usersTableWrap");
+      const users = data.users || [];
+      if (!users.length) {
+        wrap.innerHTML = '<p class="sub">Aún no hay más usuarios.</p>';
+        return;
+      }
+      wrap.innerHTML =
+        '<table class="users"><thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Estado</th></tr></thead><tbody>' +
+        users
+          .map(
+            (u) =>
+              `<tr><td>${Io.escapeHtml(u.fullName)}</td><td>${Io.escapeHtml(u.email)}</td><td>${ROLE_LABELS[u.role] || u.role}</td><td>${Io.escapeHtml(u.status || "")}</td></tr>`
+          )
+          .join("") +
+        "</tbody></table>";
+    }
+
+    (async function boot() {
+      const me = await Io.ensureAuth();
+      if (!me) return;
+      document.getElementById("shell").outerHTML = Io.renderShell("usuarios", me);
+      Io.bindShell();
+      const content = document.getElementById("content");
+      if (me.user.role !== "ADMIN") {
+        content.innerHTML = '<div class="card"><p>Solo un administrador puede gestionar usuarios.</p></div>';
+        return;
+      }
+      content.innerHTML = `
+        <div class="users-grid">
+          <div class="card">
+            <h2 style="margin:0 0 8px;font-size:16px">Nuevo usuario</h2>
+            <p class="sub" style="margin-bottom:12px">Clave temporal de al menos 8 caracteres. Entra por el login unificado o /inout/portal/login.</p>
+            <p id="formMsg" hidden></p>
+            <form class="new-form" id="createForm">
+              <div>
+                <label for="fullName">Nombre</label>
+                <input id="fullName" required placeholder="Nombre y apellido" />
+              </div>
+              <div>
+                <label for="email">Email</label>
+                <input id="email" type="email" required placeholder="nombre@inmobiliaria.cl" />
+              </div>
+              <div>
+                <label for="role">Rol</label>
+                <select id="role">
+                  <option value="INSPECTOR">Inspector</option>
+                  <option value="OPERATOR">Operador</option>
+                  <option value="ADMIN">Administrador</option>
+                </select>
+              </div>
+              <div>
+                <label for="password">Clave temporal</label>
+                <input id="password" type="text" required minlength="8" autocomplete="new-password" />
+              </div>
+              <button class="btn" type="submit" id="createBtn">Crear usuario</button>
+            </form>
+          </div>
+          <div class="card">
+            <h2 style="margin:0 0 8px;font-size:16px">Equipo</h2>
+            <p class="sub" id="tenantHint">${Io.escapeHtml(me.tenant.name)}</p>
+            <p id="listMsg" hidden></p>
+            <div id="usersTableWrap"><p class="sub">Cargando…</p></div>
+          </div>
+        </div>`;
+
+      await loadUsers();
+
+      document.getElementById("createForm").onsubmit = async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById("createBtn");
+        const formMsg = document.getElementById("formMsg");
+        btn.disabled = true;
+        try {
+          const res = await Io.ioFetch("/api/inout/users", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              fullName: document.getElementById("fullName").value.trim(),
+              email: document.getElementById("email").value.trim(),
+              role: document.getElementById("role").value,
+              password: document.getElementById("password").value
+            })
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || !data.ok) {
+            const friendly = {
+              ALREADY_ON_TEAM: "Ese correo ya está en este equipo.",
+              EMAIL_IN_OTHER_TENANT: "Ese correo ya tiene cuenta InOut en otro workspace.",
+              EMAIL_EXISTS: "Ese correo ya está registrado.",
+              INVALID_FIELDS: "Nombre, email y clave de al menos 8 caracteres."
+            };
+            throw new Error(friendly[data.error] || data.message || "No se pudo crear");
+          }
+          document.getElementById("createForm").reset();
+          showMsg(formMsg, data.moved ? "Usuario pasado a este equipo." : "Usuario creado.", true);
+          await loadUsers();
+        } catch (err) {
+          showMsg(formMsg, err.message || "Error", false);
+        } finally {
+          btn.disabled = false;
+        }
+      };
+    })();
+  </script>
+</body>
+</html>

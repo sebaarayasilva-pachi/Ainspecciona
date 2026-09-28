@@ -250,6 +250,13 @@
       <text id="kpiDetailTitle" x="80" y="972" font-size="14" fill="#F8FAFC" font-weight="700">Detalle por KPI (slots)</text>
       <g id="kpiSections"></g>
 
+      <g id="scoreTaxonomy">
+        <text id="scoreTaxonomyTitle" x="80" y="2480" font-size="14" fill="#F8FAFC" font-weight="700">Cómo se calcula el score</text>
+        <foreignObject id="scoreTaxonomyBody" x="80" y="2508" width="984" height="220">
+          <div xmlns="http://www.w3.org/1999/xhtml" id="scoreTaxonomyText" style="font-size:12px;color:#94a3b8;line-height:1.55;font-family:Inter,sans-serif;white-space:normal;"></div>
+        </foreignObject>
+      </g>
+
       <g id="techDoc">
         <text id="techDocTitle" x="80" y="2685" font-size="14" fill="#F8FAFC" font-weight="700">Documentación técnica del análisis automatizado</text>
         <foreignObject id="techDocBody" x="80" y="2715" width="984" height="420">
@@ -340,10 +347,21 @@
       return { text: "OK", fill: "#86EFAC", bg: "#14532D", stroke: "#166534" };
     }
 
-    function starsFromScore(score, cfg) {
+    function starsFromScore(score, cfg, opts) {
+      const n = clampScore(score);
+      const engine = String(cfg?.engineVersion || "");
+      if (engine === "4.0" || engine === "4") {
+        const bands = Array.isArray(cfg?.stars?.bands) ? cfg.stars.bands : [
+          { from: 0, stars: 1 }, { from: 50, stars: 2 }, { from: 65, stars: 3 },
+          { from: 80, stars: 4 }, { from: 90, stars: 5 }
+        ];
+        let stars = 1;
+        bands.forEach((b) => { if (n >= Number(b.from || 0)) stars = Number(b.stars || 1); });
+        if (opts?.highSafety) stars = Math.min(stars, Number(cfg?.stars?.highSafetyMaxStars || 3));
+        return stars;
+      }
       const yellowFrom = cfg?.badge?.yellowFrom ?? DEFAULT_SCORE_CONFIG.badge.yellowFrom;
       const greenFrom = cfg?.badge?.greenFrom ?? DEFAULT_SCORE_CONFIG.badge.greenFrom;
-      const n = clampScore(score);
       if (n >= greenFrom) {
         const topTier = greenFrom + Math.max(1, Math.round((100 - greenFrom) * 0.33));
         return n >= topTier ? 5 : 4;
@@ -356,8 +374,10 @@
     }
 
     const STAR_PATH = "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z";
-    function renderStarIcons(parent, score, cx, starY, cfg) {
-      const filled = starsFromScore(score, cfg);
+    function renderStarIcons(parent, score, cx, starY, cfg, opts) {
+      const filled = Number.isFinite(Number(opts?.filled))
+        ? Number(opts.filled)
+        : starsFromScore(score, cfg, opts);
       const starSize = 14;
       const gap = 4;
       const totalW = 5 * starSize + 4 * gap;
@@ -762,9 +782,9 @@
             let out = String(txt || "").replace(/\s*[•\-]?\s*No\s+se\s+puede\s+evaluar\s+por\s+falta\s+de\s+claridad\.?\s*/gi, " ").replace(/\s*Se\s+recomienda\s+retomar\s+(la\s+)?fotograf[ií]a\.?\s*/gi, " ").replace(/\s*Se\s+sugiere\s+retomar\s+(la\s+)?foto\.?\s*/gi, " ").replace(/\s*Retomar\s+(la\s+)?fotograf[ií]a\s+recomendado\.?\s*/gi, " ").replace(/\s*,\s*lo\s+que\s+dificulta\s+(la\s+)?visibilidad\.?\s*/gi, ". ").replace(/\s{2,}/g, " ").trim();
             return out || "Las superficies se ven uniformes y sin evidencias claras de deterioro.";
           };
-          const desc = normalizeContextTerms(removeRetakePhrases(sanitize(s?.analysisDebug?.openai?.parsed?.description || "")));
+          const desc = normalizeContextTerms(removeRetakePhrases(sanitize(s.descriptionText || s?.analysisDebug?.openai?.parsed?.description || "")));
           const kpiAnalysis = softenUnsupportedLocationClaims(
-            normalizeContextTerms(removeRetakePhrases(sanitize(s?.analysisDebug?.openai?.parsed?.kpi_analysis || ""))),
+            normalizeContextTerms(removeRetakePhrases(sanitize(s.findingsText || s?.analysisDebug?.openai?.parsed?.kpi_analysis || ""))),
             desc
           );
           const rawSignals = (s?.analysisDebug?.openai?.parsed?.signals_detected || []).map((x) => normalizeContextTerms(sanitize(x)));
@@ -791,7 +811,7 @@
             }
             return lines;
           };
-          const hasOpenAiDescription = Boolean(String(s?.analysisDebug?.openai?.parsed?.description || "").trim());
+          const hasOpenAiDescription = Boolean(String(s?.analysisDebug?.openai?.parsed?.description || s.message || "").trim());
           const toNeutralVisualDescription = (text, areaLabel) => {
             const base = String(text || "").trim();
             if (!base) return `Registro visual del área inspeccionada: ${areaLabel || "sector evaluado"}.`;
@@ -812,6 +832,12 @@
             return merged || `Registro visual del área inspeccionada: ${areaLabel || "sector evaluado"}.`;
           };
           const isOkStateEarly = isOmitted || String(s.findingCode || "").toUpperCase() === "OK" || !s.severity;
+          const looksLikeNoFinding = (text) => {
+            const t = String(text || "").toLowerCase();
+            if (!t) return false;
+            return /no se detectan hallazgos|no se observan hallazgos|sin hallazgos relevantes|sin evidencias claras de deterioro|funcionalmente correcto/.test(t)
+              && !/\bexcepto\b|\bsalvo\b|\bsin embargo\b/.test(t);
+          };
           const descriptionForOkState = (text, areaLabel) => {
             // Si el slot es OK, no dejar frases de “falta / no se observa componente” que contradicen Hallazgos.
             const base = toNeutralVisualDescription(text, areaLabel);
@@ -827,11 +853,15 @@
             }
             return `Registro visual del área inspeccionada: ${areaLabel || "sector evaluado"}.`;
           };
+          const findingNarrative = String(s.findingsText || s.message || kpiAnalysis || desc || "").trim();
+          const visualDesc = looksLikeNoFinding(desc) && findingNarrative && !isOkStateEarly
+            ? findingNarrative
+            : desc;
           const neutralDescription = isOmitted
             ? ""
             : (isOkStateEarly
               ? descriptionForOkState(desc, s.title || s.slotCode || "sector evaluado")
-              : toNeutralVisualDescription(desc, s.title || s.slotCode || "sector evaluado"));
+              : (visualDesc || findingNarrative || toNeutralVisualDescription(desc, s.title || s.slotCode || "sector evaluado")));
           const descLines = wrapLines(neutralDescription, 110, 8);
           const kpiTitle = g.title || kpiLabel(g.key);
           const headerText = `${s.groupTitle || "Área"} · ${s.title || s.slotCode || ""}`;
@@ -869,18 +899,26 @@
             container.appendChild(img);
           }
 
-          // Ver evidencia
+          // Ver evidencia (zoom, no pestaña nueva)
           if (evidenceUrl) {
-            const link = createSvg("a", { href: evidenceUrl, target: "_blank" });
-            const txt = createSvg("text", { x: 132, y: slotY + 128, "text-anchor": "middle", fill: "#60A5FA", "font-size": 12, "font-weight": 600 });
+            const txt = createSvg("text", { x: 132, y: slotY + 128, "text-anchor": "middle", fill: "#60A5FA", "font-size": 12, "font-weight": 600, cursor: "pointer" });
             txt.textContent = "Ver evidencia";
-            link.appendChild(txt);
-            container.appendChild(link);
+            txt.style.cursor = "pointer";
+            txt.addEventListener("click", (ev) => {
+              ev.preventDefault();
+              if (window.openPhotoZoom) window.openPhotoZoom(evidenceUrl);
+              else window.open(evidenceUrl, "_blank");
+            });
+            container.appendChild(txt);
           }
 
           // Header y subheader
           container.appendChild(createSvg("text", { x: 196, y: slotY + 50, fill: "#F8FAFC", "font-size": 18, "font-weight": 700 })).textContent = headerText;
           container.appendChild(createSvg("text", { x: 196, y: slotY + 72, fill: "#94a3b8", "font-size": 13, "font-weight": 600 })).textContent = subHeaderText;
+          const authorLabel = (s.analysisAuthor && s.analysisAuthor.label) || null;
+          if (authorLabel) {
+            container.appendChild(createSvg("text", { x: rightRailX - 8, y: slotY + 18, "text-anchor": "end", fill: "#67e8f9", "font-size": 11, "font-weight": 700 })).textContent = "Análisis: " + authorLabel;
+          }
           container.appendChild(createSvg("line", { x1: 196, y1: slotY + 86, x2: rightRailX - 24, y2: slotY + 86, stroke: "#475569" }));
 
           // Impacto en score (siempre coherente con el puntaje del slot: 95 = 100 - 5 → impacto −5)
@@ -936,10 +974,10 @@
           const hallazgoMain = isOmitted
             ? ""
             : isSlotMismatchNoPenalty
-              ? cleanConclusionStyle(removeRetakePhrases(s.message || kpiAnalysis || desc || "Sin observaciones."))
+              ? cleanConclusionStyle(removeRetakePhrases(s.findingsText || s.message || kpiAnalysis || desc || "Sin observaciones."))
               : isOkState
                 ? "Conclusión: no se observan hallazgos relevantes en esta evidencia."
-                : cleanConclusionStyle(removeRetakePhrases(kpiAnalysis || s.message || desc || "Sin observaciones."));
+                : cleanConclusionStyle(removeRetakePhrases(s.findingsText || s.message || kpiAnalysis || desc || "Sin observaciones."));
           const rawFindings = Array.isArray(signals) && signals.length > 0
             ? signals.slice(0, 5).map((sig) => String(sig).trim()).filter(Boolean)
             : [];
@@ -1028,6 +1066,14 @@
         currentY += sectionHeight + 14;
       });
 
+      const taxTitle = document.getElementById("scoreTaxonomyTitle");
+      const taxBody = document.getElementById("scoreTaxonomyBody");
+      if (taxTitle && taxBody) {
+        taxTitle.setAttribute("y", String(currentY + 20));
+        taxBody.setAttribute("y", String(currentY + 48));
+        currentY += 250;
+      }
+
       const techTitle = document.getElementById("techDocTitle");
       const techDocBody = document.getElementById("techDocBody");
       if (techTitle && techDocBody) {
@@ -1045,14 +1091,14 @@
 
     const DEFAULT_SCORE_CONFIG = {
       kpis: {
-        MUROS_PINTURA: { low: 5, medium: 15, high: 30 },
-        HUMEDAD: { low: 5, medium: 15, high: 30 },
-        PISOS: { low: 5, medium: 15, high: 30 },
-        SANITARIOS: { low: 5, medium: 15, high: 30 },
-        ELECTRICIDAD: { low: 5, medium: 15, high: 30 },
-        VENTANAS_CERRAMIENTOS: { low: 5, medium: 15, high: 30 },
-        PUERTAS_HERRAJES: { low: 5, medium: 15, high: 30 },
-        MOBILIARIO_FIJO: { low: 5, medium: 15, high: 30 }
+        MUROS_PINTURA: { low: 30, medium: 50, high: 80 },
+        HUMEDAD: { low: 30, medium: 50, high: 80 },
+        PISOS: { low: 30, medium: 50, high: 80 },
+        SANITARIOS: { low: 30, medium: 50, high: 80 },
+        ELECTRICIDAD: { low: 30, medium: 50, high: 80 },
+        VENTANAS_CERRAMIENTOS: { low: 30, medium: 50, high: 80 },
+        PUERTAS_HERRAJES: { low: 30, medium: 50, high: 80 },
+        MOBILIARIO_FIJO: { low: 30, medium: 50, high: 80 }
       },
       slotKpiMap: {
         BATHROOM_1_SHOWER: "SANITARIOS",
@@ -1151,6 +1197,35 @@
       badge: { yellowFrom: 60, greenFrom: 86 }
     };
 
+    function renderScoreTaxonomy(scoreConfig) {
+      const el = document.getElementById("scoreTaxonomyText");
+      if (!el) return;
+      const cfg = mergeScoreConfig(DEFAULT_SCORE_CONFIG, scoreConfig || {});
+      const yellowFrom = Number(cfg.badge?.yellowFrom ?? 60);
+      const greenFrom = Number(cfg.badge?.greenFrom ?? 86);
+      const first = cfg.kpis?.MUROS_PINTURA || { low: 30, medium: 50, high: 80 };
+      const labels = {
+        HUMEDAD: "Humedad visible",
+        SANITARIOS: "Sanitarios",
+        ELECTRICIDAD: "Electricidad visible"
+      };
+      const weighted = Object.entries(cfg.kpiWeights || {})
+        .filter(([, w]) => Number(w) > 1)
+        .map(([k, w]) => `${labels[k] || k} (${w}×)`);
+      const lines = [
+        "Taxonomía. Cada hallazgo visible se etiqueta en un KPI (muros y pintura, humedad, pisos, sanitarios, electricidad, ventanas, puertas o mobiliario) y en una severidad: baja, media o alta.",
+        `Puntaje por foto. Toda foto válida parte en 100. Si hay hallazgo, se descuenta: baja −${first.low} pts, media −${first.medium} pts, alta −${first.high} pts.`,
+        "Fotos omitidas. No se incluyen en el promedio. Una foto sin hallazgo cuenta 100.",
+        "KPI. Es el promedio de las fotos válidas de ese criterio. STI. Es el promedio ponderado de los KPIs.",
+        weighted.length
+          ? `Ponderación. En este informe pesan más: ${weighted.join(", ")}.`
+          : "Ponderación. Todos los KPIs tienen el mismo peso, salvo ajuste del administrador.",
+        `Lectura. Menos de ${yellowFrom}: revisión sugerida. De ${yellowFrom} a ${greenFrom - 1}: intermedio. ${greenFrom} o más: favorable.`,
+        "Alcance. El análisis usa solo evidencia fotográfica. No sustituye visita presencial, mediciones ni peritaje."
+      ];
+      el.innerHTML = lines.map((p) => `<p style="margin:0 0 8px;">${p}</p>`).join("");
+    }
+
     function mergeScoreConfig(base, extra) {
       if (!extra || !extra.kpis) return base;
       return {
@@ -1222,6 +1297,8 @@
     }
 
     function classifyKpi(slot, cfg) {
+      const fromSlot = String(slot.kpiKey || "").toUpperCase();
+      if (fromSlot && fromSlot !== "NONE") return fromSlot;
       const rawCode = String(slot.slotCode || "");
       const codeUpper = rawCode.toUpperCase();
       let mapKey = String(cfg?.slotKpiMap?.[codeUpper] || cfg?.slotKpiMap?.[rawCode] || "").toUpperCase();
@@ -1240,12 +1317,10 @@
 
       const code = rawCode.toLowerCase();
       const title = String(slot.title || "").toLowerCase();
-      const msg = String(slot.message || "").toLowerCase();
 
       const has = (txt) => title.includes(txt) || code.includes(txt);
       const hasAny = (arr) => arr.some(has);
 
-      if (msg && ["humedad", "moho", "filtr", "water", "mold"].some((w) => msg.includes(w))) return "HUMEDAD";
       if (hasAny(["muros", "pintura", "pared", "cielo", "paint"])) return "MUROS_PINTURA";
       if (hasAny(["piso", "pisos", "floor"])) return "PISOS";
       if (code.includes("_outlets") || code.includes("_switches") || hasAny(["electrical", "tablero", "enchufe", "interruptor"])) return "ELECTRICIDAD";
@@ -1420,7 +1495,23 @@
       const stiStars = document.getElementById("stiStars");
       if (stiStars) {
         stiStars.innerHTML = "";
-        renderStarIcons(stiStars, score, 826, 328, scoreConfig);
+        renderStarIcons(stiStars, score, 826, 328, scoreConfig, {
+          filled: summary.stars
+        });
+      }
+      if (summary.coverage && summary.coverage.expectedSlots > 0) {
+        const covEl = document.getElementById("stiLabel");
+        if (covEl && !document.getElementById("stiCoverage")) {
+          const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          t.setAttribute("id", "stiCoverage");
+          t.setAttribute("x", "826");
+          t.setAttribute("y", "360");
+          t.setAttribute("text-anchor", "middle");
+          t.setAttribute("font-size", "11");
+          t.setAttribute("fill", "#94a3b8");
+          t.textContent = `Cobertura visual: ${Math.round(summary.coverage.coverage)}%`;
+          covEl.parentNode?.appendChild(t);
+        }
       }
 
       const slots = summary.slots || [];
@@ -1501,6 +1592,7 @@
 
       adjustExecutiveSummaryLayout();
       renderKpiSections(kpiGroups, scoreConfig);
+      renderScoreTaxonomy(scoreConfig);
     }
 
     let executiveSummaryAutoTriggered = false;
@@ -1663,5 +1755,6 @@
 
     checkReviewStatus().catch(() => {});
   </script>
+  <script src="/assets/photo-zoom.js"></script>
 </body>
 </html>

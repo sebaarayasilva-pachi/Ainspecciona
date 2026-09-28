@@ -1,5 +1,26 @@
 // src/scoring/scoringV2_2.js
 
+import {
+  DEFAULT_V4_POLICY,
+  normalizeV4Policy,
+  isV4Engine,
+  computeScoringV4,
+  starsFromScoreV4,
+  caseHasHighSafety,
+  v4PenaltyMirrors,
+  publicScoreConfigSubset
+} from './scoringV4.js';
+import { DEFAULT_CONSENSUS_CONFIG, normalizeConsensusConfig } from '../consensus/config.js';
+
+export {
+  SCORE_VERSION_V4,
+  ENGINE_VERSION_V4,
+  isV4Engine,
+  computeScoringV4,
+  starsFromScoreV4,
+  publicScoreConfigSubset
+} from './scoringV4.js';
+
 export const SEVERITY_FACTOR_V22 = {
   low: 1.0,
   medium: 1.3,
@@ -382,7 +403,9 @@ export const DEFAULT_SCORE_CONFIG = {
     }
   },
   /** Ejemplos enseñados desde admin (Intelligence); se inyectan en prompts sin redeploy. */
-  aiFindingExamples: []
+  aiFindingExamples: [],
+  consensus: structuredClone(DEFAULT_CONSENSUS_CONFIG),
+  ...structuredClone(DEFAULT_V4_POLICY)
 };
 
 export const PROBLEM_BASE_V22 = {
@@ -430,9 +453,14 @@ export function badgeFromScore(score, scoreConfig) {
   return "GREEN";
 }
 
-/** 1–5 estrellas alineadas con rangos de badge (rojo=1, amarillo=2–3, verde=4–5). */
-export function starsFromScore(score, scoreConfig) {
+/** 1–5 estrellas. En v4 usa bandas de Admin; si no, parte el badge. */
+export function starsFromScore(score, scoreConfig, opts = {}) {
   const cfg = normalizeScoreConfig(scoreConfig || {});
+  if (isV4Engine(cfg)) {
+    const highSafety = opts.highSafety === true
+      || (Array.isArray(opts.slots) && caseHasHighSafety(opts.slots, cfg));
+    return starsFromScoreV4(score, cfg, { highSafety });
+  }
   const yellowFrom = cfg.badge.yellowFrom;
   const greenFrom = cfg.badge.greenFrom;
   const n = Math.max(0, Math.min(100, Number(score) || 0));
@@ -488,6 +516,9 @@ export function normalizeScoreConfig(input) {
         .filter(([, value]) => Number.isFinite(value) && value > 0)
     )
   };
+  const byKpiSrc = next.severityRules?.byKpi && typeof next.severityRules.byKpi === "object"
+    ? next.severityRules.byKpi
+    : base.severityRules.byKpi;
   next.severityRules = {
     enforceFavorableOk: next.severityRules?.enforceFavorableOk !== undefined
       ? !!next.severityRules.enforceFavorableOk
@@ -497,8 +528,29 @@ export function normalizeScoreConfig(input) {
       : base.severityRules.criticalKeywords,
     mediumKeywords: Array.isArray(next.severityRules?.mediumKeywords)
       ? next.severityRules.mediumKeywords.map((x) => String(x || "").trim()).filter(Boolean)
-      : base.severityRules.mediumKeywords
+      : base.severityRules.mediumKeywords,
+    byKpi: Object.fromEntries(
+      Object.entries(byKpiSrc || {}).map(([k, v]) => [
+        String(k).toUpperCase(),
+        {
+          criticalKeywords: Array.isArray(v?.criticalKeywords)
+            ? v.criticalKeywords.map((x) => String(x || "").trim()).filter(Boolean)
+            : [],
+          mediumKeywords: Array.isArray(v?.mediumKeywords)
+            ? v.mediumKeywords.map((x) => String(x || "").trim()).filter(Boolean)
+            : []
+        }
+      ])
+    )
   };
+  const v4 = normalizeV4Policy(next);
+  Object.assign(next, v4);
+  if (isV4Engine(next)) {
+    const mirrors = v4PenaltyMirrors(next.severityScores);
+    kpiKeys.forEach((k) => {
+      next.kpis[k] = { ...next.kpis[k], ...mirrors };
+    });
+  }
   next.slotKpiMap = {
     ...base.slotKpiMap,
     ...Object.fromEntries(
@@ -533,6 +585,10 @@ export function normalizeScoreConfig(input) {
       .filter(Boolean)
       .slice(0, 200)
     : [];
+  next.consensus = normalizeConsensusConfig({
+    ...DEFAULT_CONSENSUS_CONFIG,
+    ...(next.consensus && typeof next.consensus === 'object' ? next.consensus : {})
+  });
   return next;
 }
 
@@ -587,12 +643,10 @@ export function classifyKpiFromSlot(slot, slotKpiMap) {
 
   const code = rawCode.toLowerCase();
   const title = String(slot.title || "").toLowerCase();
-  const msg = String(slot.message || "").toLowerCase();
 
   const has = (txt) => title.includes(txt) || code.includes(txt);
   const hasAny = (arr) => arr.some(has);
 
-  if (msg && ["humedad", "moho", "filtr", "water", "mold"].some((w) => msg.includes(w))) return "HUMEDAD";
   if (hasAny(["muros", "pintura", "pared", "cielo", "paint"])) return "MUROS_PINTURA";
   if (hasAny(["piso", "pisos", "floor"])) return "PISOS";
   if (code.includes("_outlets") || code.includes("_switches") || hasAny(["electrical", "tablero", "enchufe", "interruptor"])) return "ELECTRICIDAD";
@@ -619,6 +673,62 @@ function kpiTitleFromKey(key) {
   return map[key] || key[0] + key.slice(1).toLowerCase();
 }
 
+/** Texto de pie de informe: cómo se calcula el score y la taxonomía vigente. */
+export function buildScoringTaxonomyFooter(scoreConfig) {
+  const cfg = normalizeScoreConfig(scoreConfig || {});
+  const yellowFrom = Number(cfg.badge?.yellowFrom ?? 60);
+  const greenFrom = Number(cfg.badge?.greenFrom ?? 86);
+  const weighted = Object.entries(cfg.kpiWeights || {})
+    .filter(([, w]) => Number(w) > 1)
+    .map(([k, w]) => `${kpiTitleFromKey(k)} (${w}×)`);
+
+  let scoreLine;
+  if (isV4Engine(cfg) && cfg.severityScores) {
+    const s = cfg.severityScores;
+    scoreLine = `OK: ${s.ok}. Baja: ${s.low}. Media: ${s.medium}. Alta: ${s.high}.`;
+  } else {
+    const kpiEntries = Object.entries(cfg.kpis || {});
+    const first = kpiEntries[0]?.[1] || { low: 30, medium: 50, high: 80 };
+    const allSame = kpiEntries.length > 0 && kpiEntries.every(([, k]) =>
+      Number(k.low) === Number(first.low)
+      && Number(k.medium) === Number(first.medium)
+      && Number(k.high) === Number(first.high)
+    );
+    scoreLine = allSame
+      ? `Baja: −${first.low} pts. Media: −${first.medium} pts. Alta: −${first.high} pts.`
+      : kpiEntries.map(([k, v]) =>
+        `${kpiTitleFromKey(k)}: baja −${v.low}, media −${v.medium}, alta −${v.high}`
+      ).join('. ') + '.';
+  }
+
+  const starBands = isV4Engine(cfg) && Array.isArray(cfg.stars?.bands)
+    ? cfg.stars.bands.map((b) => `${b.from}+ → ${b.stars}★ ${b.label || ''}`.trim()).join('. ')
+    : '';
+
+  const paragraphs = [
+    'Taxonomía. Cada hallazgo visible se etiqueta en un KPI (muros y pintura, humedad, pisos, sanitarios, electricidad, ventanas, puertas o mobiliario) y en una severidad: baja, media o alta.',
+    isV4Engine(cfg)
+      ? 'Puntaje por foto (STI v4). Cada foto válida recibe un puntaje según severidad vigente:'
+      : 'Puntaje por foto. Toda foto válida parte en 100. Si hay hallazgo, se descuenta según la severidad vigente en este informe:',
+    scoreLine,
+    'Fotos omitidas o no evaluables. No se incluyen en el promedio. Una foto sin hallazgo cuenta 100.',
+    'KPI. Es el promedio ponderado de las fotos válidas de ese criterio. Un HIGH funcional o de seguridad limita el techo del KPI.',
+    'STI (score del inmueble). Es el promedio ponderado de los KPIs.',
+    weighted.length
+      ? `Ponderación. En este informe pesan más: ${weighted.join(', ')}.`
+      : 'Ponderación. Todos los KPIs tienen el mismo peso, salvo ajuste del administrador.',
+    starBands
+      ? `Estrellas. ${starBands}. Un HIGH de seguridad limita a ${cfg.stars?.highSafetyMaxStars || 3} estrellas.`
+      : `Lectura. Menos de ${yellowFrom}: revisión sugerida. De ${yellowFrom} a ${greenFrom - 1}: intermedio. ${greenFrom} o más: favorable.`,
+    'Alcance. El análisis usa solo evidencia fotográfica. No sustituye visita presencial, mediciones ni peritaje.'
+  ];
+
+  return {
+    title: 'Cómo se calcula el score',
+    paragraphs
+  };
+}
+
 export function kpiWeightForKey(key, scoreConfig) {
   const cfg = normalizeScoreConfig(scoreConfig || {});
   const k = String(key || "").toUpperCase();
@@ -636,21 +746,31 @@ export function kpiPenaltyFromSeverity(kpiKey, severity, scoreConfig) {
   return Number(kpiCfg[sev] ?? 0);
 }
 
+function isOmittedSlot(s) {
+  if (!s) return true;
+  if (s.omitted) return true;
+  const status = String(s.status || '').toUpperCase();
+  if (status === 'NOT_CAPTURABLE') return true;
+  const code = String(s.findingCode || s.analysisCode || '').toUpperCase();
+  return code === 'NOT_CAPTURABLE';
+}
+
 function computeScoringByKpi(slots, scoreConfig) {
   const cfg = normalizeScoreConfig(scoreConfig || {});
   const byGroup = new Map();
   let totalPenalty = 0;
 
   slots.forEach((s) => {
+    if (isOmittedSlot(s)) return;
     const key = classifyKpiFromSlot(s, cfg.slotKpiMap);
     if (!key || !cfg.kpis?.[key]) return;
     if (!byGroup.has(key)) {
       byGroup.set(key, { groupKey: key, title: kpiTitleFromKey(key), impact: 0, slotsCount: 0 });
     }
     const group = byGroup.get(key);
-    // Solo contar slots con severity (no omitidos ni OK)
-    if (!s.severity) return;
+    // Slots OK (sin severity) cuentan como 100: entran al promedio con penalización 0.
     group.slotsCount += 1;
+    if (!s.severity) return;
     const penalty = kpiPenaltyFromSeverity(key, s.severity, cfg);
     totalPenalty += penalty;
     group.impact += penalty;
@@ -695,8 +815,12 @@ function computeScoringByKpi(slots, scoreConfig) {
  * }
  */
 export function computeScoringV2_2(findingsNormalized, slots, scoreConfig) {
-  if (scoreConfig?.kpis) {
-    return computeScoringByKpi(slots, scoreConfig);
+  const cfg = normalizeScoreConfig(scoreConfig || {});
+  if (isV4Engine(cfg)) {
+    return computeScoringV4(slots, cfg, classifyKpiFromSlot);
+  }
+  if (cfg.kpis) {
+    return computeScoringByKpi(slots, cfg);
   }
 
   const slotById = new Map(slots.map(s => [s.id, s]));

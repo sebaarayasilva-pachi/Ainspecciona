@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aprobar inspección · Ainspecciona</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #F6F7F9;
+      color: #0f172a;
+      display: grid;
+      place-items: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+    .card {
+      width: 100%;
+      max-width: 440px;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+    }
+    h1 { margin: 0 0 8px; font-size: 22px; }
+    .muted { color: #64748b; font-size: 13px; line-height: 1.5; }
+    .meta { margin: 16px 0; font-size: 14px; line-height: 1.6; }
+    .meta strong { color: #0f172a; }
+    .actions { display: grid; gap: 10px; margin-top: 20px; }
+    .btn {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: none;
+      background: #16a34a;
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 15px;
+      text-align: center;
+    }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+    .btn.reject { background: #f1f5f9; color: #0f172a; border: 1px solid #e2e8f0; }
+    .btn.panel { background: #2563eb; }
+    .note {
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 10px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      font-size: 13px;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .note.ok { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; }
+    .note.err { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1 id="title">Solicitud de inspección</h1>
+    <p class="muted" id="subtitle">Cargando…</p>
+    <div class="meta hidden" id="meta"></div>
+    <div class="actions hidden" id="actions">
+      <button type="button" class="btn" id="approveBtn">Aprobar (1 crédito)</button>
+      <button type="button" class="btn reject" id="rejectBtn">Rechazar</button>
+      <a class="btn panel" id="panelLink" href="/tenant">Ir al panel</a>
+    </div>
+    <div class="note hidden" id="note"></div>
+  </div>
+  <script>
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+      const token = String(params.get('token') || '').trim();
+      const action = String(params.get('action') || '').trim().toLowerCase();
+      const title = document.getElementById('title');
+      const subtitle = document.getElementById('subtitle');
+      const meta = document.getElementById('meta');
+      const actions = document.getElementById('actions');
+      const note = document.getElementById('note');
+      const approveBtn = document.getElementById('approveBtn');
+      const rejectBtn = document.getElementById('rejectBtn');
+
+      function showNote(text, kind) {
+        note.textContent = text;
+        note.className = 'note' + (kind ? ' ' + kind : '');
+        note.classList.remove('hidden');
+      }
+
+      function setBusy(busy) {
+        approveBtn.disabled = busy;
+        rejectBtn.disabled = busy;
+      }
+
+      async function load() {
+        if (!token) {
+          title.textContent = 'Enlace inválido';
+          subtitle.textContent = 'Falta el token de aprobación.';
+          showNote('Abre el enlace completo del correo o usa el panel de la corredora.', 'err');
+          return;
+        }
+        try {
+          const res = await fetch('/api/public/inspection-approval/' + encodeURIComponent(token));
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || !data.ok) {
+            title.textContent = 'No disponible';
+            subtitle.textContent = data.message || data.error || 'No se pudo cargar la solicitud.';
+            showNote(data.message || 'El enlace puede haber expirado o la inspección ya fue gestionada.', 'err');
+            return;
+          }
+          title.textContent = 'Aprobar inspección ' + (data.shortId || '');
+          subtitle.textContent = data.pendingApproval
+            ? 'Al aprobar se consume 1 crédito y se habilita la captura.'
+            : ('Estado: ' + (data.status || '—'));
+          const lines = [];
+          if (data.tenantName) lines.push('<div><strong>Corredora:</strong> ' + escapeHtml(data.tenantName) + '</div>');
+          if (data.executiveName) lines.push('<div><strong>Ejecutivo:</strong> ' + escapeHtml(data.executiveName) + '</div>');
+          if (data.address) lines.push('<div><strong>Dirección:</strong> ' + escapeHtml(data.address) + '</div>');
+          if (data.creditsBalance != null) lines.push('<div><strong>Créditos disponibles:</strong> ' + escapeHtml(String(data.creditsBalance)) + '</div>');
+          meta.innerHTML = lines.join('');
+          meta.classList.remove('hidden');
+          actions.classList.remove('hidden');
+          if (!data.pendingApproval) {
+            approveBtn.classList.add('hidden');
+            rejectBtn.classList.add('hidden');
+            showNote('Esta solicitud ya no está pendiente.', data.status === 'CANCELLED' ? 'err' : 'ok');
+            return;
+          }
+          if (action === 'approve') {
+            await doApprove();
+            try {
+              const u = new URL(window.location.href);
+              u.searchParams.delete('action');
+              window.history.replaceState({}, '', u.pathname + u.search);
+            } catch (_) {}
+          } else if (action === 'reject') {
+            await doReject();
+            try {
+              const u = new URL(window.location.href);
+              u.searchParams.delete('action');
+              window.history.replaceState({}, '', u.pathname + u.search);
+            } catch (_) {}
+          }
+        } catch (err) {
+          title.textContent = 'Error de red';
+          subtitle.textContent = 'No se pudo contactar al servidor.';
+          showNote(String(err?.message || err), 'err');
+        }
+      }
+
+      function escapeHtml(s) {
+        return String(s || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      async function doApprove() {
+        setBusy(true);
+        showNote('Aprobando…');
+        try {
+          const res = await fetch('/api/public/inspection-approval/' + encodeURIComponent(token) + '/approve', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: '{}'
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || !data.ok) {
+            showNote(data.message || data.error || 'No se pudo aprobar.', 'err');
+            setBusy(false);
+            return;
+          }
+          title.textContent = 'Inspección aprobada';
+          subtitle.textContent = 'Se consumió 1 crédito. La captura ya está habilitada.';
+          approveBtn.classList.add('hidden');
+          rejectBtn.classList.add('hidden');
+          showNote(
+            'Caso ' + (data.shortId || '') + (data.creditsBalance != null ? ' · Créditos restantes: ' + data.creditsBalance : ''),
+            'ok'
+          );
+        } catch (err) {
+          showNote(String(err?.message || err), 'err');
+          setBusy(false);
+        }
+      }
+
+      async function doReject() {
+        setBusy(true);
+        showNote('Rechazando…');
+        try {
+          const res = await fetch('/api/public/inspection-approval/' + encodeURIComponent(token) + '/reject', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: '{}'
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || !data.ok) {
+            showNote(data.message || data.error || 'No se pudo rechazar.', 'err');
+            setBusy(false);
+            return;
+          }
+          title.textContent = 'Solicitud rechazada';
+          subtitle.textContent = 'No se consumió crédito.';
+          approveBtn.classList.add('hidden');
+          rejectBtn.classList.add('hidden');
+          showNote('Caso ' + (data.shortId || '') + ' cancelado.', 'ok');
+        } catch (err) {
+          showNote(String(err?.message || err), 'err');
+          setBusy(false);
+        }
+      }
+
+      approveBtn.addEventListener('click', doApprove);
+      rejectBtn.addEventListener('click', doReject);
+      load();
+    })();
+  </script>
+</body>
+</html>

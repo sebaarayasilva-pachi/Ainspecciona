@@ -691,6 +691,72 @@ export async function sendInspectionApprovalRequestEmail(
 }
 
 /**
+ * Avisa al ejecutivo que el admin aprobó (o rechazó) el consumo de 1 crédito.
+ */
+export async function sendInspectionApprovalDecisionEmail(
+  to,
+  {
+    approved = true,
+    fullName = '',
+    caseShortId = '',
+    address = '',
+    tenantName = '',
+    captureUrl = ''
+  } = {}
+) {
+  if (!to) return { ok: false, error: 'Missing to' };
+  const name = fullName || to.split('@')[0] || 'Ejecutivo';
+  const addr = address ? `<p style="margin:0 0 8px;font-size:14px;color:#94a3b8">${escapeHtml(address)}</p>` : '';
+  const tenant = tenantName
+    ? `<p style="margin:0 0 8px;font-size:13px;color:#94a3b8">${escapeHtml(tenantName)}</p>`
+    : '';
+  const captureBtn = approved && captureUrl
+    ? `<p style="margin:16px 0"><a href="${escapeHtml(captureUrl)}" class="btn">Abrir captura</a></p>`
+    : '';
+  const body = approved
+    ? `El administrador aprobó tu inspección <strong>${escapeHtml(caseShortId || '')}</strong> y se consumió <strong>1 crédito</strong>. Ya puedes capturar las fotos.`
+    : `El administrador rechazó la solicitud de inspección <strong>${escapeHtml(caseShortId || '')}</strong>. No se consumió crédito.`;
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><style>body{font-family:system-ui,sans-serif;background:#0f172a;color:#e2e8f0;margin:0;padding:24px;line-height:1.6}a{color:#7c3aed;font-weight:600;text-decoration:none}.btn{display:inline-block;padding:14px 28px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff!important;border-radius:12px;margin:8px 0}.card{max-width:520px;margin:0 auto;background:#1e293b;border-radius:16px;padding:32px;border:1px solid #334155}</style></head>
+<body>
+<div class="card">
+  <h1 style="margin:0 0 16px;font-size:22px">${approved ? 'Inspección aprobada' : 'Inspección rechazada'}</h1>
+  <p style="margin:0 0 8px">Hola ${escapeHtml(name)},</p>
+  ${tenant}
+  ${addr}
+  <p style="margin:16px 0">${body}</p>
+  ${captureBtn}
+  <p style="margin:16px 0 0;font-size:13px;color:#64748b">— Ainspecciona</p>
+</div>
+</body>
+</html>`;
+
+  const transporter = getTransporter();
+  if (!transporter) {
+    console.warn('[email] SMTP no configurado. Approval decision no enviado a', to);
+    return { ok: false, skipped: true };
+  }
+
+  try {
+    const info = await transporter.sendMail({
+      from: getFromEmail(),
+      to: to.trim().toLowerCase(),
+      subject: approved
+        ? `Inspección ${caseShortId || ''} aprobada · ya puedes capturar · Ainspecciona`
+        : `Inspección ${caseShortId || ''} rechazada · Ainspecciona`,
+      html
+    });
+    return { ok: true, id: info.messageId };
+  } catch (err) {
+    console.error('[email] Error enviando approval decision al ejecutivo:', err);
+    return { ok: false, error: err?.message || String(err) };
+  }
+}
+
+/**
  * Avisa al ejecutivo asignado que el informe está emitido (caso DONE + slots listos).
  */
 export async function sendExecutiveReportReadyEmail(
@@ -956,6 +1022,193 @@ export async function sendPeerReferralWelcomeEmail(to, _tenantName, dashboardUrl
     return { ok: true, id: info.messageId };
   } catch (err) {
     console.error('[email] Error enviando peer referral welcome:', err);
+    return { ok: false, error: err?.message || String(err) };
+  }
+}
+
+/**
+ * Link de captura IN u OUT (arrendatario / inspector de campo).
+ */
+export async function sendInOutCaptureLinkEmail(to, { name = '', address = '', phase = 'IN', captureUrl } = {}) {
+  if (!to || !captureUrl) return { ok: false, error: 'Missing to or captureUrl' };
+  const who = String(name || to.split('@')[0] || 'Hola').trim();
+  const phaseLabel = String(phase || 'IN').toUpperCase() === 'OUT' ? 'cierre (OUT)' : 'apertura (IN)';
+  const addr = String(address || 'la propiedad').trim();
+
+  const html = `<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"></head>
+<body style="margin:0;padding:24px;font-family:system-ui,sans-serif;background:#f1f5f9;color:#0f172a;line-height:1.6">
+  <div style="max-width:520px;margin:0 auto;background:#fff;border-radius:16px;padding:28px;border:1px solid #e2e8f0">
+    <p style="margin:0 0 8px;font-size:13px;color:#64748b;text-transform:uppercase;letter-spacing:.04em">In &amp; Out · Ainspecciona</p>
+    <h1 style="margin:0 0 16px;font-size:22px">Hola ${escapeHtml(who)},</h1>
+    <p style="margin:0 0 12px">Hay una visita de <strong>${escapeHtml(phaseLabel)}</strong> lista para capturar en:</p>
+    <p style="margin:0 0 20px;font-weight:700">${escapeHtml(addr)}</p>
+    <p style="margin:0 0 24px"><a href="${escapeHtml(captureUrl)}" style="display:inline-block;padding:12px 20px;background:#2563eb;color:#fff;border-radius:10px;text-decoration:none;font-weight:700">Abrir captura</a></p>
+    <p style="margin:0;font-size:13px;color:#94a3b8">Si el botón no funciona, copia este enlace:<br>${escapeHtml(captureUrl)}</p>
+    <p style="margin:20px 0 0;font-size:13px;color:#94a3b8">— Ainspecciona In &amp; Out</p>
+  </div>
+</body></html>`;
+
+  const transporter = getTransporter();
+  if (!transporter) {
+    console.warn('[email] SMTP no configurado. Link captura InOut no enviado a', to);
+    return { ok: false, skipped: true };
+  }
+  try {
+    const info = await transporter.sendMail({
+      from: getFromEmail(),
+      to: to.trim().toLowerCase(),
+      subject: `Captura ${phaseLabel} · ${addr} · Ainspecciona`,
+      html
+    });
+    return { ok: true, id: info.messageId };
+  } catch (err) {
+    console.error('[email] Error captura InOut:', err);
+    return { ok: false, error: err?.message || String(err) };
+  }
+}
+
+/**
+ * Informe diferencial listo (arrendatario / propietario).
+ */
+export async function sendInOutReportReadyEmail(to, { name = '', address = '', reportUrl, conclusion = '', pdfBuffer = null } = {}) {
+  if (!to || !reportUrl) return { ok: false, error: 'Missing to or reportUrl' };
+  const who = String(name || to.split('@')[0] || 'Hola').trim();
+  const addr = String(address || 'la propiedad').trim();
+  const safeConclusion = escapeHtml(String(conclusion || '').trim());
+
+  const html = `<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"></head>
+<body style="margin:0;padding:24px;font-family:system-ui,sans-serif;background:#f1f5f9;color:#0f172a;line-height:1.6">
+  <div style="max-width:520px;margin:0 auto;background:#fff;border-radius:16px;padding:28px;border:1px solid #e2e8f0">
+    <p style="margin:0 0 8px;font-size:13px;color:#64748b;text-transform:uppercase;letter-spacing:.04em">In &amp; Out · Ainspecciona</p>
+    <h1 style="margin:0 0 16px;font-size:22px">Hola ${escapeHtml(who)},</h1>
+    <p style="margin:0 0 12px">El informe comparativo de apertura vs cierre está listo:</p>
+    <p style="margin:0 0 16px;font-weight:700">${escapeHtml(addr)}</p>
+    ${safeConclusion ? `<p style="margin:0 0 20px;color:#334155">${safeConclusion}</p>` : ''}
+    <p style="margin:0 0 24px"><a href="${escapeHtml(reportUrl)}" style="display:inline-block;padding:12px 20px;background:#2563eb;color:#fff;border-radius:10px;text-decoration:none;font-weight:700">Ver informe</a></p>
+    <p style="margin:0;font-size:13px;color:#94a3b8">El análisis es visual y no reemplaza una inspección especializada.</p>
+    <p style="margin:20px 0 0;font-size:13px;color:#94a3b8">— Ainspecciona In &amp; Out</p>
+  </div>
+</body></html>`;
+
+  const transporter = getTransporter();
+  if (!transporter) {
+    console.warn('[email] SMTP no configurado. Informe InOut no enviado a', to);
+    return { ok: false, skipped: true };
+  }
+  try {
+    const attachments = [];
+    if (pdfBuffer && pdfBuffer.length) {
+      attachments.push({ filename: 'Informe-InOut.pdf', content: pdfBuffer });
+    }
+    const info = await transporter.sendMail({
+      from: getFromEmail(),
+      to: to.trim().toLowerCase(),
+      subject: `Informe In & Out listo · ${addr} · Ainspecciona`,
+      html,
+      attachments
+    });
+    return { ok: true, id: info.messageId };
+  } catch (err) {
+    console.error('[email] Error informe InOut:', err);
+    return { ok: false, error: err?.message || String(err) };
+  }
+}
+
+/**
+ * Solicitud de módulo desde el hub tenant → Control.
+ * No habilita el producto; solo avisa.
+ */
+export async function sendProductRequestEmail({
+  orgName,
+  orgId,
+  productLabel,
+  productCode,
+  requesterName,
+  requesterEmail,
+  note
+}) {
+  const to = String(process.env.CONTACT_FORM_TO || 'contacto@ainspecciona.com').trim();
+  const safeOrg = escapeHtml(String(orgName || '').trim() || '—');
+  const safeProduct = escapeHtml(String(productLabel || productCode || '').trim());
+  const safeName = escapeHtml(String(requesterName || '').trim() || '—');
+  const safeEmail = escapeHtml(String(requesterEmail || '').trim() || '—');
+  const safeNote = escapeHtml(String(note || '').trim()).replace(/\n/g, '<br>');
+
+  const html = `<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"></head>
+<body style="margin:0;padding:24px;font-family:system-ui,sans-serif;background:#f1f5f9;color:#0f172a;line-height:1.6">
+  <div style="max-width:560px;margin:0 auto;background:#fff;border-radius:16px;padding:28px;border:1px solid #e2e8f0">
+    <p style="margin:0 0 8px;font-size:13px;color:#64748b;text-transform:uppercase;letter-spacing:.04em">Solicitud de módulo · /app</p>
+    <h1 style="margin:0 0 16px;font-size:20px">${safeOrg} pide ${safeProduct}</h1>
+    <table style="border-collapse:collapse;width:100%;font-size:14px">
+      <tr><td style="padding:6px 12px 6px 0;color:#64748b">Organización</td><td style="padding:6px 0">${safeOrg}</td></tr>
+      <tr><td style="padding:6px 12px 6px 0;color:#64748b">Org ID</td><td style="padding:6px 0">${escapeHtml(String(orgId || ''))}</td></tr>
+      <tr><td style="padding:6px 12px 6px 0;color:#64748b">Módulo</td><td style="padding:6px 0">${safeProduct} (${escapeHtml(String(productCode || ''))})</td></tr>
+      <tr><td style="padding:6px 12px 6px 0;color:#64748b">Solicitante</td><td style="padding:6px 0">${safeName} &lt;${safeEmail}&gt;</td></tr>
+    </table>
+    ${safeNote ? `<p style="margin:18px 0 6px;font-weight:600">Nota</p><p style="margin:0;color:#334155;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px">${safeNote}</p>` : ''}
+    <p style="margin:20px 0 0;font-size:13px;color:#94a3b8">Habilita el producto en Control. El tenant no puede activarlo solo.</p>
+  </div>
+</body></html>`;
+
+  const transporter = getTransporter();
+  if (!transporter) {
+    console.warn('[email] SMTP no configurado. Solicitud de módulo no enviada:', productCode, orgName);
+    return { ok: false, skipped: true };
+  }
+
+  try {
+    const info = await transporter.sendMail({
+      from: getFromEmail(),
+      to,
+      replyTo: requesterEmail || undefined,
+      subject: `[Control] ${orgName || 'Org'} solicita ${productLabel || productCode}`,
+      html
+    });
+    return { ok: true, id: info.messageId };
+  } catch (err) {
+    console.error('[email] Error solicitud de módulo:', err);
+    return { ok: false, error: err?.message || String(err) };
+  }
+}
+
+/**
+ * Envío de informe de la Expo.
+ */
+export async function sendExpoReportEmail(to, { name = '', eventName = '', reportUrl } = {}) {
+  if (!to || !reportUrl) return { ok: false, error: 'Missing to or reportUrl' };
+  const who = String(name || to.split('@')[0] || 'Hola').trim();
+
+  const html = `<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"></head>
+<body style="margin:0;padding:24px;font-family:system-ui,sans-serif;background:#05050A;color:#F8FAFC;line-height:1.6">
+  <div style="max-width:520px;margin:0 auto;background:#0F172A;border-radius:16px;padding:28px;border:1px solid rgba(255,255,255,0.1)">
+    <p style="margin:0 0 8px;font-size:13px;color:#94A3B8;text-transform:uppercase;letter-spacing:.04em">Ainspecciona ⚡ ${escapeHtml(eventName)}</p>
+    <h1 style="margin:0 0 16px;font-size:22px">Hola ${escapeHtml(who)},</h1>
+    <p style="margin:0 0 12px">¡Felicitaciones por completar el desafío! Tu informe técnico de inspección está listo.</p>
+    <p style="margin:0 0 24px"><a href="${escapeHtml(reportUrl)}" style="display:inline-block;padding:12px 20px;background:#00E5FF;color:#001626;border-radius:10px;text-decoration:none;font-weight:700">Ver informe técnico</a></p>
+    <p style="margin:0;font-size:13px;color:#94A3B8">Descubre cómo automatizar tus inspecciones, recepciones y postventa con IA en <a href="https://ainspecciona.com" style="color:#00E5FF;text-decoration:none;">ainspecciona.com</a></p>
+    <p style="margin:20px 0 0;font-size:13px;color:#94A3B8">© Ainspecciona</p>
+  </div>
+</body></html>`;
+
+  const transporter = getTransporter();
+  if (!transporter) {
+    console.warn('[email] SMTP no configurado. Informe Expo no enviado a', to);
+    return { ok: false, skipped: true };
+  }
+  try {
+    const info = await transporter.sendMail({
+      from: getFromEmail(),
+      to: to.trim().toLowerCase(),
+      subject: `Tu informe técnico ⚡ Ainspecciona en ${eventName}`,
+      html
+    });
+    return { ok: true, id: info.messageId };
+  } catch (err) {
+    console.error('[email] Error informe Expo:', err);
     return { ok: false, error: err?.message || String(err) };
   }
 }

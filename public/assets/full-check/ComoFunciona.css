@@ -1,0 +1,203 @@
+/* Cómo funciona Full Check — agenda, terreno, pruebas, informe */
+
+.fc-how {
+  --fc-cyan: #7dd3fc;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: clamp(72px, 10vw, 112px) 0;
+  background: #07090c;
+}
+
+.fc-how__texture {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: url("/assets/full-check/concrete.jpg");
+  background-size: cover;
+  background-position: center;
+  opacity: 0.16;
+  filter: grayscale(0.35) contrast(1.15) brightness(0.42);
+}
+
+.fc-how__texture::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(7, 9, 12, 0.55) 0%, rgba(7, 9, 12, 0.72) 100%),
+    radial-gradient(ellipse 70% 60% at 50% 40%, transparent 20%, rgba(7, 9, 12, 0.55) 100%);
+}
+
+.fc-how__inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: none;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 3vw, 40px);
+  box-sizing: border-box;
+}
+
+.fc-how__eyebrow {
+  color: rgba(125, 211, 252, 0.82);
+}
+
+.fc-how__eyebrow::before {
+  background: var(--fc-cyan);
+}
+
+.fc-how__title {
+  margin: 18px 0 0;
+  max-width: 16ch;
+  font-size: clamp(28px, 3.4vw, 44px);
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.032em;
+  color: var(--home-text, #f3f1ec);
+}
+
+.fc-how__lead {
+  margin: 18px 0 0;
+  max-width: 40em;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--home-muted, #a9afb4);
+}
+
+.fc-how__steps {
+  list-style: none;
+  margin: clamp(40px, 6vw, 64px) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  border: 1px solid rgba(125, 211, 252, 0.14);
+  border-radius: 14px;
+  background: rgba(10, 18, 32, 0.62);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  overflow: hidden;
+}
+
+@media (min-width: 720px) {
+  .fc-how__steps {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 1100px) {
+  .fc-how__steps {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.fc-how__step {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 28px 24px 26px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+@media (min-width: 720px) {
+  .fc-how__step:nth-child(odd) {
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .fc-how__step:nth-last-child(-n + 2) {
+    border-bottom: 0;
+  }
+}
+
+@media (min-width: 1100px) {
+  .fc-how__step {
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 0;
+  }
+
+  .fc-how__step:nth-child(odd) {
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .fc-how__step:last-child {
+    border-right: 0;
+  }
+}
+
+.fc-how__num {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  color: var(--fc-cyan);
+}
+
+.fc-how__icon {
+  display: flex;
+  width: 24px;
+  height: 24px;
+  margin: 18px 0 20px;
+  color: rgba(125, 211, 252, 0.78);
+}
+
+.fc-how__icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.fc-how__eye {
+  margin: 0;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(125, 211, 252, 0.7);
+}
+
+.fc-how__step-title {
+  margin: 10px 0 0;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.025em;
+  color: var(--home-text, #f3f1ec);
+}
+
+.fc-how__step-text {
+  margin: 10px 0 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--home-muted, #a9afb4);
+}
+
+.fc-how__micro {
+  margin: 22px 0 0;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(243, 241, 236, 0.48);
+}
+
+.fc-how__close {
+  margin: clamp(40px, 6vw, 64px) 0 0;
+  max-width: 32em;
+  font-size: clamp(18px, 2vw, 22px);
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: -0.02em;
+  color: var(--home-text, #f3f1ec);
+}
+
+.fc-how__chain {
+  margin: 12px 0 0;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(125, 211, 252, 0.62);
+}

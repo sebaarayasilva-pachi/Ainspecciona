@@ -1,0 +1,54 @@
+<svg width="1440" height="760" viewBox="0 0 1440 760" xmlns="http://www.w3.org/2000/svg">
+
+  <rect width="1440" height="760" fill="#F6F4F1"/>
+
+  <!-- Left content -->
+  <text x="120" y="140"
+    font-family="Inter"
+    font-size="40"
+    font-weight="700"
+    fill="#0B0B0B">
+    Esto no es un informe m�s.
+  </text>
+
+  <text x="120" y="200"
+    font-family="Inter"
+    font-size="40"
+    font-weight="700"
+    fill="#0B0B0B">
+    Es una herramienta para decidir.
+  </text>
+
+  <text x="120" y="290"
+    font-family="Inter"
+    font-size="22"
+    fill="#4B5563">
+    <tspan x="120">Dise�ado para entender r�pidamente el estado visible</tspan>
+    <tspan x="120" dy="32">de una propiedad y detectar problemas reales.</tspan>
+  </text>
+
+  <!-- Bullet points -->
+  <circle cx="130" cy="350" r="5" fill="#1E3A8A"/>
+  <text x="150" y="355" font-family="Inter" font-size="20">Visual y estructurado</text>
+
+  <circle cx="130" cy="390" r="5" fill="#1E3A8A"/>
+  <text x="150" y="395" font-family="Inter" font-size="20">Hallazgos claros</text>
+
+  <circle cx="130" cy="430" r="5" fill="#1E3A8A"/>
+  <text x="150" y="435" font-family="Inter" font-size="20">Evidencia fotogr�fica</text>
+
+  <circle cx="130" cy="470" r="5" fill="#1E3A8A"/>
+  <text x="150" y="475" font-family="Inter" font-size="20">Emitido por un especialista</text>
+
+  <!-- Right image container -->
+  <rect x="700" y="100" width="680" height="520" rx="28" fill="#FFFFFF" stroke="#E5E7EB"/>
+
+  <!-- Placeholder -->
+  <text x="760" y="360"
+    font-family="Inter"
+    font-size="20"
+    fill="#9CA3AF">
+    Reemplazar por imagen real del informe
+  </text>
+
+</svg>

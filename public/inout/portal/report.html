@@ -22,6 +22,9 @@
       <p style="margin:0 0 12px"><a id="backDash" href="/inout/portal">← Dashboard</a> · <a id="back" href="#">Contrato</a></p>
       <h1 id="title">Informe comparativo</h1>
       <p class="sub" id="conclusion"></p>
+      <p style="margin:0 0 16px">
+        <button class="btn" type="button" id="btnPdf">Descargar PDF</button>
+      </p>
       <div class="disclaimer" id="disclaimer"></div>
       <div class="card" id="counts"></div>
       <div id="items"></div>
@@ -41,8 +44,23 @@
       return '';
     }
 
+    async function downloadPdf() {
+      const res = await Io.ioFetch(`/api/inout/leases/${encodeURIComponent(id)}/report.pdf`);
+      if (!res.ok) {
+        alert('No se pudo generar el PDF');
+        return;
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'Informe-InOut.pdf';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
     async function load() {
-      const res = await fetch(`/api/inout/leases/${encodeURIComponent(id)}/report`);
+      const res = await Io.ioFetch(`/api/inout/leases/${encodeURIComponent(id)}/report`);
       const data = await res.json();
       if (!data.ok) { document.getElementById('conclusion').textContent = data.error || 'Error'; return; }
       document.getElementById('title').textContent = data.lease?.property?.address || 'Informe';
@@ -100,7 +118,7 @@
         card.querySelectorAll('[data-rev]').forEach((btn) => {
           btn.onclick = async () => {
             if (!item.diffId) return alert('Sin resultado de IA para revisar');
-            const r = await fetch(`/api/inout/diffs/${item.diffId}/review`, {
+            const r = await Io.ioFetch(`/api/inout/diffs/${item.diffId}/review`, {
               method: 'PATCH',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ reviewStatus: btn.dataset.rev })
@@ -119,6 +137,7 @@
       if (!me) return;
       document.getElementById('shell').outerHTML = Io.renderShell('overview', me);
       Io.bindShell();
+      document.getElementById('btnPdf').onclick = () => downloadPdf();
       if (!id) location.href = Io.appHref('/inout/portal');
       else load();
     })();

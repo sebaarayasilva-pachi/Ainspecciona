@@ -3,7 +3,8 @@
  */
 import { createStorage } from '../../storage/storage.js';
 import { analyzeInOutPair } from '../analysis/analyzeInOutPair.js';
-import { buildDiffSummary, saveDiffReport, DISCLAIMER } from './report.js';
+import { assembleLeaseReport, buildDiffSummary, saveDiffReport, DISCLAIMER } from './report.js';
+import { notifyInOutReportReady } from './notify.js';
 
 let storage;
 function getStorage() {
@@ -171,6 +172,32 @@ export function queueDiffAnalysis(prisma, leaseId, { log } = {}) {
             .catch(() => {});
         }
         log?.info?.({ leaseId, reportId: result.reportId }, 'inout auto diff analysis done');
+        prisma.ioLease
+          .findFirst({
+            where: { id: String(leaseId) },
+            include: {
+              property: true,
+              visits: {
+                include: {
+                  slots: { include: { photos: { orderBy: { capturedAt: 'desc' }, take: 1 } } },
+                  diffResults: true
+                }
+              },
+              reports: { where: { kind: 'DIFF' }, orderBy: { version: 'desc' }, take: 1 }
+            }
+          })
+          .then((lease) => {
+            if (!lease) return;
+            const view = assembleLeaseReport(lease);
+            return notifyInOutReportReady({
+              lease: view.lease,
+              summary: view.summary,
+              items: view.items,
+              disclaimer: view.disclaimer,
+              log
+            });
+          })
+          .catch((err) => log?.warn?.({ err: err?.message, leaseId }, 'inout-report-email-unhandled'));
       })
       .catch((err) => {
         log?.error?.({ err, leaseId }, 'inout auto diff analysis crashed');

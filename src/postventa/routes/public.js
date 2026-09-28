@@ -406,4 +406,14 @@ export async function registerPostventaPublicRoutes(app, { prisma } = {}) {
       tenantName
     });
   });
+
+  // Agente aparte para la demo en vivo de la expo: prompt de cuatro pasos, ticket simulado
+  // y sin tools de servidor, asi que la pagina no puede tocar datos reales.
+  app.get('/api/postventa/public/demo-expo-agent', async (req, reply) => {
+    const agentId = sanitizePostventaAgentId(process.env.ELEVENLABS_DEMO_EXPO_AGENT_ID || '');
+    if (!agentId) {
+      return reply.send({ ok: true, enabled: false, agentId: null });
+    }
+    return reply.send({ ok: true, enabled: true, agentId });
+  });
 }

@@ -154,7 +154,8 @@ export function serializePlatformContext(session) {
   const products = visibleCodes.map((code) => ({
     code,
     label: PLATFORM_PRODUCTS[code]?.label || code,
-    href: PLATFORM_PRODUCTS[code]?.href || '/app'
+    href: PLATFORM_PRODUCTS[code]?.href || '/app',
+    appHref: PLATFORM_PRODUCTS[code]?.appHref || '/app'
   }));
   const nda = ndaStatusForSession(session);
   return {

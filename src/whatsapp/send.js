@@ -45,22 +45,46 @@ async function postGraph(body, log) {
  * Plantilla HSM (solo fuera de ventana de 24h o como política explícita).
  * WHATSAPP_TEMPLATE_NAME, WHATSAPP_TEMPLATE_LANG (default es).
  */
-export async function sendWhatsAppTemplate({ to, templateName, languageCode, log }) {
+export async function sendWhatsAppTemplate({
+  to,
+  templateName,
+  languageCode,
+  bodyParams = [],
+  buttonUrlParams = [],
+  log
+} = {}) {
   const name = templateName || process.env.WHATSAPP_TEMPLATE_NAME;
   if (!name) {
     log?.warn('whatsapp-template-missing-name');
     return { ok: false, error: 'MISSING_TEMPLATE_NAME' };
   }
   const lang = languageCode || process.env.WHATSAPP_TEMPLATE_LANG || 'es';
+  const template = {
+    name,
+    language: { code: lang }
+  };
+  const components = [];
+  if (Array.isArray(bodyParams) && bodyParams.length) {
+    components.push({
+      type: 'body',
+      parameters: bodyParams.map((t) => ({ type: 'text', text: String(t ?? '').slice(0, 1024) }))
+    });
+  }
+  (Array.isArray(buttonUrlParams) ? buttonUrlParams : []).forEach((t, i) => {
+    components.push({
+      type: 'button',
+      sub_type: 'url',
+      index: String(i),
+      parameters: [{ type: 'text', text: String(t ?? '').slice(0, 1024) }]
+    });
+  });
+  if (components.length) template.components = components;
   const body = {
     messaging_product: 'whatsapp',
     recipient_type: 'individual',
     to: digits(to),
     type: 'template',
-    template: {
-      name,
-      language: { code: lang }
-    }
+    template
   };
   return postGraph(body, log);
 }
@@ -68,8 +92,8 @@ export async function sendWhatsAppTemplate({ to, templateName, languageCode, log
 /**
  * Intenta texto de sesión; si Meta indica fuera de ventana (131047), envía plantilla de reenganche.
  */
-export async function trySendTextWithTemplateFallback({ to, text, log }) {
-  const textRes = await sendWhatsAppText({ to, text, log });
+export async function trySendTextWithTemplateFallback({ to, text, previewUrl = false, log } = {}) {
+  const textRes = await sendWhatsAppText({ to, text, previewUrl, log });
   if (textRes.ok) return textRes;
 
   const code = textRes.data?.error?.code;
@@ -91,13 +115,13 @@ export async function trySendTextWithTemplateFallback({ to, text, log }) {
   });
 }
 
-export async function sendWhatsAppText({ to, text, log }) {
+export async function sendWhatsAppText({ to, text, previewUrl = false, log } = {}) {
   const body = {
     messaging_product: 'whatsapp',
     recipient_type: 'individual',
     to: digits(to),
     type: 'text',
-    text: { preview_url: false, body: String(text).slice(0, 4096) }
+    text: { preview_url: !!previewUrl, body: String(text).slice(0, 4096) }
   };
   return postGraph(body, log);
 }

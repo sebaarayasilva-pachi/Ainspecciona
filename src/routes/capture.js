@@ -135,6 +135,58 @@ export async function registerCaptureRoutes(app, {
         photoUrl: next.photo?.filePath ? storage.publicUrl(next.photo.filePath) : null
       }
     : null;
+
+  function reportPathForCase(caseRow) {
+    const key = caseRow?.shortId || caseRow?.id;
+    return key ? `/cases/${encodeURIComponent(key)}/report` : null;
+  }
+
+  function postReportMeta(caseRow, extra = {}) {
+    const status = String(caseRow?.status || extra.status || '').toUpperCase();
+    const finished = status === 'DONE' || extra.finished === true;
+    return {
+      caseStatus: status || null,
+      shortId: caseRow?.shortId || extra.shortId || null,
+      finished,
+      reportPath: reportPathForCase(caseRow) || (extra.shortId ? `/cases/${encodeURIComponent(extra.shortId)}/report` : null)
+    };
+  }
+
+  async function persistCaseScore(caseId) {
+    try {
+      const summary = await getCaseSummary({
+        prisma,
+        storage,
+        caseId,
+        slotGroupTitleFromCode: slotGroupTitleFromCode || slotGroupFromSlotCode,
+        scoreConfig: runtimeScoreConfig?.config,
+        scoreConfigUpdatedAt: runtimeScoreConfig?.updatedAt,
+        forceRecalc: true
+      });
+      if (!summary.ok || summary.score == null) return null;
+      const kpiScores = {};
+      (summary.byGroup || []).forEach((kpi) => {
+        if (kpi.groupKey && kpi.scoreIfOnlyGroup != null) {
+          kpiScores[kpi.groupKey] = kpi.scoreIfOnlyGroup;
+        }
+      });
+      const scoringData = {
+        finalScore: summary.score ?? null,
+        finalBadge: summary.badge ?? null,
+        scoreVersion: summary.scoreVersion || 'SCORING_V2_2_KPI',
+        kpiScores: Object.keys(kpiScores).length > 0 ? kpiScores : null,
+        scoredAt: new Date()
+      };
+      await prisma.case.update({
+        where: { id: caseId },
+        data: scoringData
+      });
+      return scoringData;
+    } catch (err) {
+      app.log.warn({ err, caseId }, 'Failed to persist SSOT score');
+      return null;
+    }
+  }
   // Página de captura (móvil)
   app.get('/capture/:token', async (req, reply) => {
     if (!prisma) return reply.code(500).send('DATABASE_NOT_CONFIGURED');
@@ -176,7 +228,8 @@ export async function registerCaptureRoutes(app, {
       expiresAt: t.expiresAt,
       progress,
       canFinish: !!progress.doneCycle,
-      slot: mapSlotForResponse(next)
+      slot: mapSlotForResponse(next),
+      ...postReportMeta(t.case)
     });
   });
 
@@ -216,6 +269,7 @@ export async function registerCaptureRoutes(app, {
       caseId: t.caseId,
       progress,
       canFinish: !!progress.doneCycle,
+      ...postReportMeta(t.case),
       slots: slots.map((s) => ({
         id: s.id,
         slotCode: s.slotCode,
@@ -279,7 +333,18 @@ export async function registerCaptureRoutes(app, {
     });
     const next = pickNextSlot(slots);
     const progress = computeProgress(slots);
-    return reply.send({ ok: true, skipped: true, progress, canFinish: !!progress.doneCycle, nextSlotId: next?.id ?? null, slot: mapSlotForResponse(next) });
+    if (String(t.case?.status || '').toUpperCase() === 'DONE') {
+      persistCaseScore(t.caseId).catch(() => {});
+    }
+    return reply.send({
+      ok: true,
+      skipped: true,
+      progress,
+      canFinish: !!progress.doneCycle,
+      nextSlotId: next?.id ?? null,
+      slot: mapSlotForResponse(next),
+      ...postReportMeta(t.case)
+    });
   });
 
   app.post('/api/capture/:token/finish', async (req, reply) => {
@@ -297,51 +362,27 @@ export async function registerCaptureRoutes(app, {
 
     const c = await prisma.case.findUnique({
       where: { id: t.caseId },
-      select: { id: true, reviewStatus: true }
+      select: { id: true, shortId: true, status: true, reviewStatus: true }
     });
     if (!c) return reply.code(404).send({ ok: false, error: 'CASE_NOT_FOUND' });
 
     const rev = String(c.reviewStatus || '').toLowerCase();
-    if (rev === 'pending_review' || rev === 'approved') {
-      return reply.send({ ok: true, alreadyFinished: true, reviewStatus: c.reviewStatus || 'pending_review', progress });
-    }
+    const alreadyDone = String(c.status || '').toUpperCase() === 'DONE'
+      || rev === 'pending_review'
+      || rev === 'approved';
 
-    // SSOT: Calcular score UNA SOLA VEZ al completar el caso
-    let scoringData = null;
-    try {
-      const summary = await getCaseSummary({
-        prisma,
-        storage,
-        caseId: c.id,
-        slotGroupTitleFromCode: slotGroupTitleFromCode || slotGroupFromSlotCode,
-        scoreConfig: runtimeScoreConfig?.config,
-        scoreConfigUpdatedAt: runtimeScoreConfig?.updatedAt
+    if (alreadyDone) {
+      await persistCaseScore(c.id);
+      return reply.send({
+        ok: true,
+        alreadyFinished: true,
+        reviewStatus: c.reviewStatus || 'pending_review',
+        progress,
+        ...postReportMeta({ ...c, status: 'DONE' })
       });
-
-      if (summary.ok && summary.score != null) {
-        // Construir kpiScores desde byGroup
-        const kpiScores = {};
-        if (summary.byGroup) {
-          summary.byGroup.forEach(kpi => {
-            if (kpi.groupKey && kpi.scoreIfOnlyGroup != null) {
-              kpiScores[kpi.groupKey] = kpi.scoreIfOnlyGroup;
-            }
-          });
-        }
-
-        scoringData = {
-          finalScore: summary.score ?? null,
-          finalBadge: summary.badge ?? null,
-          scoreVersion: 'SCORING_V2_2_KPI',
-          kpiScores: Object.keys(kpiScores).length > 0 ? kpiScores : null,
-          scoredAt: new Date()
-        };
-      }
-    } catch (err) {
-      app.log.warn({ err, caseId: c.id }, 'Failed to calculate score on case completion');
     }
 
-    // Persistir score en DB junto con status DONE
+    const scoringData = await persistCaseScore(c.id);
     await prisma.case.update({
       where: { id: c.id },
       data: {
@@ -372,7 +413,14 @@ export async function registerCaptureRoutes(app, {
       queueExecutiveSummaryForCase(c.id).catch(() => {});
     }
 
-    return reply.send({ ok: true, finished: true, reviewStatus: 'pending_review', notified, progress });
+    return reply.send({
+      ok: true,
+      finished: true,
+      reviewStatus: 'pending_review',
+      notified,
+      progress,
+      ...postReportMeta({ id: c.id, shortId: c.shortId, status: 'DONE' })
+    });
   });
 
   // Subir + validar captura (OK / REPEAT)
@@ -566,6 +614,10 @@ export async function registerCaptureRoutes(app, {
       })
       .catch((err) => req.log.warn(err, 'capture-upload-metric'));
 
+    if (passed && String(t.case?.status || '').toUpperCase() === 'DONE') {
+      persistCaseScore(t.caseId).catch(() => {});
+    }
+
     return reply.send({
       ok: true,
       passed,
@@ -584,7 +636,8 @@ export async function registerCaptureRoutes(app, {
           }
         : null,
       progress,
-      nextSlotId: next?.id ?? null
+      nextSlotId: next?.id ?? null,
+      ...postReportMeta(t.case)
     });
   });
 }

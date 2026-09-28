@@ -344,6 +344,11 @@
       background: #0B1220;
     }
     .logoPreview img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    html.ainspecta-embed .site-header,
+    html.ainspecta-embed .subBanner,
+    html.ainspecta-embed aside { display: none !important; }
+    html.ainspecta-embed main { grid-template-columns: 1fr; min-height: 100vh; }
+    html.ainspecta-embed [data-section-link="users"] { display: none !important; }
     @media (max-width: 900px) {
       main { grid-template-columns: 1fr; }
       aside { border-right: none; border-bottom: 1px solid #1E2B45; }
@@ -955,12 +960,16 @@
   <script>
     (function initSessionFromUrl() {
       const params = new URLSearchParams(window.location.search);
+      if (params.get("embed") === "1") {
+        document.documentElement.classList.add("ainspecta-embed");
+      }
       const t = params.get("t");
       if (t) {
         localStorage.setItem("tenant_session", t);
         const url = new URL(window.location.href);
         url.searchParams.delete("t");
-        window.history.replaceState({}, "", url.pathname + (url.hash || ""));
+        const keep = url.searchParams.toString();
+        window.history.replaceState({}, "", url.pathname + (keep ? "?" + keep : "") + (url.hash || ""));
       }
     })();
 

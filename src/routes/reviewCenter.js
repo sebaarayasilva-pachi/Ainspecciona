@@ -21,6 +21,15 @@ import {
 import { getPostventaTicketReport } from '../postventa/services/ticketReport.js';
 import { updatePostventaTicketStatus } from '../postventa/services/adminTickets.js';
 import { applySlotReviewCorrection } from '../analysis/applySlotReviewCorrection.js';
+import { FINAL_STATUS } from '../consensus/schema.js';
+import {
+  analysisFromChoice,
+  applyConsensusPatch,
+  authorFromItoChoice,
+  compactAnalysis,
+  slotPatchFromAnalysis
+} from '../consensus/applyToSlot.js';
+import { ingestItoChoiceKb } from '../consensus/kbFromConsensus.js';
 
 const VERDICTS = new Set(['ok', 'corrected']);
 // Postventa admite además 'sin_falla': no hay falla de fabricación, pero el ticket
@@ -118,7 +127,8 @@ export async function registerReviewCenterRoutes(app, deps) {
             createdAt: true,
             tenant: { select: { name: true } },
             property: { select: { address: true } },
-            slots: { select: { id: true, analysisCode: true, photoId: true } }
+            slots: { select: { id: true, analysisCode: true, photoId: true } },
+            photoAnalysisShadows: { select: { slotId: true, finalStatus: true } }
           }
         }),
         prisma.aiFeedback.findMany({
@@ -170,8 +180,22 @@ export async function registerReviewCenterRoutes(app, deps) {
         return p;
       };
 
+      const casesForQueue = cases.filter((c) => {
+        const shadows = c.photoAnalysisShadows || [];
+        if (!shadows.length) return true;
+        if (shadows.some((s) => s.finalStatus === FINAL_STATUS.UNRESOLVED)) return true;
+        // ITO ya resolvió las fotos: el caso sigue pendiente hasta Finalizar/aprobar.
+        return shadows.some((s) => s.finalStatus === FINAL_STATUS.HUMAN_REVIEWED);
+      });
+
       const items = [
-        ...cases.map((c) => ({
+        ...casesForQueue.map((c) => {
+          const unresolved = (c.photoAnalysisShadows || []).filter((s) => s.finalStatus === FINAL_STATUS.UNRESOLVED);
+          const findingSlots = c.slots.filter((s) => {
+            const code = String(s.analysisCode || '').toUpperCase();
+            return code && code !== 'OK' && code !== 'NOT_CAPTURABLE';
+          }).length;
+          return {
           source: 'AINSPECTA',
           kind: 'case_review',
           refId: c.shortId || c.id,
@@ -179,14 +203,13 @@ export async function registerReviewCenterRoutes(app, deps) {
           subtitle: c.tenant?.name || null,
           tenantName: c.tenant?.name || null,
           groupKey: null,
-          findingsCount: c.slots.filter((s) => {
-            const code = String(s.analysisCode || '').toUpperCase();
-            return code && code !== 'OK' && code !== 'NOT_CAPTURABLE';
-          }).length,
+          findingsCount: unresolved.length
+            || ((c.photoAnalysisShadows || []).some((s) => s.finalStatus === FINAL_STATUS.HUMAN_REVIEWED) ? 0 : findingSlots),
           slotsWithPhoto: c.slots.filter((s) => s.photoId).length,
           createdAt: c.createdAt,
           ageHours: ageHoursOf(c.createdAt)
-        })),
+          };
+        }),
         ...feedback.map((f) => ({
           source: 'PROPERTYCHECK',
           kind: 'feedback_curation',
@@ -221,7 +244,7 @@ export async function registerReviewCenterRoutes(app, deps) {
       return reply.send({
         ok: true,
         counts: {
-          AINSPECTA: cases.length,
+          AINSPECTA: casesForQueue.length,
           PROPERTYCHECK: feedback.length,
           POSTVENTA: tickets.length,
           total: items.length
@@ -256,6 +279,21 @@ export async function registerReviewCenterRoutes(app, deps) {
         orderBy: { orderIndex: 'asc' },
         include: { photo: { select: { filePath: true } } }
       });
+      const shadows = await prisma.photoAnalysisShadow.findMany({
+        where: { caseId: c.id }
+      });
+      const shadowBySlot = new Map(shadows.map((s) => [s.slotId, s]));
+      const unresolvedIds = new Set(
+        shadows.filter((s) => s.finalStatus === FINAL_STATUS.UNRESOLVED).map((s) => s.slotId)
+      );
+      const humanReviewedIds = new Set(
+        shadows.filter((s) => s.finalStatus === FINAL_STATUS.HUMAN_REVIEWED).map((s) => s.slotId)
+      );
+      const slotsForIto = unresolvedIds.size
+        ? slots.filter((s) => unresolvedIds.has(s.id))
+        : humanReviewedIds.size
+          ? slots.filter((s) => humanReviewedIds.has(s.id))
+          : slots;
       const reviews = await prisma.slotReview.findMany({
         where: { caseId: c.id }
       });
@@ -283,8 +321,9 @@ export async function registerReviewCenterRoutes(app, deps) {
           address: c.property?.address || null
         },
         autoApproveConfig: autoCfg,
-        slots: slots.map((s) => {
+        slots: slotsForIto.map((s) => {
           const r = reviewBySlot.get(s.id) || null;
+          const sh = shadowBySlot.get(s.id) || null;
           const kpiKey = typeof classifyKpiFromSlot === 'function'
             ? String(classifyKpiFromSlot(s, slotKpiMap) || '').toUpperCase() || null
             : null;
@@ -301,7 +340,19 @@ export async function registerReviewCenterRoutes(app, deps) {
               message: s.analysisMessage,
               confidence: s.analysisConfidence
             },
-            autoApprove: !r && slotQualifiesForAutoApprove(s, kpiStat, autoCfg),
+            consensus: sh
+              ? {
+                  finalStatus: sh.finalStatus,
+                  consensusStatus: sh.consensusStatus,
+                  judgeTriggered: sh.judgeTriggered,
+                  openai: compactAnalysis(sh.analysisOpenAI),
+                  gemini: compactAnalysis(sh.analysisGemini),
+                  claude: compactAnalysis(sh.analysisClaude)
+                }
+              : null,
+            autoApprove: unresolvedIds.size
+              ? false
+              : (!r && slotQualifiesForAutoApprove(s, kpiStat, autoCfg)),
             kpiAccuracy: kpiStat ? { accuracyPct: kpiStat.accuracyPct, reviews: kpiStat.total } : null,
             review: r
               ? {
@@ -329,9 +380,11 @@ export async function registerReviewCenterRoutes(app, deps) {
       const slotId = String(req.params.slotId || '');
       const body = req.body || {};
       const verdict = String(body.verdict || '').toLowerCase();
+      const chosenAi = String(body.chosenAi || '').toLowerCase();
+      const AI_CHOICES = new Set(['openai', 'gemini', 'claude', 'none']);
 
-      if (!VERDICTS.has(verdict)) {
-        return reply.code(400).send({ ok: false, error: 'INVALID_VERDICT', hint: "verdict: 'ok' | 'corrected'" });
+      if (!VERDICTS.has(verdict) && !(chosenAi && AI_CHOICES.has(chosenAi))) {
+        return reply.code(400).send({ ok: false, error: 'INVALID_VERDICT', hint: "verdict: 'ok' | 'corrected' o chosenAi" });
       }
 
       const c = await prisma.case.findFirst({
@@ -347,6 +400,107 @@ export async function registerReviewCenterRoutes(app, deps) {
 
       const reviewerEmail =
         String(req.headers['x-reviewer-email'] || '').trim() || reviewerEmailDefault || null;
+
+      if (chosenAi && AI_CHOICES.has(chosenAi)) {
+        const shadow = await prisma.photoAnalysisShadow.findUnique({ where: { slotId: slot.id } });
+        const author = authorFromItoChoice(chosenAi);
+        let appliedToReport = false;
+        if (chosenAi !== 'none') {
+          const analysis = analysisFromChoice(chosenAi, {
+            analysisOpenAI: shadow?.analysisOpenAI,
+            analysisGemini: shadow?.analysisGemini,
+            analysisClaude: shadow?.analysisClaude
+          });
+          if (!analysis || analysis.error) {
+            return reply.code(400).send({ ok: false, error: 'AI_ANALYSIS_MISSING', hint: `No hay análisis de ${chosenAi}` });
+          }
+          const patch = slotPatchFromAnalysis(slot, analysis, {
+            author,
+            finalStatus: 'HUMAN_REVIEWED',
+            engineVersion: shadow?.consensusEngineVersion
+          });
+          await applyConsensusPatch(prisma, slot, patch);
+          appliedToReport = true;
+          await prisma.slotReview.upsert({
+            where: { slotId: slot.id },
+            create: {
+              slotId: slot.id,
+              caseId: c.id,
+              verdict: 'ok',
+              note: `ITO eligió ${author.label}`,
+              reviewerEmail,
+              reviewedAt: new Date()
+            },
+            update: {
+              verdict: 'ok',
+              note: `ITO eligió ${author.label}`,
+              reviewerEmail,
+              reviewedAt: new Date()
+            }
+          });
+        } else {
+          const reviewDataNone = {
+            verdict: 'corrected',
+            humanCode: String(body.humanCode || 'OK').toUpperCase().slice(0, 64) || 'OK',
+            humanSeverity: String(body.humanSeverity || '').toLowerCase().slice(0, 16) || null,
+            humanMessage: String(body.humanMessage || '').slice(0, 4000) || null,
+            note: String(body.note || '').slice(0, 2000) || null,
+            reviewerEmail,
+            reviewedAt: new Date()
+          };
+          await prisma.slotReview.upsert({
+            where: { slotId: slot.id },
+            create: { slotId: slot.id, caseId: c.id, ...reviewDataNone },
+            update: reviewDataNone
+          });
+          const patch = await applySlotReviewCorrection(prisma, slot, reviewDataNone);
+          appliedToReport = !!patch;
+          const slotAfter = await prisma.slot.findUnique({ where: { id: slot.id } });
+          if (slotAfter) {
+            const debug = slotAfter.analysisDebug && typeof slotAfter.analysisDebug === 'object' ? slotAfter.analysisDebug : {};
+            await prisma.slot.update({
+              where: { id: slot.id },
+              data: {
+                analysisDebug: {
+                  ...debug,
+                  consensus: { ...(debug.consensus || {}), author, finalStatus: 'HUMAN_REVIEWED', appliedAt: new Date().toISOString() },
+                  severitySource: 'human_review_correction'
+                }
+              }
+            });
+          }
+        }
+        if (shadow) {
+          await prisma.photoAnalysisShadow.update({
+            where: { slotId: slot.id },
+            data: { finalStatus: 'HUMAN_REVIEWED' }
+          });
+        }
+        invalidateKpiAccuracyCache();
+        const kb = await ingestItoChoiceKb({
+          prisma,
+          slot,
+          caseId: c.id,
+          kpi: shadow?.kpi || null,
+          choice: chosenAi,
+          author,
+          analysisOpenAI: shadow?.analysisOpenAI,
+          analysisGemini: shadow?.analysisGemini,
+          analysisClaude: shadow?.analysisClaude,
+          human: chosenAi === 'none'
+            ? { humanCode: body.humanCode, humanSeverity: body.humanSeverity, humanMessage: body.humanMessage }
+            : null,
+          log: req.log
+        }).catch((err) => ({ ok: false, error: err?.message }));
+        return reply.send({
+          ok: true,
+          verdict: chosenAi === 'none' ? 'corrected' : 'chosen_ai',
+          chosenAi,
+          author,
+          appliedToReport,
+          kb
+        });
+      }
 
       const reviewData = {
         verdict,
@@ -453,10 +607,25 @@ export async function registerReviewCenterRoutes(app, deps) {
       });
       if (!c) return reply.code(404).send({ ok: false, error: 'CASE_NOT_FOUND' });
 
-      const caseSlots = await prisma.slot.findMany({
+      const caseSlotsAll = await prisma.slot.findMany({
         where: { caseId: c.id, photoId: { not: null } },
         select: { id: true, slotCode: true, title: true, analysisCode: true, analysisSeverity: true }
       });
+      const consensusShadows = await prisma.photoAnalysisShadow.findMany({
+        where: { caseId: c.id },
+        select: { slotId: true, finalStatus: true }
+      });
+      const unresolvedSet = new Set(
+        consensusShadows.filter((s) => s.finalStatus === FINAL_STATUS.UNRESOLVED).map((s) => s.slotId)
+      );
+      const humanSet = new Set(
+        consensusShadows.filter((s) => s.finalStatus === FINAL_STATUS.HUMAN_REVIEWED).map((s) => s.slotId)
+      );
+      const caseSlots = unresolvedSet.size
+        ? caseSlotsAll.filter((s) => unresolvedSet.has(s.id))
+        : consensusShadows.length
+          ? caseSlotsAll.filter((s) => humanSet.has(s.id))
+          : caseSlotsAll;
       const slotsTotal = caseSlots.length;
       let reviews = await prisma.slotReview.findMany({
         where: { caseId: c.id },
@@ -468,6 +637,16 @@ export async function registerReviewCenterRoutes(app, deps) {
       const autoCfg = autoApproveConfig();
       let autoApproved = 0;
       const pending = caseSlots.filter((s) => !reviewedIds.has(s.id));
+      if (pending.length && unresolvedSet.size) {
+        return reply.code(400).send({
+          ok: false,
+          error: 'REVIEW_INCOMPLETE',
+          reviewed: reviewedIds.size,
+          slotsTotal,
+          pendingSlots: pending.map((s) => ({ id: s.id, slotCode: s.slotCode, title: s.title })),
+          hint: `Faltan ${pending.length} foto(s) UNRESOLVED del consenso.`
+        });
+      }
       if (pending.length) {
         let kpiStats = {};
         let slotKpiMap;

@@ -108,14 +108,26 @@ def main():
     ], cwd=str(mvs_dir))
 
     status(40, "densifying_point_cloud")
-    # Los frames de ARCore son de 480x640, y --min-resolution ya vale 640, así que pedir
-    # nivel 1 no submuestreaba nada: el clamp lo anulaba. Se pide nivel 0 para que la
-    # intención quede explícita. Los valores van por env para calibrar sin redeployar.
+    # Los frames son de 1080x1920 y --max-resolution vale 2560, así que el nivel 0
+    # trabaja a resolución completa. Los valores van por env para calibrar sin redeployar.
+    #
+    # Las capturas de una pasada dejan ~3 vistas por punto (la mitad con solo 2), y con
+    # tan pocas la fusión por defecto descarta el 98% de las profundidades. Los dos flags
+    # de abajo son los que OpenMVS documenta para ese caso:
+    #   postprocess-dmaps 3 cambia el adjust-confidence de GPU, que poda, por
+    #     remove-speckles + fill-gaps, que rellena.
+    #   fusion-recycle-dropped devuelve al pool los píxeles que la regla de descarte tiró.
+    # Ambos cambian precisión por completitud; los outliers extra los limpia ReconstructMesh.
     run_cmd([
         "DensifyPointCloud",
         "scene.mvs",
-        "--resolution-level", env("MVS_RESOLUTION_LEVEL") or "0",
-        "--number-views-fuse", env("MVS_VIEWS_FUSE") or "2"
+        "--resolution-level", env("MVS_RESOLUTION_LEVEL") or "0", # 0 es resolucion completa (maximo detalle)
+        "--number-views", "0", # Usar todas las vistas posibles
+        "--number-views-fuse", env("MVS_VIEWS_FUSE") or "2",
+        "--postprocess-dmaps", env("MVS_POSTPROCESS_DMAPS") or "3",
+        "--fusion-recycle-dropped", env("MVS_RECYCLE_DROPPED") or "1",
+        "--filter-point-cloud", "0", # Desactivar filtro agresivo de nube de puntos para retener mas datos
+        "--estimate-normals", "1"
     ], cwd=str(mvs_dir))
 
     status(60, "reconstructing_mesh")
@@ -129,17 +141,37 @@ def main():
         "scene_dense.mvs",
         "--free-space-support", env("MVS_FREE_SPACE") or "1",
         "--min-point-distance", env("MVS_MIN_POINT_DIST") or "0",
-        "--max-edge-scale", env("MVS_MAX_EDGE_SCALE") or "6",
-        "--close-holes", env("MVS_CLOSE_HOLES") or "100",
-        "--thickness-factor", "2"
+        "--max-edge-scale", env("MVS_MAX_EDGE_SCALE") or "5.0", # Aumentado para permitir puentes entre huecos 
+grandes
+        "--close-holes", env("MVS_CLOSE_HOLES") or "150", # Aumentado drásticamente para forzar el relleno de huecos
+        "--thickness-factor", "2",
+        "--smooth", "3",
+        "--decimate", "0.25" # Aumentamos un poco la calidad (25% de polígonos)
     ], cwd=str(mvs_dir))
+
+    status(75, "filling_holes")
+    try:
+        log("Rellenando huecos en la malla con trimesh...")
+        mesh_path = mvs_dir / "scene_dense_mesh.ply"
+        if mesh_path.exists():
+            mesh = trimesh.load(str(mesh_path))
+            if not mesh.is_watertight:
+                log(f"Malla no es watertight. Rellenando huecos... (caras antes: {len(mesh.faces)})")
+                mesh.fill_holes()
+                log(f"Caras despues de rellenar: {len(mesh.faces)}")
+                mesh.export(str(mesh_path))
+            else:
+                log("La malla ya es watertight.")
+    except Exception as e:
+        log(f"Advertencia: fallo al rellenar huecos con trimesh: {e}")
 
     status(80, "texturing_mesh")
     run_cmd([
         "TextureMesh",
         "scene_dense.mvs",
         "--mesh-file", "scene_dense_mesh.ply",
-        "--export-type", "obj"
+        "--export-type", "obj",
+        "--resolution-level", env("MVS_TEXTURE_RESOLUTION") or "1" # 1 = mitad de resolucion (4x mas rapido, evita timeouts)
     ], cwd=str(mvs_dir))
 
     status(90, "converting_to_glb")

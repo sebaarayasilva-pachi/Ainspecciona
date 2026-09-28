@@ -1,0 +1,224 @@
+/* Sección 2 — Cómo funciona. Navy, más aire, menos glow que el hero. */
+
+.pv-how {
+  --how-cyan: #19d0ff;
+  --how-cyan-2: #3aa6ff;
+  --how-violet: #8b74ff;
+  --how-magenta: #c75cff;
+  position: relative;
+  padding: 96px 0 108px;
+  background:
+    linear-gradient(180deg, #020814 0%, #04111e 46%, #071428 100%);
+  overflow: hidden;
+}
+
+.pv-how::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(40, 90, 150, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(40, 90, 150, 0.07) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: linear-gradient(180deg, transparent, #000 12%, #000 88%, transparent);
+}
+
+.pv-how__inner {
+  width: min(1200px, calc(100% - 64px));
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.pv-how__eyebrow {
+  margin: 0;
+  color: var(--how-cyan);
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.pv-how__title {
+  margin: 16px 0 0;
+  max-width: 720px;
+  color: #f4f8ff;
+  font-size: clamp(32px, 3.6vw, 48px);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+}
+
+.pv-how__lead {
+  margin: 18px 0 0;
+  max-width: 640px;
+  color: #9eb0c4;
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.pv-how__track {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 28px;
+  margin: 72px 0 0;
+  padding: 0;
+  list-style: none;
+  position: relative;
+}
+
+.pv-how__track::before {
+  content: "";
+  position: absolute;
+  top: 44px;
+  left: 11%;
+  right: 11%;
+  height: 1px;
+  background: linear-gradient(90deg, #19d0ff 0%, #3aa6ff 32%, #8b74ff 68%, #c75cff 100%);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.pv-how__step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+}
+
+.pv-how__orb {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(6, 18, 34, 0.9);
+  z-index: 1;
+}
+
+.pv-how__orb svg {
+  width: 28px;
+  height: 28px;
+}
+
+.pv-how__step--cyan .pv-how__orb {
+  color: var(--how-cyan);
+  border: 1px solid rgba(25, 208, 255, 0.55);
+  box-shadow: 0 0 0 8px rgba(25, 208, 255, 0.04);
+}
+
+.pv-how__step--cyan2 .pv-how__orb {
+  color: var(--how-cyan-2);
+  border: 1px solid rgba(58, 166, 255, 0.55);
+  box-shadow: 0 0 0 8px rgba(58, 166, 255, 0.04);
+}
+
+.pv-how__step--violet .pv-how__orb {
+  color: var(--how-violet);
+  border: 1px solid rgba(139, 116, 255, 0.55);
+  box-shadow: 0 0 0 8px rgba(139, 116, 255, 0.05);
+}
+
+.pv-how__step--magenta .pv-how__orb {
+  color: var(--how-magenta);
+  border: 1px solid rgba(199, 92, 255, 0.55);
+  box-shadow: 0 0 0 8px rgba(199, 92, 255, 0.05);
+}
+
+.pv-how__label {
+  margin: 18px 0 0;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.pv-how__step--cyan .pv-how__label,
+.pv-how__step--cyan2 .pv-how__label {
+  color: var(--how-cyan);
+}
+
+.pv-how__step--violet .pv-how__label {
+  color: var(--how-violet);
+}
+
+.pv-how__step--magenta .pv-how__label {
+  color: var(--how-magenta);
+}
+
+.pv-how__name {
+  margin: 10px 0 0;
+  max-width: 240px;
+  color: #eef4fb;
+  font-size: 18px;
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+.pv-how__step ul {
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+  max-width: 240px;
+}
+
+.pv-how__step li {
+  color: #93a6bb;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.pv-how__step li + li {
+  margin-top: 6px;
+}
+
+@media (max-width: 980px) {
+  .pv-how {
+    padding: 72px 0 80px;
+  }
+
+  .pv-how__inner {
+    width: calc(100% - 40px);
+  }
+
+  .pv-how__track {
+    grid-template-columns: 1fr 1fr;
+    gap: 40px 20px;
+  }
+
+  .pv-how__track::before {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .pv-how__track {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+
+  .pv-how__step {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .pv-how__name,
+  .pv-how__step ul {
+    max-width: none;
+  }
+
+  .pv-how__step + .pv-how__step::before {
+    content: "";
+    position: absolute;
+    left: 43px;
+    top: -28px;
+    width: 1px;
+    height: 20px;
+    background: linear-gradient(#19d0ff, #8b74ff);
+    opacity: 0.5;
+  }
+}

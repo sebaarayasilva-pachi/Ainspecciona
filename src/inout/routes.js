@@ -22,8 +22,15 @@ import {
   startOutVisit
 } from './services/visitLifecycle.js';
 import { checkComparability, hintToSpanish } from './analysis/comparability.js';
-import { buildDiffSummary, DISCLAIMER } from './services/report.js';
+import { assembleLeaseReport, DISCLAIMER } from './services/report.js';
 import { queueDiffAnalysis, runDiffAnalysis } from './services/diffAnalysis.js';
+import { notifyInOutCaptureLink } from './services/notify.js';
+import { generateInOutReportPdf } from '../pdf/inoutReportPdf.js';
+import {
+  emailBelongsToOrganization,
+  findOrgIdForIoTenant,
+  upsertInOutLegacyLink
+} from './services/claimUser.js';
 
 let storage;
 function getStorage() {
@@ -110,8 +117,12 @@ export async function registerInOutRoutes(app, { prisma }) {
     });
   });
 
-  // Seed demo (solo si no hay tenants)
+  // Seed demo (solo si no hay tenants). En producción exige INOUT_ALLOW_BOOTSTRAP=1.
   app.post('/api/inout/auth/bootstrap-demo', async (req, reply) => {
+    const allow = String(process.env.INOUT_ALLOW_BOOTSTRAP || '').trim() === '1';
+    if (process.env.NODE_ENV === 'production' && !allow) {
+      return reply.code(403).send({ ok: false, error: 'DISABLED' });
+    }
     const count = await prisma.ioTenant.count();
     if (count > 0 && !req.body?.force) {
       return reply.code(409).send({ ok: false, error: 'ALREADY_BOOTSTRAPPED' });
@@ -187,6 +198,12 @@ export async function registerInOutRoutes(app, { prisma }) {
           notes: body.notes
         }
       });
+      notifyInOutCaptureLink({
+        lease: { ...result.lease, property: result.property },
+        phase: 'IN',
+        captureToken: result.visit.captureToken,
+        log: req.log
+      }).catch((err) => req.log.warn({ err: err?.message }, 'inout-capture-email-unhandled'));
       return reply.send({
         ok: true,
         lease: result.lease,
@@ -237,6 +254,16 @@ export async function registerInOutRoutes(app, { prisma }) {
       userId: req.ioSession.userId
     });
     if (!result.ok) return reply.code(400).send(result);
+    const leaseForMail = await prisma.ioLease.findFirst({
+      where: { id: String(req.params.leaseId), tenantId: req.ioSession.tenantId },
+      include: { property: true }
+    });
+    notifyInOutCaptureLink({
+      lease: leaseForMail,
+      phase: 'OUT',
+      captureToken: result.visit.captureToken,
+      log: req.log
+    }).catch((err) => req.log.warn({ err: err?.message }, 'inout-capture-email-unhandled'));
     return reply.send({
       ok: true,
       visit: result.visit,
@@ -660,6 +687,18 @@ export async function registerInOutRoutes(app, { prisma }) {
   });
 
   // Usuarios (admin)
+  app.get('/api/inout/users', { preHandler: auth }, async (req, reply) => {
+    if (req.ioSession.user.role !== 'ADMIN') {
+      return reply.code(403).send({ ok: false, error: 'FORBIDDEN' });
+    }
+    const users = await prisma.ioUser.findMany({
+      where: { tenantId: req.ioSession.tenantId },
+      select: { id: true, email: true, fullName: true, role: true, status: true, createdAt: true },
+      orderBy: { createdAt: 'asc' }
+    });
+    return reply.send({ ok: true, users });
+  });
+
   app.post('/api/inout/users', { preHandler: auth }, async (req, reply) => {
     if (req.ioSession.user.role !== 'ADMIN') {
       return reply.code(403).send({ ok: false, error: 'FORBIDDEN' });
@@ -669,7 +708,55 @@ export async function registerInOutRoutes(app, { prisma }) {
     const password = String(req.body?.password || '');
     const role = normalizeIoRole(req.body?.role) || 'INSPECTOR';
     if (!email || !fullName || password.length < 8) {
-      return reply.code(400).send({ ok: false, error: 'INVALID_FIELDS' });
+      return reply.code(400).send({
+        ok: false,
+        error: 'INVALID_FIELDS',
+        message: 'Nombre, email y clave de al menos 8 caracteres.'
+      });
+    }
+    const existing = await prisma.ioUser.findUnique({
+      where: { email },
+      select: { id: true, tenantId: true }
+    });
+    if (existing) {
+      const sameTenant = existing.tenantId === req.ioSession.tenantId;
+      if (sameTenant) {
+        return reply.code(409).send({
+          ok: false,
+          error: 'ALREADY_ON_TEAM',
+          message: 'Ese correo ya está en este equipo.'
+        });
+      }
+      const orgId = await findOrgIdForIoTenant(prisma, req.ioSession.tenantId);
+      const belongs = orgId && (await emailBelongsToOrganization(prisma, email, orgId));
+      if (belongs) {
+        const user = await prisma.ioUser.update({
+          where: { id: existing.id },
+          data: {
+            tenantId: req.ioSession.tenantId,
+            fullName,
+            role,
+            status: 'ACTIVE',
+            passwordHash: hashPassword(password)
+          }
+        });
+        await upsertInOutLegacyLink(prisma, {
+          email,
+          organizationId: orgId,
+          ioTenantId: req.ioSession.tenantId,
+          ioUserId: user.id
+        });
+        return reply.send({
+          ok: true,
+          moved: true,
+          user: { id: user.id, email: user.email, fullName: user.fullName, role: user.role }
+        });
+      }
+      return reply.code(409).send({
+        ok: false,
+        error: 'EMAIL_IN_OTHER_TENANT',
+        message: 'Ese correo ya tiene cuenta InOut en otro workspace. El email es único y no se puede repetir.'
+      });
     }
     try {
       const user = await prisma.ioUser.create({
@@ -681,12 +768,24 @@ export async function registerInOutRoutes(app, { prisma }) {
           passwordHash: hashPassword(password)
         }
       });
+      const orgId = await findOrgIdForIoTenant(prisma, req.ioSession.tenantId);
+      await upsertInOutLegacyLink(prisma, {
+        email,
+        organizationId: orgId,
+        ioTenantId: req.ioSession.tenantId,
+        ioUserId: user.id
+      });
       return reply.send({
         ok: true,
         user: { id: user.id, email: user.email, fullName: user.fullName, role: user.role }
       });
     } catch (err) {
-      return reply.code(409).send({ ok: false, error: 'EMAIL_EXISTS', message: err?.message });
+      req.log.warn({ err: err?.message }, 'inout-user-create');
+      return reply.code(409).send({
+        ok: false,
+        error: 'EMAIL_EXISTS',
+        message: 'Ese correo ya está registrado.'
+      });
     }
   });
 
@@ -709,45 +808,44 @@ export async function registerInOutRoutes(app, { prisma }) {
       }
     });
     if (!lease) return reply.code(404).send({ ok: false, error: 'NOT_FOUND' });
+    return reply.send({ ok: true, ...assembleLeaseReport(lease) });
+  });
 
-    const inVisit = lease.visits.find((v) => v.phase === 'IN');
-    const outVisit = lease.visits.find((v) => v.phase === 'OUT');
-    const diffs = outVisit?.diffResults || [];
-    const summary = buildDiffSummary(diffs);
-
-    const items = (outVisit?.slots || []).map((outSlot) => {
-      const inSlot = inVisit?.slots?.find((s) => s.slotCode === outSlot.slotCode);
-      const diff = diffs.find((d) => d.slotCode === outSlot.slotCode);
-      const inPhoto = inSlot?.photos?.[0];
-      const outPhoto = outSlot.photos?.[0];
-      return {
-        slotCode: outSlot.slotCode,
-        title: outSlot.title,
-        classification: diff?.classification || null,
-        severity: diff?.severity || null,
-        confidence: diff?.confidence ?? null,
-        description: diff?.description || null,
-        reviewStatus: diff?.reviewStatus || null,
-        diffId: diff?.id || null,
-        inPhotoUrl: inPhoto ? `/api/inout/photos/${inPhoto.id}/image` : null,
-        outPhotoUrl: outPhoto ? `/api/inout/photos/${outPhoto.id}/image` : null
-      };
+  app.get('/api/inout/leases/:leaseId/report.pdf', { preHandler: auth }, async (req, reply) => {
+    const lease = await prisma.ioLease.findFirst({
+      where: { id: String(req.params.leaseId), tenantId: req.ioSession.tenantId },
+      include: {
+        property: true,
+        visits: {
+          include: {
+            slots: {
+              orderBy: { sortOrder: 'asc' },
+              include: { photos: { orderBy: { capturedAt: 'desc' }, take: 1 } }
+            },
+            diffResults: true
+          }
+        },
+        reports: { where: { kind: 'DIFF' }, orderBy: { version: 'desc' }, take: 1 }
+      }
     });
-
-    return reply.send({
-      ok: true,
-      lease: {
-        id: lease.id,
-        cycleStatus: lease.cycleStatus,
-        tenantName: lease.tenantName,
-        ownerName: lease.ownerName,
-        property: lease.property
-      },
-      summary,
-      items,
-      report: lease.reports[0] || null,
-      disclaimer: DISCLAIMER
+    if (!lease) return reply.code(404).send({ ok: false, error: 'NOT_FOUND' });
+    const view = assembleLeaseReport(lease);
+    const pdf = await generateInOutReportPdf({
+      address: view.lease.property?.address,
+      tenantName: view.lease.tenantName,
+      ownerName: view.lease.ownerName,
+      generatedAt: new Date(),
+      summary: view.summary,
+      disclaimer: view.disclaimer,
+      items: view.items
     });
+    const slug = String(view.lease.property?.address || 'inout')
+      .replace(/[^\w\-]+/g, '_')
+      .slice(0, 40);
+    return reply
+      .header('Content-Type', 'application/pdf')
+      .header('Content-Disposition', `attachment; filename="Informe-InOut-${slug}.pdf"`)
+      .send(pdf);
   });
 }
 

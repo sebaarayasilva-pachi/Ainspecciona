@@ -62,4 +62,44 @@ export async function saveDiffReport(prisma, { leaseId, diffs, leaseMeta }) {
   return report;
 }
 
+export function assembleLeaseReport(lease) {
+  const inVisit = (lease.visits || []).find((v) => v.phase === 'IN');
+  const outVisit = (lease.visits || []).find((v) => v.phase === 'OUT');
+  const diffs = outVisit?.diffResults || [];
+  const summary = buildDiffSummary(diffs);
+  const items = (outVisit?.slots || []).map((outSlot) => {
+    const inSlot = inVisit?.slots?.find((s) => s.slotCode === outSlot.slotCode);
+    const diff = diffs.find((d) => d.slotCode === outSlot.slotCode);
+    const inPhoto = inSlot?.photos?.[0];
+    const outPhoto = outSlot.photos?.[0];
+    return {
+      slotCode: outSlot.slotCode,
+      title: outSlot.title,
+      classification: diff?.classification || null,
+      severity: diff?.severity || null,
+      confidence: diff?.confidence ?? null,
+      description: diff?.description || null,
+      reviewStatus: diff?.reviewStatus || null,
+      diffId: diff?.id || null,
+      inPhotoUrl: inPhoto ? `/api/inout/photos/${inPhoto.id}/image` : null,
+      outPhotoUrl: outPhoto ? `/api/inout/photos/${outPhoto.id}/image` : null
+    };
+  });
+  return {
+    lease: {
+      id: lease.id,
+      cycleStatus: lease.cycleStatus,
+      tenantName: lease.tenantName,
+      ownerName: lease.ownerName,
+      tenantEmail: lease.tenantEmail,
+      ownerEmail: lease.ownerEmail,
+      property: lease.property
+    },
+    summary,
+    items,
+    report: (lease.reports && lease.reports[0]) || null,
+    disclaimer: DISCLAIMER
+  };
+}
+
 export { DISCLAIMER };

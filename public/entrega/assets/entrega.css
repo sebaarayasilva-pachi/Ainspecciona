@@ -68,6 +68,8 @@ button { font-family: inherit; cursor: pointer; }
 
 /* ---------- Layout ---------- */
 .app { display: grid; grid-template-columns: 232px 1fr; min-height: 100vh; }
+html.ainspecta-embed .sidebar { display: none !important; }
+html.ainspecta-embed .app { grid-template-columns: 1fr; }
 
 .sidebar {
   background: var(--surface);

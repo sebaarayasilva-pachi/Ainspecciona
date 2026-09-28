@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Ainspecciona · Informe Expo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #05050A;
+      --text: #F8FAFC;
+      --muted: #94A3B8;
+      --accent: #00E5FF;
+      --success: #10B981;
+      --danger: #EF4444;
+      --border: rgba(255,255,255,0.1);
+      --card: rgba(255,255,255,0.03);
+      --font: 'Inter', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg); color: var(--text); font-family: var(--font);
+      line-height: 1.5; min-height: 100vh;
+    }
+    header { padding: 20px; display: flex; justify-content: center; gap: 24px; align-items: center; border-bottom: 1px solid var(--border); }
+    .logo-ainspecciona { height: 56px; }
+    .logo-expo { height: 56px; border-radius: 4px; }
+    main { max-width: 600px; margin: 0 auto; padding: 32px 20px; }
+    h1 { font-size: 24px; margin-bottom: 8px; }
+    .meta { color: var(--muted); font-size: 14px; margin-bottom: 32px; }
+    
+    .finding-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden; margin-bottom: 24px;
+    }
+    .finding-img { width: 100%; aspect-ratio: 4/3; object-fit: cover; background: #111; }
+    .finding-content { padding: 20px; }
+    .finding-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+    .finding-title { font-weight: 600; font-size: 18px; }
+    .finding-cat { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    .badge { font-size: 12px; font-weight: 700; padding: 4px 8px; border-radius: 4px; }
+    .badge.high { background: rgba(239,68,68,0.2); color: #FCA5A5; }
+    .badge.medium { background: rgba(245,158,11,0.2); color: #FCD34D; }
+    
+    .label { color: var(--accent); font-size: 13px; font-weight: 600; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .value { font-size: 15px; margin-bottom: 16px; color: #E2E8F0; }
+    
+    .cta-box {
+      margin-top: 48px; padding: 32px 24px; text-align: center;
+      background: linear-gradient(180deg, rgba(0,229,255,0.05) 0%, transparent 100%);
+      border: 1px solid rgba(0,229,255,0.2); border-radius: 16px;
+    }
+    .cta-box h2 { font-size: 20px; margin-bottom: 12px; }
+    .cta-box p { color: var(--muted); margin-bottom: 24px; }
+    button {
+      width: 100%; background: var(--accent); color: #001626; border: none;
+      padding: 16px; border-radius: 8px; font-size: 16px; font-weight: 700;
+      cursor: pointer; margin-bottom: 16px;
+    }
+    button.secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent); margin-bottom: 0; }
+    
+    #loading { text-align: center; padding: 40px; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="/assets/Logo%20Ainspecciona.png" alt="Ainspecciona" class="logo-ainspecciona" />
+    <img src="/assets/expo-real-estate-logo.png" alt="Expo Real Estate" class="logo-expo" />
+  </header>
+  
+  <main>
+    <div id="loading">Cargando informe...</div>
+    <div id="content" style="display: none;">
+      <h1 id="rName">Informe de Inspección</h1>
+      <div class="meta" id="rMeta">Expo Real Estate 2026</div>
+      
+      <div id="findingsList"></div>
+      
+      <div class="cta-box">
+        <h2>¿Quieres probar Ainspecciona en una propiedad real?</h2>
+        <p>Descubre cómo automatizar tus inspecciones, recepciones y postventa con IA.</p>
+        <button onclick="recordInterest('demo')">Solicitar una demostración</button>
+        <button class="secondary" onclick="recordInterest('web')">Conocer Ainspecciona</button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('t');
+    
+    if (!token) {
+      document.getElementById('loading').textContent = 'Enlace inválido.';
+    } else {
+      loadReport();
+    }
+
+    async function loadReport() {
+      try {
+        const res = await fetch(`/api/expo/reports/${token}`);
+        const data = await res.json();
+        
+        if (!res.ok) throw new Error(data.error || 'Error al cargar');
+        
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('content').style.display = 'block';
+        
+        document.getElementById('rName').textContent = `Informe de ${data.lead.firstName} ${data.lead.lastName}`;
+        document.getElementById('rMeta').textContent = `${data.campaign.eventName} • ${data.lead.company || 'Participante'}`;
+        
+        const list = document.getElementById('findingsList');
+        data.completions.forEach(c => {
+          const isHigh = c.mission.severity === 'HIGH';
+          list.innerHTML += `
+            <div class="finding-card">
+              <img src="${c.photoUrl}" class="finding-img" alt="Evidencia" onerror="this.style.display='none'" />
+              <div class="finding-content">
+                <div class="finding-header">
+                  <div>
+                    <div class="finding-title">${c.mission.title}</div>
+                    <div class="finding-cat">${c.mission.category}</div>
+                  </div>
+                  <div class="badge ${isHigh ? 'high' : 'medium'}">${isHigh ? 'ALTA' : 'MEDIA'}</div>
+                </div>
+                <div class="label">Hallazgo</div>
+                <div class="value">${c.mission.finding}</div>
+                <div class="label">Posible Causa</div>
+                <div class="value">${c.mission.probableCause}</div>
+                <div class="label">Recomendación</div>
+                <div class="value" style="margin-bottom:0">${c.mission.recommendation}</div>
+              </div>
+            </div>
+          `;
+        });
+      } catch (e) {
+        document.getElementById('loading').textContent = e.message;
+      }
+    }
+
+    async function recordInterest(type) {
+      try {
+        const sessionToken = localStorage.getItem('expo_session_token');
+        if (sessionToken) {
+          await fetch(`/api/expo/sessions/${sessionToken}/interest`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type })
+          });
+        }
+      } catch(e) {}
+      
+      if (type === 'demo') {
+        window.location.href = 'https://ainspecciona.com/contacto'; // O el link de agenda de HubSpot
+      } else {
+        window.location.href = 'https://ainspecciona.com';
+      }
+    }
+  </script>
+</body>
+</html>

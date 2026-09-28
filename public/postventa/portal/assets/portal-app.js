@@ -1,4 +1,13 @@
 (function () {
+  function isEmbedMode() {
+    try {
+      return new URLSearchParams(location.search).get("embed") === "1";
+    } catch {
+      return false;
+    }
+  }
+  if (isEmbedMode()) document.documentElement.classList.add("ainspecta-embed");
+
   const TOKEN_KEY = "postventa_session";
   const STALE_KEY = "pv_portal_data_stale";
   const STATUS_OVERRIDES_KEY = "pv_portal_status_overrides";
@@ -265,6 +274,7 @@
       } else if (pathname.startsWith("/")) {
         pathname = PV_BASE + pathname;
       }
+      if (isEmbedMode()) u.searchParams.set("embed", "1");
       return pathname + u.search + u.hash;
     } catch {
       return raw;
@@ -415,9 +425,11 @@
           ? appHref("/postventa/portal/proyecto?slug=" + encodeURIComponent(project.slug))
           : appHref("/postventa/portal"),
         label: "Proyecto"
-      },
-      { key: "config", href: appHref("/postventa/portal/configuracion"), label: "Configuración" }
+      }
     ];
+    if (!isEmbedMode()) {
+      nav.push({ key: "config", href: appHref("/postventa/portal/configuracion"), label: "Configuración" });
+    }
     const navHtml = nav
       .map(
         (n) =>

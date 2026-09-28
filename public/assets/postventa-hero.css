@@ -1,0 +1,339 @@
+/* Hero Postventa — captura Figma desktop */
+
+.product-page.platform-page {
+  --home-bg: #000510;
+}
+
+.product-page .platform-canvas::before {
+  background-color: #000510;
+  background-image: none;
+}
+
+.product-page.platform-page .site-header-v2 .brand {
+  gap: 0;
+}
+
+.product-page.platform-page .site-header-v2 .brand::after {
+  content: "POSTVENTA";
+  margin-left: 14px;
+  padding-left: 14px;
+  border-left: 1px solid rgba(234, 240, 255, 0.28);
+  color: #7ec8ff;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.product-page.platform-page .site-header-v2 .navDemoCta {
+  min-height: 42px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid #2aa8ff;
+  background: transparent;
+  color: #fff;
+  box-shadow: none;
+}
+
+.product-page.platform-page .site-header-v2 .navDemoCta:hover {
+  background: rgba(42, 168, 255, 0.12);
+  filter: none;
+}
+
+.pv-hero {
+  --pv-cyan: #00d1ff;
+  --pv-blue: #1aa3ff;
+  --pv-violet: #8c70ff;
+  --pv-magenta: #d948f1;
+  --pv-line: rgba(41, 80, 130, 0.7);
+  --pv-card: rgba(6, 16, 32, 0.92);
+  position: relative;
+  isolation: isolate;
+  min-height: calc(100vh - var(--header-h, 72px));
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px 0 28px;
+  box-sizing: border-box;
+  background:
+    radial-gradient(circle at 72% 42%, rgba(10, 70, 180, 0.22), transparent 28%),
+    linear-gradient(180deg, #000510 0%, #03101f 58%, #020814 100%);
+  overflow: hidden;
+}
+
+.pv-hero__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.pv-hero__glow {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle 320px at 70% 44%, rgba(7, 94, 255, 0.2), transparent 68%),
+    radial-gradient(circle 240px at 84% 58%, rgba(130, 60, 245, 0.16), transparent 70%);
+}
+
+.pv-hero__net {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 220px;
+}
+
+.pv-hero__wrap {
+  width: min(1440px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 8px 24px 0;
+  display: grid;
+  grid-template-columns: minmax(260px, 420px) minmax(0, 1fr);
+  gap: 12px 8px;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+  flex: 1;
+}
+
+.pv-hero__eyebrow {
+  margin: 0 0 18px;
+  color: var(--pv-cyan);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.pv-hero__title {
+  margin: 0;
+  max-width: 520px;
+  font-size: clamp(40px, 4.4vw, 58px);
+  font-weight: 700;
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+  color: #f8fbff;
+}
+
+.pv-hero__grad {
+  display: block;
+  background: linear-gradient(90deg, #1687ff 0%, #6a5dff 52%, #d340f1 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.pv-hero__sub {
+  margin: 22px 0 0;
+  max-width: 520px;
+  color: #c5d2e0;
+  font-size: 17px;
+  line-height: 1.55;
+}
+
+.pv-hero__ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 36px;
+}
+
+.pv-hero__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 54px;
+  padding: 0 22px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
+.pv-hero__cta--primary {
+  color: #fff;
+  background: linear-gradient(90deg, #0b8dff 0%, #6d4cff 62%, #cb39eb 100%);
+  box-shadow: 0 8px 28px rgba(80, 90, 255, 0.28);
+}
+
+.pv-hero__cta--primary:hover {
+  filter: brightness(1.06);
+}
+
+.pv-hero__cta--ghost {
+  color: #f4f8fc;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  background: rgba(4, 10, 20, 0.25);
+}
+
+.pv-hero__cta--ghost:hover {
+  border-color: #fff;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.pv-hero__cta svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.pv-hero__play {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  display: grid;
+  place-items: center;
+}
+
+.pv-hero__play svg {
+  width: 10px;
+  height: 10px;
+  margin-left: 1px;
+}
+
+.pv-flow {
+  position: relative;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pv-flow__img {
+  display: block;
+  width: 100%;
+  max-width: 920px;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 40px rgba(20, 120, 255, 0.18));
+}
+
+.pv-benefits {
+  width: min(1360px, calc(100% - 64px));
+  margin: 8px auto 0;
+  position: relative;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  min-height: 112px;
+  padding: 22px 10px;
+  border: 1px solid rgba(50, 90, 140, 0.45);
+  border-radius: 24px;
+  background: rgba(5, 14, 28, 0.78);
+  backdrop-filter: blur(10px);
+  box-sizing: border-box;
+}
+
+.pv-benefit {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  gap: 10px;
+  align-items: center;
+  padding: 0 12px;
+  border-right: 1px solid rgba(37, 54, 77, 0.9);
+}
+
+.pv-benefit:last-child {
+  border-right: none;
+}
+
+.pv-benefit__ico {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid #21c7ff;
+  background: #071a2e;
+  display: grid;
+  place-items: center;
+  color: #21c7ff;
+}
+
+.pv-benefit:nth-child(n + 3) .pv-benefit__ico {
+  color: #8b7bff;
+  border-color: #755eff;
+}
+
+.pv-benefit__ico svg {
+  width: 18px;
+  height: 18px;
+}
+
+.pv-benefit strong {
+  display: block;
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.pv-benefit span {
+  display: block;
+  margin-top: 5px;
+  color: #9eacc0;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+@media (max-width: 1100px) {
+  .product-page.platform-page .site-header-v2 .brand::after {
+    font-size: 12px;
+  }
+
+  .pv-hero {
+    min-height: 0;
+  }
+
+  .pv-hero__wrap {
+    grid-template-columns: 1fr;
+    width: min(720px, calc(100% - 40px));
+    padding: 0;
+  }
+
+  .pv-flow {
+    margin-top: 8px;
+  }
+
+  .pv-flow__img {
+    max-width: 100%;
+  }
+
+  .pv-benefits {
+    width: min(720px, calc(100% - 40px));
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding: 8px 4px;
+  }
+
+  .pv-benefit {
+    border-right: none;
+    border-bottom: 1px solid rgba(93, 117, 155, 0.2);
+    padding: 16px;
+  }
+
+  .pv-benefit:last-child {
+    border-bottom: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .product-page.platform-page .site-header-v2 .brand::after {
+    display: none;
+  }
+
+  .pv-hero {
+    min-height: 0;
+    padding-bottom: 28px;
+  }
+
+  .pv-hero__wrap,
+  .pv-benefits {
+    width: calc(100% - 28px);
+  }
+
+  .pv-hero__cta {
+    width: 100%;
+  }
+}

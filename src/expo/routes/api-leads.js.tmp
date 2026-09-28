@@ -1,0 +1,33 @@
+  // 9. Admin: Listar Leads (JSON)
+  app.get('/api/admin/expo/leads', async (request, reply) => {
+    const campaignSlug = 'expo-real-estate-2026';
+    
+    const leads = await prisma.expoLead.findMany({
+      where: { campaign: { slug: campaignSlug } },
+      include: {
+        sessions: {
+          include: { completions: true }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    const data = leads.map(lead => {
+      const session = lead.sessions[0];
+      return {
+        id: lead.id,
+        createdAt: lead.createdAt,
+        firstName: lead.firstName,
+        lastName: lead.lastName,
+        email: lead.emailNormalized,
+        company: lead.company,
+        roleType: lead.roleType,
+        progress: session ? session.completions.length : 0,
+        status: session?.status || 'PENDING',
+        marketingConsent: !!lead.marketingConsentAt
+      };
+    });
+
+    return { ok: true, leads: data };
+  });
+}

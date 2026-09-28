@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import sqlite3
 import subprocess
 import sys
@@ -21,7 +22,7 @@ from ply_to_glb import ply_to_glb_bytes
 
 WORK = Path(os.environ.get("WORK_DIR", "/tmp/scan-recon"))
 COLMAP = os.environ.get("COLMAP_BIN", "colmap")
-MAX_FRAMES = int(os.environ.get("MAX_FRAMES", "160"))
+MAX_FRAMES = int(os.environ.get("MAX_FRAMES", "320")) # Aumentamos de 160 a 320 para tener más solapamiento
 # Progreso que reporta la web cuando COLMAP termina. El tramo que queda hasta 100 es el
 # mallado de OpenMVS, que es quien publica el READY.
 COLMAP_DONE_PROGRESS = 60
@@ -160,27 +161,57 @@ def zip_file(zf: zipfile.ZipFile, rel):
     return None
 
 
+class CmdFailed(RuntimeError):
+    def __init__(self, message, output=""):
+        super().__init__(message)
+        self.output = output or ""
+
+
 def run(cmd, timeout=2400):
     log("+ " + " ".join(cmd))
     p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, timeout=timeout)
     if p.stdout:
         log(p.stdout[-8000:])
     if p.returncode != 0:
-        raise RuntimeError(f"CMD_FAILED {' '.join(cmd[:4])} exit={p.returncode}")
+        raise CmdFailed(f"CMD_FAILED {' '.join(cmd[:4])} exit={p.returncode}", p.stdout)
     return p
 
 
+UNRECOGNISED_OPTION = re.compile(r"unrecognised option '(--[\w.]+)'")
+
+
+def drop_flag(flags, name):
+    out = []
+    i = 0
+    while i < len(flags):
+        if flags[i] == name:
+            # Nos saltamos tambien el valor, si es que el flag lleva uno.
+            i += 2 if i + 1 < len(flags) and not flags[i + 1].startswith("--") else 1
+            continue
+        out.append(flags[i])
+        i += 1
+    return out
+
+
 def run_colmap(args, extra_flags=None, timeout=2400):
-    cmd = [COLMAP, *args]
-    if extra_flags:
-        cmd.extend(extra_flags)
-    try:
-        return run(cmd, timeout=timeout)
-    except RuntimeError:
-        if extra_flags:
+    flags = list(extra_flags or [])
+    while True:
+        try:
+            return run([COLMAP, *args, *flags], timeout=timeout)
+        except CmdFailed as exc:
+            if not flags:
+                raise
+            # Cada version de COLMAP renombra opciones. Descartamos solo la que rechazo:
+            # antes se caian todas juntas y un flag muerto nos dejaba, por ejemplo, el
+            # matcher con el overlap por defecto sin que nadie se enterara.
+            rejected = [name for name in UNRECOGNISED_OPTION.findall(exc.output) if name in flags]
+            if rejected:
+                for name in rejected:
+                    log(f"COLMAP no acepta {name}; sigo sin el")
+                    flags = drop_flag(flags, name)
+                continue
             log("retry without extra flags")
-            return run([COLMAP, *args], timeout=timeout)
-        raise
+            flags = []
 
 
 def write_known_model(db_path: Path, out_dir: Path, poses_by_name, camera):
@@ -296,6 +327,21 @@ def count_points3d(sparse: Path):
     return 0
 
 
+def is_blurry(image: Image.Image, threshold: float = 100.0) -> bool:
+    """Detecta si una imagen está borrosa usando la varianza del Laplaciano.
+    Evita procesar imágenes movidas (motion blur) que arruinan la fotogrametría."""
+    import cv2
+    import numpy as np
+    
+    # Convertir PIL Image a OpenCV (escala de grises)
+    cv_img = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2GRAY)
+    
+    # Calcular la varianza del Laplaciano (medida de nitidez/bordes)
+    variance = cv2.Laplacian(cv_img, cv2.CV_64F).var()
+    
+    # Si la varianza es menor al umbral, la imagen no tiene bordes definidos (está borrosa)
+    return variance < threshold
+
 def main():
     bucket = env("GCS_BUCKET")
     org_id = env("ORG_ID")
@@ -335,18 +381,39 @@ def main():
             if not man_name:
                 raise RuntimeError("NO_MANIFEST")
             manifest = json.loads(zf.read(man_name))
-            raw_frames = list(manifest.get("frames") or [])[:MAX_FRAMES]
+            raw_frames = list(manifest.get("frames") or [])
+            
+            # Si hay muchos frames, tomamos una muestra uniforme pero con un límite alto
+            # para no saturar la memoria (ej. 600 frames máximo)
+            if len(raw_frames) > 600:
+                step = len(raw_frames) / 600
+                raw_frames = [raw_frames[int(i * step)] for i in range(600)]
+                
             if not raw_frames:
                 raise RuntimeError("NO_FRAMES")
             poses_by_name = {}
             camera = None
+            
+            log(f"Analizando {len(raw_frames)} frames extraídos del video...")
+            blurry_count = 0
+            
             for f in raw_frames:
                 rel = zip_file(zf, f.get("image") or f.get("imagePath") or "")
                 if not rel:
                     continue
+                
+                data = zf.read(rel)
+                im = Image.open(BytesIO(data)).convert("RGB")
+                
+                # Filtro de fotos borrosas (Motion Blur)
+                # Umbral de 80.0 es un buen balance para interiores
+                if is_blurry(im, threshold=80.0):
+                    blurry_count += 1
+                    continue # Descartamos la foto borrosa
+                    
                 idx = int(f.get("index") or (len(poses_by_name) + 1))
                 name = f"{idx:06d}.jpg"
-                data = zf.read(rel)
+                
                 (images_dir / name).write_bytes(data)
                 pose = f.get("pose") or {}
                 poses_by_name[name] = pose
@@ -386,8 +453,9 @@ def main():
                     }
                 )
 
+        log(f"Filtro Blur: {blurry_count} fotos descartadas por estar borrosas.")
         if not poses_by_name or not camera:
-            raise RuntimeError("NO_IMAGES")
+            raise RuntimeError("NO_IMAGES (Todas borrosas o corruptas)")
 
         db = WORK / "database.db"
         if db.exists():
@@ -408,19 +476,15 @@ def main():
                 "--ImageReader.camera_params",
                 params,
             ],
-            extra_flags=["--SiftExtraction.use_gpu", "0", "--SiftExtraction.first_octave", "0"],
         )
 
         status(50, "match")
-        # Recorrido continuo: sequential escala mejor que exhaustive (160 fotos).
+        # Usamos exhaustive_matcher para asegurar la mayor cantidad de matches posibles
+        # ya que el set de datos tiene menos de 100 fotos.
         run_colmap(
-            ["sequential_matcher", "--database_path", str(db)],
+            ["exhaustive_matcher", "--database_path", str(db)],
             extra_flags=[
-                "--SiftMatching.use_gpu",
-                "0",
-                "--SequentialMatching.overlap",
-                "16",
-                "--SequentialMatching.quadratic_overlap",
+                "--SiftMatching.guided_matching",
                 "1",
             ],
         )
@@ -432,6 +496,7 @@ def main():
         status(65, "triangulate", images=n_img)
         
         # Try point_triangulator first (using ARCore poses)
+        colmap_mode = "arcore_poses"
         try:
             run_colmap(
                 [
@@ -446,6 +511,14 @@ def main():
                     str(sparse),
                     "--Mapper.tri_ignore_two_view_tracks",
                     "0",
+                    "--Mapper.filter_max_reproj_error",
+                    "32.0",
+                    "--Mapper.tri_merge_max_reproj_error",
+                    "32.0",
+                    "--Mapper.tri_complete_max_reproj_error",
+                    "32.0",
+                    "--Mapper.tri_min_angle",
+                    "1.0",
                 ]
             )
             
@@ -455,6 +528,7 @@ def main():
                 raise RuntimeError("Triangulation failed to register any images")
                 
         except Exception as e:
+            colmap_mode = "sfm_fallback"
             log(f"Triangulation with ARCore poses failed or registered 0 images: {e}")
             log("Falling back to full mapper (ignoring ARCore poses)...")
             
@@ -467,7 +541,13 @@ def main():
                     "--image_path",
                     str(images_dir),
                     "--output_path",
-                    str(sparse)
+                    str(sparse),
+                    "--Mapper.filter_max_reproj_error",
+                    "8.0",
+                    "--Mapper.filter_min_tri_angle",
+                    "1.0",
+                    "--Mapper.min_num_matches",
+                    "10",
                 ]
             )
             
@@ -483,7 +563,7 @@ def main():
                     f.rename(sparse / f.name)
 
         ply = WORK / "cloud.ply"
-        status(80, "export")
+        status(80, "export", extra={"colmap_mode": colmap_mode})
         run_colmap(
             [
                 "model_converter",
@@ -600,6 +680,7 @@ def main():
             "frames": frames_meta,
             "alignment": {"up": {"x": 0, "y": 1, "z": 0}},
             "diagnostic": diagnostic,
+            "colmap_mode": colmap_mode,
         }
         gcs.upload_json(result_key, result)
         gcs.upload_json(status_key, {
@@ -607,6 +688,7 @@ def main():
             "progress": COLMAP_DONE_PROGRESS,
             "step": "colmap_done",
             "pointCount": point_count,
+            "colmap_mode": colmap_mode,
         })
         log(f"COLMAP OK points={point_count} kind={meta['kind']}; falta el mallado")
     except Exception as exc:

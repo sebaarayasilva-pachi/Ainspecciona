@@ -1,0 +1,135 @@
+.fc-evidence {
+  --fc-cyan: #7dd3fc;
+  background: #05070b;
+  padding: clamp(80px, 10vw, 128px) 0;
+}
+
+.fc-evidence__inner {
+  width: 100%;
+  padding: 0 clamp(20px, 3.5vw, 56px);
+  box-sizing: border-box;
+}
+
+.fc-evidence__eyebrow {
+  color: rgba(125, 211, 252, 0.88);
+}
+
+.fc-evidence__eyebrow::before {
+  background: var(--fc-cyan);
+}
+
+.fc-evidence__title {
+  margin: 16px 0 0;
+  font-size: clamp(36px, 4.6vw, 60px);
+  font-weight: 600;
+  letter-spacing: -0.042em;
+  color: #f7f4ee;
+}
+
+.fc-evidence__row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-top: 44px;
+}
+
+@media (min-width: 960px) {
+  .fc-evidence__row {
+    grid-template-columns: 1.45fr 1fr 1fr;
+    grid-template-rows: minmax(520px, 62vh);
+    align-items: stretch;
+  }
+}
+
+.fc-find {
+  min-width: 0;
+  height: 100%;
+}
+
+.fc-find__photo {
+  position: relative;
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 20px;
+  aspect-ratio: 4 / 5;
+  background: #10141a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 26px 56px rgba(0, 0, 0, 0.4);
+}
+
+@media (min-width: 960px) {
+  .fc-find__photo {
+    aspect-ratio: auto;
+  }
+}
+
+.fc-find__photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.75s ease;
+}
+
+.fc-find__photo:hover img {
+  transform: scale(1.06);
+}
+
+.fc-find__photo--ui img {
+  object-position: 18% 80%;
+}
+
+.fc-find__photo figcaption {
+  position: absolute;
+  inset: auto 0 0;
+  padding: 36px 22px 22px;
+  background: linear-gradient(180deg, transparent, rgba(4, 7, 10, 0.94) 58%);
+}
+
+.fc-find__room {
+  margin: 0;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(125, 211, 252, 0.9);
+}
+
+.fc-find__desc {
+  margin: 8px 0 0;
+  font-size: 17px;
+  line-height: 1.35;
+  letter-spacing: -0.022em;
+  color: #f7f4ee;
+}
+
+.fc-find__badge {
+  display: inline-flex;
+  margin-top: 14px;
+  min-height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(125, 211, 252, 0.4);
+  background: rgba(8, 12, 18, 0.55);
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #7dd3fc;
+}
+
+.fc-find__badge--low {
+  border-color: rgba(255, 255, 255, 0.18);
+  color: rgba(243, 241, 236, 0.75);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fc-find__photo img {
+    transition: none;
+  }
+
+  .fc-find__photo:hover img {
+    transform: none;
+  }
+}

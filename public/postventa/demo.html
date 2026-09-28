@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Postventa · Demo en vivo</title>
+  <link rel="preconnect" href="https://api.elevenlabs.io" crossorigin />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* Geometría y tipografía del portal (portal/assets/portal.css) alineada a la nueva
+       referencia visual del orbe: cian para lo activo y verde para la voz. */
+    :root {
+      --bg: #000711;
+      --card: #021626;
+      --border: rgba(255, 255, 255, 0.11);
+      --text: #F4F4F5;
+      --muted: #8E93A8;
+      --accent: #00e5ff;
+      --accent-2: #4ade80;
+      --danger: #FB7185;
+      --radius: 4px;
+      --font-ui: "Rajdhani", "DM Sans", ui-sans-serif, system-ui, sans-serif;
+      --font-mono: "IBM Plex Mono", "JetBrains Mono", ui-monospace, Consolas, monospace;
+      --hud-glow: 0 0 18px rgba(0, 229, 255, 0.4);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { height: 100%; }
+
+    body {
+      margin: 0;
+      font-family: var(--font-ui);
+      font-size: 17px;
+      background:
+        radial-gradient(1100px 700px at 50% 42%, #021626 0%, rgba(0, 7, 17, 0) 70%),
+        var(--bg);
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    /* Rejilla tenue: le da profundidad al fondo sin distraer en el proyector. */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0, 229, 255, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 229, 255, 0.06) 1px, transparent 1px);
+      background-size: 64px 64px;
+      mask-image: radial-gradient(circle at 50% 45%, #000 20%, transparent 72%);
+      pointer-events: none;
+    }
+
+    .stage {
+      position: relative;
+      height: 100%;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      padding: 28px 40px 34px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 650;
+      letter-spacing: 0.2px;
+    }
+
+    .brand .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 16px var(--accent);
+    }
+
+    .brand small {
+      display: block;
+      font-family: var(--font-mono);
+      font-weight: 400;
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.4px;
+      color: var(--muted);
+      padding: 8px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: rgba(10, 10, 16, 0.8);
+      white-space: nowrap;
+    }
+
+    .status i {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--muted);
+      transition: background 0.25s, box-shadow 0.25s;
+    }
+
+    .status[data-kind="ok"] i { background: var(--accent-2); box-shadow: 0 0 10px var(--accent-2); }
+    .status[data-kind="busy"] i { background: var(--accent); box-shadow: 0 0 10px var(--accent); animation: pulse 1.1s infinite; }
+    .status[data-kind="error"] i { background: var(--danger); box-shadow: 0 0 10px var(--danger); }
+
+    @keyframes pulse { 50% { opacity: 0.25; } }
+
+    /* --- centro: orbe + pasos --- */
+
+    .middle {
+      display: grid;
+      grid-template-columns: 1fr minmax(300px, 25vw);
+      align-items: center;
+      gap: 40px;
+      min-height: 0;
+    }
+
+    .orbWrap {
+      position: relative;
+      height: 100%;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .orb-box {
+      width: min(52vh, 460px);
+      height: min(52vh, 460px);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+    }
+
+    /* Cuadrado y acotado: el orbe casi llena su caja, como el de JARVIS, y asi el halo con
+       shadowBlur no se vuelve caro en una pantalla grande. Ahora le damos 150% de tamaño
+       para que el glow hiper-reactivo no se corte en los bordes. */
+    #orb {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 150%;
+      height: 150%;
+      display: block;
+    }
+
+    #wave {
+      width: min(440px, 85%);
+      height: 58px;
+      flex: 0 0 auto;
+      margin-top: 4px;
+      display: block;
+    }
+
+    /* Misma etiqueta que el orbe: monoespaciada, muy espaciada, y del color del
+       estado (cian al escuchar, verde al responder). */
+    .hint {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      letter-spacing: 3.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      min-height: 20px;
+      text-align: center;
+      text-shadow: 0 0 14px rgba(0, 229, 255, 0.45);
+      transition: color 0.4s, text-shadow 0.4s;
+    }
+
+    .hint.speaking {
+      color: var(--accent-2);
+      text-shadow: 0 0 14px rgba(74, 222, 128, 0.45);
+    }
+
+    .hint.dim {
+      color: var(--muted);
+      letter-spacing: 1.6px;
+      text-transform: none;
+      text-shadow: none;
+    }
+
+    /* --- pasos --- */
+
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .step {
+      position: relative;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      background: rgba(10, 10, 16, 0.6);
+      opacity: 0.45;
+      transform: translateX(8px);
+      transition: opacity 0.4s, transform 0.4s, border-color 0.4s, box-shadow 0.4s;
+    }
+
+    /* Filo cian a la izquierda: el mismo recurso que marca lo activo en el portal. */
+    .step::before {
+      content: "";
+      position: absolute;
+      left: -1px;
+      top: 12%;
+      bottom: 12%;
+      width: 2px;
+      background: var(--accent);
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+
+    .step.done { opacity: 1; transform: none; border-color: rgba(0, 229, 255, 0.5); }
+    .step.done::before { opacity: 1; box-shadow: var(--hud-glow); }
+
+    .step .label {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .step .num {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 auto;
+      border-radius: 2px;
+      border: 1px solid var(--border);
+      display: grid;
+      place-items: center;
+      font-size: 10px;
+      letter-spacing: 0;
+    }
+
+    .step.done .num {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #001626;
+      font-weight: 700;
+    }
+
+    .step .value {
+      font-size: 17px;
+      line-height: 1.4;
+      color: var(--text);
+      min-height: 22px;
+    }
+
+    .step .value.empty { color: #52525B; }
+
+    .step.ticket.done { border-color: rgba(74, 222, 128, 0.5); }
+
+    .step.ticket.done::before {
+      background: var(--accent-2);
+      box-shadow: 0 0 18px rgba(74, 222, 128, 0.45);
+    }
+
+    .step.ticket.done .num {
+      background: var(--accent-2);
+      border-color: var(--accent-2);
+      color: #022610;
+      font-weight: 700;
+    }
+
+    .step.ticket.done .value {
+      color: var(--accent-2);
+      text-shadow: 0 0 16px rgba(74, 222, 128, 0.4);
+    }
+
+    .step.ticket .value {
+      font-family: var(--font-mono);
+      font-size: 25px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+    }
+
+    .step.ticket .sla {
+      margin-top: 5px;
+      font-size: 14px;
+      color: var(--muted);
+      letter-spacing: 0;
+      font-weight: 400;
+    }
+
+    /* --- controles --- */
+
+    footer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+    }
+
+    button {
+      font-family: var(--font-ui);
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: rgba(10, 10, 16, 0.85);
+      color: var(--text);
+      padding: 13px 26px;
+      transition: transform 0.15s, border-color 0.2s, background 0.2s, opacity 0.2s;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-1px);
+      border-color: rgba(0, 229, 255, 0.55);
+    }
+
+    button:disabled { opacity: 0.35; cursor: default; }
+
+    button.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #001626;
+      font-weight: 700;
+      padding: 14px 34px;
+      box-shadow: var(--hud-glow);
+    }
+
+    .kbd {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #52525B;
+      margin-left: 5px;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    @media (max-width: 1000px) {
+      .middle { grid-template-columns: 1fr; gap: 18px; }
+      .steps { flex-direction: row; overflow: auto; }
+      .step { min-width: 210px; }
+      .stage { padding: 18px 20px 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <header>
+      <div class="brand">
+        <img src="/assets/Logo%20Ainspecciona.png" alt="Ainspecciona" style="height: 32px;" />
+        <span style="border-left: 1px solid var(--border); padding-left: 12px; margin-left: 4px; display: flex; align-items: center; height: 32px;">
+          <small style="font-size: 12px; letter-spacing: 1.5px; margin-top: 2px;">POSTVENTA · ASISTENTE DE VOZ</small>
+        </span>
+      </div>
+      <div class="status" id="status" data-kind="info"><i></i><span id="statusText">Listo para comenzar</span></div>
+    </header>
+
+    <div class="middle">
+      <div class="orbWrap">
+        <div class="orb-box">
+          <canvas id="orb"></canvas>
+        </div>
+        <canvas id="wave"></canvas>
+        <div class="hint dim" id="hint">Presiona «Iniciar llamada» y habla con normalidad</div>
+      </div>
+
+      <div class="steps">
+        <div class="step" id="stepProblema">
+          <div class="label"><span class="num">1</span> Problema</div>
+          <div class="value empty" id="valProblema">A la espera…</div>
+        </div>
+        <div class="step" id="stepDireccion">
+          <div class="label"><span class="num">2</span> Dirección validada</div>
+          <div class="value empty" id="valDireccion">A la espera…</div>
+        </div>
+        <div class="step ticket" id="stepTicket">
+          <div class="label"><span class="num">3</span> Ticket asignado</div>
+          <div class="value empty" id="valTicket">A la espera…</div>
+          <div class="sla" id="valPlazo"></div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <button class="primary" id="btnStart">Iniciar llamada</button>
+      <button id="btnStop" disabled>Terminar</button>
+      <button id="btnReset">Reiniciar pantalla <span class="kbd">R</span></button>
+    </footer>
+  </div>
+
+  <script src="/assets/postventa-voice.js?v=14"></script>
+  <script src="/assets/demo-expo-orb.js?v=14"></script>
+  <script src="/assets/demo-expo-voice.js?v=14"></script>
+  <script>
+    (function () {
+      "use strict";
+
+      var el = function (id) { return document.getElementById(id); };
+
+      var orb = DemoExpoOrb.create({ orb: el("orb"), wave: el("wave") });
+      orb.setInput(function () { return DemoExpoVoice.levels(); });
+      orb.setMode("idle");
+      orb.start();
+
+      var btnStart = el("btnStart");
+      var btnStop = el("btnStop");
+
+      function setStatus(text, kind) {
+        el("statusText").textContent = text;
+        el("status").dataset.kind = kind || "info";
+      }
+
+      function fill(stepId, valueId, text) {
+        var value = el(valueId);
+        var filled = !!text;
+        value.textContent = filled ? text : "A la espera…";
+        value.classList.toggle("empty", !filled);
+        el(stepId).classList.toggle("done", filled);
+      }
+
+      function render(state) {
+        fill("stepProblema", "valProblema", state.problema);
+        fill("stepDireccion", "valDireccion", state.direccion);
+        fill("stepTicket", "valTicket", state.ticket);
+        el("valPlazo").textContent = state.plazo ? "Visita coordinada dentro de " + state.plazo : "";
+      }
+
+      DemoExpoVoice
+        .on("status", function (s) { setStatus(s.text, s.kind); })
+        .on("state", render)
+        .on("mode", function (mode) {
+          orb.setMode(mode);
+          var hint = el("hint");
+          hint.classList.remove("dim");
+          hint.classList.toggle("speaking", mode === "speaking");
+          hint.textContent = mode === "speaking" ? "Respondiendo..." : "Escuchando...";
+        })
+        .on("connected", function (live) {
+          btnStart.disabled = live;
+          btnStop.disabled = !live;
+          if (!live) {
+            orb.setMode("idle");
+            var hint = el("hint");
+            hint.classList.add("dim");
+            hint.classList.remove("speaking");
+            hint.textContent = "Presiona «Iniciar llamada» y habla con normalidad";
+          }
+        });
+
+      btnStart.addEventListener("click", function () {
+        btnStart.disabled = true;
+        DemoExpoVoice.reset();
+        DemoExpoVoice.start().catch(function () { btnStart.disabled = false; });
+      });
+
+      btnStop.addEventListener("click", function () { DemoExpoVoice.stop(); });
+
+      el("btnReset").addEventListener("click", function () {
+        DemoExpoVoice.reset();
+        setStatus(DemoExpoVoice.isActive() ? "En línea" : "Listo para comenzar", DemoExpoVoice.isActive() ? "ok" : "info");
+      });
+
+      // Atajos para manejar la demo sin buscar el mouse frente al público. Las teclas 1-3
+      // son el respaldo si se cae la conexión: llenan los pasos para narrarlos a mano.
+      document.addEventListener("keydown", function (e) {
+        if (e.target && /input|textarea/i.test(e.target.tagName)) return;
+        if (e.code === "Space") {
+          e.preventDefault();
+          if (DemoExpoVoice.isActive()) DemoExpoVoice.stop();
+          else btnStart.click();
+        } else if (e.key === "r" || e.key === "R") {
+          el("btnReset").click();
+        } else if (e.key === "1" || e.key === "2" || e.key === "3") {
+          DemoExpoVoice.simulate(Number(e.key));
+        }
+      });
+
+      render(DemoExpoVoice.getState());
+
+      // Dejamos el SDK y el agente resueltos antes del primer clic: en la expo, cada
+      // segundo de espera frente al publico se nota.
+      if (window.PostventaVoice && window.PostventaVoice.preload) window.PostventaVoice.preload();
+      DemoExpoVoice.warmup();
+    })();
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+

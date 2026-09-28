@@ -1,0 +1,101 @@
+.fc-when {
+  --fc-cyan: #7dd3fc;
+  position: relative;
+  background: 
+    radial-gradient(ellipse 45% 55% at 15% 25%, rgba(59, 130, 246, 0.09), transparent 65%),
+    #05070b;
+  padding: clamp(72px, 9vw, 120px) 0;
+}
+
+.fc-when__inner {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 3.5vw, 56px);
+  box-sizing: border-box;
+}
+
+.fc-when__eyebrow {
+  color: rgba(125, 211, 252, 0.88);
+}
+
+.fc-when__eyebrow::before {
+  background: var(--fc-cyan);
+}
+
+.fc-when__title {
+  margin: 14px 0 0;
+  max-width: 18ch;
+  font-size: clamp(36px, 4.8vw, 56px);
+  font-weight: 600;
+  letter-spacing: -0.042em;
+  line-height: 1.08;
+  color: #f7f4ee;
+}
+
+.fc-when__lead {
+  margin: 18px 0 0;
+  max-width: 46em;
+  font-size: 17px;
+  line-height: 1.55;
+  color: rgba(169, 175, 180, 0.88);
+}
+
+.fc-when__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  margin-top: 44px;
+}
+
+@media (min-width: 860px) {
+  .fc-when__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+  }
+}
+
+.fc-when__grid article {
+  position: relative;
+  padding: 28px 24px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(8, 12, 18, 0.4));
+  transition: border-color 0.3s ease, transform 0.3s ease;
+}
+
+.fc-when__grid article::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, #7dd3fc, transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.fc-when__grid article:hover {
+  border-color: rgba(125, 211, 252, 0.24);
+  transform: translateY(-4px);
+}
+
+.fc-when__grid article:hover::before {
+  opacity: 1;
+}
+
+.fc-when__grid h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.028em;
+  line-height: 1.2;
+  color: #f7f4ee;
+}
+
+.fc-when__grid p {
+  margin: 12px 0 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: rgba(169, 175, 180, 0.88);
+}

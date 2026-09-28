@@ -1,0 +1,452 @@
+/* Hero Recepción Inmobiliaria — mismo lenguaje que Postventa, acento rojo */
+
+.recepcion-page.platform-page {
+  --home-bg: #07080a;
+  --rx-red: #f04438;
+  --rx-red-2: #ff6a4a;
+  --rx-amber: #f97316;
+}
+
+.recepcion-page .platform-canvas::before {
+  background-color: #07080a;
+  background-image: none;
+}
+
+.recepcion-page .site-header-v2 .brand {
+  gap: 0;
+}
+
+.recepcion-page .site-header-v2 .brand::after {
+  content: "RECEPCIÓN";
+  margin-left: 14px;
+  padding-left: 14px;
+  border-left: 1px solid rgba(243, 241, 236, 0.28);
+  color: #ff8a7a;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.recepcion-page .site-header-v2 .navDemoCta {
+  min-height: 42px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(240, 68, 56, 0.85);
+  background: transparent;
+  color: #fff;
+  box-shadow: none;
+}
+
+.recepcion-page .site-header-v2 .navDemoCta:hover {
+  background: rgba(240, 68, 56, 0.12);
+  filter: none;
+}
+
+.rx-hero {
+  position: relative;
+  isolation: isolate;
+  min-height: calc(100vh - var(--header-h, 72px));
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px 0 28px;
+  box-sizing: border-box;
+  background:
+    radial-gradient(circle at 74% 38%, rgba(240, 68, 56, 0.16), transparent 30%),
+    linear-gradient(180deg, #07080a 0%, #0e1014 58%, #0a0c10 100%);
+  overflow: hidden;
+}
+
+.rx-hero__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.rx-hero__glow {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle 320px at 70% 44%, rgba(240, 68, 56, 0.16), transparent 68%),
+    radial-gradient(circle 240px at 86% 62%, rgba(249, 115, 22, 0.12), transparent 70%);
+}
+
+.rx-hero__net {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 220px;
+}
+
+.rx-hero__wrap {
+  width: min(1440px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 8px 24px 0;
+  display: grid;
+  grid-template-columns: minmax(260px, 440px) minmax(0, 1fr);
+  gap: 24px 28px;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+  flex: 1;
+}
+
+.rx-hero__eyebrow {
+  margin: 0 0 18px;
+  color: var(--rx-red);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.rx-hero__title {
+  margin: 0;
+  max-width: 560px;
+  font-size: clamp(38px, 4.2vw, 56px);
+  font-weight: 700;
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+  color: #f8f6f2;
+}
+
+.rx-hero__grad {
+  display: block;
+  background: linear-gradient(90deg, #f04438 0%, #ff6a4a 52%, #f97316 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.rx-hero__sub {
+  margin: 22px 0 0;
+  max-width: 520px;
+  color: #c8c4bc;
+  font-size: 17px;
+  line-height: 1.55;
+}
+
+.rx-hero__ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 36px;
+}
+
+.rx-hero__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 54px;
+  padding: 0 22px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
+.rx-hero__cta--primary {
+  color: #fff;
+  background: linear-gradient(90deg, #d92d20 0%, #f04438 48%, #f97316 100%);
+  box-shadow: 0 8px 28px rgba(240, 68, 56, 0.28);
+}
+
+.rx-hero__cta--primary:hover {
+  filter: brightness(1.06);
+}
+
+.rx-hero__cta--ghost {
+  color: #f4f1ea;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  background: rgba(8, 8, 10, 0.25);
+}
+
+.rx-hero__cta--ghost:hover {
+  border-color: #fff;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.rx-hero__cta svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.rx-hero__play {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  display: grid;
+  place-items: center;
+}
+
+.rx-hero__play svg {
+  width: 10px;
+  height: 10px;
+  margin-left: 1px;
+}
+
+.rx-building {
+  position: relative;
+  min-width: 0;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #080a0c;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45), 0 0 40px rgba(240, 68, 56, 0.08);
+}
+
+.rx-building__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-height: 320px;
+  object-fit: cover;
+  object-position: center;
+}
+
+.rx-building__layers {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.rx-marker {
+  position: absolute;
+  left: var(--mx);
+  top: var(--my);
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.rx-marker__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.25px solid #f04438;
+  background: rgba(11, 13, 15, 0.55);
+  box-shadow: 0 0 0 3px rgba(240, 68, 56, 0.18);
+}
+
+.rx-marker__pulse {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 22px;
+  height: 22px;
+  margin: -6px 0 0 -11px;
+  border-radius: 50%;
+  border: 1px solid rgba(240, 68, 56, 0.4);
+  animation: rxPulse 2.4s ease-out infinite;
+}
+
+.rx-marker__tag {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #f3f1ec;
+  background: rgba(11, 13, 15, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  padding: 6px 8px;
+  border-radius: 5px;
+  white-space: nowrap;
+  backdrop-filter: blur(6px);
+}
+
+.rx-marker__tag em {
+  font-style: normal;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.rx-hud {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  max-width: 52%;
+  padding: 10px 12px;
+  background: rgba(11, 13, 15, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  backdrop-filter: blur(8px);
+}
+
+.rx-hud__label {
+  display: block;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.rx-hud__value {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #f3f1ec;
+}
+
+.rx-benefits {
+  width: min(1360px, calc(100% - 64px));
+  margin: 8px auto 0;
+  position: relative;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  min-height: 112px;
+  padding: 22px 10px;
+  border: 1px solid rgba(120, 70, 60, 0.45);
+  border-radius: 24px;
+  background: rgba(12, 10, 12, 0.78);
+  backdrop-filter: blur(10px);
+  box-sizing: border-box;
+}
+
+.rx-benefit {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  gap: 10px;
+  align-items: center;
+  padding: 0 12px;
+  border-right: 1px solid rgba(70, 50, 48, 0.9);
+}
+
+.rx-benefit:last-child {
+  border-right: none;
+}
+
+.rx-benefit__ico {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid #f04438;
+  background: #1a0e0c;
+  display: grid;
+  place-items: center;
+  color: #f04438;
+}
+
+.rx-benefit:nth-child(n + 4) .rx-benefit__ico {
+  color: #f97316;
+  border-color: #f97316;
+}
+
+.rx-benefit__ico svg {
+  width: 18px;
+  height: 18px;
+}
+
+.rx-benefit strong {
+  display: block;
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.rx-benefit span {
+  display: block;
+  margin-top: 5px;
+  color: #9e958c;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+@keyframes rxPulse {
+  0% { transform: scale(0.7); opacity: 0.7; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rx-marker__pulse {
+    animation: none;
+  }
+}
+
+@media (max-width: 1100px) {
+  .recepcion-page .site-header-v2 .brand::after {
+    font-size: 12px;
+  }
+
+  .rx-hero {
+    min-height: 0;
+  }
+
+  .rx-hero__wrap {
+    grid-template-columns: 1fr;
+    width: min(720px, calc(100% - 40px));
+    padding: 0;
+  }
+
+  .rx-benefits {
+    width: min(720px, calc(100% - 40px));
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding: 8px 4px;
+  }
+
+  .rx-benefit {
+    border-right: none;
+    border-bottom: 1px solid rgba(155, 117, 110, 0.2);
+    padding: 16px;
+  }
+
+  .rx-benefit:last-child {
+    border-bottom: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .recepcion-page .site-header-v2 .brand::after {
+    display: none;
+  }
+
+  .rx-hero {
+    min-height: 0;
+    padding-bottom: 28px;
+  }
+
+  .rx-hero__wrap,
+  .rx-benefits {
+    width: calc(100% - 28px);
+  }
+
+  .rx-hero__cta {
+    width: 100%;
+  }
+
+  .rx-building__img {
+    min-height: 220px;
+  }
+
+  .rx-marker__tag {
+    font-size: 10px;
+    padding: 5px 7px;
+  }
+
+  .rx-marker__tag em {
+    font-size: 8px;
+  }
+
+  .rx-hud {
+    max-width: 70%;
+  }
+}

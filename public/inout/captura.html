@@ -88,6 +88,20 @@
           </div>
           <div class="row2">
             <div>
+              <label for="tenantEmail">Email arrendatario</label>
+              <input id="tenantEmail" name="tenantEmail" type="email" placeholder="opcional · recibe el link de captura" />
+            </div>
+            <div>
+              <label for="ownerName">Propietario</label>
+              <input id="ownerName" name="ownerName" placeholder="Nombre" />
+            </div>
+          </div>
+          <div>
+            <label for="ownerEmail">Email propietario</label>
+            <input id="ownerEmail" name="ownerEmail" type="email" placeholder="opcional · recibe el informe PDF" />
+          </div>
+          <div class="row2">
+            <div>
               <label for="propertyType">Tipo</label>
               <select id="propertyType" name="propertyType" required>
                 <option value="DEPARTMENT">Departamento</option>
@@ -356,6 +370,9 @@
             address,
             comuna: comuna || undefined,
             tenantName: tenantName || undefined,
+            tenantEmail: document.getElementById("tenantEmail").value.trim() || undefined,
+            ownerName: document.getElementById("ownerName").value.trim() || undefined,
+            ownerEmail: document.getElementById("ownerEmail").value.trim() || undefined,
             propertyType,
             bedroomsCount,
             bathroomsCount,

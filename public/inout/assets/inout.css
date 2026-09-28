@@ -151,6 +151,8 @@ body.io-shell { display: block; }
   grid-template-columns: 240px 1fr;
   min-height: 100vh;
 }
+html.ainspecta-embed .io-aside { display: none !important; }
+html.ainspecta-embed .io-layout { grid-template-columns: 1fr; }
 .io-aside {
   background: rgba(15, 20, 25, 0.95);
   border-right: 1px solid var(--border);

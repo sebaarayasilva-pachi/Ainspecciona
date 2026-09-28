@@ -2,7 +2,7 @@ import PDFDocument from 'pdfkit';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
-import { classifyKpiFromSlot, badgeFromScore, DEFAULT_SCORE_CONFIG, kpiPenaltyFromSeverity } from '../scoring/scoringV2_2.js';
+import { classifyKpiFromSlot, badgeFromScore, DEFAULT_SCORE_CONFIG, kpiPenaltyFromSeverity, buildScoringTaxonomyFooter } from '../scoring/scoringV2_2.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const LOGO_PATH = path.join(__dirname, '../../public/assets/Logo 2 ainspecciona.png');
@@ -123,15 +123,24 @@ function scoreKpiFromSlots(items, kpiKey, cfg, persistedKpiScores = null) {
   }
   
   // Fallback: calcular localmente (casos pre-SSOT o si no hay persistido)
-  if (!items.length) return null;
-  const impact = items.reduce((acc, s) => acc + kpiPenaltyForSlot(s, kpiKey, cfg), 0);
-  const avgPenalty = impact / items.length;
+  const countable = items.filter((s) => {
+    if (!s) return false;
+    if (s.omitted) return false;
+    return String(s.status || '').toUpperCase() !== 'NOT_CAPTURABLE'
+      && String(s.findingCode || s.analysisCode || '').toUpperCase() !== 'NOT_CAPTURABLE';
+  });
+  if (!countable.length) return null;
+  const impact = countable.reduce((acc, s) => acc + kpiPenaltyForSlot(s, kpiKey, cfg), 0);
+  const avgPenalty = impact / countable.length;
   return Math.max(0, Math.min(100, Math.round(100 - avgPenalty)));
 }
 
 function slotScoreForPdf(slot, kpiKey, cfg) {
   if (slot.omitted || String(slot.status || '').toUpperCase() === 'NOT_CAPTURABLE') return null;
-  const penalty = kpiPenaltyForSlot(slot, kpiKey, cfg);
+  if (Number.isFinite(Number(slot.slotScore))) return Math.round(Number(slot.slotScore));
+  const penalty = Number.isFinite(Number(slot.scorePenaltyApplied))
+    ? Number(slot.scorePenaltyApplied)
+    : kpiPenaltyForSlot(slot, kpiKey, cfg);
   if (!slot.severity) return 100;
   return Math.max(0, 100 - penalty);
 }
@@ -144,7 +153,7 @@ function buildKpiGroups(slots, scoreConfig, byGroupArr = [], persistedKpiScores 
   const buckets = new Map(KPI_ORDER.map((k) => [k, []]));
 
   slots.forEach((s) => {
-    const key = classifyKpiFromSlot(s, cfg.slotKpiMap);
+    const key = String(s.kpiKey || '').toUpperCase() || classifyKpiFromSlot(s, cfg.slotKpiMap);
     if (key && buckets.has(key)) buckets.get(key).push(s);
   });
 
@@ -196,7 +205,8 @@ export async function generateReportPdf({ summary, storage, prisma, scoreConfig 
   const headerTextX = logoX > 28 ? logoX + 4 : 40;
   doc.fontSize(16).fillColor('#F8FAFC').font('Helvetica-Bold').text('Informe Técnico del Inmueble', headerTextX, 14, { width: Math.max(200, 420 - (headerTextX - 40)) });
   doc.fontSize(10).fillColor('#94a3b8').text('Evaluación automatizada basada en evidencia fotográfica', headerTextX, 34);
-  doc.fontSize(9).fillColor('#64748b').text(`STI v3.0 · ${formatDate(c.createdAt)}`, 0, 22, { width: doc.page.width - 40, align: 'right' });
+  const engineLabel = String(cfg.engineVersion || summary.scoreVersion || '').includes('4') ? 'STI v4.0' : 'STI v3.0';
+  doc.fontSize(9).fillColor('#64748b').text(`${engineLabel} · ${formatDate(c.createdAt)}`, 0, 22, { width: doc.page.width - 40, align: 'right' });
 
   doc.moveDown(3);
 
@@ -229,6 +239,14 @@ export async function generateReportPdf({ summary, storage, prisma, scoreConfig 
   drawSemiCircleGauge(doc, stiCx, stiCy, stiR, score, badgeColor(badge));
   doc.fontSize(16).fillColor('#111827').font('Helvetica-Bold').text(`${score} / 100`, stiCx - 40, stiCy + 5, { align: 'center', width: 80 });
   doc.fontSize(11).fillColor(badgeColor(badge)).font('Helvetica-Bold').text(badgeLabel(badge), stiCx - 40, stiCy + 48, { align: 'center', width: 80 });
+  if (summary.coverage && summary.coverage.expectedSlots > 0) {
+    doc.fontSize(8).fillColor('#6B7280').font('Helvetica').text(
+      `Cobertura visual: ${Math.round(summary.coverage.coverage)}%`,
+      stiColLeft,
+      stiCy + 68,
+      { width: 200, align: 'center' }
+    );
+  }
   doc.lineWidth(1);
 
   doc.moveDown(4);
@@ -319,8 +337,8 @@ export async function generateReportPdf({ summary, storage, prisma, scoreConfig 
       const source = String(slot.source || '').toUpperCase() === 'OPENAI' ? 'OpenAI' : 'V1';
       const slotScore = slotScoreForPdf(slot, group.key, cfg);
       const sanitize = (t) => t && typeof t === 'string' ? t.replace(/\bLIVING_CEILING\b/gi, 'el techo del living').replace(/\bLIVING_WALLS\b/gi, 'los muros').replace(/\bBATHROOM_\d+_\w+/g, (m) => m.replace(/_/g, ' ').toLowerCase()).replace(/\bKITCHEN_\w+/g, (m) => m.replace(/_/g, ' ').toLowerCase()) : t;
-      const desc = removeRetakePhrases(sanitize(slot?.analysisDebug?.openai?.parsed?.description || slot.message || 'Sin observaciones.'));
-      const kpiAnalysis = removeRetakePhrases(sanitize(slot?.analysisDebug?.openai?.parsed?.kpi_analysis || ''));
+      const desc = removeRetakePhrases(sanitize(slot.descriptionText || slot?.analysisDebug?.openai?.parsed?.description || slot.message || 'Sin observaciones.'));
+      const kpiAnalysis = removeRetakePhrases(sanitize(slot.findingsText || slot?.analysisDebug?.openai?.parsed?.kpi_analysis || ''));
       const analysisText = kpiAnalysis || desc;
 
       const imgW = 80;
@@ -362,15 +380,28 @@ export async function generateReportPdf({ summary, storage, prisma, scoreConfig 
     y += 15;
   }
 
+  const taxonomy = buildScoringTaxonomyFooter(cfg);
   const footerMarginTop = 24;
   const footerHeight = doc.fontSize(9).heightOfString(
     'Documentación técnica del análisis automatizado',
     { width: doc.page.width - margin * 2 }
-  ) + 320;
+  ) + 420;
   if (y + footerMarginTop + footerHeight > doc.page.height - margin) {
     doc.addPage();
     y = 50;
   }
+
+  doc.fontSize(11).fillColor('#111827').font('Helvetica-Bold').text(taxonomy.title, margin, y + 8, {
+    width: doc.page.width - margin * 2
+  });
+  y += 28;
+  doc.font('Helvetica').fontSize(9).fillColor('#4B5563').text(
+    taxonomy.paragraphs.join('\n\n'),
+    margin,
+    y,
+    { width: doc.page.width - margin * 2, align: 'left' }
+  );
+  y = doc.y + 18;
 
   const footerText = [
     'Documentación técnica del análisis automatizado',

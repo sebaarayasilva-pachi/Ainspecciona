@@ -21,6 +21,7 @@ import { provisionProductAccess } from './control/provisionProduct.js';
 import { createOrganizationFromControl } from './control/createOrganization.js';
 import { addOrganizationMember } from './control/addOrganizationMember.js';
 import { PLATFORM_NDA_VERSION, ndaStatusForSession } from './nda.js';
+import { registerOrgRoutes } from './org/api.js';
 
 function noStore(reply) {
   reply.header('Cache-Control', 'no-store, no-cache, must-revalidate');
@@ -41,20 +42,25 @@ export async function registerPlatformRoutes(fastify, { prisma }) {
     return reply.redirect(302, `/?${q.toString()}`);
   });
 
-  fastify.get('/app', async (req, reply) => {
+  async function serveAppShell(req, reply, nextPath) {
     const session = prisma ? await getPlatformSession(prisma, req) : null;
-    if (!session) return reply.redirect(302, '/login?next=/app');
+    if (!session) {
+      return reply.redirect(302, `/login?next=${encodeURIComponent(nextPath || req.url || '/app')}`);
+    }
     return noStore(reply).sendFile('app/index.html');
-  });
+  }
 
-  // Tenant door: /app/{producto} → login o entra al módulo. URLs legacy no se tocan.
+  fastify.get('/app', async (req, reply) => serveAppShell(req, reply, '/app'));
+  fastify.get('/app/modulos', async (req, reply) => serveAppShell(req, reply, '/app/modulos'));
+  fastify.get('/app/usuarios', async (req, reply) => serveAppShell(req, reply, '/app/usuarios'));
+  fastify.get('/app/configuracion', async (req, reply) => serveAppShell(req, reply, '/app/configuracion'));
+
+  // Mismo chrome para /app/{producto} y /app/{producto}/{item}. URLs legacy no se tocan.
   for (const product of APP_TENANT_PRODUCTS) {
-    fastify.get(product.app, async (req, reply) => {
-      const session = prisma ? await getPlatformSession(prisma, req) : null;
-      if (!session) {
-        return reply.redirect(302, `/login?next=${encodeURIComponent(product.app)}`);
-      }
-      return reply.redirect(302, `/app?enter=${encodeURIComponent(product.code)}`);
+    fastify.get(product.app, async (req, reply) => serveAppShell(req, reply, product.app));
+    fastify.get(`${product.app}/:item`, async (req, reply) => {
+      const item = encodeURIComponent(String(req.params.item || ''));
+      return serveAppShell(req, reply, `${product.app}/${item}`);
     });
   }
 
@@ -503,4 +509,6 @@ export async function registerPlatformRoutes(fastify, { prisma }) {
       }))
     });
   });
+
+  await registerOrgRoutes(fastify, { prisma });
 }

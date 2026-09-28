@@ -7,7 +7,7 @@ import { createEntregaSession, ENTREGA_SESSION_COOKIE } from '../../entrega/auth
 import { createIoSession, IO_SESSION_COOKIE } from '../../inout/auth.js';
 import { resolveLegacyLink } from './legacyBridge.js';
 import { sessionCookieOpts } from './passwords.js';
-import { PLATFORM_PRODUCTS } from '../products.js';
+import { PLATFORM_PRODUCTS, MODULE_NAV, embedUrlForItem } from '../products.js';
 
 const TENANT_SESSION_COOKIE = 'tenant_session';
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 7;
@@ -55,11 +55,14 @@ export async function enterProduct(prisma, platformSession, productCode, req, re
   }
 
   if (product === 'SCAN') {
+    const first = (MODULE_NAV.SCAN || [])[0];
     return {
       ok: true,
       product,
       token: platformSession.token,
       href: meta.href,
+      appHref: meta.appHref || '/app/scan',
+      embedHref: embedUrlForItem(first || { href: meta.href }),
       storageKey: null,
       note: 'redirect_only'
     };
@@ -103,11 +106,14 @@ export async function enterProduct(prisma, platformSession, productCode, req, re
   if (cookieName) reply.setCookie(cookieName, token, opts);
   // Mantener __session como sesión de plataforma.
 
+  const first = (MODULE_NAV[product] || [])[0];
   return {
     ok: true,
     product,
     token,
     href: meta.href,
+    appHref: meta.appHref || '/app',
+    embedHref: embedUrlForItem(first || { href: meta.href }, { token }),
     storageKey: STORAGE_KEYS[product] || null,
     storage
   };

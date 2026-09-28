@@ -1,0 +1,58 @@
+{
+  "principle": "Marketing vende. Tenant opera. No se mezclan.",
+  "layers": {
+    "marketing": {
+      "home": "/",
+      "precios": "/precios",
+      "contacto": "/contacto.html",
+      "faq": "/faq.html"
+    },
+    "tenant": {
+      "hub": "/app"
+    }
+  },
+  "products": [
+    {
+      "id": "recepcion-inmobiliaria",
+      "name": "Recepción Inmobiliaria",
+      "marketing": "/productos/recepcion-inmobiliaria",
+      "app": "/app/recepcion",
+      "tenant": "/entrega"
+    },
+    {
+      "id": "postventa",
+      "name": "Postventa",
+      "marketing": "/productos/postventa",
+      "app": "/app/postventa",
+      "tenant": "/postventa"
+    },
+    {
+      "id": "inspeccion-score",
+      "name": "Inspección Score",
+      "marketing": "/productos/inspeccion-score",
+      "app": "/app/score",
+      "tenant": "/tenant"
+    },
+    {
+      "id": "inspeccion-full-check",
+      "name": "Inspección Full Check",
+      "marketing": "/productos/inspeccion-full-check",
+      "app": null,
+      "tenant": null
+    },
+    {
+      "id": "in-out",
+      "name": "In & Out",
+      "marketing": "/productos/in-out",
+      "app": "/app/inout",
+      "tenant": "/inout"
+    },
+    {
+      "id": "property-scan",
+      "name": "Property Scan",
+      "marketing": "/productos/property-scan",
+      "app": "/app/scan",
+      "tenant": "/scan"
+    }
+  ]
+}

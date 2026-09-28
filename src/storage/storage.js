@@ -66,13 +66,54 @@ export function createStorage() {
           const ab = await res.arrayBuffer();
           return Buffer.from(ab);
         }
-        throw new Error('FILEPATH_NOT_HTTP_URL');
+        const key = String(filePath || '').replace(/^[/\\]+/, '');
+        if (!key) throw new Error('NO_FILE_PATH');
+        const [buf] = await bucket.file(key).download();
+        return buf;
       },
       publicUrl(filePath) {
         if (!filePath) return null;
         if (isHttpUrl(filePath)) return filePath;
-        // If someone stored a relative path accidentally, return it as /path
-        return String(filePath).startsWith('/') ? filePath : `/${filePath}`;
+        return publicUrlFromGcs(gcsBucket, filePath);
+      },
+      /**
+       * URL firmada v4 para que la app suba un zip directo a GCS (evita el límite de body de Cloud Run).
+       */
+      async createSignedUploadUrl({ object, contentType = 'application/zip', expiresSeconds = 1800 }) {
+        const key = String(object || '').replace(/^[/\\]+/, '');
+        if (!key || key.includes('..')) throw new Error('INVALID_OBJECT');
+        const [url] = await bucket.file(key).getSignedUrl({
+          version: 'v4',
+          action: 'write',
+          expires: Date.now() + Math.max(60, Number(expiresSeconds) || 1800) * 1000,
+          contentType
+        });
+        return {
+          uploadUrl: url,
+          method: 'PUT',
+          headers: { 'Content-Type': contentType },
+          objectPath: key,
+          publicUrl: publicUrlFromGcs(gcsBucket, key)
+        };
+      },
+      async createSignedReadUrl({ object, expiresSeconds = 3600 }) {
+        const key = String(object || '').replace(/^[/\\]+/, '');
+        if (!key || key.includes('..')) throw new Error('INVALID_OBJECT');
+        const [url] = await bucket.file(key).getSignedUrl({
+          version: 'v4',
+          action: 'read',
+          expires: Date.now() + Math.max(60, Number(expiresSeconds) || 3600) * 1000
+        });
+        return url;
+      },
+      async saveBuffer({ buffer, contentType, storageKey }) {
+        const key = String(storageKey || '').replace(/^[/\\]+/, '');
+        if (!key) throw new Error('STORAGE_KEY_REQUIRED');
+        await bucket.file(key).save(buffer, {
+          contentType: contentType || 'application/octet-stream',
+          resumable: false
+        });
+        return { filePath: publicUrlFromGcs(gcsBucket, key), publicUrl: publicUrlFromGcs(gcsBucket, key), objectPath: key };
       },
       async deleteFile(filePath) {
         if (!filePath) return false;
@@ -133,6 +174,30 @@ export function createStorage() {
       if (!filePath) return null;
       if (isHttpUrl(filePath)) return filePath;
       return String(filePath).startsWith('/') ? filePath : `/${filePath}`;
+    },
+    async createSignedUploadUrl({ object, contentType = 'application/zip' }) {
+      const key = String(object || '').replace(/^[/\\]+/, '');
+      return {
+        uploadUrl: null,
+        method: 'PUT',
+        headers: { 'Content-Type': contentType },
+        objectPath: key,
+        publicUrl: `/uploads/${String(key).replace(/\//g, '-')}`,
+        localFallback: true
+      };
+    },
+    async createSignedReadUrl({ object }) {
+      const key = String(object || '').replace(/^[/\\]+/, '');
+      return `/uploads/${String(key).replace(/\//g, '-')}`;
+    },
+    async saveBuffer({ buffer, contentType, storageKey }) {
+      const key = String(storageKey || '').replace(/^[/\\]+/, '');
+      if (!key) throw new Error('STORAGE_KEY_REQUIRED');
+      const storedFileName = key.replace(/\//g, '-');
+      const absPath = join(dir, storedFileName);
+      await fs.promises.writeFile(absPath, buffer);
+      const filePath = `uploads/${storedFileName}`;
+      return { filePath, publicUrl: `/${filePath}`, objectPath: key };
     },
     async deleteFile(filePath) {
       if (!filePath || isHttpUrl(filePath)) return false;

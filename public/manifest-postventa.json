@@ -1,0 +1,18 @@
+{
+  "name": "Postventa Ainspecciona",
+  "short_name": "Postventa",
+  "description": "Asistente de postventa inmobiliaria",
+  "start_url": "/postventa/captura",
+  "scope": "/postventa/",
+  "display": "browser",
+  "background_color": "#070812",
+  "theme_color": "#070812",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

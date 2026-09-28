@@ -27,4 +27,4 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 # Usually Cloud Run Jobs are used for one-off scripts, not Cloud Run Services.
 # If this is deployed as a Service, we need a dummy server or we should deploy it as a Job.
 # Let's check how it was deployed originally.
-CMD ["python3", "/app/run_luma.py"]
+CMD ["python3", "/app/run_recon.py"]

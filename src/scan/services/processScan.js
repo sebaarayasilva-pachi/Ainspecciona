@@ -201,7 +201,11 @@ export async function maybeFinalizeScan(prisma, scan, { storage = null } = {}, f
     let modelType = 'GLB';
     if (result.modelType === 'SPLAT_PLY' || result.modelType === 'SPLAT' || result.modelType === 'GAUSSIAN_SPLAT') {
       modelType = 'GAUSSIAN_SPLAT';
+    } else if (result.modelKey && result.modelKey.endsWith('.ply')) {
+      modelType = 'GAUSSIAN_SPLAT';
     }
+    
+    console.log('maybeFinalizeScan: setting modelType to', modelType, 'for', scan.id);
     
     return markReady(prisma, scan.id, {
       status: 'READY',

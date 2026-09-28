@@ -7,6 +7,7 @@ import { runMockProcessing, maybeFinalizeScan } from './services/processScan.js'
 import { ColmapReconstructionProvider } from './reconstruction/colmapProvider.js';
 import { ModalReconstructionProvider } from './reconstruction/modalProvider.js';
 import { setReconstructionProvider } from './reconstruction/provider.js';
+import { reconObjectKeys } from './reconstruction/colmapPoses.js';
 import { createJobForProperty, createPropertyAndJob, normalizeCaptureMode, packageObjectKey } from './scanJob.js';
 
 const DEMO_ORG_SLUG = 'scan-demo';
@@ -55,8 +56,9 @@ function serializeScan(scan, req) {
     captureMode: scan.captureMode,
     processingProgress: scan.processingProgress,
     modelType: scan.modelType,
-    // Para Gaussian Splatting, enviamos la URL real de GCS para evitar problemas de CORS/Redirecciones en el visor
-    modelUrl: scan.modelUrl && scan.modelType === 'GLB'
+    rawModelUrl: scan.modelUrl,
+    // Para Gaussian Splatting y modelos grandes, enviamos la URL real de GCS para evitar problemas de CORS/Redirecciones en el visor
+    modelUrl: scan.modelUrl && (scan.modelType === 'GLB' || scan.modelType === 'GAUSSIAN_SPLAT')
       ? `/api/scan/public/${scan.publicId}/model`
       : scan.modelUrl,
     planUrl: scan.planUrl,

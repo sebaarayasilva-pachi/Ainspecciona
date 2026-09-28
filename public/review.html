@@ -36,8 +36,11 @@
     .btn:disabled { opacity: .5; cursor: not-allowed; }
     /* Vista revisión caso */
     .reviewWrap { display: grid; grid-template-columns: 1.4fr 1fr; gap: 18px; }
-    .photoBox { background: #0b1220; border: 1px solid #334155; border-radius: 14px; padding: 10px; display: flex; align-items: center; justify-content: center; min-height: 380px; }
+    .photoBox { background: #0b1220; border: 1px solid #334155; border-radius: 14px; padding: 10px; display: flex; align-items: center; justify-content: center; min-height: 380px; cursor: zoom-in; }
     .photoBox img { max-width: 100%; max-height: 540px; border-radius: 8px; }
+    .trioGrid { display: grid; gap: 8px; margin-top: 10px; }
+    .trioCard { border: 1px solid #334155; border-radius: 10px; padding: 10px; background: #0b1220; }
+    .trioCard .who { font-size: 11px; font-weight: 800; color: #93c5fd; letter-spacing: .04em; }
     .findingBox h3 { margin: 0 0 4px; font-size: 15px; }
     .sev { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; margin-left: 8px; }
     .sev.low { background: #365314; color: #d9f99d; }
@@ -137,7 +140,7 @@
 
       <div class="reviewWrap">
         <div>
-          <div class="photoBox"><img id="slotPhoto" alt="Foto del slot" /></div>
+          <div class="photoBox" id="slotPhotoBox" title="Clic para ampliar"><img id="slotPhoto" alt="Foto del slot" /></div>
           <div class="actions" style="justify-content:space-between;">
             <button type="button" class="btn ghost" id="prevBtn">← Anterior</button>
             <button type="button" class="btn ghost" id="nextBtn">Siguiente →</button>
@@ -151,8 +154,15 @@
               <div class="muted" style="font-size:12px;">Análisis IA</div>
               <div id="aiFinding" style="margin-top:6px; font-size:14px;">—</div>
             </div>
+            <div id="trioBox" class="trioGrid"></div>
             <div id="reviewState" class="statusMsg"></div>
-            <div class="actions">
+            <div class="actions" id="pickAiActions" style="display:none;">
+              <button type="button" class="btn ok" data-ai="openai">Elegir GPT-4o</button>
+              <button type="button" class="btn ok" data-ai="gemini">Elegir Gemini</button>
+              <button type="button" class="btn primary" data-ai="claude">Elegir Claude</button>
+              <button type="button" class="btn warn" id="noneAiBtn">Ninguna es correcta</button>
+            </div>
+            <div class="actions" id="legacyActions">
               <button type="button" class="btn ok" id="okBtn">✓ OK — hallazgo correcto</button>
               <button type="button" class="btn warn" id="correctBtn">✎ Corregir</button>
             </div>
@@ -586,6 +596,8 @@
       if (!slots.length) { $('slotTitle').textContent = 'Sin fotos para revisar'; return; }
       const s = slots[cursor];
       $('slotPhoto').src = s.photoUrl || '';
+      $('slotPhoto').onclick = () => { if (s.photoUrl && window.openPhotoZoom) window.openPhotoZoom(s.photoUrl); };
+      $('slotPhotoBox').onclick = () => { if (s.photoUrl && window.openPhotoZoom) window.openPhotoZoom(s.photoUrl); };
       $('slotTitle').textContent = s.title || s.slotCode;
       $('slotCode').textContent = s.slotCode + ' · ' + (cursor + 1) + ' de ' + slots.length;
       const a = s.analysis || {};
@@ -595,6 +607,28 @@
           (a.severity ? '<span class="sev ' + esc(a.severity) + '">' + esc(a.severity) + '</span>' : '') +
           '<div style="margin-top:6px; color:#cbd5e1;">' + esc(a.message || '') + '</div>'
         : '<span style="color:#86efac;">Sin hallazgo (OK)</span>';
+      const trio = s.consensus;
+      const trioEl = $('trioBox');
+      function trioLine(label, side) {
+        if (!side) return '';
+        if (side.error) return '<div class="trioCard"><div class="who">' + esc(label) + '</div><div class="muted">Error</div></div>';
+        const codes = (side.codes || []).join(', ') || (side.primaryCode || 'OK');
+        return '<div class="trioCard"><div class="who">' + esc(label) + '</div>' +
+          '<div><strong>' + esc(codes) + '</strong>' +
+          (side.severity ? '<span class="sev ' + esc(String(side.severity).toLowerCase()) + '">' + esc(side.severity) + '</span>' : '') +
+          '</div><div class="muted" style="margin-top:4px;">' + esc(side.observation || side.interpretation || '') + '</div></div>';
+      }
+      if (trio) {
+        trioEl.innerHTML = trioLine('GPT-4o', trio.openai) + trioLine('Gemini', trio.gemini) + trioLine('Claude', trio.claude);
+        $('pickAiActions').style.display = '';
+        $('legacyActions').style.display = 'none';
+        const claudeBtn = document.querySelector('#pickAiActions [data-ai="claude"]');
+        if (claudeBtn) claudeBtn.style.display = trio.claude && !trio.claude.error ? '' : 'none';
+      } else {
+        trioEl.innerHTML = '';
+        $('pickAiActions').style.display = 'none';
+        $('legacyActions').style.display = '';
+      }
       $('reviewState').innerHTML = s.review
         ? (s.review.verdict === 'ok'
             ? '<span style="color:#86efac;">✓ Validado por revisor</span>'
@@ -636,6 +670,29 @@
       return true;
     }
 
+    async function sendChosenAi(chosenAi, extra) {
+      const s = slots[cursor];
+      const res = await adminFetch(
+        '/api/admin/review/cases/' + encodeURIComponent(currentCase.id) + '/slots/' + encodeURIComponent(s.id),
+        { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chosenAi, ...(extra || {}) }) }
+      );
+      const data = await res.json();
+      if (!data.ok) { alert(data.error || data.hint || 'Error al guardar'); return false; }
+      s.review = { verdict: chosenAi === 'none' ? 'corrected' : 'ok', note: data.author ? data.author.label : '' };
+      return true;
+    }
+    document.getElementById('pickAiActions').addEventListener('click', async (e) => {
+      const btn = e.target.closest('[data-ai]');
+      if (!btn) return;
+      if (await sendChosenAi(btn.getAttribute('data-ai'))) {
+        if (cursor < slots.length - 1) cursor++;
+        renderSlot();
+      }
+    });
+    $('noneAiBtn').addEventListener('click', () => {
+      $('humanCode').value = 'OK';
+      $('correctionForm').classList.remove('hidden');
+    });
     $('okBtn').addEventListener('click', async () => {
       if (await sendVerdict({ verdict: 'ok' })) {
         if (cursor < slots.length - 1) cursor++;
@@ -652,13 +709,17 @@
     });
     $('cancelCorrectionBtn').addEventListener('click', () => $('correctionForm').classList.add('hidden'));
     $('saveCorrectionBtn').addEventListener('click', async () => {
-      const ok = await sendVerdict({
+      const payload = {
         verdict: 'corrected',
         humanCode: $('humanCode').value,
         humanSeverity: $('humanSeverity').value,
         humanMessage: $('humanMessage').value.trim(),
         note: $('note').value.trim()
-      });
+      };
+      const hasTrio = !!(slots[cursor] && slots[cursor].consensus);
+      const ok = hasTrio
+        ? await sendChosenAi('none', payload)
+        : await sendVerdict(payload);
       if (ok) {
         if (cursor < slots.length - 1) cursor++;
         renderSlot();
@@ -1105,5 +1166,6 @@
     const deepCase = new URLSearchParams(window.location.search).get('case');
     if (deepCase) openCase(deepCase).catch((e) => { if (e.message !== 'UNAUTHORIZED') console.error(e); });
   </script>
+  <script src="/assets/photo-zoom.js"></script>
 </body>
 </html>

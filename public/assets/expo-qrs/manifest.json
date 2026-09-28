@@ -1,0 +1,96 @@
+{
+  "campaign": "expo-real-estate-2026",
+  "generatedAt": "2026-09-20T19:31:01.693Z",
+  "missions": [
+    {
+      "code": "elec-01",
+      "shortCode": "ELC-9M4X",
+      "title": "Electricidad visible",
+      "payload": "AINS-EXPO|v1|expo-real-estate-2026|elec-01|8011c0fc730becd2|c15030d309fe3816",
+      "qrUrl": "https://ainspecciona.web.app/expo?q=AINS-EXPO%7Cv1%7Cexpo-real-estate-2026%7Celec-01%7C8011c0fc730becd2%7Cc15030d309fe3816",
+      "png": "C:\\Users\\DELL 7520\\OneDrive\\Escritorio\\Proyectos Web\\Ainspecta\\ainspecta_web\\public\\assets\\expo-qrs\\elec-01.png",
+      "svg": "C:\\Users\\DELL 7520\\OneDrive\\Escritorio\\Proyectos Web\\Ainspecta\\ainspecta_web\\public\\assets\\expo-qrs\\elec-01.svg"
+    },
+    {
+      "code": "humedad-01",
+      "shortCode": "HUM-7K2P",
+      "title": "Humedad",
+      "payload": "AINS-EXPO|v1|expo-real-estate-2026|humedad-01|0f54841c4ff61543|444355653e8ad9c9",
+      "qrUrl": "https://ainspecciona.web.app/expo?q=AINS-EXPO%7Cv1%7Cexpo-real-estate-2026%7Chumedad-01%7C0f54841c4ff61543%7C444355653e8ad9c9",
+      "png": "C:\\Users\\DELL 7520\\OneDrive\\Escritorio\\Proyectos Web\\Ainspecta\\ainspecta_web\\public\\assets\\expo-qrs\\humedad-01.png",
+      "svg": "C:\\Users\\DELL 7520\\OneDrive\\Escritorio\\Proyectos Web\\Ainspecta\\ainspecta_web\\public\\assets\\expo-qrs\\humedad-01.svg"
+    },
+    {
+      "code": "sello-01",
+      "shortCode": "SEL-5V1C",
+      "title": "Instalación sanitaria o sello",
+      "payload": "AINS-EXPO|v1|expo-real-estate-2026|sello-01|0f4b9d4288fd153f|25a0862700a4407c",
+      "qrUrl": "https://ainspecciona.web.app/expo?q=AINS-EXPO%7Cv1%7Cexpo-real-estate-2026%7Csello-01%7C0f4b9d4288fd153f%7C25a0862700a4407c",
+      "png": "C:\\Users\\DELL 7520\\OneDrive\\Escritorio\\Proyectos Web\\Ainspecta\\ainspecta_web\\public\\assets\\expo-qrs\\sello-01.png",
+      "svg": "C:\\Users\\DELL 7520\\OneDrive\\Escritorio\\Proyectos Web\\Ainspecta\\ainspecta_web\\public\\assets\\expo-qrs\\sello-01.svg"
+    },
+    {
+      "code": "fisura-01",
+      "shortCode": "FIS-3B8N",
+      "title": "Fisura visible",
+      "payload": "AINS-EXPO|v1|expo-real-estate-2026|fisura-01|08bd7311d1c131e6|51dbf7068cdb3c6c",
+      "qrUrl": "https://ainspecciona.web.app/expo?q=AINS-EXPO%7Cv1%7Cexpo-real-estate-2026%7Cfisura-01%7C08bd7311d1c131e6%7C51dbf7068cdb3c6c",
+      "png": "C:\\Users\\DELL 7520\\OneDrive\\Escritorio\\Proyectos Web\\Ainspecta\\ainspecta_web\\public\\assets\\expo-qrs\\fisura-01.png",
+      "svg": "C:\\Users\\DELL 7520\\OneDrive\\Escritorio\\Proyectos Web\\Ainspecta\\ainspecta_web\\public\\assets\\expo-qrs\\fisura-01.svg"
+    },
+    {
+      "code": "ventana-01",
+      "shortCode": "VEN-1Q9Z",
+      "title": "Ventana con sello defectuoso",
+      "payload": "AINS-EXPO|v1|expo-real-estate-2026|ventana-01|642c6d228b2b32b1|26f8292fa9dd12b4",
+      "qrUrl": "https://ainspecciona.web.app/expo?q=AINS-EXPO%7Cv1%7Cexpo-real-estate-2026%7Cventana-01%7C642c6d228b2b32b1%7C26f8292fa9dd12b4",
+      "png": "C:\\Users\\DELL 7520\\OneDrive\\Escritorio\\Proyectos Web\\Ainspecta\\ainspecta_web\\public\\assets\\expo-qrs\\ventana-01.png",
+      "svg": "C:\\Users\\DELL 7520\\OneDrive\\Escritorio\\Proyectos Web\\Ainspecta\\ainspecta_web\\public\\assets\\expo-qrs\\ventana-01.svg"
+    },
+    {
+      "code": "puerta-01",
+      "shortCode": "PUE-6R5T",
+      "title": "Puerta o herraje desalineado",
+      "payload": "AINS-EXPO|v1|expo-real-estate-2026|puerta-01|d4c8fbd5223d1128|81bb4fcbd744493f",
+      "qrUrl": "https://ainspecciona.web.app/expo?q=AINS-EXPO%7Cv1%7Cexpo-real-estate-2026%7Cpuerta-01%7Cd4c8fbd5223d1128%7C81bb4fcbd744493f",
+      "png": "C:\\Users\\DELL 7520\\OneDrive\\Escritorio\\Proyectos Web\\Ainspecta\\ainspecta_web\\public\\assets\\expo-qrs\\puerta-01.png",
+      "svg": "C:\\Users\\DELL 7520\\OneDrive\\Escritorio\\Proyectos Web\\Ainspecta\\ainspecta_web\\public\\assets\\expo-qrs\\puerta-01.svg"
+    },
+    {
+      "code": "fuga-01",
+      "shortCode": "FUG-2X1A",
+      "title": "Fuga sanitaria",
+      "payload": "AINS-EXPO|v1|expo-real-estate-2026|fuga-01|1a6e4eae5148ec7f|1ea1450cbafb249b",
+      "qrUrl": "https://ainspecciona.web.app/expo?q=AINS-EXPO%7Cv1%7Cexpo-real-estate-2026%7Cfuga-01%7C1a6e4eae5148ec7f%7C1ea1450cbafb249b",
+      "png": "C:\\Users\\DELL 7520\\OneDrive\\Escritorio\\Proyectos Web\\Ainspecta\\ainspecta_web\\public\\assets\\expo-qrs\\fuga-01.png",
+      "svg": "C:\\Users\\DELL 7520\\OneDrive\\Escritorio\\Proyectos Web\\Ainspecta\\ainspecta_web\\public\\assets\\expo-qrs\\fuga-01.svg"
+    },
+    {
+      "code": "corrosion-01",
+      "shortCode": "COR-9P2M",
+      "title": "Corrosión en un baño",
+      "payload": "AINS-EXPO|v1|expo-real-estate-2026|corrosion-01|a982c65065d812d0|58f5e173233e95ca",
+      "qrUrl": "https://ainspecciona.web.app/expo?q=AINS-EXPO%7Cv1%7Cexpo-real-estate-2026%7Ccorrosion-01%7Ca982c65065d812d0%7C58f5e173233e95ca",
+      "png": "C:\\Users\\DELL 7520\\OneDrive\\Escritorio\\Proyectos Web\\Ainspecta\\ainspecta_web\\public\\assets\\expo-qrs\\corrosion-01.png",
+      "svg": "C:\\Users\\DELL 7520\\OneDrive\\Escritorio\\Proyectos Web\\Ainspecta\\ainspecta_web\\public\\assets\\expo-qrs\\corrosion-01.svg"
+    },
+    {
+      "code": "mueble-01",
+      "shortCode": "MUE-4Y7U",
+      "title": "Mobiliario hinchado por humedad",
+      "payload": "AINS-EXPO|v1|expo-real-estate-2026|mueble-01|b383d814a9aa2181|9dbbd1fbd6133f0f",
+      "qrUrl": "https://ainspecciona.web.app/expo?q=AINS-EXPO%7Cv1%7Cexpo-real-estate-2026%7Cmueble-01%7Cb383d814a9aa2181%7C9dbbd1fbd6133f0f",
+      "png": "C:\\Users\\DELL 7520\\OneDrive\\Escritorio\\Proyectos Web\\Ainspecta\\ainspecta_web\\public\\assets\\expo-qrs\\mueble-01.png",
+      "svg": "C:\\Users\\DELL 7520\\OneDrive\\Escritorio\\Proyectos Web\\Ainspecta\\ainspecta_web\\public\\assets\\expo-qrs\\mueble-01.svg"
+    },
+    {
+      "code": "piso-01",
+      "shortCode": "PIS-8L4W",
+      "title": "Piso levantado o deteriorado",
+      "payload": "AINS-EXPO|v1|expo-real-estate-2026|piso-01|3eeb8c7ad188973b|d2acefc604ce7c07",
+      "qrUrl": "https://ainspecciona.web.app/expo?q=AINS-EXPO%7Cv1%7Cexpo-real-estate-2026%7Cpiso-01%7C3eeb8c7ad188973b%7Cd2acefc604ce7c07",
+      "png": "C:\\Users\\DELL 7520\\OneDrive\\Escritorio\\Proyectos Web\\Ainspecta\\ainspecta_web\\public\\assets\\expo-qrs\\piso-01.png",
+      "svg": "C:\\Users\\DELL 7520\\OneDrive\\Escritorio\\Proyectos Web\\Ainspecta\\ainspecta_web\\public\\assets\\expo-qrs\\piso-01.svg"
+    }
+  ]
+}

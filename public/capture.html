@@ -386,6 +386,7 @@
       <div class="row">
         <button class="btn outline" id="reviewSlotsBtn" type="button">Revisar fotos y retomar una</button>
         <button class="btn" id="finishBtn" type="button">Terminar inspección</button>
+        <a class="btn hidden" id="reportBtn" href="#" target="_blank" rel="noreferrer">Ver informe</a>
       </div>
       <div class="reviewList hidden" id="reviewList"></div>
     </div>
@@ -455,6 +456,7 @@
     const doneTitle = document.getElementById("doneTitle");
     const doneText = document.getElementById("doneText");
     const finishBtn = document.getElementById("finishBtn");
+    const reportBtn = document.getElementById("reportBtn");
     const reviewSlotsBtn = document.getElementById("reviewSlotsBtn");
     const reviewList = document.getElementById("reviewList");
     const stickyActions = document.getElementById("stickyActions");
@@ -714,14 +716,18 @@
         slotCard.classList.add("hidden");
         doneCard.classList.remove("hidden");
         stickyActions.classList.add("hidden");
-        if (data.canFinish) {
+        if (data.finished || data.alreadyFinished || String(data.caseStatus || "").toUpperCase() === "DONE") {
+          showPostReportState(data);
+        } else if (data.canFinish) {
           doneTitle.textContent = "Ciclo de captura completo";
           doneText.textContent = "No quedan fotos pendientes. Presiona Terminar para enviar la inspección a aprobación.";
           finishBtn.classList.remove("hidden");
+          hideReportLink();
         } else {
           doneTitle.textContent = "Captura en proceso";
           doneText.textContent = "Aún hay fotos pendientes o rechazadas. Vuelve a intentar desde esta misma pantalla.";
           finishBtn.classList.add("hidden");
+          hideReportLink();
         }
         return;
       }
@@ -1060,6 +1066,26 @@
       return { ok: res.ok, data };
     }
 
+    function hideReportLink() {
+      if (!reportBtn) return;
+      reportBtn.classList.add("hidden");
+      reportBtn.removeAttribute("href");
+    }
+
+    function showPostReportState(data) {
+      doneTitle.textContent = "Inspección enviada";
+      doneText.textContent = "Puedes ver el informe y, si hace falta, retomar una foto. El score se actualiza al corregir evidencia.";
+      finishBtn.classList.add("hidden");
+      reviewSlotsBtn.classList.remove("hidden");
+      const path = data?.reportPath;
+      if (reportBtn && path) {
+        reportBtn.href = path;
+        reportBtn.classList.remove("hidden");
+      } else {
+        hideReportLink();
+      }
+    }
+
     uploadBtn.addEventListener("click", async () => {
       if (!currentSlotId) return;
       const file = capturedBlob || photoInput.files?.[0];
@@ -1139,9 +1165,7 @@
         await loadNext();
         return;
       }
-      doneTitle.textContent = "Inspección enviada a aprobación";
-      doneText.textContent = "Tu inspección quedó pendiente de revisión. Te avisaremos cuando esté aprobada.";
-      finishBtn.classList.add("hidden");
+      showPostReportState(data);
       stickyActions.classList.add("hidden");
       statusMsg.textContent = "";
     });

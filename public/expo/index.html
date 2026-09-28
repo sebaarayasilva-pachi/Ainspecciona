@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Ainspecciona · Desafío Expo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #05050A;
+      --text: #F8FAFC;
+      --muted: #94A3B8;
+      --accent: #00E5FF;
+      --success: #10B981;
+      --danger: #EF4444;
+      --border: rgba(255,255,255,0.1);
+      --card: rgba(255,255,255,0.03);
+      --font: 'Inter', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo-ainspecciona { height: 56px; }
+    .logo-expo { height: 56px; border-radius: 4px; }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 24px 20px;
+      max-width: 500px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .screen { display: none; flex: 1; flex-direction: column; }
+    .screen.active { display: flex; }
+
+    h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.5px; }
+    p.subtitle { color: var(--muted); font-size: 16px; margin-bottom: 32px; }
+
+    /* Formulario */
+    .form-group { margin-bottom: 20px; }
+    label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px; color: var(--muted); }
+    input, select {
+      width: 100%;
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 14px 16px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-family: var(--font);
+      outline: none;
+    }
+    select option {
+      background: #0F172A; /* Fondo oscuro para las opciones */
+      color: #F8FAFC;
+    }
+    input:focus, select:focus { border-color: var(--accent); }
+    
+    .checkbox-group {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .checkbox-group input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      margin-top: 2px;
+      accent-color: var(--accent);
+    }
+    .checkbox-group label { margin-bottom: 0; font-size: 13px; line-height: 1.4; }
+
+    /* Botones */
+    button {
+      width: 100%;
+      background: var(--accent);
+      color: #001626;
+      border: none;
+      padding: 16px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 700;
+      font-family: var(--font);
+      cursor: pointer;
+      margin-top: auto;
+      transition: opacity 0.2s;
+    }
+    button:active { opacity: 0.8; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    button.secondary {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      margin-top: 16px;
+    }
+
+    /* Misiones */
+    .progress-bar {
+      height: 6px;
+      background: var(--card);
+      border-radius: 3px;
+      margin: 24px 0;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .mission-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .mission-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      aspect-ratio: 1;
+    }
+    .mission-card.done {
+      border-color: var(--success);
+      background: rgba(16, 185, 129, 0.1);
+    }
+    .mission-card .icon {
+      font-size: 32px;
+      margin-bottom: 12px;
+      opacity: 0.5;
+    }
+    .mission-card.done .icon { opacity: 1; }
+
+    /* Cámara */
+    #videoContainer {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 3/4;
+      max-height: 40vh; /* Evita que el video empuje los botones fuera de la pantalla en móviles pequeños */
+      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .scanner-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      border: 2px solid rgba(0, 229, 255, 0.3);
+      margin: 40px;
+      border-radius: 16px;
+      box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);
+    }
+
+    /* Alertas */
+    .alert {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+      font-size: 14px;
+      display: none;
+    }
+    .alert.error { background: rgba(239, 68, 68, 0.1); border: 1px solid var(--danger); color: #FCA5A5; display: block; }
+    .alert.success { background: rgba(16, 185, 129, 0.1); border: 1px solid var(--success); color: #6EE7B7; display: block; }
+
+  </style>
+</head>
+<body>
+
+  <header>
+    <img src="/assets/Logo%20Ainspecciona.png" alt="Ainspecciona" class="logo-ainspecciona" />
+    <img src="/assets/expo-real-estate-logo.png" alt="Expo Real Estate" class="logo-expo" />
+  </header>
+
+  <main>
+    <!-- LANDING -->
+    <div id="screen-landing" class="screen active">
+      <h1>Encuentra los 4 problemas.</h1>
+      <p class="subtitle">Están escondidos en distintas láminas de la expo.</p>
+      
+      <div style="background: var(--card); padding: 20px; border-radius: 12px; margin-bottom: 32px;">
+        <p style="margin-bottom: 12px; color: var(--muted);">En el escenario viste cómo Ainspecciona <strong>escucha</strong>. Ahora prueba cómo <strong>ve</strong>.</p>
+        <ul style="color: var(--muted); padding-left: 20px; font-size: 14px;">
+          <li style="margin-bottom: 8px;">Busca las 4 láminas en la expo</li>
+          <li style="margin-bottom: 8px;">Toma una foto de cada problema</li>
+          <li>Recibe tu informe técnico por correo</li>
+        </ul>
+      </div>
+
+      <button onclick="showScreen('screen-register')">Comenzar el desafío</button>
+      <button class="secondary" id="btnResume" style="display: none;" onclick="resumeSession()">Continuar mi sesión</button>
+    </div>
+
+    <!-- REGISTRO -->
+    <div id="screen-register" class="screen">
+      <h1>Registro</h1>
+      <p class="subtitle">Ingresa tus datos para enviarte el informe final.</p>
+
+      <div id="regError" class="alert error"></div>
+
+      <div class="form-group">
+        <label>Nombre</label>
+        <input type="text" id="regName" required />
+      </div>
+      <div class="form-group">
+        <label>Apellido</label>
+        <input type="text" id="regLastName" required />
+      </div>
+      <div class="form-group">
+        <label>Correo electrónico</label>
+        <input type="email" id="regEmail" required />
+      </div>
+      <div class="form-group">
+        <label>Empresa</label>
+        <input type="text" id="regCompany" />
+      </div>
+      <div class="form-group">
+        <label>Perfil</label>
+        <select id="regRole">
+          <option value="">Selecciona una opción...</option>
+          <option value="CORREDORA">Corredor de propiedades</option>
+          <option value="INMOBILIARIA">Inmobiliaria</option>
+          <option value="INVERSIONISTA">Inversionista</option>
+          <option value="OTRO">Otro</option>
+        </select>
+      </div>
+
+      <div class="checkbox-group">
+        <input type="checkbox" id="regPrivacy" required />
+        <label for="regPrivacy">Acepto procesar mis datos para participar en esta dinámica y recibir mi informe por correo.</label>
+      </div>
+      <div class="checkbox-group">
+        <input type="checkbox" id="regMarketing" />
+        <label for="regMarketing">Acepto recibir información comercial sobre Ainspecciona.</label>
+      </div>
+
+      <button id="btnSubmitReg" onclick="submitRegistration()">Empezar</button>
+    </div>
+
+    <!-- MISIONES -->
+      <div id="screen-missions" class="screen">
+        <h1 id="missionsTitle">Progreso: 0 de 4</h1>
+        <p class="subtitle" style="margin-bottom: 16px;">Busca una lámina, encuádrala completa y asegúrate de incluir el QR.</p>
+  
+        <div class="progress-bar">
+          <div class="progress-fill" id="missionsProgress"></div>
+        </div>
+  
+        <div class="mission-grid" id="missionGrid">
+          <div class="mission-card"><div class="icon">🔍</div><div>Pendiente</div></div>
+          <div class="mission-card"><div class="icon">🔍</div><div>Pendiente</div></div>
+          <div class="mission-card"><div class="icon">🔍</div><div>Pendiente</div></div>
+          <div class="mission-card"><div class="icon">🔍</div><div>Pendiente</div></div>
+        </div>
+  
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: auto; padding-bottom: 16px;">
+          <button onclick="openCamera()">Tomar foto</button>
+        </div>
+      </div>
+
+    <!-- CÁMARA (Placeholder por ahora) -->
+      <div id="screen-camera" class="screen">
+        <h1>Captura</h1>
+        <p class="subtitle" style="margin-bottom: 16px;">Enfoca la lámina y el QR.</p>
+        
+        <div id="videoContainer">
+          <video id="videoElement" autoplay playsinline></video>
+          <div class="scanner-overlay"></div>
+        </div>
+  
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: auto; padding-bottom: 16px;">
+          <button onclick="takePhoto()">Capturar</button>
+          <button class="secondary" onclick="stopCamera(); showScreen('screen-missions')">Cancelar</button>
+        </div>
+      </div>
+
+      <!-- RESULTADO HALLAZGO -->
+    <div id="screen-finding" class="screen">
+      <h1 id="findCategory">Categoría</h1>
+      <div style="background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <span style="font-weight: 600; font-size: 18px;" id="findTitle">Título</span>
+          <span id="findSeverity" style="font-size: 12px; font-weight: 700; padding: 4px 8px; border-radius: 4px; background: rgba(239,68,68,0.2); color: #FCA5A5;">ALTA</span>
+        </div>
+        
+        <label style="color: var(--accent); margin-bottom: 4px;">Hallazgo</label>
+        <p id="findDesc" style="margin-bottom: 16px; font-size: 15px;"></p>
+        
+        <label style="color: var(--accent); margin-bottom: 4px;">Posible causa</label>
+        <p id="findCause" style="margin-bottom: 16px; font-size: 15px;"></p>
+        
+        <label style="color: var(--accent); margin-bottom: 4px;">Recomendación</label>
+        <p id="findRec" style="font-size: 15px;"></p>
+      </div>
+      
+      <button onclick="showScreen('screen-missions')">Buscar el siguiente problema</button>
+    </div>
+
+    <!-- COMPLETADO -->
+    <div id="screen-done" class="screen">
+      <div style="text-align: center; margin: auto 0;">
+        <div style="font-size: 64px; margin-bottom: 24px;">🎉</div>
+        <h1>Encontraste los 4 problemas.</h1>
+        <p class="subtitle" style="margin-bottom: 16px;">Estamos preparando tu informe.</p>
+        <p style="color: var(--muted); font-size: 14px; margin-bottom: 32px;">Te lo enviaremos al correo que registraste.</p>
+        <button onclick="viewReport()">Ver mi informe</button>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="/assets/jsQR.js"></script>
+  <script>
+    function viewReport() {
+      const token = localStorage.getItem('expo_report_token');
+      if (token) {
+        window.location.href = `/expo/report.html?t=${token}`;
+      } else {
+        alert('El informe aún se está generando.');
+      }
+    }
+    let sessionToken = localStorage.getItem('expo_session_token');
+    let videoStream = null;
+    let isProcessing = false;
+
+    // Capturar parámetro ?q= de la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const qParam = urlParams.get('q');
+    if (qParam && qParam.startsWith('AINS-EXPO')) {
+      sessionStorage.setItem('pending_qr_scan', qParam);
+    }
+
+    if (sessionToken) {
+      document.getElementById('btnResume').style.display = 'block';
+      
+      // Si hay un QR pendiente y ya hay sesión, intentar reanudar automáticamente
+      if (sessionStorage.getItem('pending_qr_scan')) {
+        resumeSession();
+      }
+    }
+
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    async function processPendingQR(token) {
+      const pendingQR = sessionStorage.getItem('pending_qr_scan');
+      if (!pendingQR) return false;
+      
+      try {
+        const res = await fetch(`/api/expo/sessions/${token}/completions`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            qrPayload: pendingQR,
+            photoStorageKey: '', // Sin foto porque se escaneó desde fuera
+            validationMethod: 'URL_PARAM'
+          })
+        });
+        
+        const json = await res.json();
+        
+        if (!res.ok) {
+          if (json.code === 'DUPLICATE') {
+            alert(json.error);
+            sessionStorage.removeItem('pending_qr_scan');
+            window.history.replaceState({}, document.title, window.location.pathname);
+            return false;
+          }
+          throw new Error(json.error || 'Error al validar el QR');
+        }
+
+        sessionStorage.removeItem('pending_qr_scan');
+        window.history.replaceState({}, document.title, window.location.pathname);
+        
+        // Mostrar hallazgo
+        document.getElementById('findCategory').textContent = json.mission.category;
+        document.getElementById('findTitle').textContent = json.mission.title;
+        document.getElementById('findDesc').textContent = json.mission.finding;
+        document.getElementById('findCause').textContent = json.mission.probableCause;
+        document.getElementById('findRec').textContent = json.mission.recommendation;
+        
+        const sevEl = document.getElementById('findSeverity');
+        sevEl.textContent = json.mission.severity === 'HIGH' ? 'ALTA' : 'MEDIA';
+        sevEl.style.background = json.mission.severity === 'HIGH' ? 'rgba(239,68,68,0.2)' : 'rgba(245,158,11,0.2)';
+        sevEl.style.color = json.mission.severity === 'HIGH' ? '#FCA5A5' : '#FCD34D';
+
+        updateMissionsUI(json.progress);
+        
+        if (json.challengeCompleted) {
+          const completeRes = await fetch(`/api/expo/sessions/${token}/complete`, { method: 'POST' });
+          const completeJson = await completeRes.json();
+          if (completeJson.reportToken) {
+            localStorage.setItem('expo_report_token', completeJson.reportToken);
+          }
+          showScreen('screen-done');
+        } else {
+          showScreen('screen-finding');
+        }
+        return true;
+      } catch (e) {
+        alert(e.message);
+        sessionStorage.removeItem('pending_qr_scan');
+        window.history.replaceState({}, document.title, window.location.pathname);
+        return false;
+      }
+    }
+
+    async function submitRegistration() {
+      const btn = document.getElementById('btnSubmitReg');
+      const err = document.getElementById('regError');
+      err.style.display = 'none';
+
+      const data = {
+        campaignSlug: 'expo-real-estate-2026',
+        firstName: document.getElementById('regName').value,
+        lastName: document.getElementById('regLastName').value,
+        email: document.getElementById('regEmail').value,
+        company: document.getElementById('regCompany').value,
+        roleType: document.getElementById('regRole').value,
+        privacyConsent: document.getElementById('regPrivacy').checked,
+        marketingConsent: document.getElementById('regMarketing').checked
+      };
+
+      if (!data.firstName || !data.lastName || !data.email || !data.privacyConsent) {
+        err.textContent = 'Por favor completa los campos obligatorios y acepta la privacidad.';
+        err.style.display = 'block';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Registrando...';
+
+      try {
+        const res = await fetch('/api/expo/sessions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        const json = await res.json();
+
+        if (!res.ok) throw new Error(json.error || 'Error al registrar');
+
+        localStorage.setItem('expo_session_token', json.sessionToken);
+        sessionToken = json.sessionToken;
+        
+        updateMissionsUI(json.progress);
+        const processed = await processPendingQR(sessionToken);
+        if (!processed) {
+          showScreen('screen-missions');
+        }
+      } catch (e) {
+        err.textContent = e.message;
+        err.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Empezar';
+      }
+    }
+
+    async function resumeSession() {
+      if (!sessionToken) return;
+      try {
+        const res = await fetch(`/api/expo/sessions/${sessionToken}`);
+        const json = await res.json();
+        if (!res.ok) throw new Error('Sesión inválida');
+        
+        updateMissionsUI(json.progress);
+        const processed = await processPendingQR(sessionToken);
+        if (!processed) {
+          showScreen('screen-missions');
+        }
+      } catch (e) {
+        localStorage.removeItem('expo_session_token');
+        sessionToken = null;
+        document.getElementById('btnResume').style.display = 'none';
+        alert('Tu sesión ha expirado, por favor regístrate de nuevo.');
+      }
+    }
+
+    function updateMissionsUI(progress) {
+      document.getElementById('missionsTitle').textContent = `Progreso: ${progress.completed} de 4`;
+      document.getElementById('missionsProgress').style.width = `${(progress.completed / 4) * 100}%`;
+      
+      const grid = document.getElementById('missionGrid');
+      grid.innerHTML = '';
+      for (let i = 0; i < 4; i++) {
+        const done = i < progress.completed;
+        grid.innerHTML += `
+          <div class="mission-card ${done ? 'done' : ''}">
+            <div class="icon">${done ? '✅' : '🔍'}</div>
+            <div>${done ? 'Encontrado' : 'Pendiente'}</div>
+          </div>
+        `;
+      }
+    }
+
+    async function openCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment' }
+        });
+        const video = document.getElementById('videoElement');
+        video.srcObject = stream;
+        videoStream = stream;
+        showScreen('screen-camera');
+      } catch (e) {
+        alert('No pudimos acceder a la cámara. Por favor revisa los permisos del navegador.');
+      }
+    }
+
+    function stopCamera() {
+      if (videoStream) {
+        videoStream.getTracks().forEach(t => t.stop());
+        videoStream = null;
+      }
+    }
+
+      async function takePhoto() {
+      if (isProcessing) return;
+      isProcessing = true;
+      const btn = document.querySelector('#screen-camera button');
+      const originalText = btn.textContent;
+      btn.textContent = 'Analizando...';
+      btn.disabled = true;
+
+      try {
+        const video = document.getElementById('videoElement');
+        const canvas = document.createElement('canvas');
+        
+        // Redimensionar para no reventar la memoria (max 1600px)
+        let w = video.videoWidth;
+        let h = video.videoHeight;
+        const max = 1600;
+        if (w > h && w > max) { h = Math.round(h * (max / w)); w = max; }
+        else if (h > w && h > max) { w = Math.round(w * (max / h)); h = max; }
+        
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, w, h);
+
+        // Intentar leer QR
+        const imgData = ctx.getImageData(0, 0, w, h);
+        const code = jsQR(imgData.data, w, h, { inversionAttempts: "dontInvert" });
+
+        if (!code || !code.data) {
+          alert('No alcanzamos a leer el código QR. Acércate un poco, enfoca bien la lámina y vuelve a tomar la foto.');
+          return;
+        }
+
+        let payload = code.data;
+        
+        // Si el QR es una URL, extraer el parámetro q
+        try {
+          const url = new URL(payload);
+          const q = url.searchParams.get('q');
+          if (q && q.startsWith('AINS-EXPO')) {
+            payload = q;
+          }
+        } catch (e) {
+          // No es una URL válida, usar el payload tal cual
+        }
+        
+        // Pedir URL firmada
+        const urlRes = await fetch(`/api/expo/sessions/${sessionToken}/photos/upload-url`, { method: 'POST' });
+        const urlJson = await urlRes.json();
+        if (!urlRes.ok) throw new Error(urlJson.error || 'Error al preparar subida');
+
+        // Comprimir a JPEG
+        const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.75));
+
+          // Subir a GCS
+          let uploadRes;
+          try {
+            uploadRes = await fetch(urlJson.uploadUrl, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'image/jpeg' },
+              body: blob
+            });
+          } catch (netErr) {
+            throw new Error('Error de conexión al subir la foto. Revisa tu internet e intenta de nuevo.');
+          }
+          if (!uploadRes.ok) throw new Error('Error al guardar la foto en el servidor');
+        
+          // Enviar al backend
+          let res;
+          try {
+            res = await fetch(`/api/expo/sessions/${sessionToken}/completions`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                qrPayload: payload,
+                photoStorageKey: urlJson.storageKey,
+                validationMethod: 'QR_IMAGE'
+              })
+            });
+          } catch (netErr) {
+            throw new Error('Error de conexión al validar el código. Intenta de nuevo.');
+          }
+
+        const json = await res.json();
+        
+        if (!res.ok) {
+          if (json.code === 'DUPLICATE') {
+            alert(json.error);
+            showScreen('screen-missions');
+            stopCamera();
+            return;
+          }
+          throw new Error(json.error || 'Error al validar el QR');
+        }
+
+        stopCamera();
+        
+        // Mostrar hallazgo
+        document.getElementById('findCategory').textContent = json.mission.category;
+        document.getElementById('findTitle').textContent = json.mission.title;
+        document.getElementById('findDesc').textContent = json.mission.finding;
+        document.getElementById('findCause').textContent = json.mission.probableCause;
+        document.getElementById('findRec').textContent = json.mission.recommendation;
+        
+        const sevEl = document.getElementById('findSeverity');
+        sevEl.textContent = json.mission.severity === 'HIGH' ? 'ALTA' : 'MEDIA';
+        sevEl.style.background = json.mission.severity === 'HIGH' ? 'rgba(239,68,68,0.2)' : 'rgba(245,158,11,0.2)';
+        sevEl.style.color = json.mission.severity === 'HIGH' ? '#FCA5A5' : '#FCD34D';
+
+        updateMissionsUI(json.progress);
+        
+        if (json.challengeCompleted) {
+          // Llamar a complete
+          const completeRes = await fetch(`/api/expo/sessions/${sessionToken}/complete`, { method: 'POST' });
+          const completeJson = await completeRes.json();
+          if (completeJson.reportToken) {
+            localStorage.setItem('expo_report_token', completeJson.reportToken);
+          }
+          showScreen('screen-done');
+        } else {
+          showScreen('screen-finding');
+        }
+
+      } catch (e) {
+        console.error(e);
+        alert(e.message);
+      } finally {
+        isProcessing = false;
+        btn.textContent = originalText;
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>

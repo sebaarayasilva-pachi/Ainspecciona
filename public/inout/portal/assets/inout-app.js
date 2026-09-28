@@ -6,6 +6,18 @@
   const IO_LOGIN = "/inout/portal/login";
   const IO_TOKEN_KEY = "inout_session";
 
+  function isEmbedMode() {
+    try {
+      return new URLSearchParams(location.search).get("embed") === "1";
+    } catch {
+      return false;
+    }
+  }
+
+  if (isEmbedMode()) {
+    document.documentElement.classList.add("ainspecta-embed");
+  }
+
   function getStoredToken() {
     try {
       return sessionStorage.getItem(IO_TOKEN_KEY) || "";
@@ -60,6 +72,7 @@
       } else if (pathname.startsWith("/")) {
         pathname = IO_BASE + pathname;
       }
+      if (isEmbedMode()) u.searchParams.set("embed", "1");
       return pathname + u.search + u.hash;
     } catch {
       return raw;
@@ -150,10 +163,14 @@
   function renderShell(activeKey, me) {
     const tenant = (me && me.tenant && me.tenant.name) || "In & Out";
     const user = (me && me.user && (me.user.fullName || me.user.email)) || "";
+    const role = me && me.user && me.user.role;
     const nav = [
       { key: "overview", href: appHref("/inout/portal"), label: "Dashboard" },
-      { key: "captura", href: capturaHubHref(), label: "Captura" }
+      { key: "captura", href: appHref("/inout/captura"), label: "Captura" }
     ];
+    if (role === "ADMIN" && !isEmbedMode()) {
+      nav.push({ key: "usuarios", href: appHref("/inout/portal/usuarios"), label: "Usuarios" });
+    }
     const navHtml = nav
       .map(
         (n) =>

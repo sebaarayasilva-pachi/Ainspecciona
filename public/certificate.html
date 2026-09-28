@@ -161,9 +161,20 @@
     }
 
     function starsFromScore(score, badgeCfg) {
+      const s = Math.max(0, Math.min(100, Number(score) || 0));
+      const engine = String(badgeCfg?.engineVersion || window.__AINSPECTA_SCORE_CONFIG__?.engineVersion || "");
+      const starsCfg = badgeCfg?.stars || window.__AINSPECTA_SCORE_CONFIG__?.stars;
+      if (engine === "4.0" || engine === "4" || starsCfg?.bands) {
+        const bands = Array.isArray(starsCfg?.bands) ? starsCfg.bands : [
+          { from: 0, stars: 1 }, { from: 50, stars: 2 }, { from: 65, stars: 3 },
+          { from: 80, stars: 4 }, { from: 90, stars: 5 }
+        ];
+        let stars = 1;
+        bands.forEach((b) => { if (s >= Number(b.from || 0)) stars = Number(b.stars || 1); });
+        return stars;
+      }
       const yellowFrom = badgeCfg?.yellowFrom ?? 60;
       const greenFrom = badgeCfg?.greenFrom ?? 86;
-      const s = Math.max(0, Math.min(100, Number(score) || 0));
       if (s >= greenFrom) {
         const topTier = greenFrom + Math.max(1, Math.round((100 - greenFrom) * 0.33));
         return s >= topTier ? 5 : 4;

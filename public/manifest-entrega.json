@@ -1,0 +1,18 @@
+{
+  "name": "Entrega Ainspecciona",
+  "short_name": "Entrega",
+  "description": "Recepción y entrega de unidades",
+  "start_url": "/entrega/",
+  "scope": "/entrega/",
+  "display": "browser",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

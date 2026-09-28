@@ -230,8 +230,9 @@
           viewMode = "model";
           document.getElementById("tabTour").textContent = "Tour 3D (Splat)";
           
-          const iframe = document.createElement('iframe');
-          iframe.src = `/scan/splat/viewer.html?url=${encodeURIComponent(modelUrl)}`;
+            const iframe = document.createElement('iframe');
+            const thumbUrl = hasPhotos ? tour.frames[0].imageUrl : '';
+            iframe.src = `/scan/splat/viewer.html?url=${encodeURIComponent(modelUrl)}&thumb=${encodeURIComponent(thumbUrl)}`;
           iframe.style.width = '100%';
           iframe.style.height = '100%';
           iframe.style.border = 'none';
@@ -628,6 +629,8 @@
       const renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
       renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping; // Añadir tone mapping global
+      renderer.toneMappingExposure = 1.2; // Ajustar exposición
       stage.appendChild(renderer.domElement);
       scene.add(new THREE.HemisphereLight(0xffffff, 0x223344, 1.15));
       const dir = new THREE.DirectionalLight(0xffffff, 0.55);
@@ -643,15 +646,13 @@
             o.material.vertexColors = true;
           }
           if (o.isMesh && o.material) {
-            // La textura de OpenMVS ya trae horneada la luz de las fotos. Sombrearla otra vez
-            // con las luces de la escena la deja casi negra, y la malla llega sin normales,
-            // asi que el sombreado plano ni siquiera seria correcto.
+            // Mejorar la textura de OpenMVS para que se vea más clara y realista
             const src = o.material;
             o.material = new THREE.MeshBasicMaterial({
               map: src.map || null,
-              color: src.map ? new THREE.Color(1.45, 1.45, 1.45) : (src.color || new THREE.Color(0xffffff)),
+              color: src.map ? new THREE.Color(1.8, 1.8, 1.8) : (src.color || new THREE.Color(0xffffff)), // Aumentar el brillo
               side: THREE.DoubleSide,
-              toneMapped: false,
+              toneMapped: true, // Habilitar tone mapping para mejor contraste
               vertexColors: !!o.geometry?.attributes?.color
             });
             src.dispose();

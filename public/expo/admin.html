@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Expo - Ainspecciona</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #05050A;
+      --text: #F8FAFC;
+      --muted: #94A3B8;
+      --accent: #00E5FF;
+      --border: rgba(255,255,255,0.1);
+      --card: rgba(255,255,255,0.03);
+      --font: 'Inter', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg); color: var(--text); font-family: var(--font);
+      line-height: 1.5; min-height: 100vh; padding: 32px;
+    }
+    header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 32px; border-bottom: 1px solid var(--border); padding-bottom: 24px;
+    }
+    h1 { font-size: 24px; font-weight: 600; }
+    .stats {
+      display: flex; gap: 24px; margin-bottom: 32px;
+    }
+    .stat-card {
+      background: var(--card); border: 1px solid var(--border);
+      padding: 20px; border-radius: 12px; flex: 1;
+    }
+    .stat-value { font-size: 32px; font-weight: 700; color: var(--accent); }
+    .stat-label { font-size: 14px; color: var(--muted); }
+    
+    table { width: 100%; border-collapse: collapse; background: var(--card); border-radius: 12px; overflow: hidden; }
+    th, td { padding: 16px; text-align: left; border-bottom: 1px solid var(--border); }
+    th { color: var(--muted); font-weight: 500; font-size: 13px; text-transform: uppercase; }
+    td { font-size: 14px; }
+    
+    .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    .badge.done { background: rgba(16,185,129,0.2); color: #34D399; }
+    .badge.pending { background: rgba(245,158,11,0.2); color: #FCD34D; }
+    
+    button {
+      background: var(--accent); color: #001626; border: none;
+      padding: 10px 16px; border-radius: 8px; font-weight: 600; cursor: pointer;
+      text-decoration: none; display: inline-block;
+    }
+    button:hover { opacity: 0.9; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Admin Expo Real Estate</h1>
+    <button onclick="downloadCSV()">Descargar CSV</button>
+  </header>
+
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-value" id="statLeads">0</div>
+      <div class="stat-label">Total Registros</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="statCompleted">0</div>
+      <div class="stat-label">Desafíos Completados</div>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>Nombre</th>
+        <th>Correo</th>
+        <th>Empresa</th>
+        <th>Perfil</th>
+        <th>Progreso</th>
+        <th>Estado</th>
+      </tr>
+    </thead>
+    <tbody id="leadsTable">
+      <tr><td colspan="7" style="text-align:center; color:var(--muted);">Cargando...</td></tr>
+    </tbody>
+  </table>
+
+  <script>
+    function getAdminQuery() {
+      let adminUser = localStorage.getItem("ainspectaAdminUser");
+      let adminPass = localStorage.getItem("ainspectaAdminPass");
+      if (!adminUser || !adminPass) {
+        adminUser = prompt("Usuario de administración (admin):");
+        if (adminUser) {
+          adminPass = prompt("Contraseña (admin123):");
+          if (adminPass) {
+            localStorage.setItem("ainspectaAdminUser", adminUser);
+            localStorage.setItem("ainspectaAdminPass", adminPass);
+          }
+        }
+      }
+      return `?adminUser=${encodeURIComponent(adminUser || '')}&adminPass=${encodeURIComponent(adminPass || '')}`;
+    }
+
+    async function downloadCSV() {
+      try {
+        const query = getAdminQuery();
+        window.location.href = `/api/admin/expo/export${query}`;
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    async function loadData() {
+      try {
+        const query = getAdminQuery();
+        const res = await fetch(`/api/admin/expo/leads${query}`);
+        if (!res.ok) {
+          if (res.status === 401) {
+            localStorage.removeItem("ainspectaAdminUser");
+            localStorage.removeItem("ainspectaAdminPass");
+            throw new Error('Credenciales incorrectas. Recarga la página para ingresar de nuevo.');
+          }
+          throw new Error('Error al cargar datos del servidor.');
+        }
+        const data = await res.json();
+        
+        const leads = data.leads || [];
+        
+        document.getElementById('statLeads').textContent = leads.length;
+        document.getElementById('statCompleted').textContent = leads.filter(l => l.status === 'COMPLETED').length;
+        
+        const tbody = document.getElementById('leadsTable');
+        tbody.innerHTML = '';
+        
+        leads.forEach(lead => {
+          const date = new Date(lead.createdAt).toLocaleString('es-CL', { 
+            day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' 
+          });
+          
+          const isDone = lead.status === 'COMPLETED';
+          const badgeClass = isDone ? 'done' : 'pending';
+          const badgeText = isDone ? 'Completado' : 'Pendiente';
+          
+          tbody.innerHTML += `
+            <tr>
+              <td style="color:var(--muted)">${date}</td>
+              <td style="font-weight:500">${lead.firstName} ${lead.lastName}</td>
+              <td>${lead.email}</td>
+              <td>${lead.company || '-'}</td>
+              <td>${lead.roleType || '-'}</td>
+              <td>${lead.progress} / 4</td>
+              <td><span class="badge ${badgeClass}">${badgeText}</span></td>
+            </tr>
+          `;
+        });
+        
+        if (leads.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--muted);">No hay registros aún.</td></tr>';
+        }
+        
+      } catch (err) {
+        document.getElementById('leadsTable').innerHTML = `<tr><td colspan="7" style="text-align:center; color:#EF4444;">${err.message}</td></tr>`;
+      }
+    }
+    
+    loadData();
+  </script>
+</body>
+</html>

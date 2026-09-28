@@ -30,7 +30,10 @@ export class ModalReconstructionProvider {
       const buf = await this.storage.readBuffer(key);
       return readJsonBuffer(buf);
     } catch (err) {
-      this.log.error(`ModalReconstructionProvider: error reading ${key}:`, err);
+      // Ignorar el error si es un 404 (el archivo aún no existe)
+      if (err.message && !err.message.includes('404')) {
+        this.log.error(`ModalReconstructionProvider: error reading ${key}:`, err.message);
+      }
       return null;
     }
   }
@@ -89,8 +92,7 @@ export class ModalReconstructionProvider {
       return result;
     }
 
-    // Primero intentamos leer el status de splatting si existe
-    const splatStatus = await this.readJson(`${keys.prefix}/splat_status.json`);
+    const splatStatus = await this.readJson(`${keys.prefix}/recon/splat_status.json`);
     this.log.info('ModalReconstructionProvider: read splat_status.json', splatStatus);
     if (splatStatus) {
       if (splatStatus.step === 'done') {
@@ -112,6 +114,19 @@ export class ModalReconstructionProvider {
 
   async getResult(scan) {
     const keys = this.keys(scan);
+    
+    // Si splat_status.json dice que terminó, forzamos el result para que apunte al .ply
+    const splatStatus = await this.readJson(`${keys.prefix}/recon/splat_status.json`);
+    if (splatStatus && splatStatus.step === 'done' && splatStatus.modelKey) {
+       const result = await this.readJson(keys.result) || {};
+       return {
+         ...result,
+         status: 'READY',
+         modelType: 'SPLAT',
+         modelKey: splatStatus.modelKey
+       };
+    }
+
     const result = await this.readJson(keys.result);
     if (result) return result;
     

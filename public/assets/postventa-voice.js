@@ -56,5 +56,16 @@
     return conversation;
   }
 
-  window.PostventaVoice = { start: start, stop: stop, isActive: isActive, getConversation: getConversation };
+  /** Adelanta la descarga del SDK para que el primer clic conecte sin esperar la red. */
+  function preload() {
+    return loadSdk().catch(function () { /* se reintenta al iniciar la llamada */ });
+  }
+
+  window.PostventaVoice = {
+    start: start,
+    stop: stop,
+    isActive: isActive,
+    getConversation: getConversation,
+    preload: preload
+  };
 })();
